@@ -1,24 +1,73 @@
+const renderJDOM = (node, previous, next) => {
+    // TODO: do some diffing to figure out what to change, change them
+
+    return node;
+}
+
 /**
  * Unit of UI component
  */
 class Component {
 
-    constructor(jdom) {
+    constructor() {
+        this.jdom = null;
+        this.node = null;
+        this.event = {
+            source: null,
+            composer: () => {},
+        };
+    }
+
+    listen({source, composer}) {
+        if (source instanceof Evented) {
+            this.event = { source, composer };
+            source.addHandler(composer);
+        } else {
+            throw new Error('event source to listen() is not an Evented');
+        }
+    }
+
+    unlisten() {
+        this.event.source.removeHandler(this.event.composer);
+        this.event = {
+            source: null,
+            composer: () => {},
+        };
+    }
+
+    compose(data) {
+        // return a JDOM
+    }
+
+    render(data) {
+        renderJDOM(this.node, this.jdom, this.compose(data));
         this.jdom = jdom;
-        this.element = null;
-        this.eventSource = null;
     }
 
-    setSource(eventSource, composer) {
+}
 
+/**
+ * A base class for evented data stores
+ */
+class Evented {
+
+    constructor() {
+        this.eventTargets = new Set();
     }
 
-    unsetSource(eventSource) {
-
+    emitEvent() {
+        const data = this.serialize();
+        for (const handler of this.eventTargets) {
+            handler(Object.assign({}, data));
+        }
     }
 
-    render() {
+    addHandler(target, handler) {
+        this.eventTargets.add(handler);
+    }
 
+    removeHandler(handler) {
+        this.eventTargets.delete(handler);
     }
 
 }
@@ -26,33 +75,21 @@ class Component {
 /**
  * Unit of data
  */
-class Record {
+class Record extends Evented {
 
-    constructor(id, data) {
+    constructor(id = null, data = {}) {
+        super();
         this.id = id;
         this.data = data;
-
-        this.eventTargets = new Set();
     }
 
     update(data) {
-
+        this.data = data;
+        this.emitEvent();
     }
 
     serialize() {
-
-    }
-
-    emitEvent() {
-
-    }
-
-    addTarget() {
-
-    }
-
-    removeTarget() {
-
+        return Object.assign({}, this.data);
     }
 
 }
@@ -60,42 +97,50 @@ class Record {
 /**
  * Collection of like data into a table / collection
  */
-class Store {
+class Store extends Evented {
 
-    constructor(records) {
-        this.records = records;
-
-        this.eventTargets = new Set();
+    constructor(records = [], comparator = null) {
+        super();
+        this.records = new Set(records);
+        this.comparator = comparator;
     }
 
     add(record) {
-
+        this.records.add(record);
+        this.emitEvent();
     }
 
     remove(record) {
-
+        this.records.delete(record);
+        this.emitEvent();
     }
 
     serialize() {
-
-    }
-
-    emitEvent() {
-
-    }
-
-    addTarget() {
-
-    }
-
-    removeTarget() {
-
+        const unordered_data = [];
+        for (const record of this.records) {
+            unordered_data.push({
+                comparator: comparator(record),
+                data: record.serialize(),
+            });
+        }
+        const ordered_data = unordered_data.sort((a, b) => {
+            if (b > a) {
+                return 1;
+            } else if (a < b) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
+        return ordered_data.map(o => o.data);
     }
 
 }
 
 /**
  * Front-end router
+ *
+ * Router stands in the place of a component somewhere in the DOM tree.
  */
 class Router {
 
@@ -103,8 +148,14 @@ class Router {
         this.paths = paths;
     }
 
-    route() {
-
+    route(path) {
+        for (const [pathRegex, composer] of this.paths) {
+            const match = pathRegex.exec(path);
+            if (match !== null) {
+                const parameters = match.slice(1);
+                return composer(...parameters);
+            }
+        }
     }
 
 }
@@ -119,7 +170,16 @@ class Adapter {
     }
 
     async save(type, data) {
-
+        switch (type) {
+            case 'read':
+                break;
+            case 'create':
+                break;
+            case 'delete':
+                break;
+            case 'update':
+                break;
+        }
     }
 
 }

@@ -1,11 +1,12 @@
 const createNodeFactory = tag => {
     return function(attrs, events, ...children) {
-        return {
+        const jdom = {
             tag: tag,
-            attrs: attrs,
-            events: events,
-            children: children,
-        }
+        };
+        if (attrs !== undefined) jdom.attrs = attrs;
+        if (events !== undefined) jdom.events = events;
+        if (children.length > 0) jdom.children = children;
+        return jdom;
     }
 }
 
@@ -21,52 +22,100 @@ const img = createNodeFactory('img');
 const button = createNodeFactory('button');
 const input = createNodeFactory('input');
 
+const normalizeJDOM = jdom => {
+    if (typeof jdom === 'object') {
+        if (!('tag' in jdom)) jdom.tag = 'div';
+        if (!('attrs' in jdom)) jdom.attrs = {};
+        if (!('events' in jdom)) jdom.events = {};
+        if (!('children' in jdom)) jdom.children = [];
+    }
+    return jdom;
+}
+
 const renderJDOM = (node, previous, next) => {
-    // TODO: do some diffing to figure out what to change, change them
-    //  for the current node. Pass on details for children to a nested recursive call.
-    // TODO: in the future, do key based reconciliation
+    function erasePreviousNode() {
+        if (node !== undefined) {
+            if (node.parentNode) node.parentNode.removeChild(node);
+            for (const eventName in previous.events) {
+                node.removeEventListener(eventName);
+            }
+        }
+    };
 
-    // Special case: comments and text nodes
-    // TODO
+    if (next === null) {
+        if (previous === null) {
+            // both are comments, do nothing
+        } else {
+            erasePreviousNode();
+            node = document.createComment('');
+        }
+    } else if (typeof next === 'string') {
+        erasePreviousNode();
+        node = document.createTextNode(next);
+    } else if (typeof next === 'object') {
+        if (previous === undefined) {
+            // Creating a brand-new node.
+            previous = {
+                tag: null,
+            };
+        }
+        normalizeJDOM(previous);
+        normalizeJDOM(next);
 
-    // compare tag
-    if (previous.tag !== next.tag) {
-        node.parentNode.removeChild(node);
+        // Compare tag
+        if (previous.tag !== next.tag) {
+            erasePreviousNode();
+            node = document.createElement(next.tag);
+        }
+
+        // Compare attrs
+        for (const attrName in next.attrs) {
+            if (next.attrs[attrName] !== previous.attrs[attrName]) {
+                node.setAttribute(attrName, next.attrs[attrName]);
+            }
+        }
+        for (const attrName in previous.attrs) {
+            if (!(attrName in next.attrs)) {
+                node.removeAttribute(attrName);
+            }
+        }
+
+        // Compare events
+        for (const eventName in next.events) {
+            if (next.events[eventName] !== previous.events[eventName]) {
+                node.removeEventListener(eventName);
+                node.addEventListener(eventName, next.events[eventName]);
+            }
+        }
         for (const eventName in previous.events) {
-            node.removeEventListener(eventName);
+            if (!(eventName in next.events)) {
+                node.removeEventListener(eventName);
+            }
         }
 
-        node = document.createElement(tag);
-    }
-
-    // Compare attrs
-    for (const attrName in next.attrs) {
-        if (next.attrs[attrName] !== previous.attrs[attrName]) {
-            node.setAttribute(attrName, next.attrs[attrName]);
+        // Render children
+        if (next.children.length > 0 || previous.children.length > 0) {
+            // TODO improve / optimize with key-based reconciliation
+            if (previous.children.length < next.children.length) {
+                let i;
+                for (i = 0; i < previous.children.length; i ++) {
+                    renderJDOM(node.childNodes[i], previous.children[i], next.children[i]);
+                }
+                while (i < next.children.length) {
+                    node.appendChild(renderJDOM(undefined, undefined, next.children[i]));
+                    i ++;
+                }
+            } else {
+                let i;
+                for (i = 0; i < next.children.length; i ++) {
+                    renderJDOM(node.childNodes[i], previous.children[i], next.children[i]);
+                }
+                while (i < previous.children.length) {
+                    node.appendChild(renderJDOM(undefined, previous.children[i], null));
+                    i ++;
+                }
+            }
         }
-    }
-    for (const attrName in previous.attrs) {
-        if (!(attrName in next.attrs)) {
-            node.removeAttribute(attrName);
-        }
-    }
-
-    // Compare events
-    for (const eventName in next.events) {
-        if (next.events[eventName] !== previous.events[eventName]) {
-            node.removeEventListener(eventName);
-            node.addEventListener(eventName, next.events[eventName]);
-        }
-    }
-    for (const eventName in previous.events) {
-        if (!(eventName in next.events)) {
-            noe.removeEventListener(eventName);
-        }
-    }
-
-    // Render children
-    if (next.children.length > 0 && previous.children.length > 0) {
-        // TODO
     }
 
     return node;

@@ -8,7 +8,9 @@
     <script>
       class App extends Component {
         compose() {
-          return h1({}, {}, 'Hello, World!');
+          return h1([
+            'Hello, ', em(['World!']),
+          ]);
         }
       }
 

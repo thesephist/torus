@@ -1,5 +1,20 @@
 const createNodeFactory = tag => {
-    return function(attrs, events, ...children) {
+    return function(arg1, arg2, arg3) {
+        let attrs,
+            events,
+            children;
+
+        if (arg1 instanceof Array) {
+            children = arg1;
+        } else if (arg2 instanceof Array) {
+            attrs = arg1;
+            children = arg2;
+        } else if (arg3 instanceof Array) {
+            attrs = arg1;
+            events = arg2;
+            children = arg3;
+        }
+
         const jdom = {
             tag: tag,
         };

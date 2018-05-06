@@ -5,5 +5,15 @@
   </head>
   <body>
     <script src='/torus.js'></script>
+    <script>
+      class App extends Component {
+        compose() {
+          return h1({}, {}, 'Hello, World!');
+        }
+      }
+
+      const app = new App();
+      document.body.appendChild(app.node);
+    </script>
   </body>
 </html>

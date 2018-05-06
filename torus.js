@@ -136,12 +136,13 @@ const renderJDOM = (node, previous, next) => {
 class Component {
 
     constructor() {
-        this.jdom = null;
-        this.node = null;
+        this.jdom = undefined;
+        this.node = undefined;
         this.event = {
             source: null,
             composer: () => {},
         };
+        this.render({});
     }
 
     listen({source, composer}) {
@@ -172,7 +173,8 @@ class Component {
 
     render(data) {
         if (data) {
-            renderJDOM(this.node, this.jdom, this.compose(data));
+            const jdom = this.compose(data);
+            this.node = renderJDOM(this.node, this.jdom, jdom);
             this.jdom = jdom;
         }
         return this.jdom;

@@ -16,7 +16,7 @@ const h2 = createNodeFactory('h2');
 const h3 = createNodeFactory('h3');
 const p = createNodeFactory('p');
 const a = createNodeFactory('a');
-const emph = createNodeFactory('emph');
+const em = createNodeFactory('em');
 const strong = createNodeFactory('strong');
 const img = createNodeFactory('img');
 const button = createNodeFactory('button');
@@ -33,25 +33,35 @@ const normalizeJDOM = jdom => {
 }
 
 const renderJDOM = (node, previous, next) => {
-    function erasePreviousNode() {
+    function replacePreviousNode(newNode) {
         if (node !== undefined) {
-            if (node.parentNode) node.parentNode.removeChild(node);
             for (const eventName in previous.events) {
                 node.removeEventListener(eventName);
             }
+
+            const parentNode = node.parentNode;
+            const nextSibling = node.nextSibling;
+            if (parentNode) {
+                parentNode.removeChild(node);
+                if (nextSibling) {
+                    parentNode.insertBefore(newNode, nextSibling);
+                } else {
+                    parentNode.appendChild(newNode);
+                }
+            }
         }
+
+        node = newNode;
     };
 
     if (next === null) {
         if (previous === null) {
             // both are comments, do nothing
         } else {
-            erasePreviousNode();
-            node = document.createComment('');
+            replacePreviousNode(document.createComment(''));
         }
     } else if (typeof next === 'string') {
-        erasePreviousNode();
-        node = document.createTextNode(next);
+        replacePreviousNode(document.createTextNode(next));
     } else if (typeof next === 'object') {
         if (previous === undefined) {
             // Creating a brand-new node.
@@ -64,8 +74,7 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare tag
         if (previous.tag !== next.tag) {
-            erasePreviousNode();
-            node = document.createElement(next.tag);
+            replacePreviousNode(document.createElement(next.tag));
         }
 
         // Compare attrs

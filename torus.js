@@ -25,7 +25,49 @@ const renderJDOM = (node, previous, next) => {
     // TODO: do some diffing to figure out what to change, change them
     //  for the current node. Pass on details for children to a nested recursive call.
     // TODO: in the future, do key based reconciliation
-    // TODO: handle event listeners
+
+    // Special case: comments and text nodes
+    // TODO
+
+    // compare tag
+    if (previous.tag !== next.tag) {
+        node.parentNode.removeChild(node);
+        for (const eventName in previous.events) {
+            node.removeEventListener(eventName);
+        }
+
+        node = document.createElement(tag);
+    }
+
+    // Compare attrs
+    for (const attrName in next.attrs) {
+        if (next.attrs[attrName] !== previous.attrs[attrName]) {
+            node.setAttribute(attrName, next.attrs[attrName]);
+        }
+    }
+    for (const attrName in previous.attrs) {
+        if (!(attrName in next.attrs)) {
+            node.removeAttribute(attrName);
+        }
+    }
+
+    // Compare events
+    for (const eventName in next.events) {
+        if (next.events[eventName] !== previous.events[eventName]) {
+            node.removeEventListener(eventName);
+            node.addEventListener(eventName, next.events[eventName]);
+        }
+    }
+    for (const eventName in previous.events) {
+        if (!(eventName in next.events)) {
+            noe.removeEventListener(eventName);
+        }
+    }
+
+    // Render children
+    if (next.children.length > 0 && previous.children.length > 0) {
+        // TODO
+    }
 
     return node;
 }

@@ -1,5 +1,31 @@
+const createNodeFactory = tag => {
+    return function(attrs, events, ...children) {
+        return {
+            tag: tag,
+            attrs: attrs,
+            events: events,
+            children: children,
+        }
+    }
+}
+
+const div = createNodeFactory('div');
+const h1 = createNodeFactory('h1');
+const h2 = createNodeFactory('h2');
+const h3 = createNodeFactory('h3');
+const p = createNodeFactory('p');
+const a = createNodeFactory('a');
+const emph = createNodeFactory('emph');
+const strong = createNodeFactory('strong');
+const img = createNodeFactory('img');
+const button = createNodeFactory('button');
+const input = createNodeFactory('input');
+
 const renderJDOM = (node, previous, next) => {
     // TODO: do some diffing to figure out what to change, change them
+    //  for the current node. Pass on details for children to a nested recursive call.
+    // TODO: in the future, do key based reconciliation
+    // TODO: handle event listeners
 
     return node;
 }
@@ -19,6 +45,10 @@ class Component {
     }
 
     listen({source, composer}) {
+        if (this.event.source !== null) {
+            this.unlisten();
+        }
+
         if (source instanceof Evented) {
             this.event = { source, composer };
             source.addHandler(composer);
@@ -37,11 +67,15 @@ class Component {
 
     compose(data) {
         // return a JDOM
+        return null;
     }
 
     render(data) {
-        renderJDOM(this.node, this.jdom, this.compose(data));
-        this.jdom = jdom;
+        if (data) {
+            renderJDOM(this.node, this.jdom, this.compose(data));
+            this.jdom = jdom;
+        }
+        return this.jdom;
     }
 
 }

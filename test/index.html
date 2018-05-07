@@ -24,7 +24,14 @@
               p([
                 'Button has been pressed ', clickTimes, ' times.',
               ]),
-              button({}, {click: this.buttonClick.bind(this)}, [
+              button({
+                style: {
+                  background: 'blue',
+                  color: '#fff',
+                },
+              }, {
+                click: this.buttonClick.bind(this),
+              }, [
                 'Click me!',
               ]),
             ])

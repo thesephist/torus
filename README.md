@@ -6,6 +6,8 @@ Minimal JS Model-View UI framework focused on being lightweight and free of depe
 
 Torus takes after the React and Vue model, breaking down interfaces to reusable components. But components in Torus are much lighter, faster, and closer to vanilla JavaScript compared to the alternatives. (In fact, Using the full set of Torus UI rendering features requires no compilation step; just import `torus.js` with a `<script>` tag and go!)
 
+For a more detailed and real-world example tying in models, please reference `/samples/todo.html`.
+
 ```javascript
 class Toggle extends Component {
 

@@ -58,6 +58,7 @@ const strong = createNodeFactory('strong');
 const img = createNodeFactory('img');
 const button = createNodeFactory('button');
 const input = createNodeFactory('input');
+const label = createNodeFactory('label');
 const ul = createNodeFactory('ul');
 const ol = createNodeFactory('ol');
 const li = createNodeFactory('li');
@@ -146,7 +147,7 @@ const renderJDOM = (node, previous, next) => {
         // Compare attrs
         for (const attrName in next.attrs) {
             if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
-                render_debug(`Set <${next.tag}> property ${attrName} to ${next.attrs[attrName]}`);
+                render_debug(`Set <${next.tag}> property ${attrName} to "${next.attrs[attrName]}"`);
                 node[attrName] = next.attrs[attrName];
                 continue;
             }
@@ -168,7 +169,7 @@ const renderJDOM = (node, previous, next) => {
                 }
             } else {
                 if (next.attrs[attrName] !== previous.attrs[attrName]) {
-                    render_debug(`Set <${next.tag}> attribute "${attrName}" to ${next.attrs[attrName]}`);
+                    render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
                     node.setAttribute(attrName, next.attrs[attrName]);
                 }
             }
@@ -407,7 +408,7 @@ class Record extends Evented {
     }
 
     update(data) {
-        this.data = data;
+        Object.assign(this.data, data);
         this.emitEvent();
     }
 
@@ -438,7 +439,7 @@ class Store extends Evented {
 
     constructor(records = [], comparator = null) {
         super();
-        this.recordClass = Record;
+        this.recordClass = this.recordClass || Record;
         this.records = new Set(records);
         this.comparator = comparator;
     }

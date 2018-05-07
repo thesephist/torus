@@ -1,0 +1,14 @@
+{
+  "name": "torus-js",
+  "version": "1.0.0",
+  "description": "Minimal JS UI framework focused on being lightweight and free of dependencies",
+  "main": "torus.js",
+  "repository": "git@github.com:thesephist/torus.git",
+  "author": "Linus Lee <linus@thesephist.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "istanbul": "^0.4.5",
+    "karma": "^2.0.2",
+    "mocha": "^5.1.1"
+  }
+}

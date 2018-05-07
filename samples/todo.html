@@ -40,7 +40,16 @@
           return (
             li({
               style: {
-                color: data.completed ? '#aaa' : '#000',
+                opacity: data.completed ? 0.4 : 1,
+                height: '50px',
+                width: '100%',
+                background: '#eee',
+                listStyle: 'none',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'left',
+                marginBottom: '1px',
               },
             }, [
               input({
@@ -62,6 +71,18 @@
           super.initialize();
           this.source = tasks;
           this.itemClass = TaskItem;
+        }
+
+        compose() {
+          return (
+            ul({
+              style: {
+                padding: 0,
+              }
+            }, [
+              ...this.nodes,
+            ])
+          );
         }
 
       }
@@ -102,11 +123,20 @@
         
         compose() {
           return (
-            div([
+            div({
+              style: {
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'row',
+              },
+            },[
               input({
                 value: this.value,
+                style: {
+                  flexGrow: 1,
+                }
               }, {
-                keyup: this.boundSetValue,
+                input: this.boundSetValue,
                 keypress: this.boundOnKeyPress,
               }),
               button({}, {
@@ -129,7 +159,14 @@
 
         compose() {
           return (
-            div([
+            div({
+              style: {
+                fontFamily: "'Helvetica', 'Ubuntu', sans-serif",
+                width: '100%',
+                maxWidth: '500px',
+                margin: '0 auto',
+              },
+            }, [
               this.input.node,
               this.list.node,
             ])

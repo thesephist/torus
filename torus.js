@@ -47,6 +47,9 @@ const strong = createNodeFactory('strong');
 const img = createNodeFactory('img');
 const button = createNodeFactory('button');
 const input = createNodeFactory('input');
+const ul = createNodeFactory('ul');
+const ol = createNodeFactory('ol');
+const li = createNodeFactory('li');
 
 const normalizeJDOM = jdom => {
     if (typeof jdom === 'object') {

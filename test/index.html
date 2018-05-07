@@ -61,7 +61,11 @@
               }, [
                 'Click me!',
               ]),
-              ...this.toggles.map(t => t.node),
+              ul([
+                ...this.toggles.map(t => {
+                  return li([t.node]);
+                }),
+              ]),
             ])
           );
         }

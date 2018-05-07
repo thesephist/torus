@@ -73,6 +73,8 @@ const normalizeJDOM = jdom => {
 }
 
 const renderJDOM = (node, previous, next) => {
+    // TODO: can we make this more effective with requestAnimationFrame?
+
     function replacePreviousNode(newNode) {
         if (node !== undefined) {
             const parentNode = node.parentNode;
@@ -108,7 +110,7 @@ const renderJDOM = (node, previous, next) => {
             if (node === undefined) {
                 render_debug('Add comment node');
             } else {
-                render_debug('Replace previous node', node, 'with comment node');
+                render_debug(`Replace previous node <${node.tagName}> with comment node`);
             }
             replacePreviousNode(document.createComment(''));
         }
@@ -136,7 +138,7 @@ const renderJDOM = (node, previous, next) => {
             if (node === undefined) {
                 render_debug(`Add <${next.tag}>`);
             } else {
-                render_debug('Replace previous node', node, `with <${next.tag}>`);
+                render_debug(`Replace previous node <${node.tagName}> with <${next.tag}`);
             }
             replacePreviousNode(document.createElement(next.tag));
         }
@@ -144,6 +146,7 @@ const renderJDOM = (node, previous, next) => {
         // Compare attrs
         for (const attrName in next.attrs) {
             if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
+                render_debug(`Set <${next.tag}> property ${attrName} to ${next.attrs[attrName]}`);
                 node[attrName] = next.attrs[attrName];
                 continue;
             }
@@ -172,14 +175,15 @@ const renderJDOM = (node, previous, next) => {
 
         }
         for (const attrName in previous.attrs) {
-            if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
-                node[attrName] = ''; // TODO: might not be the best way to unset properties
-                continue;
-            }
-
             if (!(attrName in next.attrs)) {
-                render_debug('Remove attribute', attrName);
-                node.removeAttribute(attrName);
+                if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
+                    render_debug(`Remove <${next.tag}> property ${attrName}`);
+                    node[attrName] = ''; // TODO: might not be the best way to unset properties
+                    continue;
+                } else {
+                    render_debug(`Remove <${next.tag}> attribute ${attrName}`);
+                    node.removeAttribute(attrName);
+                }
             }
         }
 
@@ -246,6 +250,10 @@ class Component {
         // no-op, will be overridden
     }
 
+    get record() {
+        return this.event.source;
+    }
+
     listen({source, handler}) {
         if (this.event.source !== null) {
             this.unlisten();
@@ -291,6 +299,8 @@ class Component {
  */
 class List extends Component {
 
+    // TODO: add searchability
+
     constructor(...args) {
         super(...args);
         this.listen({
@@ -331,9 +341,13 @@ class List extends Component {
         this.render();
     }
 
+    get nodes() {
+        return [...this.items.values()].map(item => item.node);
+    }
+
     compose(data) {
         return (
-            ul([...this.items.values()].map(item => item.node))
+            ul(this.nodes)
         );
     }
 

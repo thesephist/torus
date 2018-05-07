@@ -26,14 +26,28 @@
             source: source,
             handler: data => this.render(data),
           });
+
+          this.boundOnCheck = this.onCheck.bind(this);
+        }
+
+        onCheck() {
+          this.record.update({
+            completed: !this.record.get('completed'),
+          });
         }
 
         compose(data) {
           return (
-            li({}, [
+            li({
+              style: {
+                color: data.completed ? '#aaa' : '#000',
+              },
+            }, [
               input({
                 type: 'checkbox',
                 checked: data.completed,
+              }, {
+                change: this.boundOnCheck,
               }),
               data.description,
             ])
@@ -73,16 +87,14 @@
 
         setValue(evt) {
           this.value = evt.target.value;
+          this.render();
         }
 
         _addTask() {
-          tasks.add(new Task(
-            undefined,
-            {
-              description: this.value,
-              completed: false,
-            }
-          ));
+          tasks.create(undefined, {
+            description: this.value,
+            completed: false,
+          });
 
           this.value = '';
           this.render();

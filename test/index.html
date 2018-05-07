@@ -47,9 +47,15 @@
         compose() {
           return (
             div([
-              h1([
-                'Hello, ', em(['World!']),
-              ]),
+              (
+                this.clickTimes % 2 ? (
+                  h1([
+                    'Hello, ', em(['World!']),
+                  ])
+                ) : (
+                  h1(['Hello, World!'])
+                )
+              ),
               p([
                 'Button has been pressed ', this.clickTimes, ' times.',
               ]),

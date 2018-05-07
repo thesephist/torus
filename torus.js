@@ -1,4 +1,4 @@
-const DEBUG_RENDER = true;h
+const DEBUG_RENDER = true;
 const render_debug = (msg, bold = false) => {
     if (DEBUG_RENDER) {
         if (bold) {
@@ -208,7 +208,7 @@ const renderJDOM = (node, previous, next) => {
                     renderJDOM(node.childNodes[i], previous.children[i], next.children[i]);
                 }
                 while (i < previous.children.length) {
-                    node.appendChild(renderJDOM(undefined, previous.children[i], null));
+                    node.removeChild(node.childNodes[i]);
                     i ++;
                 }
             }

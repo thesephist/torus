@@ -6,12 +6,39 @@
   <body>
     <script src='/torus.js'></script>
     <script>
-      let clickTimes = 0;
+      class Toggle extends Component {
+
+        initialize() {
+          this.state = false;
+        }
+
+        onToggle() {
+          this.state = !this.state;
+          this.render();
+        }
+
+        compose() {
+          return (
+            button({}, {
+              click: this.onToggle.bind(this),
+            }, [
+              this.state ? ':D' : ':\'(',
+            ])
+          );
+        }
+
+      }
 
       class App extends Component {
 
+        initialize() {
+          this.clickTimes = 0;
+          this.toggles = [];
+        }
+
         buttonClick() {
-          clickTimes ++;
+          this.clickTimes ++;
+          this.toggles.push(new Toggle());
           this.render();
         }
 
@@ -22,7 +49,7 @@
                 'Hello, ', em(['World!']),
               ]),
               p([
-                'Button has been pressed ', clickTimes, ' times.',
+                'Button has been pressed ', this.clickTimes, ' times.',
               ]),
               button({
                 style: {
@@ -34,6 +61,7 @@
               }, [
                 'Click me!',
               ]),
+              ...this.toggles.map(t => t.node),
             ])
           );
         }

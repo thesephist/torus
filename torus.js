@@ -80,7 +80,18 @@ const renderJDOM = (node, previous, next) => {
         node = newNode;
     };
 
-    if (next === null) {
+    if (next instanceof Node) {
+        if (previous === next) {
+            // pass, it's the same element
+        } else {
+            if (node === undefined) {
+                render_debug(`Add literal element <${next.tagName}>`);
+            } else {
+                render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
+            }
+            replacePreviousNode(next);
+        }
+    } else if (next === null) {
         if (previous === null) {
             // both are comments, do nothing
         } else {
@@ -122,6 +133,9 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare attrs
         for (const attrName in next.attrs) {
+            // "key" is used for key based list reconciliation
+            if (attrName === 'key') continue;
+
             if (attrName === 'style') {
                 const prevStyle = previous.attrs.style || {};
                 const nextStyle = next.attrs.style;
@@ -170,6 +184,12 @@ const renderJDOM = (node, previous, next) => {
         // Render children
         if (next.children.length > 0 || previous.children.length > 0) {
             // TODO improve / optimize with key-based reconciliation
+
+            // Key-based list reconciliation
+            // 1. identify carried-over elements
+            // 2. Modify the rest as if we had no keys
+            // 3. Insert the keyed items in the right indices
+
             if (previous.children.length < next.children.length) {
                 let i;
                 for (i = 0; i < previous.children.length; i ++) {
@@ -207,7 +227,12 @@ class Component {
             source: null,
             composer: () => {},
         };
-        this.render({});
+        this.initialize();
+        this.render();
+    }
+
+    initialize() {
+        // no-op, will be overridden
     }
 
     listen({source, composer}) {
@@ -237,8 +262,8 @@ class Component {
     }
 
     render(data) {
-        render_debug('New render pass start:', true);
         const jdom = this.compose(data);
+        render_debug(`Render pass for <${jdom.tag}>:`, true);
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;
         return this.jdom;

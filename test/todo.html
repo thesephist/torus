@@ -7,37 +7,80 @@
     <script src='/torus.js'></script>
     <script>
       class Task extends Record {}
-      class TaskStore extends Store {}
+      class TaskStore extends Store {
+
+        initialize() {
+          this.recordClass = Task;
+        }
+
+      }
       const tasks = new TaskStore([
         new Task(1, {description: 'Do this', completed: false,}),
         new Task(2, {description: 'Do that', completed: false,}),
-      ]);
+      ], task => task.get('description'));
+
+      class Item extends Component {
+
+        initialize(source) {
+          this.listen({
+            source: source,
+            handler: data => this.render(data),
+          });
+        }
+
+        compose(data) {
+          return (
+            li({}, [
+              input({
+                type: 'checkbox',
+                checked: data.completed,
+              }),
+              data.description,
+            ])
+          );
+        }
+
+      }
 
       class List extends Component {
 
         initialize() {
           this.listen({
             source: tasks,
-            handler: data => this.render(data),
+            handler: this.updateItems.bind(this),
           });
+
+          this.items = new Map();
         }
 
-        composeTask(task) {
-          return (
-            li({
-              'data-id': task.id,
-            }, [
-              input({
-                type: 'checkbox',
-              }),
-              task.description,
-            ])
-          );
+        updateItems(data) {
+          for (const [record, item] of this.items.entries()) {
+            if (!data.includes(record)) {
+              this.items.delete(record);
+            }
+          }
+          for (const record of data) {
+            if (this.items.has(record)) {
+              // taken care of, pass
+            } else {
+              this.items.set(record, new Item(record));
+            }
+          }
+
+          const sorter = [...this.items.entries()];
+          sorter.sort((a, b) => data.indexOf(a[0]) - data.indexOf(b[0]));
+
+          this.items = new Map();
+          for (const [record, item] of sorter) {
+            this.items.set(record, item);
+          }
+
+          this.render();
         }
 
         compose(data) {
           return (
-            ul(data.map(task => this.composeTask(task)))
+            ul([...this.items.values()].map(item => item.node))
           );
         }
 
@@ -68,7 +111,7 @@
 
         _addTask() {
           tasks.add(new Task(
-            10,
+            undefined,
             {
               description: this.value,
               completed: false,

@@ -11,6 +11,8 @@ const render_debug = (msg, bold = false) => {
 
 const HTML_REFLECTED_PROPERTIES = [
     'value',
+    'checked',
+    'indeterminate',
 ];
 
 const createNodeFactory = tag => {
@@ -73,10 +75,6 @@ const normalizeJDOM = jdom => {
 const renderJDOM = (node, previous, next) => {
     function replacePreviousNode(newNode) {
         if (node !== undefined) {
-            for (const eventName in previous.events) {
-                node.removeEventListener(eventName);
-            }
-
             const parentNode = node.parentNode;
             const nextSibling = node.nextSibling;
             if (parentNode) {
@@ -145,9 +143,6 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare attrs
         for (const attrName in next.attrs) {
-            // "key" is used for key based list reconciliation
-            if (attrName === 'key') continue;
-
             if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
                 node[attrName] = next.attrs[attrName];
                 continue;
@@ -170,15 +165,13 @@ const renderJDOM = (node, previous, next) => {
                 }
             } else {
                 if (next.attrs[attrName] !== previous.attrs[attrName]) {
-                    render_debug(`Set <${next.tag}> attribute`, attrName, 'to', next.attrs[attrName]);
+                    render_debug(`Set <${next.tag}> attribute "${attrName}" to ${next.attrs[attrName]}`);
                     node.setAttribute(attrName, next.attrs[attrName]);
                 }
             }
 
         }
         for (const attrName in previous.attrs) {
-            if (attrName === 'key') continue;
-
             if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
                 node[attrName] = ''; // TODO: might not be the best way to unset properties
                 continue;
@@ -207,13 +200,6 @@ const renderJDOM = (node, previous, next) => {
 
         // Render children
         if (next.children.length > 0 || previous.children.length > 0) {
-            // TODO improve / optimize with key-based reconciliation
-
-            // Key-based list reconciliation
-            // 1. identify carried-over elements
-            // 2. Modify the rest as if we had no keys
-            // 3. Insert the keyed items in the right indices
-
             if (previous.children.length < next.children.length) {
                 let i;
                 for (i = 0; i < previous.children.length; i ++) {
@@ -245,14 +231,14 @@ const renderJDOM = (node, previous, next) => {
  */
 class Component {
 
-    constructor() {
+    constructor(...args) {
         this.jdom = undefined;
         this.node = undefined;
         this.event = {
             source: null,
             handler: () => {},
         };
-        this.initialize();
+        this.initialize(...args);
         this.render();
     }
 
@@ -301,6 +287,13 @@ class Component {
 }
 
 /**
+ * Generic list implementation based on stores
+ */
+class TorusList extends Component {
+    // TODO
+}
+
+/**
  * A base class for evented data stores
  */
 class Evented {
@@ -310,7 +303,7 @@ class Evented {
     }
 
     emitEvent() {
-        const data = this.serialize();
+        const data = this.summarize();
         if (data instanceof Array) {
             for (const handler of this.eventTargets) {
                 handler(data.slice());
@@ -337,7 +330,7 @@ class Evented {
  */
 class Record extends Evented {
 
-    constructor(id = null, data = {}) {
+    constructor(id, data = {}) {
         super();
         this.id = id;
         this.data = data;
@@ -348,8 +341,22 @@ class Record extends Evented {
         this.emitEvent();
     }
 
+    get(name) {
+        return this.data[name];
+    }
+
+    summarize() {
+        return Object.assign(
+            {},
+            this.data,
+            {
+                id: this.id
+            }
+        );
+    }
+
     serialize() {
-        return Object.assign({}, this.data);
+        return this.summarize();
     }
 
 }
@@ -361,8 +368,13 @@ class Store extends Evented {
 
     constructor(records = [], comparator = null) {
         super();
+        this.recordClass = Record;
         this.records = new Set(records);
         this.comparator = comparator;
+    }
+
+    create(id, data) {
+        this.add(new this.recordClass(id, data));
     }
 
     add(record) {
@@ -375,24 +387,28 @@ class Store extends Evented {
         this.emitEvent();
     }
 
-    serialize() {
+    summarize() {
         const unordered_data = [];
         for (const record of this.records) {
             unordered_data.push({
                 comparator: this.comparator ? this.comparator(record) : null,
-                data: record.serialize(),
+                record: record,
             });
         }
         const ordered_data = unordered_data.sort((a, b) => {
-            if (b > a) {
-                return 1;
-            } else if (a < b) {
+            if (a.comparator < b.comparator) {
                 return -1;
+            } else if (a.comparator > b.comparator) {
+                return 1;
             } else {
                 return 0;
             }
         });
-        return ordered_data.map(o => o.data);
+        return ordered_data.map(o => o.record);
+    }
+
+    serialize() {
+        return this.summarize().map(record => record.serialize());
     }
 
 }

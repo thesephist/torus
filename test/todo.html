@@ -19,7 +19,7 @@
         new Task(2, {description: 'Do that', completed: false,}),
       ], task => task.get('description'));
 
-      class Item extends Component {
+      class TaskItem extends Component {
 
         initialize(source) {
           this.listen({
@@ -42,46 +42,12 @@
 
       }
 
-      class List extends Component {
+      class TaskList extends List {
 
         initialize() {
-          this.listen({
-            source: tasks,
-            handler: this.updateItems.bind(this),
-          });
-
-          this.items = new Map();
-        }
-
-        updateItems(data) {
-          for (const [record, item] of this.items.entries()) {
-            if (!data.includes(record)) {
-              this.items.delete(record);
-            }
-          }
-          for (const record of data) {
-            if (this.items.has(record)) {
-              // taken care of, pass
-            } else {
-              this.items.set(record, new Item(record));
-            }
-          }
-
-          const sorter = [...this.items.entries()];
-          sorter.sort((a, b) => data.indexOf(a[0]) - data.indexOf(b[0]));
-
-          this.items = new Map();
-          for (const [record, item] of sorter) {
-            this.items.set(record, item);
-          }
-
-          this.render();
-        }
-
-        compose(data) {
-          return (
-            ul([...this.items.values()].map(item => item.node))
-          );
+          super.initialize();
+          this.source = tasks;
+          this.itemClass = TaskItem;
         }
 
       }
@@ -146,7 +112,7 @@
 
         initialize() {
           this.input = new TaskInput();
-          this.list = new List();
+          this.list = new TaskList();
         }
 
         compose() {

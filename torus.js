@@ -255,7 +255,7 @@ class Component {
             this.event = { source, handler};
             source.addHandler(handler);
         } else {
-            throw new Error('event source to listen() is not an Evented');
+            throw new Error('Event source to listen() is not an Evented');
         }
     }
 
@@ -289,8 +289,54 @@ class Component {
 /**
  * Generic list implementation based on stores
  */
-class TorusList extends Component {
-    // TODO
+class List extends Component {
+
+    constructor(...args) {
+        super(...args);
+        this.listen({
+            source: this.source,
+            handler: this.updateItems.bind(this),
+        });
+    }
+
+    initialize() {
+        // Override when extending
+        this.source = new Store();
+        this.itemClass = Component;
+        this.items = new Map();
+    }
+
+    updateItems(data) {
+        for (const [record, item] of this.items.entries()) {
+            if (!data.includes(record)) {
+                this.items.delete(record);
+            }
+        }
+        for (const record of data) {
+            if (this.items.has(record)) {
+                // taken care of, pass
+            } else {
+                this.items.set(record, new this.itemClass(record));
+            }
+        }
+
+        const sorter = [...this.items.entries()];
+        sorter.sort((a, b) => data.indexOf(a[0]) - data.indexOf(b[0]));
+
+        this.items = new Map();
+        for (const [record, item] of sorter) {
+            this.items.set(record, item);
+        }
+
+        this.render();
+    }
+
+    compose(data) {
+        return (
+            ul([...this.items.values()].map(item => item.node))
+        );
+    }
+
 }
 
 /**
@@ -315,8 +361,18 @@ class Evented {
         }
     }
 
+    getCurrentSummary() {
+        const data = this.summarize();
+        if (data instanceof Array) {
+            return data.slice();
+        } else if (data instanceof Object) {
+            return Object.assign({}, data);
+        }
+    }
+
     addHandler(handler) {
         this.eventTargets.add(handler);
+        handler(this.getCurrentSummary());
     }
 
     removeHandler(handler) {

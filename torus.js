@@ -1,4 +1,4 @@
-const DEBUG_RENDER = true;
+const DEBUG_RENDER = true;h
 const render_debug = (msg, bold = false) => {
     if (DEBUG_RENDER) {
         if (bold) {

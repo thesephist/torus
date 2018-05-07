@@ -10,6 +10,7 @@
 
         initialize() {
           this.state = false;
+          this.boundOnToggle = this.onToggle.bind(this);
         }
 
         onToggle() {
@@ -20,7 +21,7 @@
         compose() {
           return (
             button({}, {
-              click: this.onToggle.bind(this),
+              click: this.boundOnToggle,
             }, [
               this.state ? ':D' : ':\'(',
             ])
@@ -34,6 +35,7 @@
         initialize() {
           this.clickTimes = 0;
           this.toggles = [];
+          this.boundButtonClick = this.buttonClick.bind(this);
         }
 
         buttonClick() {
@@ -57,7 +59,7 @@
                   color: '#fff',
                 },
               }, {
-                click: this.buttonClick.bind(this),
+                click: this.boundButtonClick,
               }, [
                 'Click me!',
               ]),

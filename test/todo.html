@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Torus Todo</title>
+  </head>
+  <body>
+    <script src='/torus.js'></script>
+    <script>
+      class Task extends Record {}
+      class TaskStore extends Store {}
+      const tasks = new TaskStore([
+        new Task(1, {description: 'Do this'}),
+        new Task(1, {description: 'Do that'}),
+      ]);
+
+      class List extends Component {
+
+        initialize() {
+          this.listen({
+            source: tasks,
+            handler: data => this.render(data),
+          });
+        }
+
+        compose(data) {
+          return (
+            ul(data.map(task => {
+              return li({
+                'data-id': task.id,
+              }, [
+                task.description,
+              ]);
+            }))
+          );
+        }
+
+      }
+
+      class App extends Component {
+
+        initialize() {
+          this.list = new List();
+        }
+
+        compose() {
+          return (
+            div([
+              this.list.node,
+            ])
+          );
+        }
+
+      }
+
+      const app = new App();
+      document.body.appendChild(app.node);
+    </script>
+  </body>
+</html>
+

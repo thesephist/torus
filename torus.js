@@ -126,11 +126,11 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare tag
         if (previous.tag !== next.tag) {
-                if (node === undefined) {
-                    render_debug(`Add <${next.tag}>`);
-                } else {
-                    render_debug('Replace previous node', node, `with <${next.tag}>`);
-                }
+            if (node === undefined) {
+                render_debug(`Add <${next.tag}>`);
+            } else {
+                render_debug('Replace previous node', node, `with <${next.tag}>`);
+            }
             replacePreviousNode(document.createElement(next.tag));
         }
 
@@ -229,7 +229,7 @@ class Component {
         this.node = undefined;
         this.event = {
             source: null,
-            composer: () => {},
+            handler: () => {},
         };
         this.initialize();
         this.render();
@@ -239,34 +239,38 @@ class Component {
         // no-op, will be overridden
     }
 
-    listen({source, composer}) {
+    listen({source, handler}) {
         if (this.event.source !== null) {
             this.unlisten();
         }
 
         if (source instanceof Evented) {
-            this.event = { source, composer };
-            source.addHandler(composer);
+            this.event = { source, handler};
+            source.addHandler(handler);
         } else {
             throw new Error('event source to listen() is not an Evented');
         }
     }
 
     unlisten() {
-        this.event.source.removeHandler(this.event.composer);
+        this.event.source.removeHandler(this.event.handler);
         this.event = {
             source: null,
-            composer: () => {},
+            handler: () => {},
         };
     }
 
     compose(data) {
-        // return a JDOM
+        // no-op, will be overridden to return a composed JDOM
         return null;
     }
 
     render(data) {
-        const jdom = this.compose(data);
+        const jdom = this.compose(
+            data
+            || this.event.source && this.event.source.serialize()
+            || undefined
+        );
         render_debug(`Render pass for <${jdom.tag}>:`, true);
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;
@@ -348,7 +352,7 @@ class Store extends Evented {
         const unordered_data = [];
         for (const record of this.records) {
             unordered_data.push({
-                comparator: comparator(record),
+                comparator: this.comparator ? this.comparator(record) : null,
                 data: record.serialize(),
             });
         }

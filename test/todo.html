@@ -9,8 +9,8 @@
       class Task extends Record {}
       class TaskStore extends Store {}
       const tasks = new TaskStore([
-        new Task(1, {description: 'Do this'}),
-        new Task(1, {description: 'Do that'}),
+        new Task(1, {description: 'Do this', completed: false,}),
+        new Task(2, {description: 'Do that', completed: false,}),
       ]);
 
       class List extends Component {
@@ -22,15 +22,78 @@
           });
         }
 
+        composeTask(task) {
+          return (
+            li({
+              'data-id': task.id,
+            }, [
+              input({
+                type: 'checkbox',
+              }),
+              task.description,
+            ])
+          );
+        }
+
         compose(data) {
           return (
-            ul(data.map(task => {
-              return li({
-                'data-id': task.id,
+            ul(data.map(task => this.composeTask(task)))
+          );
+        }
+
+      }
+
+      class TaskInput extends Component {
+
+        initialize() {
+          this.value = '';
+          this.boundOnKeyPress = this.onKeyPress.bind(this);
+          this.boundOnAddClick = this.onAddClick.bind(this);
+          this.boundSetValue = this.setValue.bind(this);
+        }
+
+        onKeyPress(evt) {
+          if (evt.keyCode === 13) {
+            this._addTask();
+          }
+        }
+
+        onAddClick(evt) {
+          this._addTask();
+        }
+
+        setValue(evt) {
+          this.value = evt.target.value;
+        }
+
+        _addTask() {
+          tasks.add(new Task(
+            10,
+            {
+              description: this.value,
+              completed: false,
+            }
+          ));
+
+          this.value = '';
+          this.render();
+        }
+        
+        compose() {
+          return (
+            div([
+              input({
+                value: this.value,
+              }, {
+                keyup: this.boundSetValue,
+                keypress: this.boundOnKeyPress,
+              }),
+              button({}, {
+                click: this.boundOnAddClick,
               }, [
-                task.description,
-              ]);
-            }))
+                'Add'
+              ]),
+            ])
           );
         }
 
@@ -39,12 +102,14 @@
       class App extends Component {
 
         initialize() {
+          this.input = new TaskInput();
           this.list = new List();
         }
 
         compose() {
           return (
             div([
+              this.input.node,
               this.list.node,
             ])
           );

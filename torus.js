@@ -9,6 +9,10 @@ const render_debug = (msg, bold = false) => {
     }
 }
 
+const HTML_REFLECTED_PROPERTIES = [
+    'value',
+];
+
 const createNodeFactory = tag => {
     return function(arg1, arg2, arg3) {
         let attrs,
@@ -24,6 +28,11 @@ const createNodeFactory = tag => {
             attrs = arg1;
             events = arg2;
             children = arg3;
+        } else if (typeof arg1 === 'object' && typeof arg2 === 'undefined') {
+            attrs = arg1;
+        } else if (typeof arg1 === 'object' && typeof arg2 === 'object') {
+            attrs = arg1;
+            events = arg2;
         }
 
         const jdom = {
@@ -31,7 +40,7 @@ const createNodeFactory = tag => {
         };
         if (attrs !== undefined) jdom.attrs = attrs;
         if (events !== undefined) jdom.events = events;
-        if (children.length > 0) jdom.children = children;
+        if (children && children.length > 0) jdom.children = children;
         return jdom;
     }
 }
@@ -139,6 +148,11 @@ const renderJDOM = (node, previous, next) => {
             // "key" is used for key based list reconciliation
             if (attrName === 'key') continue;
 
+            if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
+                node[attrName] = next.attrs[attrName];
+                continue;
+            }
+
             if (attrName === 'style') {
                 const prevStyle = previous.attrs.style || {};
                 const nextStyle = next.attrs.style;
@@ -163,6 +177,13 @@ const renderJDOM = (node, previous, next) => {
 
         }
         for (const attrName in previous.attrs) {
+            if (attrName === 'key') continue;
+
+            if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
+                node[attrName] = ''; // TODO: might not be the best way to unset properties
+                continue;
+            }
+
             if (!(attrName in next.attrs)) {
                 render_debug('Remove attribute', attrName);
                 node.removeAttribute(attrName);
@@ -290,12 +311,18 @@ class Evented {
 
     emitEvent() {
         const data = this.serialize();
-        for (const handler of this.eventTargets) {
-            handler(Object.assign({}, data));
+        if (data instanceof Array) {
+            for (const handler of this.eventTargets) {
+                handler(data.slice());
+            }
+        } else if (data instanceof Object) {
+            for (const handler of this.eventTargets) {
+                handler(Object.assign({}, data));
+            }
         }
     }
 
-    addHandler(target, handler) {
+    addHandler(handler) {
         this.eventTargets.add(handler);
     }
 

@@ -1,4 +1,13 @@
 const DEBUG_RENDER = true;
+const render_debug = (msg, bold = false) => {
+    if (DEBUG_RENDER) {
+        if (bold) {
+            console.log('%c' + msg, 'font-weight: bold');
+        } else {
+            console.log(msg);
+        }
+    }
+}
 
 const createNodeFactory = tag => {
     return function(arg1, arg2, arg3) {
@@ -75,23 +84,19 @@ const renderJDOM = (node, previous, next) => {
         if (previous === null) {
             // both are comments, do nothing
         } else {
-            if (DEBUG_RENDER) {
-                if (node === undefined) {
-                    console.log('Add comment node');
-                } else {
-                    console.log('Replace previous node', node, 'with comment node');
-                }
+            if (node === undefined) {
+                render_debug('Add comment node');
+            } else {
+                render_debug('Replace previous node', node, 'with comment node');
             }
             replacePreviousNode(document.createComment(''));
         }
     } else if (['string', 'number'].includes(typeof next)) {
         if (previous !== next) {
-            if (DEBUG_RENDER) {
-                if (node === undefined) {
-                    console.log(`Add text node "${next}"`);
-                } else {
-                    console.log(`Replace previous node "${previous}" with text node "${next}"`);
-                }
+            if (node === undefined) {
+                render_debug(`Add text node "${next}"`);
+            } else {
+                render_debug(`Replace previous node "${previous}" with text node "${next}"`);
             }
             replacePreviousNode(document.createTextNode(next));
         }
@@ -107,26 +112,42 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare tag
         if (previous.tag !== next.tag) {
-            if (DEBUG_RENDER) {
                 if (node === undefined) {
-                    console.log(`Add <${next.tag}>`);
+                    render_debug(`Add <${next.tag}>`);
                 } else {
-                    console.log('Replace previous node', node, `with <${next.tag}>`);
+                    render_debug('Replace previous node', node, `with <${next.tag}>`);
                 }
-            }
             replacePreviousNode(document.createElement(next.tag));
         }
 
         // Compare attrs
         for (const attrName in next.attrs) {
-            if (next.attrs[attrName] !== previous.attrs[attrName]) {
-                if (DEBUG_RENDER) console.log(`Set <${next.tag}> attribute`, attrName, 'to', next.attrs[attrName]);
-                node.setAttribute(attrName, next.attrs[attrName]);
+            if (attrName === 'style') {
+                const prevStyle = previous.attrs.style || {};
+                const nextStyle = next.attrs.style;
+
+                for (const styleKey in nextStyle) {
+                    if (nextStyle[styleKey] !== prevStyle[styleKey]) {
+                        render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
+                        node.style[styleKey] = nextStyle[styleKey];
+                    }
+                }
+                for (const styleKey in prevStyle) {
+                    if (!(styleKey in next.attrs.style)) {
+                        node.style[styleKey] = '';
+                    }
+                }
+            } else {
+                if (next.attrs[attrName] !== previous.attrs[attrName]) {
+                    render_debug(`Set <${next.tag}> attribute`, attrName, 'to', next.attrs[attrName]);
+                    node.setAttribute(attrName, next.attrs[attrName]);
+                }
             }
+
         }
         for (const attrName in previous.attrs) {
             if (!(attrName in next.attrs)) {
-                if (DEBUG_RENDER) console.log('Remove attribute', attrName);
+                render_debug('Remove attribute', attrName);
                 node.removeAttribute(attrName);
             }
         }
@@ -134,14 +155,14 @@ const renderJDOM = (node, previous, next) => {
         // Compare events
         for (const eventName in next.events) {
             if (next.events[eventName] !== previous.events[eventName]) {
-                if (DEBUG_RENDER) console.log(`Set new ${eventName} event listener on <${next.tag}>`);
+                render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
                 node.removeEventListener(eventName, previous.events[eventName]);
                 node.addEventListener(eventName, next.events[eventName]);
             }
         }
         for (const eventName in previous.events) {
             if (!(eventName in next.events)) {
-                if (DEBUG_RENDER) console.log(`Remove ${eventName} event listener on <${next.tag}>`);
+                render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
                 node.removeEventListener(eventName, previous.events[eventName]);
             }
         }
@@ -216,6 +237,7 @@ class Component {
     }
 
     render(data) {
+        render_debug('New render pass start:', true);
         const jdom = this.compose(data);
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;

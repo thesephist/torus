@@ -6,11 +6,29 @@
   <body>
     <script src='/torus.js'></script>
     <script>
+      let clickTimes = 0;
+
       class App extends Component {
+
+        buttonClick() {
+          clickTimes ++;
+          this.render();
+        }
+
         compose() {
-          return h1([
-            'Hello, ', em(['World!']),
-          ]);
+          return (
+            div([
+              h1([
+                'Hello, ', em(['World!']),
+              ]),
+              p([
+                'Button has been pressed ', clickTimes, ' times.',
+              ]),
+              button({}, {click: this.buttonClick.bind(this)}, [
+                'Click me!',
+              ]),
+            ])
+          );
         }
       }
 

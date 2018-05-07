@@ -75,7 +75,7 @@ const renderJDOM = (node, previous, next) => {
         } else {
             replacePreviousNode(document.createComment(''));
         }
-    } else if (typeof next === 'string') {
+    } else if (['string', 'number'].includes(typeof next)) {
         replacePreviousNode(document.createTextNode(next));
     } else if (typeof next === 'object') {
         if (previous === undefined) {
@@ -107,13 +107,13 @@ const renderJDOM = (node, previous, next) => {
         // Compare events
         for (const eventName in next.events) {
             if (next.events[eventName] !== previous.events[eventName]) {
-                node.removeEventListener(eventName);
+                node.removeEventListener(eventName, previous.events[eventName]);
                 node.addEventListener(eventName, next.events[eventName]);
             }
         }
         for (const eventName in previous.events) {
             if (!(eventName in next.events)) {
-                node.removeEventListener(eventName);
+                node.removeEventListener(eventName, previous.events[eventName]);
             }
         }
 
@@ -187,11 +187,9 @@ class Component {
     }
 
     render(data) {
-        if (data) {
-            const jdom = this.compose(data);
-            this.node = renderJDOM(this.node, this.jdom, jdom);
-            this.jdom = jdom;
-        }
+        const jdom = this.compose(data);
+        this.node = renderJDOM(this.node, this.jdom, jdom);
+        this.jdom = jdom;
         return this.jdom;
     }
 

@@ -208,6 +208,7 @@ const renderJDOM = (node, previous, next) => {
                     renderJDOM(node.childNodes[i], previous.children[i], next.children[i]);
                 }
                 while (i < previous.children.length) {
+                    render_debug(`Remove child <${node.childNodes[i].tagName}>`);
                     node.removeChild(node.childNodes[i]);
                     i ++;
                 }

@@ -6,7 +6,11 @@
   "repository": "git@github.com:thesephist/torus.git",
   "author": "Linus Lee <linus@thesephist.com>",
   "license": "MIT",
+  "scripts": {
+    "test": "mocha test/test.js"
+  },
   "devDependencies": {
+    "chai": "^4.2.0",
     "istanbul": "^0.4.5",
     "karma": "^2.0.2",
     "mocha": "^5.1.1"

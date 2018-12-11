@@ -74,7 +74,7 @@ const normalizeJDOM = jdom => {
 }
 
 const renderJDOM = (node, previous, next) => {
-    // TODO: can we make this more effective with requestAnimationFrame?
+    // TODO: can we make this more efficient with requestAnimationFrame?
 
     function replacePreviousNode(newNode) {
         if (node !== undefined) {

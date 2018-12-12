@@ -1,5 +1,7 @@
 # Torus To-dos
 
+- [ ] When creating Stores for Records, consider the `class MyModelStore extends Store(MyModel)` instead of setting recordclass separately.
+
 - [ ] Set up browser tests with Karma with multiple browsers, coverage with Istanbul / nyc
 
 - [ ] Find a way to do server-side rendering, and make a sample / demo - Have an alternative renderer that only takes jdom once on a first pass, returns a string.
@@ -19,6 +21,12 @@
 - [ ] For styles: we can make styled components pretty easily by providing a `css()` function (like `github/khan/aphrodite`) that takes a styles object and serializes it into CSS stylesheets or inline style declarations (then the inline styles can be passed to Torus like normal).
 
 - [ ] Make a transpiler for JSX to torus JDOM so I can write JSX instead of pure JDOM.
+
+- [ ] Add searchability / filterability to the default `List` implementation.
+
+- [ ] Consider adding a really simple API to attach `app.node` to a DOM element, so the boilerplate isn't necessary.
+
+- [ ] `render_debug` should indent debug statements depending on component tree
 
 ## Markus (markdown parser demo)
 

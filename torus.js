@@ -1,10 +1,24 @@
+// debug data, should be removed in production builds
 const DEBUG_RENDER = true;
-const render_debug = (msg, bold = false) => {
+let render_stack = [];
+const push_render_stack = component => render_stack.push(component);
+const pop_render_stack = () => render_stack.pop();
+const repeat = (str, count) => {
+    let s = '';
+    while (count > 0) {
+        s += str;
+        count --;
+    }
+    return s;
+}
+const render_debug = (msg, header = false) => {
     if (DEBUG_RENDER) {
-        if (bold) {
-            console.log('%c' + msg, 'font-weight: bold');
+        if (header) {
+            const prefix = repeat('\t', render_stack.length - 1);
+            console.log('%c' + prefix + msg, 'font-weight: bold');
         } else {
-            console.log(msg);
+            const prefix = repeat('\t', render_stack.length);
+            console.log(prefix + msg);
         }
     }
 }
@@ -94,6 +108,8 @@ const renderJDOM = (node, previous, next) => {
         node = newNode;
     };
 
+    push_render_stack(next);
+
     if (next instanceof Node) {
         if (previous === next) {
             // pass, it's the same element
@@ -135,6 +151,8 @@ const renderJDOM = (node, previous, next) => {
         normalizeJDOM(previous);
         normalizeJDOM(next);
 
+        render_debug(`Render pass for <${next.tag.toLowerCase()}>:`, true);
+
         // Compare tag
         if (previous.tag !== next.tag) {
             if (node === undefined) {
@@ -148,7 +166,7 @@ const renderJDOM = (node, previous, next) => {
         // Compare attrs
         for (const attrName in next.attrs) {
             if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
-                render_debug(`Set <${next.tag}> property ${attrName} to "${next.attrs[attrName]}"`);
+                render_debug(`Set <${next.tag}> property "${attrName}" to "${next.attrs[attrName]}"`);
                 node[attrName] = next.attrs[attrName];
                 continue;
             }
@@ -229,6 +247,8 @@ const renderJDOM = (node, previous, next) => {
         }
     }
 
+    pop_render_stack();
+
     return node;
 }
 
@@ -284,12 +304,12 @@ class Component {
     }
 
     render(data) {
+        render_debug(`Render Component: ${this.constructor.name}`, true);
         const jdom = this.compose(
             data
             || this.event.source && this.event.source.serialize()
             || undefined
         );
-        render_debug(`Render pass for <${jdom.tag}>:`, true);
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;
         return this.jdom;

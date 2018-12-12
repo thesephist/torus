@@ -1,8 +1,6 @@
 # Torus To-dos
 
-- Create build processes so that a production build strips out all the debug parts; start measuring performance/memory footprint and bundle size.
-
-- [ ] Emphasize in documentation: Portability (across other frameworks especially, since it literally just returns an HTML element with all state encapsulated inside; and modularity, in that it's a tiny package that can be dropped in just for a single component, or used for an entire app architecture.
+- [ ] Create build processes so that a production build strips out all the debug parts; start measuring performance/memory footprint and bundle size.
 
 - [ ] Think about single-file components -- just import a namespaced component from a single JS file and use it. Does that fit into Torus's rationale and how can we make it work here?
 

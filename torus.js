@@ -76,7 +76,6 @@ const normalizeJDOM = jdom => {
 }
 
 const renderJDOM = (node, previous, next) => {
-    // TODO: can we make this more efficient with requestAnimationFrame?
 
     function replacePreviousNode(newNode) {
         if (node !== undefined) {
@@ -520,10 +519,14 @@ const StoreOf = recordClass => {
  *
  * Router stands in the place of a component somewhere in the DOM tree.
  */
-class Router {
+class Router extends Evented {
 
     get paths() {
         return {};
+    }
+
+    summarize() {
+        // TODO
     }
 
     route(path) {

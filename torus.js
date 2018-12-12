@@ -92,19 +92,9 @@ const normalizeJDOM = jdom => {
 const renderJDOM = (node, previous, next) => {
 
     function replacePreviousNode(newNode) {
-        if (node !== undefined) {
-            const parentNode = node.parentNode;
-            const nextSibling = node.nextSibling;
-            if (parentNode) {
-                parentNode.removeChild(node);
-                if (nextSibling) {
-                    parentNode.insertBefore(newNode, nextSibling);
-                } else {
-                    parentNode.appendChild(newNode);
-                }
-            }
+        if (node !== undefined && node.parentNode) {
+            node.parentNode.replaceChild(newNode);
         }
-
         node = newNode;
     };
 

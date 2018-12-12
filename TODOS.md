@@ -1,7 +1,5 @@
 # Torus To-dos
 
-- [ ] Placeholders for using literal elements -- replace with referenced placeholders, then replace in one fell swoop before function exits. Also should each render or top level tender use rAF? I think that works in principle but requires testing and overhead measuring. Use `HTMLElement.replaceChild()` for this.
-
 - [ ] For styles: we can make styled components pretty easily by providing a `css()` function (like `github/khan/aphrodite`) that takes a styles object and serializes it into CSS stylesheets or inline style declarations (then the inline styles can be passed to Torus like normal).
 
 - [ ] consider making `renderJDOM` use `requestAnimationFrame` by default to batch updates

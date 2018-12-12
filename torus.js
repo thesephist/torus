@@ -89,14 +89,24 @@ const normalizeJDOM = jdom => {
     return jdom;
 }
 
+const tmpNode = () => document.createComment('');
+
 const renderJDOM = (node, previous, next) => {
 
+    const placeholders = new Map();
     function replacePreviousNode(newNode) {
         if (node !== undefined && node.parentNode) {
-            node.parentNode.replaceChild(newNode);
+            const tmp = tmpNode();
+            placeholders.set(tmp, newNode);
+            node.parentNode.replaceChild(tmp, node);
         }
         node = newNode;
     };
+    function replacePlaceholders() {
+        for (const [tmp, newNode] of placeholders.entries()) {
+            tmp.parentNode.replaceChild(newNode, tmp);
+        }
+    }
 
     push_render_stack(next);
 
@@ -236,6 +246,8 @@ const renderJDOM = (node, previous, next) => {
             }
         }
     }
+
+    replacePlaceholders();
 
     pop_render_stack();
 

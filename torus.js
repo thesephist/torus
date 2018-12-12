@@ -12,6 +12,8 @@ const render_debug = (msg, bold = false) => {
 const HTML_REFLECTED_PROPERTIES = [
     'value',
     'checked',
+    'selected',
+    'disabled',
     'indeterminate',
 ];
 
@@ -243,12 +245,13 @@ class Component {
             source: null,
             handler: () => {},
         };
-        this.initialize(...args);
+        this.init(...args);
         this.render();
     }
 
-    initialize() {
-        // no-op, will be overridden
+    init() {
+        // should be overridden
+        // Component#init is guaranteed to always be a no-op method
     }
 
     get record() {
@@ -300,21 +303,19 @@ class Component {
  */
 class List extends Component {
 
-    // TODO: add searchability
+    get itemClass() {
+        return Component; // default value, should be overridden
+    }
 
-    constructor(...args) {
-        super(...args);
+    init(store) {
+        this.source = store;
+        this.items = new Map();
+
         this.listen({
             source: this.source,
             handler: this.updateItems.bind(this),
         });
-    }
 
-    initialize() {
-        // Override when extending
-        this.source = new Store();
-        this.itemClass = Component;
-        this.items = new Map();
     }
 
     updateItems(data) {
@@ -354,6 +355,16 @@ class List extends Component {
 
 }
 
+const ListOf = itemClass => {
+    class TmpList extends List {
+        get itemClass() {
+            return itemClass;
+        }
+    }
+
+    return TmpList;
+}
+
 /**
  * A base class for evented data stores
  */
@@ -361,6 +372,10 @@ class Evented {
 
     constructor() {
         this.eventTargets = new Set();
+    }
+
+    summarize() {
+        throw new Error('summarize() should be implemented independently in subclasses');
     }
 
     emitEvent() {
@@ -437,11 +452,17 @@ class Record extends Evented {
  */
 class Store extends Evented {
 
-    constructor(records = [], comparator = null) {
+    constructor(records = []) {
         super();
-        this.recordClass = this.recordClass || Record;
         this.records = new Set(records);
-        this.comparator = comparator;
+    }
+
+    get recordClass() {
+        return Record; // default value, should be overridden
+    }
+
+    get comparator() {
+        return null;
     }
 
     create(id, data) {
@@ -484,6 +505,16 @@ class Store extends Evented {
 
 }
 
+const StoreOf = recordClass => {
+    class TmpStore extends Store {
+        get recordClass() {
+            return recordClass;
+        }
+    }
+
+    return TmpStore;
+}
+
 /**
  * Front-end router
  *
@@ -491,8 +522,8 @@ class Store extends Evented {
  */
 class Router {
 
-    constructor(paths) {
-        this.paths = paths;
+    get paths() {
+        return {};
     }
 
     route(path) {
@@ -502,30 +533,6 @@ class Router {
                 const parameters = match.slice(1);
                 return composer(...parameters);
             }
-        }
-    }
-
-}
-
-/**
- * Persistence management
- */
-class Adapter {
-
-    constructor() {
-
-    }
-
-    async save(type, data) {
-        switch (type) {
-            case 'read':
-                break;
-            case 'create':
-                break;
-            case 'delete':
-                break;
-            case 'update':
-                break;
         }
     }
 

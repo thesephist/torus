@@ -1,7 +1,5 @@
 # Torus To-dos
 
-- [ ] Create build processes so that a production build strips out all the debug parts; start measuring performance/memory footprint and bundle size. We can probably wrap debug code in `// @begindebug ... // @enddebug` code blocks or `// @debug` for one-liners, and strip them out at build time.
-
 - [ ] Make a transpiler for JSX to torus JDOM so I can write JSX instead of pure JDOM.
 
 - [ ] Add searchability / filterability to the default `List` implementation.

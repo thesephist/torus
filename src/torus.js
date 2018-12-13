@@ -1,4 +1,3 @@
-// debug data, should be removed in production builds
 // @begindebug
 const DEBUG_RENDER = true;
 let render_stack = [];
@@ -65,22 +64,6 @@ const createNodeFactory = tag => {
     }
 }
 
-const div = createNodeFactory('div');
-const h1 = createNodeFactory('h1');
-const h2 = createNodeFactory('h2');
-const h3 = createNodeFactory('h3');
-const p = createNodeFactory('p');
-const a = createNodeFactory('a');
-const em = createNodeFactory('em');
-const strong = createNodeFactory('strong');
-const img = createNodeFactory('img');
-const button = createNodeFactory('button');
-const input = createNodeFactory('input');
-const label = createNodeFactory('label');
-const ul = createNodeFactory('ul');
-const ol = createNodeFactory('ol');
-const li = createNodeFactory('li');
-
 const normalizeJDOM = jdom => {
     if (typeof jdom === 'object') {
         if (!('tag' in jdom)) jdom.tag = 'div';
@@ -110,6 +93,7 @@ const renderJDOM = (node, previous, next) => {
         }
     }
 
+    // @debug
     push_render_stack(next);
 
     if (next instanceof Node) {
@@ -268,6 +252,7 @@ const renderJDOM = (node, previous, next) => {
 
     replacePlaceholders();
 
+    // @debug
     pop_render_stack();
 
     return node;
@@ -582,4 +567,36 @@ class Router extends Evented {
     }
 
 }
+
+const exposedNames = {
+    Component,
+    List,
+    ListOf,
+    Evented,
+    Record,
+    Store,
+    StoreOf,
+    Router,
+}
+const builtinElements = [
+    'div',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'p', 'a', 'em', 'strong',
+    'img',
+    'button',
+    'input',
+    'label',
+    'ul', 'ol', 'li',
+];
+for (const tagName of builtinElements) {
+    exposedNames[tagName] = createNodeFactory(tagName);
+}
+
+if (typeof window === 'object') {
+    for (const name in exposedNames) {
+        window[name] = exposedNames[name];
+    }
+}
+
+module.exports = exposedNames;
 

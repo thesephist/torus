@@ -1,18 +1,21 @@
 {
-  "name": "torus-js",
+  "name": "torus-vdom",
   "version": "0.1.0",
   "description": "Minimal JS UI framework focused on being lightweight and free of dependencies",
-  "main": "torus.js",
+  "main": "src/torus.js",
   "repository": "git@github.com:thesephist/torus.git",
   "author": "Linus Lee <linus@thesephist.com>",
   "license": "MIT",
   "scripts": {
-    "test": "mocha test/test.js"
+    "test": "mocha test/test.js",
+    "build": "node build/build.js"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "istanbul": "^0.4.5",
     "karma": "^2.0.2",
-    "mocha": "^5.1.1"
+    "mkdirp": "^0.5.1",
+    "mocha": "^5.1.1",
+    "webpack": "^4.27.1"
   }
 }

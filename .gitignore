@@ -1,3 +1,6 @@
+# torus-specific ignores
+dist/ # build files
+
 # Logs
 logs
 *.log

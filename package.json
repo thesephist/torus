@@ -1,6 +1,6 @@
 {
   "name": "torus-js",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Minimal JS UI framework focused on being lightweight and free of dependencies",
   "main": "torus.js",
   "repository": "git@github.com:thesephist/torus.git",

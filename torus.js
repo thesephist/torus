@@ -1,4 +1,5 @@
 // debug data, should be removed in production builds
+// @begindebug
 const DEBUG_RENDER = true;
 let render_stack = [];
 const push_render_stack = component => render_stack.push(component);
@@ -22,6 +23,7 @@ const render_debug = (msg, header = false) => {
         }
     }
 }
+// @enddebug
 
 const HTML_REFLECTED_PROPERTIES = [
     'value',
@@ -114,31 +116,37 @@ const renderJDOM = (node, previous, next) => {
         if (previous === next) {
             // pass, it's the same element
         } else {
+            // @begindebug
             if (node === undefined) {
                 render_debug(`Add literal element <${next.tagName}>`);
             } else {
                 render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
             }
+            // @enddebug
             replacePreviousNode(next);
         }
     } else if (next === null) {
         if (previous === null) {
             // both are comments, do nothing
         } else {
+            // @begindebug
             if (node === undefined) {
                 render_debug('Add comment node');
             } else {
                 render_debug(`Replace previous node <${node.tagName}> with comment node`);
             }
+            // @enddebug
             replacePreviousNode(document.createComment(''));
         }
     } else if (['string', 'number'].includes(typeof next)) {
         if (previous !== next) {
+            // @begindebug
             if (node === undefined) {
                 render_debug(`Add text node "${next}"`);
             } else {
                 render_debug(`Replace previous node "${previous}" with text node "${next}"`);
             }
+            // @enddebug
             replacePreviousNode(document.createTextNode(next));
         }
     } else if (typeof next === 'object') {
@@ -151,21 +159,25 @@ const renderJDOM = (node, previous, next) => {
         normalizeJDOM(previous);
         normalizeJDOM(next);
 
+        // @debug
         render_debug(`Render pass for <${next.tag.toLowerCase()}>:`, true);
 
         // Compare tag
         if (previous.tag !== next.tag) {
+            // @begindebug
             if (node === undefined) {
                 render_debug(`Add <${next.tag}>`);
             } else {
                 render_debug(`Replace previous node <${node.tagName}> with <${next.tag}`);
             }
+            // @enddebug
             replacePreviousNode(document.createElement(next.tag));
         }
 
         // Compare attrs
         for (const attrName in next.attrs) {
             if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
+                // @debug
                 render_debug(`Set <${next.tag}> property "${attrName}" to "${next.attrs[attrName]}"`);
                 node[attrName] = next.attrs[attrName];
                 continue;
@@ -177,6 +189,7 @@ const renderJDOM = (node, previous, next) => {
 
                 for (const styleKey in nextStyle) {
                     if (nextStyle[styleKey] !== prevStyle[styleKey]) {
+                        // @debug
                         render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
                         node.style[styleKey] = nextStyle[styleKey];
                     }
@@ -188,6 +201,7 @@ const renderJDOM = (node, previous, next) => {
                 }
             } else {
                 if (next.attrs[attrName] !== previous.attrs[attrName]) {
+                    // @debug
                     render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
                     node.setAttribute(attrName, next.attrs[attrName]);
                 }
@@ -197,10 +211,12 @@ const renderJDOM = (node, previous, next) => {
         for (const attrName in previous.attrs) {
             if (!(attrName in next.attrs)) {
                 if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
+                    // @debug
                     render_debug(`Remove <${next.tag}> property ${attrName}`);
                     node[attrName] = ''; // TODO: might not be the best way to unset properties
                     continue;
                 } else {
+                    // @debug
                     render_debug(`Remove <${next.tag}> attribute ${attrName}`);
                     node.removeAttribute(attrName);
                 }
@@ -210,6 +226,7 @@ const renderJDOM = (node, previous, next) => {
         // Compare events
         for (const eventName in next.events) {
             if (next.events[eventName] !== previous.events[eventName]) {
+                // @debug
                 render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
                 node.removeEventListener(eventName, previous.events[eventName]);
                 node.addEventListener(eventName, next.events[eventName]);
@@ -217,6 +234,7 @@ const renderJDOM = (node, previous, next) => {
         }
         for (const eventName in previous.events) {
             if (!(eventName in next.events)) {
+                // @debug
                 render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
                 node.removeEventListener(eventName, previous.events[eventName]);
             }
@@ -239,6 +257,7 @@ const renderJDOM = (node, previous, next) => {
                     renderJDOM(node.childNodes[i], previous.children[i], next.children[i]);
                 }
                 while (i < previous.children.length) {
+                    // @debug
                     render_debug(`Remove child <${node.childNodes[i].tagName}>`);
                     node.removeChild(node.childNodes[i]);
                     i ++;
@@ -306,6 +325,7 @@ class Component {
     }
 
     render(data) {
+        // @debug
         render_debug(`Render Component: ${this.constructor.name}`, true);
         const jdom = this.compose(
             data

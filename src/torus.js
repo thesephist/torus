@@ -569,6 +569,7 @@ class Router extends Evented {
 }
 
 const exposedNames = {
+    renderJDOM,
     Component,
     List,
     ListOf,
@@ -598,5 +599,7 @@ if (typeof window === 'object') {
     }
 }
 
-module.exports = exposedNames;
+if (typeof module === 'object' && typeof module.exports === 'object') {
+    module.exports = exposedNames;
+}
 

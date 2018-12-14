@@ -1,12 +1,12 @@
 # Torus
 
-Minimal JS Model-View UI framework focused on being lightweight and free of dependencies
+Minimal JS Model-View UI framework focused on being small, efficient, and free of dependencies.
 
 ## Features
 
 ### Simplicity
 
-Torus has no production dependencies, no build step to ship, and weighs in at under 3kb gzipped. This makes it simple to adopt and ship.
+Torus has no production dependencies and weighs in at under 3kb gzipped. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
 
 ### Portability
 
@@ -159,5 +159,5 @@ To run Torus's unit tests, run
 ~$ yarn test
 ```
 
-This will run the basic test suit. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
+This will run the basic test suite. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
 

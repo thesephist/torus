@@ -140,13 +140,16 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare tag
         if (previous.tag !== next.tag) {
-            // @begindebug
             if (node === undefined) {
+                // @debug
                 render_debug(`Add <${next.tag}>`);
             } else {
+                // @debug
                 render_debug(`Replace previous node <${node.tagName}> with <${next.tag}`);
+                // new root element, so "reset" previous
+                previous = {};
+                normalizeJDOM(previous);
             }
-            // @enddebug
             replacePreviousNode(document.createElement(next.tag));
         }
 
@@ -212,8 +215,6 @@ const renderJDOM = (node, previous, next) => {
             const pe = previous.events[eventName] || [];
             const nextEvents = typeof ne === 'function' ? [ne] : ne;
             const prevEvents = typeof pe === 'function' ? [pe] : pe;
-
-            console.log(nextEvents, prevEvents);
 
             for (const handlerFn of nextEvents) {
                 if (!prevEvents.includes(handlerFn)) {

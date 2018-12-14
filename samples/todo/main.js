@@ -39,11 +39,16 @@ class TaskItem extends Component {
                     alignItems: 'center',
                     justifyContent: 'left',
                     marginBottom: '1px',
+                    cursor: 'pointer',
                 },
+            }, {
+                click: this.boundOnCheck,
             }, [
                 input({
                     type: 'checkbox',
-                    checked: data.completed,
+                    ...(data.completed ? {
+                        checked: 'checked',
+                    } : {}),
                 }, {
                     change: this.boundOnCheck,
                 }),

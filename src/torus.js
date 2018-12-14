@@ -24,14 +24,6 @@ const render_debug = (msg, header = false) => {
 }
 // @enddebug
 
-const HTML_REFLECTED_PROPERTIES = [
-    'value',
-    'checked',
-    'selected',
-    'disabled',
-    'indeterminate',
-];
-
 const createNodeFactory = tag => {
     return function(arg1, arg2, arg3) {
         let attrs,
@@ -160,12 +152,7 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare attrs
         for (const attrName in next.attrs) {
-            if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
-                // @debug
-                render_debug(`Set <${next.tag}> property "${attrName}" to "${next.attrs[attrName]}"`);
-                node[attrName] = next.attrs[attrName];
-                continue;
-            } else if (attrName === 'class'){
+            if (attrName === 'class'){
                 const prevClass = previous.attrs.class || [];
                 const nextClass = next.attrs.class;
 
@@ -210,16 +197,9 @@ const renderJDOM = (node, previous, next) => {
         }
         for (const attrName in previous.attrs) {
             if (!(attrName in next.attrs)) {
-                if (HTML_REFLECTED_PROPERTIES.includes(attrName)) {
-                    // @debug
-                    render_debug(`Remove <${next.tag}> property ${attrName}`);
-                    node[attrName] = ''; // TODO: might not be the best way to unset properties
-                    continue;
-                } else {
-                    // @debug
-                    render_debug(`Remove <${next.tag}> attribute ${attrName}`);
-                    node.removeAttribute(attrName);
-                }
+                // @debug
+                render_debug(`Remove <${next.tag}> attribute ${attrName}`);
+                node.removeAttribute(attrName);
             }
         }
 

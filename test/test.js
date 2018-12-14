@@ -476,26 +476,79 @@ describe('Component', () => {
         expect(c.record).to.not.be.undefined;
     });
 
-    describe('Event bindings', () => {
+    describe('Event bindings to #record', () => {
 
         it('should call event handler defined with #listen on source event', () => {
+            let handlerCalled = false;
 
+            const c = new Component();
+            const r = new Record();
+            c.listen({
+                source: r,
+                handler: () => handlerCalled = true,
+            });
+
+            r.update({key: 'value'});
+            handlerCalled.should.be.true;
         });
 
         it('should no longer call the event handler after #unlisten()', () => {
+            let handlerCallCount = 0;
 
+            const c = new Component();
+            const r = new Record();
+            c.listen({
+                source: r,
+                handler: () => handlerCallCount++,
+            });
+
+            r.update({key: 'value'});
+            handlerCallCount.should.equal(1);
+            c.unlisten();
+            r.update({key: 'value'});
+            handlerCallCount.should.equal(1);
+        });
+
+        it('should remove the previous lister when a new source is set', () => {
+            let handlerCallCount = 0;
+
+            const c = new Component();
+            const r = new Record();
+            c.listen({
+                source: r,
+                handler: () => handlerCallCount++,
+            });
+
+            r.update({key: 'value'});
+            handlerCallCount.should.equal(1);
+            c.listen({
+                source: new Record(),
+                handler: () => {},
+            });
+            r.update({key: 'value'});
+            handlerCallCount.should.equal(1);
         });
 
     });
 
     describe('#render', () => {
 
-        it('should render the result of #compose() to #node', () => {
+        class FooComponent extends Component {
+            compose() {
+                return h1(['Hello, World!']);
+            }
+        }
 
+        it('should render the result of #compose() to #node', () => {
+            const c = new FooComponent();
+            c.render();
+
+            c.node.textContent.should.equal('Hello, World!');
         });
 
         it('should return #jdom', () => {
-
+            const c = new FooComponent();
+            c.render().should.equal(c.jdom);
         });
 
     });

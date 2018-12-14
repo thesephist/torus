@@ -334,7 +334,7 @@ class Component {
             this.event = { source, handler};
             source.addHandler(handler);
         } else {
-            throw new Error('Event source to listen() is not an Evented');
+            throw new Error('Event source to listen() is not an instance of Evented');
         }
     }
 
@@ -383,7 +383,7 @@ class List extends Component {
             source: this.source,
             handler: this.updateItems.bind(this),
         });
-
+        this.updateItems(this.source.getCurrentSummary());
     }
 
     updateItems(data) {
@@ -470,7 +470,6 @@ class Evented {
 
     addHandler(handler) {
         this.eventTargets.add(handler);
-        handler(this.getCurrentSummary());
     }
 
     removeHandler(handler) {

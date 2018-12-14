@@ -21,6 +21,16 @@ const render_debug = (msg, header = false) => {
 }
 // @enddebug
 
+const HTML_IDL_ATTRIBUTES = [
+    'value',
+    'selected',
+    'indeterminate',
+    'tabIndex',
+    'title',
+    'checked',
+    'disabled',
+];
+
 let render_stack = [];
 const push_render_stack = component => render_stack.push(component);
 const pop_render_stack = () => render_stack.pop();
@@ -66,6 +76,8 @@ const normalizeJDOM = jdom => {
     }
     return jdom;
 }
+
+const arrayNormalize = data => data instanceof Array ? data : [data];
 
 const tmpNode = () => document.createComment('');
 const placeholders = new Map();
@@ -156,66 +168,81 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare attrs
         for (const attrName in next.attrs) {
-            if (attrName === 'class'){
-                const pc = previous.attrs.class || [];
-                const nc = next.attrs.class;
 
-                const prevClass = typeof pc === 'string' ? [pc] : pc;
-                const nextClass = typeof nc === 'string' ? [nc] : nc;
+            switch (attrName) {
+                case 'class':
+                    const prevClass = arrayNormalize(previous.attrs.class || []);
+                    const nextClass = arrayNormalize(next.attrs.class);
 
-                for (const className of nextClass) {
-                    // @debug
-                    render_debug(`Add <${next.tag}> class "${className}"`);
-                    node.classList.add(className);
-                }
-                for (const className of prevClass) {
-                    if (!nextClass.includes(className)) {
+                    for (const className of nextClass) {
                         // @debug
-                        render_debug(`Remove <${next.tag}> class "${className}"`);
-                        node.classList.remove(className);
+                        render_debug(`Add <${next.tag}> class "${className}"`);
+                        node.classList.add(className);
                     }
-                }
-            } else if (attrName === 'style') {
-                const prevStyle = previous.attrs.style || {};
-                const nextStyle = next.attrs.style;
+                    for (const className of prevClass) {
+                        if (!nextClass.includes(className)) {
+                            // @debug
+                            render_debug(`Remove <${next.tag}> class "${className}"`);
+                            node.classList.remove(className);
+                        }
+                    }
+                    break;
+                case 'style':
+                    const prevStyle = previous.attrs.style || {};
+                    const nextStyle = next.attrs.style;
 
-                for (const styleKey in nextStyle) {
-                    if (nextStyle[styleKey] !== prevStyle[styleKey]) {
-                        // @debug
-                        render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
-                        node.style[styleKey] = nextStyle[styleKey];
+                    for (const styleKey in nextStyle) {
+                        if (nextStyle[styleKey] !== prevStyle[styleKey]) {
+                            // @debug
+                            render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
+                            node.style[styleKey] = nextStyle[styleKey];
+                        }
                     }
-                }
-                for (const styleKey in prevStyle) {
-                    if (!(styleKey in next.attrs.style)) {
-                        // @debug
-                        render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
-                        node.style[styleKey] = '';
+                    for (const styleKey in prevStyle) {
+                        if (!(styleKey in next.attrs.style)) {
+                            // @debug
+                            render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
+                            node.style[styleKey] = '';
+                        }
                     }
-                }
-            } else {
-                if (next.attrs[attrName] !== previous.attrs[attrName]) {
-                    // @debug
-                    render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
-                    node.setAttribute(attrName, next.attrs[attrName]);
-                }
+                    break;
+                default:
+                    if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
+                        // @debug
+                        render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
+                        node[attrName] = next.attrs[attrName];
+                    } else {
+                        if (next.attrs[attrName] !== previous.attrs[attrName]) {
+                            // @debug
+                            render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
+                            node.setAttribute(attrName, next.attrs[attrName]);
+                        }
+                    }
+                    break;
             }
 
         }
         for (const attrName in previous.attrs) {
             if (!(attrName in next.attrs)) {
-                // @debug
-                render_debug(`Remove <${next.tag}> attribute ${attrName}`);
-                node.removeAttribute(attrName);
+                if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
+                    // @debug
+                    render_debug(`Remove <${next.tag} property ${attrName}`);
+                    // null seems to be the default for most IDL attrs,
+                    //  but even this isn't entirely consistent. This seems
+                    //  like something we should fix as issues come up.
+                    node[attrName] = null;
+                } else {
+                    // @debug
+                    render_debug(`Remove <${next.tag}> attribute ${attrName}`);
+                    node.removeAttribute(attrName);
+                }
             }
         }
 
         // Compare event handlers
         for (const eventName in next.events) {
-            const ne = next.events[eventName];
-            const pe = previous.events[eventName] || [];
-            const nextEvents = typeof ne === 'function' ? [ne] : ne;
-            const prevEvents = typeof pe === 'function' ? [pe] : pe;
+            const prevEvents = arrayNormalize(previous.events[eventName] || []);
+            const nextEvents = arrayNormalize(next.events[eventName]);
 
             for (const handlerFn of nextEvents) {
                 if (!prevEvents.includes(handlerFn)) {
@@ -226,10 +253,8 @@ const renderJDOM = (node, previous, next) => {
             }
         }
         for (const eventName in previous.events) {
-            const ne = next.events[eventName];
-            const pe = previous.events[eventName] || [];
-            const nextEvents = typeof ne === 'function' ? [ne] : ne;
-            const prevEvents = typeof pe === 'function' ? [pe] : pe;
+            const prevEvents = arrayNormalize(previous.events[eventName] || []);
+            const nextEvents = arrayNormalize(next.events[eventName]);
 
             for (const handlerFn of prevEvents) {
                 if (!nextEvents.includes(handlerFn)) {

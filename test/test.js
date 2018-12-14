@@ -162,14 +162,12 @@ describe('renderJDOM', () => {
                 const node = render({
                     tag: 'input',
                     attrs: {
-                        checked: 'checked',
-                        disabled: 'disabled',
+                        type: 'text',
                         'data-mynumber': '4242',
                     },
                 });
 
-                node.getAttribute('checked').should.equal('checked');
-                node.getAttribute('disabled').should.equal('disabled');
+                node.getAttribute('type').should.equal('text');
                 node.getAttribute('data-mynumber').should.equal('4242');
             });
 
@@ -177,9 +175,9 @@ describe('renderJDOM', () => {
                 const prev = {
                     tag: 'input',
                     attrs: {
-                        checked: 'checked',
                         type: 'checkbox',
                         'data-foo': 'bar',
+                        'data-magic': 'magic',
                     },
                 }
                 const next = {
@@ -191,11 +189,46 @@ describe('renderJDOM', () => {
                 }
 
                 const node = render(prev);
-                node.getAttribute('checked').should.equal('checked');
+                node.getAttribute('data-magic').should.equal('magic');
                 node.getAttribute('data-foo').should.equal('bar');
                 const node2 = renderJDOM(node, prev, next);
                 expect(node.getAttribute('checked')).to.be.null;
                 node.getAttribute('data-foo').should.equal('baz');
+            });
+
+            it('should reflect IDL properties as DOM properties', () => {
+                const node = render({
+                    tag: 'input',
+                    attrs: {
+                        type: 'text',
+                        value: 'hello',
+                    },
+                });
+
+                node.getAttribute('type').should.equal('text');
+                node.value.should.equal('hello');
+            });
+
+            it('should update IDL properties when they change', () => {
+                const prev = {
+                    tag: 'input',
+                    attrs: {
+                        type: 'checkbox',
+                        checked: true,
+                    },
+                }
+                const next = {
+                    tag: 'input',
+                    attrs: {
+                        type: 'checkbox',
+                        checked: false,
+                    },
+                }
+
+                const node = render(prev);
+                node.checked.should.be.true;
+                const node2 = renderJDOM(node, prev, next);
+                node2.checked.should.be.false;
             });
 
         });

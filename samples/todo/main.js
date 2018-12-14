@@ -47,9 +47,7 @@ class TaskItem extends Component {
             }, [
                 input({
                     type: 'checkbox',
-                    ...(data.completed ? {
-                        checked: 'checked',
-                    } : {}),
+                    checked: data.completed,
                 }, {
                     change: this.boundOnCheck,
                 }),

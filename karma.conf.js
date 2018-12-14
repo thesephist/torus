@@ -16,7 +16,6 @@ module.exports = function(config) {
         ],
 
         reporters: [
-            'progress',
             'mocha',
         ],
 

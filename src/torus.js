@@ -1,8 +1,5 @@
 // @begindebug
 const DEBUG_RENDER = true;
-let render_stack = [];
-const push_render_stack = component => render_stack.push(component);
-const pop_render_stack = () => render_stack.pop();
 const repeat = (str, count) => {
     let s = '';
     while (count > 0) {
@@ -23,6 +20,10 @@ const render_debug = (msg, header = false) => {
     }
 }
 // @enddebug
+
+let render_stack = [];
+const push_render_stack = component => render_stack.push(component);
+const pop_render_stack = () => render_stack.pop();
 
 const createNodeFactory = tag => {
     return function(arg1, arg2, arg3) {
@@ -67,10 +68,16 @@ const normalizeJDOM = jdom => {
 }
 
 const tmpNode = () => document.createComment('');
+const placeholders = new Map();
+function replacePlaceholders() {
+    for (const [tmp, newNode] of placeholders.entries()) {
+        tmp.parentNode.replaceChild(newNode, tmp);
+    }
+    placeholders.clear();
+}
 
 const renderJDOM = (node, previous, next) => {
 
-    const placeholders = new Map();
     function replacePreviousNode(newNode) {
         if (node !== undefined && node.parentNode) {
             const tmp = tmpNode();
@@ -79,13 +86,7 @@ const renderJDOM = (node, previous, next) => {
         }
         node = newNode;
     };
-    function replacePlaceholders() {
-        for (const [tmp, newNode] of placeholders.entries()) {
-            tmp.parentNode.replaceChild(newNode, tmp);
-        }
-    }
 
-    // @debug
     push_render_stack(next);
 
     if (next instanceof Node) {
@@ -265,10 +266,11 @@ const renderJDOM = (node, previous, next) => {
         }
     }
 
-    replacePlaceholders();
-
-    // @debug
     pop_render_stack();
+
+    if (render_stack.length === 0) {
+        replacePlaceholders();
+    }
 
     return node;
 }

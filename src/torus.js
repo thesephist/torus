@@ -165,9 +165,23 @@ const renderJDOM = (node, previous, next) => {
                 render_debug(`Set <${next.tag}> property "${attrName}" to "${next.attrs[attrName]}"`);
                 node[attrName] = next.attrs[attrName];
                 continue;
-            }
+            } else if (attrName === 'class'){
+                const prevClass = previous.attrs.class || [];
+                const nextClass = next.attrs.class;
 
-            if (attrName === 'style') {
+                for (const className of nextClass) {
+                    // @debug
+                    render_debug(`Add <${next.tag}> class "${className}"`);
+                    node.classList.add(className);
+                }
+                for (const className of prevClass) {
+                    if (!nextClass.includes(className)) {
+                        // @debug
+                        render_debug(`Remove <${next.tag}> class "${className}"`);
+                        node.classList.remove(className);
+                    }
+                }
+            } else if (attrName === 'style') {
                 const prevStyle = previous.attrs.style || {};
                 const nextStyle = next.attrs.style;
 
@@ -180,6 +194,8 @@ const renderJDOM = (node, previous, next) => {
                 }
                 for (const styleKey in prevStyle) {
                     if (!(styleKey in next.attrs.style)) {
+                        // @debug
+                        render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
                         node.style[styleKey] = '';
                     }
                 }

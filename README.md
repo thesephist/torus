@@ -31,6 +31,11 @@ const jdom = {
   tag: 'div',
   attrs: {
     'data-ref': 42,
+    class: [
+      'firstClass',
+      'second_class',
+      'third-class',
+    ],
     style: {
       background: '#fff',
     },

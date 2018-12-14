@@ -42,6 +42,10 @@ const jdom = {
   },
   events: {
     'click': () => counter ++,
+    'mouseover': [
+        () => console.log('hi'),
+        () => console.log('hello'),
+    ],
   },
   children: [...<JDOM>],
 };

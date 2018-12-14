@@ -153,8 +153,11 @@ const renderJDOM = (node, previous, next) => {
         // Compare attrs
         for (const attrName in next.attrs) {
             if (attrName === 'class'){
-                const prevClass = previous.attrs.class || [];
-                const nextClass = next.attrs.class;
+                const pc = previous.attrs.class || [];
+                const nc = next.attrs.class;
+
+                const prevClass = typeof pc === 'string' ? [pc] : pc;
+                const nextClass = typeof nc === 'string' ? [nc] : nc;
 
                 for (const className of nextClass) {
                     // @debug
@@ -203,20 +206,35 @@ const renderJDOM = (node, previous, next) => {
             }
         }
 
-        // Compare events
+        // Compare event handlers
         for (const eventName in next.events) {
-            if (next.events[eventName] !== previous.events[eventName]) {
-                // @debug
-                render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
-                node.removeEventListener(eventName, previous.events[eventName]);
-                node.addEventListener(eventName, next.events[eventName]);
+            const ne = next.events[eventName];
+            const pe = previous.events[eventName] || [];
+            const nextEvents = typeof ne === 'function' ? [ne] : ne;
+            const prevEvents = typeof pe === 'function' ? [pe] : pe;
+
+            console.log(nextEvents, prevEvents);
+
+            for (const handlerFn of nextEvents) {
+                if (!prevEvents.includes(handlerFn)) {
+                    // @debug
+                    render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
+                    node.addEventListener(eventName, handlerFn);
+                }
             }
         }
         for (const eventName in previous.events) {
-            if (!(eventName in next.events)) {
-                // @debug
-                render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
-                node.removeEventListener(eventName, previous.events[eventName]);
+            const ne = next.events[eventName];
+            const pe = previous.events[eventName] || [];
+            const nextEvents = typeof ne === 'function' ? [ne] : ne;
+            const prevEvents = typeof pe === 'function' ? [pe] : pe;
+
+            for (const handlerFn of prevEvents) {
+                if (!nextEvents.includes(handlerFn)) {
+                    // @debug
+                    render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
+                    node.removeEventListener(eventName, handlerFn);
+                }
             }
         }
 

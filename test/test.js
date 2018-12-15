@@ -1,3 +1,57 @@
+describe('Node factory functions', () => {
+
+    it('should accept 1 argument of array as children in an array', () => {
+        const jdom = h1(['Hello']);
+        jdom.tag.should.equal('h1');
+        jdom.children.should.deep.equal(['Hello']);
+    });
+
+    it('should accept 1 argument of object as attrs', () => {
+        const jdom = li({
+            style: {fontSize: '20px'},
+        });
+        jdom.tag.should.equal('li');
+        jdom.attrs.should.deep.equal({style:{
+            fontSize: '20px',
+        }});
+    });
+
+    it('should accept 2 arguments as attrs and children', () => {
+        const jdom = li({
+            style: {fontSize: '20px'},
+        }, ['List item']);
+        jdom.tag.should.equal('li');
+        jdom.attrs.should.deep.equal({style:{
+            fontSize: '20px',
+        }});
+        jdom.children.should.deep.equal(['List item']);
+    });
+
+    it('should accept 2 arguments of objects as attrs and events', () => {
+        const clickHandler = () => {};
+        const jdom = button({
+            disabled: true,
+        }, {
+            click: clickHandler,
+        });
+        jdom.tag.should.equal('button');
+        jdom.attrs.should.deep.equal({disabled: true});
+    });
+
+    it('should accept 3 arguments as attrs, events, children', () => {
+        const clickHandler = () => {};
+        const jdom = button({
+            disabled: true,
+        }, {
+            click: clickHandler,
+        }, ['button text']);
+        jdom.tag.should.equal('button');
+        jdom.attrs.should.deep.equal({disabled: true});
+        jdom.children.should.deep.equal(['button text']);
+    });
+
+});
+
 describe('renderJDOM', () => {
 
     const render = jdom => renderJDOM(undefined, undefined, jdom);
@@ -567,6 +621,24 @@ describe('List', () => {
         }
     }
 
+    describe('#constructor', () => {
+
+        it('should throw an error when not given a store', () => {
+            const create = () => new List();
+            create.should.throw(Error);
+        });
+
+    });
+
+    describe('#itemClass', () => {
+
+        it('should be Component by default', () => {
+            const l = new List(new Store());
+            l.itemClass.should.equal(Component);
+        });
+
+    });
+
     describe('Rendering', () => {
 
         it('should render the list items in a <ul>', () => {
@@ -740,6 +812,15 @@ describe('Store', () => {
         }
 
     }
+
+    describe('#recordClass', () => {
+
+        it('should be Record by default', () => {
+            const s = new Store();
+            s.recordClass.should.equal(Record);
+        });
+
+    });
 
     describe('#constructor', () => {
 

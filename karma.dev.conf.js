@@ -7,7 +7,7 @@ module.exports = function(config) {
         frameworks: ['mocha', 'chai'],
 
         files: [
-            'dist/torus.min.js',
+            'dist/torus.no-debug.js',
             'test/*.js'
         ],
 
@@ -17,7 +17,17 @@ module.exports = function(config) {
 
         reporters: [
             'mocha',
+            'coverage',
         ],
+
+        preprocessors: {
+            'dist/**/*.js': ['coverage'],
+        },
+
+        coverageReporter: {
+            type: 'html',
+            dir: 'coverage/',
+        },
 
         port: 9876,
 

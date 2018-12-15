@@ -442,15 +442,8 @@ class Evented {
     }
 
     emitEvent() {
-        const data = this.summarize();
-        if (data instanceof Array) {
-            for (const handler of this.eventTargets) {
-                handler(data.slice());
-            }
-        } else if (data instanceof Object) {
-            for (const handler of this.eventTargets) {
-                handler(Object.assign({}, data));
-            }
+        for (const handler of this.eventTargets) {
+            handler(this.getCurrentSummary());
         }
     }
 

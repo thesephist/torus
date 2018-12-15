@@ -6,7 +6,7 @@ Minimal JS Model-View UI framework focused on being small, efficient, and free o
 
 ### Simplicity
 
-Torus has no production dependencies and weighs in at under 3kb gzipped. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
+Torus has no production dependencies and weighs in at under 2.5kb gzipped. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
 
 ### Portability
 

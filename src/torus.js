@@ -618,7 +618,7 @@ const exposedNames = {
     Record,
     Store,
     StoreOf,
-    Router,
+    // Router,
 }
 const builtinElements = [
     'div',

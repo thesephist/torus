@@ -9,7 +9,8 @@
   "scripts": {
     "test": "karma start karma.conf.js",
     "test-prod": "karma start karma.min.conf.js",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "verify": "node build/build.js && karma start karma.min.conf.js"
   },
   "devDependencies": {
     "chai": "^4.2.0",

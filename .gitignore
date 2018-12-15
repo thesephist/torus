@@ -1,5 +1,6 @@
 # torus-specific ignores
 dist/
+coverage/
 
 # Logs
 logs

@@ -151,7 +151,7 @@ This will run `./src/torus.js` through a custom toolchain, first removing any de
 
 ### Running tests
 
-To run Torus's unit tests, run
+To run Torus's unit tests and generate a coverage report to `coverage/`, run
 
 ```sh
 ~$ npm test
@@ -159,5 +159,15 @@ To run Torus's unit tests, run
 ~$ yarn test
 ```
 
-This will run the basic test suite. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
+This will run the basic test suite on a development build of Torus. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
+
+We can also run tests on the production build, with:
+
+```sh
+~$ npm test-prod
+# or
+~$ yarn test-prod
+```
+
+This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occured.
 

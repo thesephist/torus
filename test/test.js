@@ -3,7 +3,7 @@ describe('renderJDOM', () => {
     const render = jdom => renderJDOM(undefined, undefined, jdom);
 
     describe('Tags', () => {
-        
+
         it('should support all tags specified in the spec', () => {
             const supportedTags = [
                 'div',
@@ -28,7 +28,7 @@ describe('renderJDOM', () => {
     });
 
     describe('Element attributes', () => {
-        
+
         it('id', () => {
             const node = render({
                 tag: 'div',
@@ -255,7 +255,7 @@ describe('renderJDOM', () => {
             });
 
             node.childNodes.should.have.lengthOf(1);
-            node.childNodes[0]; // TODO
+            node.childNodes[0].nodeType.should.equal(8);
         });
 
         it('Text nodes from strings', () => {
@@ -591,11 +591,38 @@ describe('List', () => {
     describe('Events', () => {
 
         it('when a new record is added to the list, add the item', () => {
+            class MyList extends List {
+                get itemClass() {
+                    return ItemComponent;
+                }
+            }
+            const s = new Store([
+                new Record({label: 'first'}),
+                new Record({label: 'second'}),
+                new Record({label: 'third'}),
+            ]);
+            const l = new MyList(s);
 
+            s.add(new Record({label: 'fourth'}));
+            l.node.textContent.should.equal('firstsecondthirdfourth');
         });
 
         it('when a new record is removed from the list, remove the item', () => {
+            class MyList extends List {
+                get itemClass() {
+                    return ItemComponent;
+                }
+            }
+            const second = new Record({label: 'second'});
+            const s = new Store([
+                new Record({label: 'first'}),
+                second,
+                new Record({label: 'third'}),
+            ]);
+            const l = new MyList(s);
 
+            s.remove(second);
+            l.node.textContent.should.equal('firstthird');
         });
 
     });
@@ -615,25 +642,86 @@ describe('ListOf', () => {
 
 });
 
-describe('Evented', () => {
-
-});
-
 describe('Record', () => {
 
-    it('should inherit from Evented', () => {
-        const r = new Record();
-        r.should.be.an.instanceof(Evented);
+    describe('#constructor', () => {
+
+        it('should accept an id and a data object as arguments', () => {
+            const r = new Record('some_id', {some: 'data'});
+            r.id.should.equal('some_id');
+            r.data.should.deep.equal({some: 'data'});
+        });
+
+        it('should accept just the data object as the first argument, leaving id null', () => {
+            const r = new Record({some: 'my_data'});
+            expect(r.id).to.be.null;
+            r.data.should.deep.equal({some: 'my_data'});
+        });
+
+    });
+
+    describe('#update', () => {
+
+        it('should update the record data', () => {
+            const r = new Record({some: 'data'});
+            r.update({some_other: 'more_data'});
+
+            r.data.should.deep.equal({
+                some: 'data',
+                some_other: 'more_data',
+            });
+        });
+
+        it('should fire an event', () => {
+            let handlerCalled = false;
+            const r = new Record({some: 'data'});
+            r.addHandler(() => handlerCalled = true);
+            r.update({some_other: 'more_data'});
+
+            handlerCalled.should.be.true;
+        });
+
+    });
+
+    describe('#get', () => {
+
+        it('should return the data value', () => {
+            const r = new Record({some: 'data'});
+
+            r.get('some').should.equal('data');
+        });
+
+    });
+
+    describe('#summarize', () => {
+
+        it('should return the union of #data and #id', () => {
+            const r = new Record('some_id', {some: 'data'});
+
+            r.summarize().should.deep.equal({
+                id: 'some_id',
+                some: 'data',
+            });
+        });
+
+    });
+
+    describe('#serialize', () => {
+
+        it('should return the union of #data and #id', () => {
+            const r = new Record('some_id', {some: 'data'});
+
+            r.serialize().should.deep.equal({
+                id: 'some_id',
+                some: 'data',
+            });
+        });
+
     });
 
 });
 
 describe('Store', () => {
-
-    it('should inherit from Evented', () => {
-        const s = new Store();
-        s.should.be.an.instanceof(Evented);
-    });
 
 });
 

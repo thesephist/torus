@@ -429,7 +429,7 @@ const ListOf = itemClass => {
 }
 
 /**
- * A base class for evented data stores
+ * A base class for evented data stores. Not exposed to the public API.
  */
 class Evented {
 
@@ -615,7 +615,6 @@ const exposedNames = {
     Component,
     List,
     ListOf,
-    Evented,
     Record,
     Store,
     StoreOf,

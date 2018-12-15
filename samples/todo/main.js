@@ -2,12 +2,16 @@
 //  layers of Torus interact.
 
 class Task extends Record {}
-class TaskStore extends StoreOf(Task) {}
+class TaskStore extends StoreOf(Task) {
+    get comparator() {
+        return task => task.get('description').toLowerCase();
+    }
+}
 
 const tasks = new TaskStore([
     new Task(1, {description: 'Do this', completed: false,}),
     new Task(2, {description: 'Do that', completed: false,}),
-], task => task.get('description'));
+]);
 
 class TaskItem extends Component {
 

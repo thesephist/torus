@@ -476,6 +476,19 @@ describe('Component', () => {
         expect(c.record).to.not.be.undefined;
     });
 
+    it('#init runs before first #render call', () => {
+        let rendered = false;
+        const c = new (class extends Component {
+            init() {
+                rendered.should.be.false;
+            }
+            render() {
+                super.render();
+                rendered = true;
+            }
+        })();
+    });
+
     describe('Event bindings to #record', () => {
 
         it('should call event handler defined with #listen on source event', () => {
@@ -483,10 +496,7 @@ describe('Component', () => {
 
             const c = new Component();
             const r = new Record();
-            c.listen({
-                source: r,
-                handler: () => handlerCalled = true,
-            });
+            c.listen(r, () => handlerCalled = true);
 
             r.update({key: 'value'});
             handlerCalled.should.be.true;
@@ -497,10 +507,7 @@ describe('Component', () => {
 
             const c = new Component();
             const r = new Record();
-            c.listen({
-                source: r,
-                handler: () => handlerCallCount++,
-            });
+            c.listen(r, () => handlerCallCount++);
 
             r.update({key: 'value'});
             handlerCallCount.should.equal(1);
@@ -514,17 +521,11 @@ describe('Component', () => {
 
             const c = new Component();
             const r = new Record();
-            c.listen({
-                source: r,
-                handler: () => handlerCallCount++,
-            });
+            c.listen(r, () => handlerCallCount++);
 
             r.update({key: 'value'});
             handlerCallCount.should.equal(1);
-            c.listen({
-                source: new Record(),
-                handler: () => {},
-            });
+            c.listen(new Record(), () => {});
             r.update({key: 'value'});
             handlerCallCount.should.equal(1);
         });
@@ -556,6 +557,48 @@ describe('Component', () => {
 });
 
 describe('List', () => {
+
+    class ItemComponent extends Component {
+        init(record) {
+            this.listen(record, () => this.render);
+        }
+        compose(data) {
+            return li([data.label]);
+        }
+    }
+
+    describe('Rendering', () => {
+
+        it('should render the list items in a <ul>', () => {
+            class MyList extends List {
+                get itemClass() {
+                    return ItemComponent;
+                }
+            }
+            const s = new Store([
+                new Record({label: 'first'}),
+                new Record({label: 'second'}),
+                new Record({label: 'third'}),
+            ]);
+            const l = new MyList(s);
+
+            l.node.textContent.should.equal('firstsecondthird');
+            l.node.tagName.toLowerCase().should.equal('ul');
+        });
+
+    });
+
+    describe('Events', () => {
+
+        it('when a new record is added to the list, add the item', () => {
+
+        });
+
+        it('when a new record is removed from the list, remove the item', () => {
+
+        });
+
+    });
 
 });
 

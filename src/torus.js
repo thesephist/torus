@@ -325,7 +325,7 @@ class Component {
         return this.event.source;
     }
 
-    listen({source, handler}) {
+    listen(source, handler) {
         if (this.event.source !== null) {
             this.unlisten();
         }
@@ -379,10 +379,7 @@ class List extends Component {
         this.source = store;
         this.items = new Map();
 
-        this.listen({
-            source: this.source,
-            handler: this.updateItems.bind(this),
-        });
+        this.listen(this.source, this.updateItems.bind(this));
         this.updateItems(this.source.getCurrentSummary());
     }
 
@@ -393,9 +390,7 @@ class List extends Component {
             }
         }
         for (const record of data) {
-            if (this.items.has(record)) {
-                // taken care of, pass
-            } else {
+            if (!this.items.has(record)) {
                 this.items.set(record, new this.itemClass(record));
             }
         }
@@ -485,6 +480,12 @@ class Record extends Evented {
 
     constructor(id, data = {}) {
         super();
+
+        if (typeof id === 'object' && Object.keys({}).length === 0) {
+            data = id;
+            id = null;
+        }
+
         this.id = id;
         this.data = data;
     }

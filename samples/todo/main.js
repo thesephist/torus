@@ -13,11 +13,7 @@ class TaskItem extends Component {
 
     init(source) {
         this.boundOnCheck = this.onCheck.bind(this);
-
-        this.listen({
-            source: source,
-            handler: data => this.render(data),
-        });
+        this.listen(source, data => this.render(data));
     }
 
     onCheck() {

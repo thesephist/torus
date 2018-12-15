@@ -723,6 +723,156 @@ describe('Record', () => {
 
 describe('Store', () => {
 
+    class MyRecord extends Record {
+        myMethod() {
+            return 'methodResult';
+        }
+    }
+
+    class MyStore extends Store {
+
+        get recordClass() {
+            return MyRecord;
+        }
+
+        get comparator() {
+            return record => record.get('label');
+        }
+
+    }
+
+    describe('#constructor', () => {
+
+        it('creates #records, a Set of the given records', () => {
+            const s = new MyStore([
+                new MyRecord({label: 1}),
+                new MyRecord({label: 2}),
+                new MyRecord({label: 3}),
+                new MyRecord({label: 4}),
+            ]);
+            s.records.size.should.equal(4);
+        });
+
+        it('creates an empty #records Set given no arguments', () => {
+            const s = new MyStore();
+            s.records.size.should.equal(0);
+        });
+
+    });
+
+    describe('#create', () => {
+
+        it('should add a new recordClass instance with given id and data', () => {
+            const s = new MyStore();
+            s.create('some_id', {some: 'data'});
+            s.records.size.should.equal(1);
+            [...s.records][0].should.be.an.instanceof(MyRecord);
+            [...s.records][0].id.should.equal('some_id');
+        });
+
+        it('should fire an event', () => {
+            let eventEmitted = false;
+            const s = new MyStore();
+            s.addHandler(() => eventEmitted = true);
+            s.create('some_id', {some: 'data'});
+
+            eventEmitted.should.be.true;
+        });
+
+    });
+
+    describe('#add', () => {
+
+        it('should add the given record to #records', () => {
+            const s = new MyStore();
+            const r = new MyRecord({some: 'data'});
+            s.add(r);
+            [...s.records][0].should.equal(r);
+        });
+
+        it('should fire an event', () => {
+            let eventEmitted = false;
+            const s = new MyStore();
+            s.addHandler(() => eventEmitted = true);
+            s.add(new MyRecord({some: 'data'}));
+
+            eventEmitted.should.be.true;
+        });
+
+    });
+
+    describe('#remove', () => {
+
+        it('should remove the given record from #records', () => {
+            const r = new MyRecord({some: 'data'});
+            const s = new MyStore([r]);
+            s.remove(r);
+            s.records.size.should.equal(0);
+        });
+
+        it('should fire an event', () => {
+            let eventEmitted = false;
+            const r = new MyRecord({some: 'data'});
+            const s = new MyStore([r]);
+            s.addHandler(() => eventEmitted = true);
+            s.remove(r);
+
+            eventEmitted.should.be.true;
+        });
+
+    });
+
+    describe('#summarize', () => {
+
+        it('should return a #comparator-ordered list of records', () => {
+            const first = new MyRecord(1, {label: 'first'});
+            const second = new MyRecord(2, {label: 'second'});
+            const third = new MyRecord(3, {label: 'third'});
+            const fourth = new MyRecord(4, {label: 'fourth'});
+
+            const s = new MyStore([first, second, third, fourth]);
+
+            const summary = s.summarize();
+            summary[0].should.equal(first);
+            summary[1].should.equal(fourth);
+            summary[2].should.equal(second);
+            summary[3].should.equal(third);
+        });
+
+    });
+
+    describe('#serialize', () => {
+
+        it('should return an array of serialized records, in #comparator order', () => {
+            const first = new MyRecord(1, {label: 'first'});
+            const second = new MyRecord(2, {label: 'second'});
+            const third = new MyRecord(3, {label: 'third'});
+            const fourth = new MyRecord(4, {label: 'fourth'});
+
+            const s = new MyStore([first, second, third, fourth]);
+
+            s.serialize().should.deep.equal([
+                {
+                    id: 1,
+                    label: 'first',
+                },
+                {
+                    id: 4,
+                    label: 'fourth',
+                },
+                {
+                    id: 2,
+                    label: 'second',
+                },
+                {
+                    id: 3,
+                    label: 'third',
+                },
+            ]);
+        });
+
+    });
+
 });
 
 describe('StoreOf', () => {

@@ -129,7 +129,7 @@ class TaskInput extends Component {
                 button({}, {
                     click: this.boundOnAddClick,
                 }, [
-                    'Add'
+                    'Add',
                 ]),
             ])
         );

@@ -22,11 +22,11 @@ const render_debug = (msg, header = false) => {
 // @enddebug
 
 const HTML_IDL_ATTRIBUTES = [
+    'type',
     'value',
     'selected',
     'indeterminate',
     'tabIndex',
-    'title',
     'checked',
     'disabled',
 ];
@@ -366,6 +366,83 @@ class Component {
 
 }
 
+const injectedClassNames = new Set();
+let styledComponentSheet = null;
+const generateUniqueClassName = stylesObject => {
+    // Modified from https://github.com/darkskyapp/string-hash/blob/master/index.js
+    const str = JSON.stringify(stylesObject);
+    let i = str.length;
+    let hash = 1989;
+    while (i) {
+        hash = (hash * 13) ^ str.charCodeAt(--i);
+    }
+    return '_torus' + (hash >>> 0);
+}
+const insertCSSDeclarations = (sheet, selector, declarations) => {
+    let str = '';
+    for (const [prop, val] of Object.entries(declarations)) {
+        str += prop + ':' + val + ';';
+    }
+    const rule = selector + '{' + str + '}';
+    sheet.insertRule(rule, sheet.cssRules.length);
+}
+const insertStylesObjectRecursively = (sheet, selector, stylesObject) => {
+    let selfDeclarations = {};
+    for (const [key, val] of Object.entries(stylesObject)) {
+        if (typeof val === 'object') {
+            // key is selector suffix, val is styles object
+            insertStylesObjectRecursively(sheet, selector + key, val);
+        } else {
+            // key is CSS property, val is value
+            selfDeclarations[key] = val;
+        }
+    }
+    insertCSSDeclarations(sheet, selector, selfDeclarations);
+}
+const injectStyleSheet = (className, stylesObject) => {
+    if (!styledComponentSheet) {
+        styleElement = document.createElement('style');
+        styleElement.setAttribute('data-torus', '');
+        document.head.appendChild(styleElement);
+        styledComponentSheet = styleElement.sheet;
+    }
+
+    insertStylesObjectRecursively(styledComponentSheet, '.' + className, stylesObject);
+    injectedClassNames.add(className);
+}
+const injectStylesOnce = stylesObject => {
+    const className = generateUniqueClassName(stylesObject);
+    if (!injectedClassNames.has(className)) {
+        injectStyleSheet(className, stylesObject);
+    }
+    return className;
+}
+class StyledComponent extends Component {
+
+    styles(data) {
+        // should be overridden in subclasses
+        return {};
+    }
+
+    render(data) {
+        // @debug
+        render_debug(`Render Styled Component: ${this.constructor.name}`, true);
+        const jdom = this.compose(
+            data
+            || this.event.source && this.event.source.serialize()
+            || undefined
+        );
+        jdom.attrs = jdom.attrs || {};
+        jdom.attrs.class = jdom.attrs.class || [];
+        jdom.attrs.class.push(injectStylesOnce(this.styles(data)));
+
+        this.node = renderJDOM(this.node, this.jdom, jdom);
+        this.jdom = jdom;
+        return this.jdom;
+    }
+
+}
+
 /**
  * Generic list implementation based on stores
  */
@@ -376,11 +453,10 @@ class List extends Component {
     }
 
     init(store) {
-        this.source = store;
         this.items = new Map();
 
-        this.listen(this.source, this.updateItems.bind(this));
-        this.updateItems(this.source.getCurrentSummary());
+        this.listen(store, this.updateItems.bind(this));
+        this.updateItems(store.getCurrentSummary());
     }
 
     updateItems(data) {
@@ -605,6 +681,7 @@ class Router extends Evented {
 
 const exposedNames = {
     renderJDOM,
+    StyledComponent,
     Component,
     List,
     ListOf,

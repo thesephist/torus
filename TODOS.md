@@ -4,11 +4,13 @@
 
 - [ ] Improve performance of inserting a node at the top of a long sorted list. Currently, it replaces every element going down.
 
+- [ ] Unbundle `StyledComponent` and `List`/`ListOf` from the core library and provide them as optional modules, to decrease bundle size.
+
 - [ ] Make a template tag for JSX to torus JDOM so I can write JSX instead of pure JDOM -- Experiment with using `<template>` to make the browser render with replaced attributes, then walking the resulting tree.
 
 - [ ] Add searchability / filterability to the default `List` implementation.
 
-- [ ] Find a way to do server-side rendering, and make a sample / demo - Have an alternative renderer that only takes jdom once on a first pass, returns a string.
+- [ ] Find a way to do server-side rendering, and make a sample / demo - Have an alternative renderer that only takes jdom once on a first pass, returns a string. We'll need to stub some `document.*` methods.
 
 - [ ] What if there was a way to seamlessly transition between Polymer-type shadow-rooted web components and React-style pre-rendered DOM? Upgrade and downgrade? This would solve the server side render issue for web components while making things like Torus more versatile across both rendering regimes. We can do this with a `ShadowComponent` class that, when pre-rendering, just renders normal, but can also, given a web component tag, render to its shadow root.
 

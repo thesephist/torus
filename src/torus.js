@@ -101,43 +101,34 @@ const renderJDOM = (node, previous, next) => {
 
     push_render_stack(next);
 
-    if (next instanceof Node) {
-        if (previous === next) {
-            // pass, it's the same element
+    const isChanged = previous !== next;
+    if (isChanged && next instanceof Node) {
+        // @begindebug
+        if (node === undefined) {
+            render_debug(`Add literal element <${next.tagName}>`);
         } else {
-            // @begindebug
-            if (node === undefined) {
-                render_debug(`Add literal element <${next.tagName}>`);
-            } else {
-                render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
-            }
-            // @enddebug
-            replacePreviousNode(next);
+            render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
         }
-    } else if (next === null) {
-        if (previous === null) {
-            // both are comments, do nothing
+        // @enddebug
+        replacePreviousNode(next);
+    } else if (isChanged && next === null) {
+        // @begindebug
+        if (node === undefined) {
+            render_debug('Add comment node');
         } else {
-            // @begindebug
-            if (node === undefined) {
-                render_debug('Add comment node');
-            } else {
-                render_debug(`Replace previous node <${node.tagName}> with comment node`);
-            }
-            // @enddebug
-            replacePreviousNode(document.createComment(''));
+            render_debug(`Replace previous node <${node.tagName}> with comment node`);
         }
-    } else if (['string', 'number'].includes(typeof next)) {
-        if (previous !== next) {
-            // @begindebug
-            if (node === undefined) {
-                render_debug(`Add text node "${next}"`);
-            } else {
-                render_debug(`Replace previous node "${previous}" with text node "${next}"`);
-            }
-            // @enddebug
-            replacePreviousNode(document.createTextNode(next));
+        // @enddebug
+        replacePreviousNode(tmpNode());
+    } else if (isChanged && (typeof next === 'string' || typeof next === 'number')) {
+        // @begindebug
+        if (node === undefined) {
+            render_debug(`Add text node "${next}"`);
+        } else {
+            render_debug(`Replace previous node "${previous}" with text node "${next}"`);
         }
+        // @enddebug
+        replacePreviousNode(document.createTextNode(next));
     } else if (typeof next === 'object') {
         if (previous === undefined) {
             // Creating a brand-new node.
@@ -168,7 +159,6 @@ const renderJDOM = (node, previous, next) => {
 
         // Compare attrs
         for (const attrName in next.attrs) {
-
             switch (attrName) {
                 case 'class':
                     const prevClass = arrayNormalize(previous.attrs.class || []);
@@ -326,12 +316,10 @@ class Component {
     }
 
     listen(source, handler) {
-        if (this.event.source !== null) {
-            this.unlisten();
-        }
+        this.unlisten();
 
         if (source instanceof Evented) {
-            this.event = { source, handler};
+            this.event = {source, handler};
             source.addHandler(handler);
         } else {
             throw new Error('Event source to listen() is not an instance of Evented');
@@ -339,7 +327,10 @@ class Component {
     }
 
     unlisten() {
-        this.event.source.removeHandler(this.event.handler);
+        if (this.event.source) {
+            this.event.source.removeHandler(this.event.handler);
+        }
+
         this.event = {
             source: null,
             handler: () => {},
@@ -347,7 +338,6 @@ class Component {
     }
 
     compose(data) {
-        // no-op, will be overridden to return a composed JDOM
         return null;
     }
 
@@ -355,9 +345,7 @@ class Component {
         // @debug
         render_debug(`Render Component: ${this.constructor.name}`, true);
         const jdom = this.compose(
-            data
-            || this.event.source && this.event.source.serialize()
-            || undefined
+            data || (this.event.source && this.event.source.serialize())
         );
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;
@@ -438,9 +426,7 @@ class StyledComponent extends Component {
         // @debug
         render_debug(`Render Styled Component: ${this.constructor.name}`, true);
         const jdom = this.compose(
-            data
-            || this.event.source && this.event.source.serialize()
-            || undefined
+            data || (this.event.source && this.event.source.serialize())
         );
         jdom.attrs = jdom.attrs || {};
         jdom.attrs.class = jdom.attrs.class || [];
@@ -505,13 +491,11 @@ class List extends Component {
 }
 
 const ListOf = itemClass => {
-    class TmpList extends List {
+    return class extends List {
         get itemClass() {
             return itemClass;
         }
     }
-
-    return TmpList;
 }
 
 /**
@@ -524,7 +508,7 @@ class Evented {
     }
 
     summarize() {
-        throw new Error('summarize() should be implemented independently in subclasses');
+        throw new Error(`Evented#summarize() not implemented in ${this.constructor.name}`);
     }
 
     emitEvent() {
@@ -560,7 +544,7 @@ class Record extends Evented {
     constructor(id, data = {}) {
         super();
 
-        if (typeof id === 'object' && Object.keys({}).length === 0) {
+        if (typeof id === 'object' && !Object.keys(data).length) {
             data = id;
             id = null;
         }
@@ -582,9 +566,7 @@ class Record extends Evented {
         return Object.assign(
             {},
             this.data,
-            {
-                id: this.id
-            }
+            {id: this.id}
         );
     }
 
@@ -601,6 +583,7 @@ class Store extends Evented {
 
     constructor(records = []) {
         super();
+
         this.records = new Set(records);
     }
 
@@ -653,13 +636,11 @@ class Store extends Evented {
 }
 
 const StoreOf = recordClass => {
-    class TmpStore extends Store {
+    return class extends Store {
         get recordClass() {
             return recordClass;
         }
     }
-
-    return TmpStore;
 }
 
 /**

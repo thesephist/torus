@@ -16,9 +16,12 @@ class SearchInput extends StyledComponent {
             'height': '100%',
             'width': '100%',
 
-            ' input': {
+            'input': {
                 'height': '100%',
                 'width': '100%',
+                'line-height': '40px',
+                'box-sizing': 'border-box',
+                '-webkit-appearance': 'textfield',
                 'border': 0,
                 'padding': '8px 16px',
                 'font-size': '16px',
@@ -62,11 +65,12 @@ class SearchButton extends StyledComponent {
             'background': '#5073f1',
             'color': '#fff',
             'padding': '8px 16px',
+            'margin': '0',
             'cursor': 'pointer',
             'transition': 'opacity .2s',
             'border': '0',
 
-            ':hover': {
+            '&:hover': {
                 'opacity': '.85',
             },
         };
@@ -102,13 +106,13 @@ class App extends StyledComponent {
             'left': '50%',
             'transform': 'translate(-50%, -50%)',
 
-            ' h1': {
+            'h1': {
                 'font-size': '88px',
                 'color': '#333',
                 'margin': '36px 0',
             },
 
-            ' .bar': {
+            '.bar': {
                 'height': '40px',
                 'max-width': '520px',
                 'width': '100%',

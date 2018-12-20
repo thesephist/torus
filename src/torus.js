@@ -391,7 +391,17 @@ const insertStylesObjectRecursively = (sheet, selector, stylesObject) => {
     for (const [key, val] of Object.entries(stylesObject)) {
         if (typeof val === 'object') {
             // key is selector suffix, val is styles object
-            insertStylesObjectRecursively(sheet, selector + key, val);
+            if (key[0] === '@') {
+                // media query or keyframes or font, which are global CSS names
+                insertStylesObjectRecursively(sheet, key, val);
+            } else {
+                if (key.includes('&')) {
+                    const fullSelector = key.replace(/&/g, selector);
+                    insertStylesObjectRecursively(sheet, fullSelector, val);
+                } else {
+                    insertStylesObjectRecursively(sheet, selector + ' ' + key, val);
+                }
+            }
         } else {
             // key is CSS property, val is value
             selfDeclarations[key] = val;

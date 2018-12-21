@@ -103,8 +103,9 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
 
     const commit = (key, val) => {
         if (typeof val === 'function') {
-            if (!(key in events)) events[key] = [];
-            events[key].push(val);
+            const eventName = key.replace('on', '');
+            if (!(key in events)) events[eventName] = [];
+            events[eventName].push(val);
         } else {
             if (key === 'style') {
                 const declarations = val.split(';').filter(s => !!s).map(pair => {
@@ -188,45 +189,65 @@ const parseJSX = (tplParts, dynamicParts) => {
     const reader = new TplReader(tplParts, dynamicParts);
 
     let currentElement = null;
-    const commitCurrentElement = () => {
-        result.push(currentElement);
+    let inTextNode = false;
+    const commit = () => {
+        if (inTextNode) {
+            currentElement = currentElement.trim();
+        }
+
+        if (currentElement) {
+            result.push(currentElement);
+        }
         currentElement = null;
+        inTextNode = false;
     }
 
     for (let next = reader.next(); next !== READER_END; next = reader.next()) {
         switch (next) {
             case '<':
+                commit();
                 const result = parseOpeningTagContents(...reader.readUpto('>'));
+                reader.readUntil('>');
                 currentElement = result.jdom;
                 if (typeof currentElement === 'object') {
-                    if (result.selfClosing) {
-                        // do nothing
-                        commitCurrentElement();
-                    } else {
+                    if (!result.selfClosing) {
                         const closingTag = `</${currentElement.tag}>`;
                         currentElement.children = parseJSX(...reader.readUpto(closingTag));
-                        commitCurrentElement();
                         reader.readUntil(closingTag);
                     }
                 }
                 break;
             default:
-                currentElement = interpolate(...reader.readUpto('<'));
-                if (currentElement.trim()) {
-                    commitCurrentElement();
+                if (next instanceof Array && next[0] instanceof Node) {
+                    for (const component of next) {
+                        commit();
+                        currentElement = component;
+                    }
+                } else if (next instanceof Node) {
+                    commit();
+                    currentElement = next;
+                } else {
+                    if (!inTextNode) {
+                        commit();
+                        inTextNode = true;
+                        currentElement = '';
+                    }
+                    currentElement += next;
                 }
                 break;
         }
     }
+
+    commit();
 
     return result;
 }
 
 const jdom = (tplParts, ...dynamicParts) => {
     try {
-    return parseJSX(tplParts.map(part => part.replace(/\s+/g, ' ')), dynamicParts); 
+        return parseJSX(tplParts.map(part => part.replace(/\s+/g, ' ')), dynamicParts)[0]; 
     } catch (e) {
-        throw new Error(`Error parsing invalid HTML template: ${interpolate(tplParts, dynamicParts)}`);
+        console.error(`Error parsing invalid HTML template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);
     }
 }
 

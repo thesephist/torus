@@ -1,6 +1,6 @@
 # Torus To-dos
 
-- [ ] Tests for `StyledComponent`
+- [ ] Tests for `StyledComponent`, `jdom` template tag function
 
 - [ ] Flesh out documentation, referencing tests for API surface.
 

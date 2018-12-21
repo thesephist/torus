@@ -55,8 +55,25 @@ const webpackConfigs = {
         entry: './dist/torus.no-debug.js',
         mode: 'production',
         output: {
+
             path: path.resolve('./dist/'),
             filename: 'torus.min.js',
+        },
+    },
+    jdom_dev: {
+        entry: './src/jdom.js',
+        mode: 'development',
+        output: {
+            path: path.resolve('./dist/'),
+            filename: 'jdom.dev.js',
+        },
+    },
+    jdom_prod: {
+        entry: './src/jdom.js',
+        mode: 'production',
+        output: {
+            path: path.resolve('./dist/'),
+            filename: 'jdom.min.js',
         },
     },
 }

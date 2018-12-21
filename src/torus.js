@@ -429,7 +429,7 @@ class StyledComponent extends Component {
             data || (this.event.source && this.event.source.serialize())
         );
         jdom.attrs = jdom.attrs || {};
-        jdom.attrs.class = jdom.attrs.class || [];
+        jdom.attrs.class = arrayNormalize(jdom.attrs.class || []);
         jdom.attrs.class.push(injectStylesOnce(this.styles(data)));
 
         this.node = renderJDOM(this.node, this.jdom, jdom);

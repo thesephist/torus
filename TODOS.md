@@ -6,8 +6,6 @@
 
 - [ ] Improve performance of inserting a node at the top of a long sorted list. Currently, it replaces every element going down.
 
-- [ ] Make a template tag for JSX to torus JDOM so I can write JSX instead of pure JDOM -- Experiment with using `<template>` to make the browser render with replaced attributes, then walking the resulting tree.
-
 - [ ] Add filterability with an arbitrary filter function to the default `List` implementation.
 
 - [ ] Find a way to do server-side rendering, and make a sample / demo - Have an alternative renderer that only takes jdom once on a first pass, returns a string. We'll need to stub some `document.*` methods.

@@ -155,9 +155,40 @@ tagName({...attributes}, {...events}, [... <children JDOM>])
 
 80% of building user interfaces consists of building list interfaces. To increase developer productivity here, Torus comes with a default implementation of `List` that inherits from the base Component class.
 
+Here's an example of an app that uses `List`. THe default List component's key advantage is that it efficiently renders its contents without our having to write much boilerplate code at all to manage it. We just define a `Store` where our data will live and be sorted, hand that off to a `List` constructor, define our custom `List#compose()` function if we want, and drop the list's DOM node into the page.
+
 ```javascript
-// TODO document List API
+// This represents the collection of todo items.
+//  Updates to a Store is reflected in any List listening to it by default.
+class Task extends Record {}
+class TaskStore extends StoreOf(Task) {
+    get comparator() {
+        return task => task.get('description').toLowerCase();
+    }
+}
+
+class TaskItem extends Component {
+
+    // ... (imagine some more component code here)
+
+}
+
+class TaskList extends ListOf(TaskItem) {
+    compose() {
+        return jdom`<ul style="padding:0">
+            ${this.nodes}
+        </ul>`;
+    }
+}
+
+const tasks = new TaskStore([
+    new Task(1, {description: 'Do this', completed: false,}),
+    new Task(2, {description: 'Do that', completed: false,}),
+]);
+const list = new TaskList(tasks);
 ```
+
+>// TODO document List API
 
 ## Data models (`Record`, `Store`)
 

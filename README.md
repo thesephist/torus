@@ -1,6 +1,6 @@
 # Torus
 
-Minimal JS Model-View UI framework focused on being small, efficient, and free of dependencies.
+Minimal JS Model-View UI framework focused on being tiny, efficient, and free of dependencies.
 
 ## Features
 
@@ -72,9 +72,82 @@ class TabButton extends StyledComponent {
 
 For a more detailed and real-world example tying in models, please reference `samples/`.
 
-## JDOM (JSON DOM)
+### Component lifecycle
 
-JDOM is an efficient, lightweight representation of the DOM used for diffing and rendering in Torus.
+1. Create new component
+    - call `#init()`
+    - call `#render()` (which calls `#compose()` in the process)
+2. Render triggered (can happen through `#listen(...)` binding the component to state updates, or through manual triggers from local state changes)
+    - call `#render()` (which calls `#compose()`)
+3. Remove component (cleanly destroy component to be garbage collected)
+    - call `#remove()`, cleans up any event listeners attached with `#listen(...)`
+
+**Note**: It's generally a good idea to call `Component#remove()` when the component no longer becomes needed, like when a model tied to it is destroyed or the user switches to a completely different view. But because Torus components are lightweight, there's no need to use it as a memory management mechanism or to trigger garbage collection. Torus components, unlike React components, are designed to be long-lived and last through a full session or page lifecycle.
+
+## `List` Component
+
+80% of building user interfaces consists of building lists of models. To increase developer productivity here, Torus comes with a default implementation of `List` that inherits from the base Component class. The default `List` renders instances of a given view to a `<ul>` given a collection of models, but because it's just a Torus component, it's completely extensible.
+
+Here's an example of an app that uses `List`. The default List component's key advantage is that it efficiently renders its contents without our having to write much boilerplate code at all to manage it. We just define a `Store` where our data will live and be sorted, hand that off to a `List` constructor, define our custom `List#compose()` function if we want, and drop the list's DOM node into the page.
+
+```javascript
+// This represents the collection of todo items.
+//  Updates to a Store is reflected in any List listening to it by default.
+class Task extends Record {}
+// The StoreOf(<RecordClass>) syntax creates a Store class that defaults to
+//  the given record type. (StoreOf is a higher order class constructor)
+class TaskStore extends StoreOf(Task) {
+    get comparator() {
+        return task => task.get('description').toLowerCase();
+    }
+}
+
+class TaskItem extends Component {
+
+    // ... (imagine some more component code here)
+
+}
+
+// These 7 lines define our entire list view. Like StoreOf(...) above,
+//  the ListOf(<ItemComponentClass>) defines a list view where new models
+//  in our collection will be inserted into our list as ItemComponentClass
+//  views.
+class TaskList extends ListOf(TaskItem) {
+    compose() {
+        return jdom`<ul style="padding:0">
+            // this.nodes is the array of sorted DOM nodes of the collection
+            /   items. We can drop this object in here to render the list here.
+            ${this.nodes}
+        </ul>`;
+    }
+}
+
+const tasks = new TaskStore([
+    new Task(1, {description: 'Do this', completed: false,}),
+    new Task(2, {description: 'Do that', completed: false,}),
+]);
+const list = new TaskList(tasks);
+```
+
+>// TODO document List API
+
+## Styles with CSS in `StyledComponent`
+
+```javascript
+// TODO
+```
+
+## Data models (`Record`, `Store`)
+
+```javascript
+// TODO
+```
+
+## A supplement about JDOM (JSON DOM)
+
+JDOM is an efficient, lightweight (usually internal) representation of the DOM used for diffing and rendering in Torus. While the `jdom` template tag provides an ergonomic, JSX-like templating syntax, we need a more efficient and lightweight format for Torus's internal representation of components, and JDOM fills that role!
+
+Whenever you `#compose()` a component in Torus, you can use the `jdom` template tag to define your DOM, or return the lower-level, JDOM representation of your tree. In the future, we might compile away the `jdom` template processor at build time, inspired by `developit/htm`.
 
 ### Single element
 
@@ -151,51 +224,6 @@ tagName({...attributes}, [... <children JDOM>])
 tagName({...attributes}, {...events}, [... <children JDOM>])
 ```
 
-## `List` Component
-
-80% of building user interfaces consists of building list interfaces. To increase developer productivity here, Torus comes with a default implementation of `List` that inherits from the base Component class.
-
-Here's an example of an app that uses `List`. THe default List component's key advantage is that it efficiently renders its contents without our having to write much boilerplate code at all to manage it. We just define a `Store` where our data will live and be sorted, hand that off to a `List` constructor, define our custom `List#compose()` function if we want, and drop the list's DOM node into the page.
-
-```javascript
-// This represents the collection of todo items.
-//  Updates to a Store is reflected in any List listening to it by default.
-class Task extends Record {}
-class TaskStore extends StoreOf(Task) {
-    get comparator() {
-        return task => task.get('description').toLowerCase();
-    }
-}
-
-class TaskItem extends Component {
-
-    // ... (imagine some more component code here)
-
-}
-
-class TaskList extends ListOf(TaskItem) {
-    compose() {
-        return jdom`<ul style="padding:0">
-            ${this.nodes}
-        </ul>`;
-    }
-}
-
-const tasks = new TaskStore([
-    new Task(1, {description: 'Do this', completed: false,}),
-    new Task(2, {description: 'Do that', completed: false,}),
-]);
-const list = new TaskList(tasks);
-```
-
->// TODO document List API
-
-## Data models (`Record`, `Store`)
-
-```javascript
-// TODO
-```
-
 ## Installation and usage
 
 Torus is still in active development (now making sure we have good test coverage, and then testing it out on larger projects before marking a release). So we aren't on NPM yet. But you can install `torus` locally and import it via node's require:
@@ -250,5 +278,5 @@ We can also run tests on the production build, with:
 ~$ yarn test-prod
 ```
 
-This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occured.
+This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occurred.
 

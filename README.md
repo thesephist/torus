@@ -20,6 +20,56 @@ Combined with the small size of Torus, this makes it reasonable to ship torus wi
 
 Torus takes after the React and Vue model, breaking down interfaces to reusable components. But components in Torus are much lighter, faster, and closer to vanilla JavaScript compared to the alternatives. (In fact, Using the full set of Torus UI rendering features requires no compilation step; just import `torus.js` with a `<script>` tag and go!)
 
+Torus components, in addition to the standard benefits of component-based UI models, have an additional benefit that we need no build step to run! The component below can be dropped verbatim into the browser console as plain JavaScript, and if the Torus library is in scope, it'll be rendered perfectly into the DOM.
+
+Here's an example of a Torus Component, from the `samples/tabs/` sample project.
+
+```javascript
+class TabButton extends StyledComponent {
+
+    // #init() is the customizable constructor for Component. We don't use
+    //  the default #constructor, because torus needs to hook in both before
+    //  and after the #init() call is made on a new component.
+    init({number, setActiveTab}) {
+        this.number = number;
+        this.setActiveTab = setActiveTab;
+        this.active = false;
+    }
+
+    // because we inherit from StyledComponent (which inherits
+    //  from Component), we can define styles like this, using
+    //  the [S]CSS syntax we know.
+    styles() {
+        return {
+            '&.active': {
+                'background': '#555',
+                'color': '#fff',
+            }
+        }
+    }
+
+    markActive(yes) {
+        this.active = yes;
+        this.render();
+    }
+
+    // Think of #compose() like the #render() in React or Backbone.
+    //  #compose() declaratively returns the DOM for the UI component,
+    //  which torus takes and renderes efficiently through its virtual DOM.
+    //
+    // We can return a vanilla, JSON representation of the DOM (see
+    //  "JDOM" section in the README), but we can also rely on the
+    //  tiny jdom`` template tag to transform JSX-like syntax (with very
+    //  minor differences) to JDOM, so we can write JSX or HTML that we're used to.
+    compose() {
+        return jdom`<button class="${this.active ? 'active' : ''}"
+            onclick="${this.setActiveTab}">Switch to ${this.number}
+        </button>`;
+    }
+
+}
+```
+
 For a more detailed and real-world example tying in models, please reference `samples/`.
 
 ## JDOM (JSON DOM)

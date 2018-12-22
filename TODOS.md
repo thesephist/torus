@@ -1,6 +1,8 @@
 # Torus To-dos
 
-- [ ] Tests for `StyledComponent`, `jdom` template tag function
+- [ ] As a stopgap, emphasize samples for documentation on README page until I can get full docs up
+
+- [ ] Tests for `StyledComponent`, `jdom` template tag function, and lifecycle methods
 
 - [ ] Flesh out documentation, referencing tests for API surface.
 

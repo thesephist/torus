@@ -337,6 +337,10 @@ class Component {
         };
     }
 
+    remove() {
+        this.unlisten();
+    }
+
     compose(data) {
         return null;
     }
@@ -458,6 +462,7 @@ class List extends Component {
     updateItems(data) {
         for (const [record, item] of this.items.entries()) {
             if (!data.includes(record)) {
+                this.items.get(record).remove();
                 this.items.delete(record);
             }
         }
@@ -482,10 +487,15 @@ class List extends Component {
         return [...this.items.values()].map(item => item.node);
     }
 
+    remove() {
+        super.remove();
+        for (const c of this.items.values()) {
+            c.remove();
+        }
+    }
+
     compose(data) {
-        return (
-            ul(this.nodes)
-        );
+        return ul(this.nodes.slice());
     }
 
 }

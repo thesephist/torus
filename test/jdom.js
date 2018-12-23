@@ -13,6 +13,7 @@ describe('jdom template tag', () => {
     }
 
     const compare = (title, expression, result) => {
+        normalizeJDOM(expression);
         normalizeJDOM(result);
         it(title, () => {
             expect(expression,
@@ -95,7 +96,7 @@ describe('jdom template tag', () => {
 
         compare(
             'multiple attributes',
-            jdom`<input type="text" name="username"/>`,
+            jdom`<input type="text" name="username" />`,
             {tag: 'input', attrs: {type: 'text', name: 'username'}}
         );
 
@@ -115,6 +116,29 @@ describe('jdom template tag', () => {
             'whitespaces distributed in the input',
             jdom`<button \n disabled           data-color  \n  =   "blue"></button>`,
             {tag: 'button', attrs: {disabled: true, 'data-color': 'blue'}}
+        );
+
+        compare(
+            'interpolate mixed values to a string',
+            jdom`<img data-prop="first ${{a: 'b'}}"`,
+            {tag: 'img', attrs: {'data-prop': 'first [object Object]'}}
+        );
+
+        compare(
+            'complex multi-attribute input',
+            jdom`<    div class ="hi
+               jinja name" disabled
+            color        =
+            "${{object: 'black'}}" taste
+                =  content list="what${{same: 'difference'}}
+            test  ${{much: 9}}"     > </div>`,
+            {tag: 'div', attrs: {
+                class: 'hi jinja name',
+                disabled: true,
+                color: {object: 'black'},
+                taste: 'content',
+                list: 'what[object Object] test [object Object]',
+            }}
         );
 
     });

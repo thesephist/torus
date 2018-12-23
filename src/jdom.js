@@ -59,9 +59,7 @@ class TplReader {
 
     readUpto(substr) {
         const [strs, objs] = this.readUntil(substr);
-        strs.reverse();
-        strs[0] = strs[0].replace(substr, '');
-        strs.reverse();
+        strs[strs.length - 1] = strs[strs.length - 1].replace(substr, '');
 
         for (const chr of substr) this.backtrack();
         return [strs, objs];
@@ -74,7 +72,7 @@ class TplReader {
         let next;
         while (!strs[0].endsWith(substr) && next !== READER_END) {
             next = this.next();
-            if (typeof next === 'string') {
+            if (typeof next === 'string' || typeof next === 'undefined') {
                 strs[0] += next;
             } else if (next !== READER_END) {
                 objs.push(next);
@@ -83,6 +81,19 @@ class TplReader {
         }
 
         return [strs.reverse(), objs];
+    }
+
+    get lastPart() {
+        return this.tplParts[this.tplParts.length - 1];
+    }
+
+    clipEnd(substr) {
+        if (this.lastPart.endsWith(substr)) {
+            this.tplParts[this.tplParts.length - 1] =
+                this.lastPart.replace(substr, '');
+            return true;
+        }
+        return false;
     }
 
 }
@@ -102,6 +113,7 @@ const kebabToCamel = kebabStr => {
 const parseOpeningTagContents = (tplParts, dynamicParts) => {
     const reader = new TplReader(tplParts, dynamicParts);
     reader.trim();
+    const selfClosing = reader.clipEnd('/');
 
     if (reader.next() === '!') {
         return null; // comment
@@ -109,10 +121,9 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
         reader.backtrack();
     }
 
+    let tag = '';
     const attrs = {};
     const events = {};
-    let keyContent = '';
-    let valContent = '';
 
     const commit = (key, val) => {
         if (typeof val === 'function') {
@@ -134,65 +145,114 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
                 attrs[key] = val;
             }
         }
-        keyContent = '';
-        valContent = '';
     }
 
-    const tagName = interpolate(...reader.readUpto(' ')).replace('/', '');
+    // tokenize
+    let head = [''];
+    let head_obj = [];
+    let waitingForAttr = false;
+    let inQuotes = false;
+    const tokens = [];
+    const TYPE_KEY = 0,
+        TYPE_VALUE = 1;
 
-    const commitMaybeAttribute = () => {
-        keyContent = keyContent.trim().replace('/', '');
-        if (keyContent !== '') {
-            commit(keyContent, true);
+    let nextType = TYPE_KEY;
+    const push = (type, val) => {
+        if (val !== '') {
+            tokens.push({
+                type: type,
+                value: val,
+            });
+            waitingForAttr = false;
         }
     }
-
-    for (let next = reader.next(); next !== READER_END; next = reader.next()) {
-        if (next === '=') {
-            const keys = keyContent.trim().split(/\s+/);
-            let i;
-            for (i = 0; i < keys.length - 1; i ++) {
-                if (keys[i] !== '') commit(keys[i], true);
-            }
-            keyContent = keys[i];
-
-            const nextChar = reader.next();
-
-            let val = null;
-            if (nextChar === '"') {
-                val = reader.readUpto('"');
-                reader.readUntil(' ');
+    const commitToken = () => {
+        head.reverse();
+        if (head.length == 2 && head[0] === '' && head[1] === '') {
+            if (head_obj.length === 1 && nextType === TYPE_VALUE) {
+                push(TYPE_VALUE, head_obj[0]);
             } else {
-                reader.backtrack();
-                val = reader.readUntil(' ');
+                push(nextType, interpolate(head, head_obj));
             }
-
-            if (val[0].length === 2 && val[0][0].trim() == '' && val[0][1].trim() == '') {
-                valContent = val[1][0];
-            } else {
-                valContent = interpolate(...val);
-            }
-
-            commit(keyContent, valContent);
         } else {
-            keyContent += next;
+            push(nextType, interpolate(head, head_obj).trim());
+        }
+        head = [''];
+        head_obj = [];
+    }
+    for (let next = reader.next(); next !== READER_END; next = reader.next()) {
+        switch (next) {
+            case '=':
+                commitToken();
+                waitingForAttr = true;
+                nextType = TYPE_VALUE;
+                break;
+            case ' ': // catches all whitespace; we replaced \s+ with ' ' earlier
+                if (inQuotes) {
+                    if (typeof next === 'string') {
+                        head[0] += next;
+                    } else {
+                        head_obj.unshift(next);
+                        head.unshift('');
+                    }
+                } else if (!waitingForAttr) {
+                    commitToken();
+                    nextType = TYPE_KEY;
+                }
+                break;
+            case '\\':
+                if (inQuotes) {
+                    head[0] += next;
+                    next = reader.next();
+                    head[0] += next;
+                }
+                break;
+            case '"':
+                if (inQuotes) {
+                    inQuotes = false;
+                    commitToken();
+                    nextType = TYPE_KEY;
+                } else if (nextType === TYPE_VALUE) {
+                    inQuotes = true;
+                }
+                break;
+            default:
+                if (typeof next === 'string') {
+                    head[0] += next;
+                } else {
+                    head_obj.unshift(next);
+                    head.unshift('');
+                }
+                waitingForAttr = false;
+                break;
         }
     }
+    commitToken();
 
-    commitMaybeAttribute();
-
-    // FIXME: find a more elegant way to detect self-closers,
-    //  especially since this is leading to some ugly stuff like
-    //  const tagName = ... and commitMaybeAttribute:1
-    let selfClosing = false;
-    reader.backtrack();
-    if (reader.next() === '/') {
-        selfClosing = true;
+    // parse token stream
+    tag = tokens.shift().value;
+    let last = null,
+        curr = tokens.shift();
+    const step = () => {
+        last = curr;
+        curr = tokens.shift();
+    }
+    while (curr !== undefined) {
+        if (curr.type === TYPE_VALUE) {
+            commit(last.value, curr.value);
+            step();
+        } else if (last) {
+            commit(last.value, true);
+        }
+        step();
+    }
+    if (last && last.type === TYPE_KEY) {
+        commit(last.value, true);
     }
 
     return {
         jdom: {
-            tag: tagName,
+            tag: tag,
             attrs: attrs,
             events: events,
         },
@@ -202,7 +262,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
 
 const interpolate = (tplParts, dynamicParts) => {
     let str = tplParts[0];
-    for (let i = 1; i < dynamicParts.length; i ++) {
+    for (let i = 1; i <= dynamicParts.length; i ++) {
         str += dynamicParts[i - 1] + tplParts[i];
     }
     return str;

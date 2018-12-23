@@ -88,9 +88,10 @@ class TplReader {
     }
 
     clipEnd(substr) {
-        if (this.lastPart.endsWith(substr)) {
+        const last = this.lastPart;
+        if (last.endsWith(substr)) {
             this.tplParts[this.tplParts.length - 1] =
-                this.lastPart.replace(substr, '');
+                last.substr(0, last.length - substr.length);
             return true;
         }
         return false;
@@ -136,7 +137,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             } else if (key === 'style') {
                 const declarations = val.split(';').filter(s => !!s).map(pair => {
                     const [first, ...rest] = pair.split(':');
-                    return [kebabToCamel(first), rest.join(':')];
+                    return [kebabToCamel(first.trim()), rest.join(':').trim()];
                 });
                 const rule = {};
                 for (const [prop, val] of declarations) {
@@ -191,12 +192,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
                 break;
             case ' ': // catches all whitespace; we replaced \s+ with ' ' earlier
                 if (inQuotes) {
-                    if (typeof next === 'string') {
-                        head[0] += next;
-                    } else {
-                        head_obj.unshift(next);
-                        head.unshift('');
-                    }
+                    head[0] += next;
                 } else if (!waitingForAttr) {
                     commitToken();
                     nextType = TYPE_KEY;
@@ -204,7 +200,6 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
                 break;
             case '\\':
                 if (inQuotes) {
-                    head[0] += next;
                     next = reader.next();
                     head[0] += next;
                 }

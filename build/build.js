@@ -60,14 +60,6 @@ const webpackConfigs = {
             filename: 'torus.min.js',
         },
     },
-    jdom_dev: {
-        entry: './src/jdom.js',
-        mode: 'development',
-        output: {
-            path: path.resolve('./dist/'),
-            filename: 'jdom.dev.js',
-        },
-    },
     jdom_prod: {
         entry: './src/jdom.js',
         mode: 'production',
@@ -78,12 +70,25 @@ const webpackConfigs = {
     },
 }
 
+const iife = s => `(function(){${s}})();`;
+
 // copy torus without debug statements
 const torusSource = fs.readFileSync('./src/torus.js', 'utf8');
+const jdomSource = fs.readFileSync('./src/jdom.js', 'utf8');
+
 mkdirp.sync('./dist/');
+
 const torusSourceNoDebug = stripDebugParts(torusSource);
+const jdomSourceNoDebug = stripDebugParts(jdomSource);
+
+// we don't use webpack for this dev build, so we can run coverage reports
+//  the easiest way (without depending on sourcemaps to work all the time).
+fs.writeFile('./dist/jdom.dev.js', iife(jdomSourceNoDebug), 'utf8', (err) => {
+    if (err) console.error('Error writing no-debug jdom.js', err);
+});
+
 fs.writeFile('./dist/torus.no-debug.js', torusSourceNoDebug, 'utf8', (err) => {
-    if (err) console.error('Error writing no-debug file', err);
+    if (err) console.error('Error writing no-debug torus.js', err);
 
     for (const [name, config] of Object.entries(webpackConfigs)) {
         webpack(config, (err, stats) => {

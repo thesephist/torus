@@ -621,15 +621,39 @@ describe('Styled', () => {
     });
 
     describe('StyledComponent', () => {
+        const S = class extends StyledComponent {
+            styles() {
+                return {
+                    'font-size': '18px',
+                    'background': 'rgba(0, 0, 0, 0.4)',
+                    '@keyframes some-name': `{
+                        from {opacity: 0}
+                        to {opacity: 1}
+                    }`,
+                    '&.invalid': {
+                        'color': 'red',
+                    },
+                    '::after': {
+                        'display': 'block',
+                    },
+                }
+            }
 
-        it('should not throw if no styles are defined', () => {
+            compose() {
+                return div();
+            }
+        }
 
+        it('should render without customization', () => {
+            const Vanilla = Styled(class extends Component {
+                compose() {return div()}
+            });
+            const v = new Vanilla();
         });
 
         it('should not throw with styles defined (placeholder test)', () => {
-
+            const s = new S();
         });
-
     });
 
 });

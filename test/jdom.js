@@ -41,6 +41,13 @@ describe('jdom template tag', () => {
         undefined,
     );
 
+    const tn = document.createElement('video');
+    compare(
+        'literal Node',
+        jdom`${tn}`,
+        tn
+    );
+
     describe('tags', () => {
 
         compare(
@@ -110,8 +117,31 @@ describe('jdom template tag', () => {
         );
 
         compare(
-            'class'
-        )
+            'styles in to a styles JDOM object',
+            jdom`<div style=" display: flex;flex-direction
+                :column; transition: opacity .9s"></div>`,
+            {tag: 'div', attrs: {style: {
+                'display': 'flex',
+                'flexDirection': 'column',
+                'transition': 'opacity .9s',
+            }}}
+        );
+
+        compare(
+            'URLs in self-closing tags with /',
+            jdom`<img src="/static/img.png"/>`,
+            {tag: 'img', attrs: {
+                src: '/static/img.png',
+            }}
+        );
+
+        compare(
+            'escape with backslash',
+            jdom`<button type="my\\"type"`,
+            {tag: 'button', attrs: {
+                type: 'my"type',
+            }}
+        );
 
         compare(
             'multiple attributes',
@@ -196,6 +226,7 @@ describe('jdom template tag', () => {
     describe('children', () => {
 
         const tmpNode = document.createElement('img');
+        const tmp2 = document.createElement('article');
 
         compare(
             'children as markup',
@@ -224,6 +255,12 @@ describe('jdom template tag', () => {
                 {tag: 'li', children: ['Second']},
                 tmpNode,
             ]}
+        );
+
+        compare(
+            'array of literal elements',
+            jdom`<main>${[tmpNode, tmp2]}</main>`,
+            {tag: 'main', children: [tmpNode, tmp2]}
         );
 
         compare(
@@ -274,6 +311,11 @@ describe('jdom template tag', () => {
         noThrow(
             'broken tag',
             () => jdom`<div>di>`
+        );
+
+        noThrow(
+            'invalid attributes',
+            () => jdom`<div ${{santa: 'claus'}}></div>`
         );
 
     });

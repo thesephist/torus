@@ -128,7 +128,7 @@ class MyVideoPlayer extends Component {
 
     init() {
         this.videoEl = document.createElement('video');
-        this.videoEl.src = '/videos/abc`;
+        this.videoEl.src = '/videos/abc';
     }
 
     play() {

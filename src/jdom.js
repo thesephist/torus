@@ -133,7 +133,9 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             events[eventName].push(val);
         } else {
             if (key === 'class') {
-                attrs[key] = val.trim().split(' ');
+                if (val = val.trim()) {
+                    attrs[key] = val.split(' ');
+                }
             } else if (key === 'style') {
                 const declarations = val.split(';').filter(s => !!s).map(pair => {
                     const [first, ...rest] = pair.split(':');
@@ -160,8 +162,8 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
         TYPE_VALUE = 1;
 
     let nextType = TYPE_KEY;
-    const push = (type, val) => {
-        if (val !== '') {
+    const push = (type, val, force) => {
+        if (val !== '' || force) {
             tokens.push({
                 type: type,
                 value: val,
@@ -169,16 +171,16 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             waitingForAttr = false;
         }
     }
-    const commitToken = () => {
+    const commitToken = (force) => {
         head.reverse();
         if (head.length == 2 && head[0] === '' && head[1] === '') {
             if (head_obj.length === 1 && nextType === TYPE_VALUE) {
-                push(TYPE_VALUE, head_obj[0]);
+                push(TYPE_VALUE, head_obj[0], force);
             } else {
-                push(nextType, interpolate(head, head_obj));
+                push(nextType, interpolate(head, head_obj), force);
             }
         } else {
-            push(nextType, interpolate(head, head_obj).trim());
+            push(nextType, interpolate(head, head_obj).trim(), force);
         }
         head = [''];
         head_obj = [];
@@ -207,7 +209,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             case '"':
                 if (inQuotes) {
                     inQuotes = false;
-                    commitToken();
+                    commitToken(true);
                     nextType = TYPE_KEY;
                 } else if (nextType === TYPE_VALUE) {
                     inQuotes = true;

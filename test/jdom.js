@@ -156,6 +156,12 @@ describe('jdom template tag', () => {
         );
 
         compare(
+            'attributes with an empty value',
+            jdom`<div class=""></div>`,
+            {tag: 'div'}
+        );
+
+        compare(
             'mixed IDL and valued attributes',
             jdom`<button disabled data-color="blue"></button>`,
             {tag: 'button', attrs: {disabled: true, 'data-color': 'blue'}}

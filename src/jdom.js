@@ -1,6 +1,12 @@
-// note: anything where value is aufnction iwill be treated as an event listener or ignored.
+// note: anything where value is a function will be treated as an event listener or ignored.
 
 const READER_END = 1989;
+
+const isNode = (typeof Node === 'undefined') ? (
+    () => false
+) : (
+    o => o instanceof Node
+)
 
 class TplReader {
 
@@ -11,6 +17,12 @@ class TplReader {
         this.partIdx = 0;
         this.charIdx = -1;
         this.end = false;
+    }
+
+    trim() {
+        const l = this.tplParts.length;
+        this.tplParts[0] = this.tplParts[0].replace(/^\s+/, '');
+        this.tplParts[l-1] = this.tplParts[l-1].replace(/\s+$/, '');
     }
 
     next() {
@@ -89,6 +101,7 @@ const kebabToCamel = kebabStr => {
 
 const parseOpeningTagContents = (tplParts, dynamicParts) => {
     const reader = new TplReader(tplParts, dynamicParts);
+    reader.trim();
 
     if (reader.next() === '!') {
         return null; // comment
@@ -125,41 +138,51 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
         valContent = '';
     }
 
-    const tagName = interpolate(...reader.readUpto(' '));
+    const tagName = interpolate(...reader.readUpto(' ')).replace('/', '');
 
-    for (let next = reader.next(); next !== READER_END; next = reader.next()) {
-        switch (next) {
-            case '=':
-                const nextChar = reader.next();
-
-                let val = null;
-                if (nextChar === '"') {
-                    val = reader.readUpto('"');
-                    reader.readUntil(' ');
-                } else {
-                    reader.backtrack();
-                    val = reader.readUntil(' ');
-                }
-
-                if (val[0].length === 2 && val[0][0].trim() == '' && val[0][1].trim() == '') {
-                    valContent = val[1][0];
-                } else {
-                    valContent = interpolate(...val);
-                }
-
-                commit(keyContent, valContent);
-                break;
-            case ' ':
-                if (keyContent !== '') {
-                    commit(keyContent, true);
-                }
-                break;
-            default:
-                keyContent += next;
-                break;
+    const commitMaybeAttribute = () => {
+        keyContent = keyContent.trim().replace('/', '');
+        if (keyContent !== '') {
+            commit(keyContent, true);
         }
     }
 
+    for (let next = reader.next(); next !== READER_END; next = reader.next()) {
+        if (next === '=') {
+            const keys = keyContent.trim().split(/\s+/);
+            let i;
+            for (i = 0; i < keys.length - 1; i ++) {
+                if (keys[i] !== '') commit(keys[i], true);
+            keyContent = keys[i];
+
+            const nextChar = reader.next();
+
+            let val = null;
+            if (nextChar === '"') {
+                val = reader.readUpto('"');
+                reader.readUntil(' ');
+            } else {
+                reader.backtrack();
+                val = reader.readUntil(' ');
+            }
+
+            if (val[0].length === 2 && val[0][0].trim() == '' && val[0][1].trim() == '') {
+                valContent = val[1][0];
+            } else {
+                valContent = interpolate(...val);
+            }
+
+            commit(keyContent, valContent);
+        } else {
+            keyContent += next;
+        }
+    }
+
+    commitMaybeAttribute();
+
+    // FIXME: find a more elegant way to detect self-closers,
+    //  especially since this is leading to some ugly stuff like
+    //  const tagName = ... and commitMaybeAttribute:1
     let selfClosing = false;
     reader.backtrack();
     if (reader.next() === '/') {
@@ -203,38 +226,33 @@ const parseJSX = (tplParts, dynamicParts) => {
     }
 
     for (let next = reader.next(); next !== READER_END; next = reader.next()) {
-        switch (next) {
-            case '<':
+        if (next === '<') {
+            commit();
+            const result = parseOpeningTagContents(...reader.readUpto('>'));
+            reader.readUntil('>');
+            currentElement = result && result.jdom;
+            if (typeof currentElement === 'object' && currentElement !== null) {
+                if (!result.selfClosing) {
+                    const closingTag = `</${currentElement.tag}>`;
+                    currentElement.children = parseJSX(...reader.readUpto(closingTag));
+                    reader.readUntil(closingTag);
+                }
+            }
+        } else if (next instanceof Array && isNode(next[0])) {
+            for (const component of next) {
                 commit();
-                const result = parseOpeningTagContents(...reader.readUpto('>'));
-                reader.readUntil('>');
-                currentElement = result.jdom;
-                if (typeof currentElement === 'object') {
-                    if (!result.selfClosing) {
-                        const closingTag = `</${currentElement.tag}>`;
-                        currentElement.children = parseJSX(...reader.readUpto(closingTag));
-                        reader.readUntil(closingTag);
-                    }
-                }
-                break;
-            default:
-                if (next instanceof Array && next[0] instanceof Node) {
-                    for (const component of next) {
-                        commit();
-                        currentElement = component;
-                    }
-                } else if (next instanceof Node) {
-                    commit();
-                    currentElement = next;
-                } else {
-                    if (!inTextNode) {
-                        commit();
-                        inTextNode = true;
-                        currentElement = '';
-                    }
-                    currentElement += next;
-                }
-                break;
+                currentElement = component;
+            }
+        } else if (isNode(next)) {
+            commit();
+            currentElement = next;
+        } else {
+            if (!inTextNode) {
+                commit();
+                inTextNode = true;
+                currentElement = '';
+            }
+            currentElement += next;
         }
     }
 
@@ -245,7 +263,7 @@ const parseJSX = (tplParts, dynamicParts) => {
 
 const jdom = (tplParts, ...dynamicParts) => {
     try {
-        return parseJSX(tplParts.map(part => part.replace(/\s+/g, ' ')), dynamicParts)[0]; 
+        return parseJSX(tplParts.map(part => part.replace(/\s+/g, ' ')), dynamicParts)[0];
     } catch (e) {
         console.error(`Error parsing invalid HTML template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);
     }
@@ -262,4 +280,3 @@ if (typeof window === 'object') {
 if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = exposedNames;
 }
-

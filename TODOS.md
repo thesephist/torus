@@ -1,8 +1,8 @@
 # Torus To-dos
 
-- [-] Add tests for `Styled[Component]`, `jdom` template tag function, and `Component#remove`/`List#remove`.
+- [-] Add tests for `Styled[Component]`, template tag function, and `Component#remove`/`List#remove`.
 
-- [-] Keep cutting down that bundle size!
+- [-] Keep cutting down that bundle size and complexity / speed, especially for jdom!
 
 - [ ] Incorporate sample projects into test, under `test/todo.js` etc. These integration tests will make testing on the whole more robust.
 

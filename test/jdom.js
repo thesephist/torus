@@ -8,6 +8,9 @@ describe('jdom template tag', () => {
             if (!('attrs' in jdom)) jdom.attrs = {};
             if (!('events' in jdom)) jdom.events = {};
             if (!('children' in jdom)) jdom.children = [];
+            for (const c of jdom.children) {
+                normalizeJDOM(c);
+            }
         }
         return jdom;
     }
@@ -17,7 +20,11 @@ describe('jdom template tag', () => {
         normalizeJDOM(result);
         it(title, () => {
             expect(expression,
-                `${JSON.stringify(expression)}\n\t** versus **\n${JSON.stringify(result)}\n`)
+                `\n${
+                    JSON.stringify(expression, true, '\t')
+                }\n\t^ should have been ...\n${
+                    JSON.stringify(result, null, '\t')
+                }\n`)
                 .to.deep.equal(result);
         });
     }
@@ -95,6 +102,18 @@ describe('jdom template tag', () => {
         );
 
         compare(
+            'classes into an array in JDOM',
+            jdom`<div class="a b class "></div>`,
+            {tag: 'div', attrs: {
+                class: ['a', 'b', 'class'],
+            }}
+        );
+
+        compare(
+            'class'
+        )
+
+        compare(
             'multiple attributes',
             jdom`<input type="text" name="username" />`,
             {tag: 'input', attrs: {type: 'text', name: 'username'}}
@@ -125,6 +144,12 @@ describe('jdom template tag', () => {
         );
 
         compare(
+            'quoted attributes with no space',
+            jdom`<div type="a"kind="b></div>"`,
+            {tag: 'div', attrs: {type: 'a', kind: 'b'}}
+        );
+
+        compare(
             'complex multi-attribute input',
             jdom`<    div class ="hi
                jinja name" disabled
@@ -133,7 +158,7 @@ describe('jdom template tag', () => {
                 =  content list="what${{same: 'difference'}}
             test  ${{much: 9}}"     > </div>`,
             {tag: 'div', attrs: {
-                class: 'hi jinja name',
+                class: ['hi', 'jinja', 'name'],
                 disabled: true,
                 color: {object: 'black'},
                 taste: 'content',
@@ -154,20 +179,71 @@ describe('jdom template tag', () => {
             {tag: 'button', events: {click: [fnA]}}
         );
 
+        compare(
+            'two different events',
+            jdom`<button onclick="${fnA}"onblur="${fnB}"></button>`,
+            {tag: 'button', events: {click: [fnA], blur: [fnB]}}
+        );
+
+        compare(
+            'preserve case of event name',
+            jdom`<button onDOMContentLoaded=${fnA}></button>`,
+            {tag: 'button', events: {DOMContentLoaded: [fnA]}}
+        );
+
     });
 
     describe('children', () => {
 
-    });
+        const tmpNode = document.createElement('img');
 
-    describe('integration', () => {
+        compare(
+            'children as markup',
+            jdom`<ul><li>Text</li></ul>`,
+            {tag: 'ul', children: [
+                {tag: 'li', children: ['Text']}
+            ]}
+        );
+        compare(
+            'children as Node',
+            jdom`<li>${tmpNode}</li>`,
+            {tag: 'li', children: [
+                tmpNode,
+            ]}
+        );
+
+        compare(
+            'mixed children',
+            jdom`<div>
+            First
+            <li>Second</li>
+            ${tmpNode}
+            </div>`,
+            {tag: 'div', children: [
+                'First',
+                {tag: 'li', children: ['Second']},
+                tmpNode,
+            ]}
+        );
+
+        compare(
+            'deep nesting',
+            jdom`<main><article><section class="mySection c2"><h1>hi</h1></section></article></main>`,
+            {tag: 'main', children: [
+                {tag: 'article', children: [
+                    {tag: 'section', attrs: {class: ['mySection', 'c2']}, children: [
+                        {tag: 'h1', children: ['hi']},
+                    ]},
+                ]},
+            ]},
+        );
 
     });
 
     describe('Graceful failure', () => {
 
         const noThrow = (title, fn) => {
-            it(title, () => expect(fn).to.not.throw);
+            it(title, () => expect(fn).to.not.throw());
         }
 
         noThrow(
@@ -185,8 +261,22 @@ describe('jdom template tag', () => {
             () => jdom`<div\n></\ndiv\n>`
         );
 
-        // TODO: mismatched opening/closing pairs, broken attrs, etc.
+        noThrow(
+            'mismatched tags',
+            () => jdom`<div><p></div>`
+        );
+
+        noThrow(
+            'broken attributes',
+            () => jdom`<img src=/>`
+        );
+
+        noThrow(
+            'broken tag',
+            () => jdom`<div>di>`
+        );
 
     });
 
 });
+

@@ -131,7 +131,9 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             if (!(key in events)) events[eventName] = [];
             events[eventName].push(val);
         } else {
-            if (key === 'style') {
+            if (key === 'class') {
+                attrs[key] = val.trim().split(' ');
+            } else if (key === 'style') {
                 const declarations = val.split(';').filter(s => !!s).map(pair => {
                     const [first, ...rest] = pair.split(':');
                     return [kebabToCamel(first), rest.join(':')];
@@ -341,3 +343,4 @@ if (typeof window === 'object') {
 if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = exposedNames;
 }
+

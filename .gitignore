@@ -1,6 +1,7 @@
 # torus-specific ignores
 dist/
 coverage/
+.vscode/
 
 # Logs
 logs

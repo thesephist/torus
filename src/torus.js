@@ -67,8 +67,10 @@ const createNodeFactory = tag => {
     }
 }
 
+const isObject = o => typeof o === 'object' && o !== null;
+
 const normalizeJDOM = jdom => {
-    if (typeof jdom === 'object') {
+    if (isObject(jdom)) {
         if (!('tag' in jdom)) jdom.tag = 'div';
         if (!('attrs' in jdom)) jdom.attrs = {};
         if (!('events' in jdom)) jdom.events = {};
@@ -91,7 +93,7 @@ function replacePlaceholders() {
 const renderJDOM = (node, previous, next) => {
 
     function replacePreviousNode(newNode) {
-        if (node !== undefined && node.parentNode) {
+        if (node !== undefined && node !== newNode && node.parentNode) {
             const tmp = tmpNode();
             placeholders.set(tmp, newNode);
             node.parentNode.replaceChild(tmp, node);
@@ -454,13 +456,14 @@ class List extends Component {
 
     init(store) {
         this.items = new Map();
+        this.filterFn = null;
 
         this.listen(store, this.updateItems.bind(this));
         this.updateItems(store.getCurrentSummary());
     }
 
     updateItems(data) {
-        for (const [record, item] of this.items.entries()) {
+        for (const record of this.items.keys()) {
             if (!data.includes(record)) {
                 this.items.get(record).remove();
                 this.items.delete(record);
@@ -473,6 +476,9 @@ class List extends Component {
         }
 
         const sorter = [...this.items.entries()];
+        if (this.filterFn !== null) {
+            sorter.filter(record => filterFn(record));
+        }
         sorter.sort((a, b) => data.indexOf(a[0]) - data.indexOf(b[0]));
 
         this.items = new Map();
@@ -480,6 +486,16 @@ class List extends Component {
             this.items.set(record, item);
         }
 
+        this.render();
+    }
+
+    filter(filterFn) {
+        this.filterFn = filterFn;
+        this.render();
+    }
+
+    unfilter() {
+        this.filterFn = null;
         this.render();
     }
 
@@ -714,4 +730,3 @@ if (typeof window === 'object') {
 if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = exposedNames;
 }
-

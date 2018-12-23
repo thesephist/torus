@@ -8,6 +8,7 @@ module.exports = function(config) {
 
         files: [
             'dist/torus.min.js',
+            'dist/jdom.dev.js',
             'test/*.js'
         ],
 
@@ -42,4 +43,3 @@ module.exports = function(config) {
         concurrency: Infinity,
     });
 }
-

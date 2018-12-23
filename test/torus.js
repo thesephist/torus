@@ -1,12 +1,12 @@
 describe('Node factory functions', () => {
 
-    it('should accept 1 argument of array as children in an array', () => {
+    it('should correctly process 1 argument of array as children in an array', () => {
         const jdom = h1(['Hello']);
         jdom.tag.should.equal('h1');
         jdom.children.should.deep.equal(['Hello']);
     });
 
-    it('should accept 1 argument of object as attrs', () => {
+    it('should correctly process 1 argument of object as attrs', () => {
         const jdom = li({
             style: {fontSize: '20px'},
         });
@@ -16,7 +16,7 @@ describe('Node factory functions', () => {
         }});
     });
 
-    it('should accept 2 arguments as attrs and children', () => {
+    it('should correctly process 2 arguments as attrs and children', () => {
         const jdom = li({
             style: {fontSize: '20px'},
         }, ['List item']);
@@ -27,7 +27,7 @@ describe('Node factory functions', () => {
         jdom.children.should.deep.equal(['List item']);
     });
 
-    it('should accept 2 arguments of objects as attrs and events', () => {
+    it('should correctly process 2 arguments of objects as attrs and events', () => {
         const clickHandler = () => {};
         const jdom = button({
             disabled: true,
@@ -38,7 +38,7 @@ describe('Node factory functions', () => {
         jdom.attrs.should.deep.equal({disabled: true});
     });
 
-    it('should accept 3 arguments as attrs, events, children', () => {
+    it('should correctly process 3 arguments as attrs, events, children', () => {
         const clickHandler = () => {};
         const jdom = button({
             disabled: true,
@@ -610,6 +610,30 @@ describe('Component', () => {
 
 });
 
+describe('Styled', () => {
+
+    it('Returns a subclass of a given Component with CSS APIs', () => {
+        class Comp extends Component {};
+        const Tmp = Styled(Comp);
+        const t = new Tmp();
+        t.should.be.an.instanceof(Comp);
+        t.styles.should.be.a('function');
+    });
+
+    describe('StyledComponent', () => {
+
+        it('should not throw if no styles are defined', () => {
+
+        });
+
+        it('should not throw with styles defined (placeholder test)', () => {
+
+        });
+
+    });
+
+});
+
 describe('List', () => {
 
     class ItemComponent extends Component {
@@ -967,4 +991,3 @@ describe('StoreOf', () => {
     });
 
 });
-

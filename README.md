@@ -98,7 +98,33 @@ const MyStyledList = Styled(List);
 // or
 
 class MyFancyList extends Styled(List) {
-    constructor() {...}
+
+    styles() {
+        return {
+            // normal CSS properties scoped to the root node
+            'font-size': '18px',
+            'background': 'rgba(0, 0, 0, 0.4)',
+
+            // Keyframes and media queries will be scoped globally
+            '@keyframes some-name': `{
+                from {opacity: 0}
+                to {opacity: 1}
+            }`,
+            '@media (max-width: 800px)': {
+                'font-size': '16px',
+            },
+
+            // We can use SCSS-like syntax for hierarchy.
+            //  '&' are replaced by the parent selector.
+            '&.invalid': {
+                'color': 'red',
+            },
+            '::after': {
+                'display': 'block',
+            },
+        }
+    }
+
 }
 ```
 
@@ -218,19 +244,27 @@ const tasks = new TaskStore([
 const list = new TaskList(tasks);
 ```
 
+Note that `List` is not styled by default. You can extend the styled version of the list component by extending from `Styled(List)`.
+
 >// TODO document List API
-
-## Styles with CSS in `StyledComponent`
-
-```javascript
-// TODO
-```
 
 ## Data models (`Record`, `Store`)
 
-```javascript
-// TODO
-```
+### Records
+
+An instance of `Record` represents a single source of data, and we can bind a Torus component to a record to have the component perform some action (usually re-compose and render) when the record emits an event (usually data update).
+
+>// TODO
+
+### Stores
+
+An instance of `Store` represents a collection of records, or a table in a relational sense. We can bind Torus components to stores, but stores are usually best used with `List` or a list-like component to display an entire list of records.
+
+>// TODO
+
+## Client-side routing: Components bound to `Router`
+
+>// TODO
 
 ## A supplement about JDOM (JSON DOM)
 

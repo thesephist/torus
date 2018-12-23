@@ -1,12 +1,10 @@
 # Torus To-dos
 
-- [-] Add more detailed tests for `Styled[Component]`
+- [-] Flesh out documentation, referencing tests for API surface.
+
+- [-] Add more detailed tests for `Styled[Component]` (media queries?)
 
 - [-] Keep cutting down that bundle size and complexity / speed!
-
-- [ ] Incorporate sample projects into test, under `test/todo.js` etc. These integration tests will make testing on the whole more robust.
-
-- [ ] Flesh out documentation, referencing tests for API surface.
 
 - [ ] First release (after all the above are complete)
 

@@ -648,6 +648,9 @@ describe('Styled', () => {
                         from {opacity: 0}
                         to {opacity: 1}
                     }`,
+                    '@media (max-width: 800px)': {
+                        'font-size': '16px',
+                    },
                     '&.invalid': {
                         'color': 'red',
                     },

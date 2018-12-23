@@ -347,12 +347,15 @@ class Component {
         return null;
     }
 
+    preprocess(jdom, data) {
+        return jdom;
+    }
+
     render(data) {
         // @debug
         render_debug(`Render Component: ${this.constructor.name}`, true);
-        const jdom = this.compose(
-            data || (this.event.source && this.event.source.serialize())
-        );
+        data = data || (this.event.source && this.event.source.serialize())
+        const jdom = this.preprocess(this.compose(data), data);
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;
         return this.jdom;
@@ -421,29 +424,24 @@ const injectStylesOnce = stylesObject => {
     }
     return className;
 }
-class StyledComponent extends Component {
+const Styled = Base => {
+    return class extends Base {
+        styles(data) {
+            // should be overridden in subclasses
+            return {};
+        }
 
-    styles(data) {
-        // should be overridden in subclasses
-        return {};
+        preprocess(jdom, data) {
+            if (isObject(jdom)) {
+                jdom.attrs = jdom.attrs || {};
+                jdom.attrs.class = arrayNormalize(jdom.attrs.class || []);
+                jdom.attrs.class.push(injectStylesOnce(this.styles(data)));
+            }
+            return jdom;
+        }
     }
-
-    render(data) {
-        // @debug
-        render_debug(`Render Styled Component: ${this.constructor.name}`, true);
-        const jdom = this.compose(
-            data || (this.event.source && this.event.source.serialize())
-        );
-        jdom.attrs = jdom.attrs || {};
-        jdom.attrs.class = arrayNormalize(jdom.attrs.class || []);
-        jdom.attrs.class.push(injectStylesOnce(this.styles(data)));
-
-        this.node = renderJDOM(this.node, this.jdom, jdom);
-        this.jdom = jdom;
-        return this.jdom;
-    }
-
 }
+const StyledComponent = Styled(Component);
 
 /**
  * Generic list implementation based on stores
@@ -698,6 +696,7 @@ class Router extends Evented {
 
 const exposedNames = {
     renderJDOM,
+    Styled,
     StyledComponent,
     Component,
     List,

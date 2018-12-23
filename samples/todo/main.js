@@ -164,4 +164,3 @@ class App extends Component {
 
 const app = new App();
 document.body.appendChild(app.node);
-

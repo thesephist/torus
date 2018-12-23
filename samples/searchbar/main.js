@@ -110,6 +110,7 @@ class App extends StyledComponent {
                 'font-size': '88px',
                 'color': '#333',
                 'margin': '36px 0',
+                'text-align': 'center',
             },
 
             '.bar': {
@@ -148,4 +149,3 @@ class App extends StyledComponent {
 const app = new App();
 document.body.appendChild(app.node);
 document.body.style.background = '#f7f7f7';
-

@@ -84,6 +84,24 @@ One notable difference between Torus's and React's component API, which this res
 
 For a more detailed and real-world example tying in models, please reference `samples/`.
 
+### `Styled()` and `StyledComponent`
+
+By default, Torus components are only styled through inline CSS, through the `attrs.style` field in the JDOM. However, Torus also comes with a higher order component to produce a version of any given Torus component that understands an SCSS-like syntax for declaring styles, `Styled()`, and the `StyledComponent` class, which is equivalent to `Styled(Component)`.
+
+The `TabButton` example at the beginning of this README demonstrates how these styled Torus components work. Rather than defining inline styles in the compose function, which is tedious and can cost performance, we define a new `#styles()` method that returns a JSON representation of the SCSS for that component. These styles will be scoped to just the component with a `_torus???` class name and applied to the component DOM before it's rendered to the page, and will efficiently update when the defined styles change.
+
+The `Styled` higher order component allows us to take vanilla Torus components and give them the ability to understand SCSS styles. For example, the default `List` component inherits purely from `Component`, but we can create a list component that we can style with CSS, by declaring:
+
+```javascript
+const MyStyledList = Styled(List);
+
+// or
+
+class MyFancyList extends Styled(List) {
+    constructor() {...}
+}
+```
+
 ### Component lifecycle
 
 1. Create new component

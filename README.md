@@ -4,17 +4,27 @@ Minimal JS Model-View UI framework focused on being tiny, efficient, and free of
 
 ## Features
 
-### Simplicity
+### Simplicity and size
 
-Torus has no production dependencies and weighs in at under 2.5kb gzipped. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
+Torus has no production dependencies, requires no build step to take advantage of all of its features, and weighs in at under 3kb gzipped. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
 
 ### Portability
 
-Torus's architecture encapsulates all of the rendering and updating logic within the component itself, so it's safe to take `someComponent.node` and treat it as a simple pointer to the root DOM element of the component. You can move it around the page, take it in and out of the document, embed it in React or Vue components, and otherwise use it anywhere a vanilla DOM element can be used. This allows you to include Torus components and apps in lots of other frontends.
+Torus's architecture encapsulates all of the rendering and updating logic within the component itself, so it's safe to take `Component#node` and treat it as a simple pointer to the root DOM element of the component. You can move it around the page, take it in and out of the document, embed it in React or Vue components, and otherwise use it anywhere a vanilla DOM element can be used. This allows you to include Torus components and apps in lots of other frontends.
 
-**Note**: Sometimes, like when the tag of the root element changes, `someComponent.node` can change as Torus needs to replace one element fully with a new element. For this reason, always use `#node` referenced from the component object, rather than caching the actual element `#node` points to at one point in time.
+**Note**: Sometimes, like when the tag of the root element changes, `Component#node` can change as Torus needs to replace one element fully with a new element. For this reason, always use `#node` referenced from the component object, rather than caching the actual element `#node` points to at one point in time.
 
 Combined with the small size of Torus, this makes it reasonable to ship torus with only one or a few components for a larger project that includes elements from other frameworks, if you don't want to or can't ship an entire Torus application.
+
+## Influences
+
+Torus's API is a mixture of declarative interfaces for defining user interfaces and views, and imperative patterns for state management, which I personally find is the best balance of the two styles when building large applications.
+
+Torus's design is inspired by React's component-driven architecture, and borrows common concepts from the React ecosystem, like the idea of diffing in virtual DOM before rendering, composition with higher order components, and mixing CSS and markup into JavaScript to separate concerns for each component into a single class. But Torus builds on those ideas by providing a more minimal, less opinionated lower-level APIs, and opting for a stateful data model rather than a view/controller layer that strives to be purely functional.
+
+Torus also borrows from [Backbone](http://backbonejs.org) in its data models design, for Records and Stores, for having an event-driven design behind how data updates are bound to views and other models.
+
+Lastly, Torus's `jdom` template tag was inspired by [htm](https://github.com/developit/htm) and [lit-html](https://github.com/Polymer/lit-html), both template tags to process HTML markup into virtual DOM.
 
 ## Component model
 
@@ -55,7 +65,7 @@ class TabButton extends StyledComponent {
 
     // Think of #compose() like the #render() in React or Backbone.
     //  #compose() declaratively returns the DOM for the UI component,
-    //  which torus takes and renderes efficiently through its virtual DOM.
+    //  which torus takes and renders efficiently through its virtual DOM.
     //
     // We can return a vanilla, JSON representation of the DOM (see
     //  "JDOM" section in the README), but we can also rely on the
@@ -69,6 +79,8 @@ class TabButton extends StyledComponent {
 
 }
 ```
+
+One notable difference between Torus's and React's component API, which this resembles, is that Torus components are much more self-managing. Torus components are long-lived and stateful, and so have no lifecycle methods, but instead call `#render` imperatively whenever the component's DOM tree needs to update (when local state changes or a data source emits an event). This manual render-call replaces React's `shouldComponentUpdate` in a sense, and means that render functions are _never_ run unless a re-render is explicitly required as the result of a state change, even if the component in question is a child of a parent that re-renders frequently.
 
 For a more detailed and real-world example tying in models, please reference `samples/`.
 
@@ -84,11 +96,70 @@ For a more detailed and real-world example tying in models, please reference `sa
 
 **Note**: It's generally a good idea to call `Component#remove()` when the component no longer becomes needed, like when a model tied to it is destroyed or the user switches to a completely different view. But because Torus components are lightweight, there's no need to use it as a memory management mechanism or to trigger garbage collection. Torus components, unlike React components, are designed to be long-lived and last through a full session or page lifecycle.
 
+### Accessing stateful HTMLElement methods
+
+Torus tries to define UI components as declaratively as possible, but the rest of the web, and crucially the DOM, expose stateful APIS, like `VideoElement.play()` and `FormElement.submit()`.
+
+React's approach to resolving this conflict is [refs](https://reactjs.org/docs/refs-and-the-dom.html), which are declaratively defined bindings to HTML elements that are later created by React's renderer.
+
+Torus's Component API is lower-level, and tries to expose the underlying DOM more transparently. Because we can embed literal DOM nodes within what `Component#compose()` returns, we can do this instead:
+
+```javascript
+// Option A
+class MyVideoPlayer extends Component {
+
+    init() {
+        this.videoEl = document.createElement('video');
+        this.videoEl.src = '/videos/abc`;
+    }
+
+    play() {
+        this.videoEl.play();
+    }
+
+    compose() {
+        // compose a literal element within the root element
+        return jdom`<div id="player">
+            ${this.videoEl}
+        </div>`;
+    }
+
+}
+
+// Option B
+class MyForm extends Component {
+
+    submit() {
+        // Because the root element of this component is
+        //   the <form/>, this.node corresponds to the form element.
+        this.node.submit();
+    }
+
+    getFirstInput() {
+        // This isn't ideal. I don't think this will be a commonly
+        //  required pattern, but if it becomes common, we might need
+        //  to establish a better way of doing this.
+        return this.node.querySelector('input');
+    }
+
+    compose() {
+        return jdom`<form>
+            <input type="text"/>
+        </form>`;
+    }
+
+}
+```
+
+Torus might get a higher-level API later to do something like this, maybe closer to React refs, but this is the current API design while larger Torus-based applications are built and patterns are better established.
+
 ## `List` Component
 
 80% of building user interfaces consists of building lists of models. To increase developer productivity here, Torus comes with a default implementation of `List` that inherits from the base Component class. The default `List` renders instances of a given view to a `<ul>` given a collection of models, but because it's just a Torus component, it's completely extensible.
 
 Here's an example of an app that uses `List`. The default List component's key advantage is that it efficiently renders its contents without our having to write much boilerplate code at all to manage it. We just define a `Store` where our data will live and be sorted, hand that off to a `List` constructor, define our custom `List#compose()` function if we want, and drop the list's DOM node into the page.
+
+React and similar virtual-dom view libraries depend on [key-based reconciliation](https://reactjs.org/docs/reconciliation.html) during render to efficiently render children of long lists. Torus doesn't (yet) have a key-aware reconciler in the diffing algorithm, but `List`'s design obviates the need for keys. Rather than giving the renderer a flat virtual DOM tree to render, `List` instantiates each individual item component and hands them off to the renderer as full DOM Node elements, so each list item manages its own rendering, and the list component only worries about displaying the list wrapper and a flat list of children items.
 
 ```javascript
 // This represents the collection of todo items.
@@ -248,7 +319,7 @@ If you find bugs, please open an issue or put in a pull request with a test to r
 
 ### Builds
 
-To build Torus, run 
+To build Torus, run
 
 ```sh
 ~$ npm build
@@ -279,4 +350,3 @@ We can also run tests on the production build, with:
 ```
 
 This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occurred.
-

@@ -153,6 +153,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             let i;
             for (i = 0; i < keys.length - 1; i ++) {
                 if (keys[i] !== '') commit(keys[i], true);
+            }
             keyContent = keys[i];
 
             const nextChar = reader.next();

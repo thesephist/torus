@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "test": "karma start karma.dev.conf.js",
-    "test-prod": "karma start karma.min.conf.js",
+    "test:prod": "karma start karma.min.conf.js",
     "build": "node build/build.js",
     "verify": "node build/build.js && karma start karma.min.conf.js",
     "clean": "rm -rvf dist/* coverage/*"

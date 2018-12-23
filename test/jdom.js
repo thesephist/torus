@@ -1,5 +1,17 @@
 describe('jdom template tag', () => {
 
+    const isObject = o => typeof o === 'object' && o !== null;
+
+    const normalizeJDOM = jdom => {
+        if (isObject(jdom)) {
+            if (!('tag' in jdom)) jdom.tag = 'div';
+            if (!('attrs' in jdom)) jdom.attrs = {};
+            if (!('events' in jdom)) jdom.events = {};
+            if (!('children' in jdom)) jdom.children = [];
+        }
+        return jdom;
+    }
+
     const compare = (title, expression, result) => {
         normalizeJDOM(result);
         it(title, () => {

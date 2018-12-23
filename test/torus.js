@@ -608,6 +608,24 @@ describe('Component', () => {
 
     });
 
+    describe('#remove', () => {
+
+        it('should remove all existing event listeners', () => {
+            let unlistened = false;
+
+            class Foo extends Component {
+                unlisten() {
+                    unlistened = true;
+                }
+            }
+            const f = new Foo();
+            unlistened.should.be.false;
+            f.remove();
+            unlistened.should.be.true;
+        });
+
+    });
+
 });
 
 describe('Styled', () => {
@@ -683,6 +701,47 @@ describe('List', () => {
         it('should be Component by default', () => {
             const l = new List(new Store());
             l.itemClass.should.equal(Component);
+        });
+
+    });
+
+    describe('#filter / #unfilter', () => {
+
+        class MyList extends List {
+            get itemClass() {
+                return ItemComponent;
+            }
+        }
+        const s = new Store([
+            new Record({ label: 'first' }),
+            new Record({ label: 'second' }),
+            new Record({ label: 'third' }),
+        ]);
+        const l = new MyList(s);
+
+        it('#filter should filter a list by the record', () => {
+            l.filter(r => r.get('label') !== 'second');
+            l.node.textContent.should.equal('firstthird');
+        });
+
+        it('#unfilter should remove any filters', () => {
+            l.unfilter();
+            l.node.textContent.should.equal('firstsecondthird');
+        });
+
+    });
+
+    describe('#remove', () => {
+
+        it('should call #remove on children', () => {
+            let removed = 0;
+            class Item extends Component {
+                remove() { removed++ }
+            }
+            const s = new Store([new Record(), new Record(), new Record()]);
+            const l = new (ListOf(Item))(s);
+            l.remove();
+            removed.should.equal(3);
         });
 
     });

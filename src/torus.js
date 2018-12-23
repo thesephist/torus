@@ -453,14 +453,16 @@ class List extends Component {
     }
 
     init(store) {
+        this.store = store;
         this.items = new Map();
         this.filterFn = null;
 
-        this.listen(store, this.updateItems.bind(this));
-        this.updateItems(store.getCurrentSummary());
+        this.listen(this.store, () => this.itemsChanged());
+        this.itemsChanged();
     }
 
-    updateItems(data) {
+    itemsChanged() {
+        const data = this.store.getCurrentSummary();
         for (const record of this.items.keys()) {
             if (!data.includes(record)) {
                 this.items.get(record).remove();
@@ -473,9 +475,9 @@ class List extends Component {
             }
         }
 
-        const sorter = [...this.items.entries()];
+        let sorter = [...this.items.entries()];
         if (this.filterFn !== null) {
-            sorter.filter(record => filterFn(record));
+            sorter = sorter.filter(item => this.filterFn(item[0]));
         }
         sorter.sort((a, b) => data.indexOf(a[0]) - data.indexOf(b[0]));
 
@@ -489,12 +491,12 @@ class List extends Component {
 
     filter(filterFn) {
         this.filterFn = filterFn;
-        this.render();
+        this.itemsChanged();
     }
 
     unfilter() {
         this.filterFn = null;
-        this.render();
+        this.itemsChanged();
     }
 
     get nodes() {
@@ -729,4 +731,3 @@ if (typeof window === 'object') {
 if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = exposedNames;
 }
-

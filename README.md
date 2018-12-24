@@ -250,7 +250,7 @@ As an alternative to calling the `ListOf()` API, we can also just extend `List` 
 class MyList extends ListOf(MyView) {}
 // equivalent to
 class MyList extends List {
-    get itemClass {
+    get itemClass() {
         return MyView;
     }
 }
@@ -358,7 +358,7 @@ class City extends Record {}
 class CityStore extends StoreOf(City) { /*...*/ }
 // equivalent to
 class CityStore extends Store {
-    get recordClass {
+    get recordClass() {
         return City;
     }
 }
@@ -371,7 +371,7 @@ Like records, stores have `#serialize()` and `#summarize()` methods used for sha
 ```javascript
 const destinations = new CityStore([
     new City({name: 'Dublin'}),
-    new City({name: 'Melbourne}),
+    new City({name: 'Melbourne'}),
 ]);
 destinations.serialize(); // [{name: 'Dublin'}, {name: 'Melbourne'}]
 ```

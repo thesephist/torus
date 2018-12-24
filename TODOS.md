@@ -1,19 +1,39 @@
 # Torus To-dos
 
-- [-] Flesh out documentation, referencing tests for API surface.
-
-- [-] Add more detailed tests for `Styled[Component]` (media queries?)
+- [-] Add more detailed tests for `Styled[Component]` (media queries?) -- use `getComputedStyle(HTMLElement)` to test.
 
 - [-] Keep cutting down that bundle size and complexity / speed!
 
 - [ ] Concurrency
     - Yielding to the browser at the component level. Treat each Component#render or renderJDOM() as a separately, always-deferrable async event. This gets the interactivity / CPU time benefits of concurrent React.
     - React uses the defer() function to indicate to the renderer what updates aren't critical. We could try something similar, and have defer be default but indicate high priority updates?
+    - We can split the render process of each component (each render() call ) into two parts: part 1, up to and including the `#compose()` call, and part 2, everything from when `#compose()` returns, to flushing all changes to the DOM and letting the browser render.
+        - Let's make everything in part 2 asynchronous and collaboratively concurrent (through `requestIdleCallback`) by default, and part 1 opt-in asynchronous.
+        - This makes sense within the larger scope of Torus's architecture. The data layer is meant to be imperative, which makes it hard to be async by default. But the presentation layer is declarative, which makes it easy to be async by default.
+        - Using this method, at each subtree in the `renderJDOM` render tree, we can choose to defer the render of that subtree, a la concurrent React and React suspense.
+        - As a part of this consideration, maybe we should also make all bulk `replaceChild` calls in the render step asynchronous with rAF? Does that have any benefits?
+    - Like concurrent React, we should support the ability to halt rendering and cancel a render pass, render the next render call if render was called before the previous render call began flushing to DOM / being rendered. Multiple calls to `#render()` in succession should result in a single `#render()` call.
 
 - [ ] Function components
     - We can abstract away pure components that just render data with a function that returns JDOM (or uses jdom to render JSX to JDOM), and call these functions in #compose of larger class components.
     - This feels very native, JavaScripty -- just using the function abstraction, because the JDOM is just JSON objects.
-    - But how would we, for example, Style() these components?
+    - But how would we, for example, Style() these components? A proposal:
+        - We'll call a "functional component" anything that returns valid JDOM from the function call, like ``data => jdom`<p>${data.content}</p>`;``.
+        - We'll provide a function `Componentize/ComponentFrom`:
+        ```javascript
+        const Componentize = renderFn => {
+            return class extends Component {
+                compose(data) {
+                    return renderFn(data);
+                }
+            }
+        }
+
+        function fancyButton = text => jdom `<button class="fancy">${text}</button>`;
+        const FancyButton = Componentize(fancyButton);
+        // FancyButton is now a class component!
+        ```
+        - This function will allow us to transform any functional component into a full-fledged Torus component, that can be styled and composed with other higher order components.
 
 - [ ] First release (after all the above are complete)
 

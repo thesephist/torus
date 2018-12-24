@@ -199,7 +199,7 @@ Torus might get a higher-level API later to do something like this, maybe closer
 
 ## `List` Component
 
-80% of building user interfaces consists of building lists of models. To increase developer productivity here, Torus comes with a default implementation of `List` that inherits from the base Component class. The default `List` renders instances of a given view to a `<ul>` given a collection of models, but because it's just a Torus component, it's completely extensible.
+80% of building user interfaces consists of building lists of models. To increase developer productivity here, Torus comes with a default implementation of `List` that inherits from the base Component class. The default `List` renders instances of a given view to a `<ul>` given a collection of models, but because it's just a Torus component, it's completely extensible. Torus lists re-render efficiently when the underlying data from the store updates.
 
 Here's an example of an app that uses `List`. The default List component's key advantage is that it efficiently renders its contents without our having to write much boilerplate code at all to manage it. We just define a `Store` where our data will live and be sorted, hand that off to a `List` constructor, define our custom `List#compose()` function if we want, and drop the list's DOM node into the page.
 
@@ -244,9 +244,74 @@ const tasks = new TaskStore([
 const list = new TaskList(tasks);
 ```
 
+As an alternative to calling the `ListOf()` API, we can also just extend `List` with a different `#itemClass` getter:
+
+```javascript
+class MyList extends ListOf(MyView) {}
+// equivalent to
+class MyList extends List {
+    get itemClass {
+        return MyView;
+    }
+}
+```
+
 Note that `List` is not styled by default. You can extend the styled version of the list component by extending from `Styled(List)`.
 
->// TODO document List API
+### List API
+
+When we create a list view from `List`, we need to tell it two things: 1) what component each of its children items are going to be, and 2) what it source of data is going to be. All together, this looks like:
+
+```javascript
+// define our data models first
+const movies = new Store();
+class MovieView extends Component { /*...*/ }
+
+// define our list view
+class MovieListView extends ListOf(MovieView) { /*...*/ }
+// or
+const MovieListView = ListOf(MovieView);
+
+// instantiate our list
+const movieList = new MovieListView(movies);
+```
+
+Here, we make a new Store called `movies`, which is going to hold all our movie models in a list. We also define `MovieView`, which is a component that displays one movie in our list.
+
+When we define `MovieListView` as `ListOf(MovieView)`, we're telling Torus that we want `MovieListView` to behave like a `List`, but we want each individual child view to be a `MovieView` we defined earlier.
+
+Lastly, we can create an instance of the list view that listens to our `movies` store for changes, and updates the view accordingly by rendering a list of the movies that are in that list.
+
+By default, a `List` is going to render the children inside a `<ul>...</ul>` wrapper element, but we can fully customize how our list is rendered by overriding `List#compose()`. For example, this is going to add the children to a container element, and add a header at the top of the list.
+
+```javascript
+class MovieListView extends ListOf(MovieView) {
+    compose() {
+        return jdom`<div class="list-container">
+            <h1>My favorite movies</h1>
+            ${this.nodes}
+        </div>`;
+    }
+}
+```
+
+We can access the array of children components' nodes in a Torus List component with `this.nodes`, and embed it anywhere in our markup to customize the look of our list.
+
+### Filter
+
+We can set and remove a filter function that Torus lists will run on each record before rendering that record's listing in the view. Each time we change the filter, the list will automatically re-render. This is useful for searching through or filtering lists rendered with `List`.
+
+```javascript
+const movieList = new (ListOf(MovieView))(movies);
+
+// let's only show movies that start with 'A' or 'a'
+movieList.filter(movie => movie.get('name').toLowerCase()[0] === 'a');
+// let's switch the filter to movies that are rated above 80%
+//  this unsets the last filter, and sets a new filter
+movieList.filter(movie => movie.get('rating') > 80);
+// show all the movies again
+movieList.unfilter();
+```
 
 ## Data models (`Record`, `Store`)
 
@@ -254,23 +319,110 @@ Note that `List` is not styled by default. You can extend the styled version of 
 
 An instance of `Record` represents a single source of data, and we can bind a Torus component to a record to have the component perform some action (usually re-compose and render) when the record emits an event (usually data update).
 
->// TODO
+When we create a record, we can give it an optional id (key), and any initial attributes we want it to have.
+
+We can access attributes from the record with `#get`, and set or update values with `#update`.
+
+```javascript
+class Movie extends Record {}
+const movie1 = new Movie({ // omitted the ID
+    name: 'Avengers: Endgame',
+});
+const movie2 = new Movie('1234ab', { // specified an ID
+    name: 'Wonder',
+});
+movie1.id; // null
+movie2.id; // '1234ab'
+
+movie1.get('name'); // 'Avengers: Endgame'
+movie1.update({
+    release_year: 2019,
+});
+movie1.get('release_year'); // 2019
+```
+
+When we call `#update()` to set new values on a record, any components listening to the record will be notified after the new attributes are set.
+
+When we want to serialize the record for rendering or sharing on the network, we can use one of two methods. By default, both of these methods, `#serialize()` and `#summarize`, return the same, JSON representation of the record's attributes.
+
+`#serialize()` is meant to be used when we need a completely string-like format for transferring data, like sending over the network. `#summarize` is used to share state within our app, like when the record emits an event. It can contain data structures that aren't JSON-serializable into a string.
 
 ### Stores
 
 An instance of `Store` represents a collection of records, or a table in a relational sense. We can bind Torus components to stores, but stores are usually best used with `List` or a list-like component to display an entire list of records.
 
->// TODO
+Like lists, we can construct custom Store classes in two ways:
+
+```javascript
+class City extends Record {}
+class CityStore extends StoreOf(City) { /*...*/ }
+// equivalent to
+class CityStore extends Store {
+    get recordClass {
+        return City;
+    }
+}
+```
+
+When we create a new store, we can give it an initial array of records to contain. Stores are not strictly required to be homogeneous (it can contain records of multiple different types), but it's not recommended that you create heterogenous stores.
+
+Like records, stores have `#serialize()` and `#summarize()` methods used for sharing in a flat string format and for internally sharing a snapshot of the data, respectively. For more about serialize vs. summarize in Torus data models, see the Records section above.
+
+```javascript
+const destinations = new CityStore([
+    new City({name: 'Dublin'}),
+    new City({name: 'Melbourne}),
+]);
+destinations.serialize(); // [{name: 'Dublin'}, {name: 'Melbourne'}]
+```
+
+We can add new records to our store in two ways, and remove with `#remove()`. All of these operations update the underlying data, so they'll fire individual events for any components listening to updates.
+
+```javascript
+// create an instance of destinations.recordClass (City)
+destinations.create({
+    name: 'Vancouver',
+});
+// add the given record to the end of the list.
+const london = new City({name: 'London'});
+destinations.add(london);
+destinations.serialize(); /* [
+    {name: 'Dublin'},
+    {name: 'Melbourne'},
+    {name: 'Vancouver'},
+    {name: 'London'}
+] */
+
+destinations.remove(london);
+destinations.serialize(); /* [
+    {name: 'Dublin'},
+    {name: 'Melbourne'},
+    {name: 'Vancouver'}
+] */
+```
+
+Often, we want the records in a store to be ordered by a specific property regardless of when we added them to the list. For this, we can modify the store's `#comparator` function, which _maps a record to the property that should be used for sorting_.
+
+```javascript
+class CityStore extends StoreOf(City) {
+    get comparator() {
+        // sort in lexicographical order by the name
+        return city => city.get('name').toLowerCase();
+    }
+}
+```
 
 ## Client-side routing: Components bound to `Router`
 
->// TODO
+>// TODO: the Router API is still being built
 
 ## A supplement about JDOM (JSON DOM)
 
 JDOM is an efficient, lightweight (usually internal) representation of the DOM used for diffing and rendering in Torus. While the `jdom` template tag provides an ergonomic, JSX-like templating syntax, we need a more efficient and lightweight format for Torus's internal representation of components, and JDOM fills that role!
 
 Whenever you `#compose()` a component in Torus, you can use the `jdom` template tag to define your DOM, or return the lower-level, JDOM representation of your tree. In the future, we might compile away the `jdom` template processor at build time, inspired by `developit/htm`.
+
+JDOM also bears a resemblance in motivation to [hyperscript](https://github.com/hyperhype/hyperscript). Both try to create a nice interface for describing DOM hierarchies, but hyperscript is more of an authoring interface, whereas JDOM is more of an intermediate representation for rendering markup in Torus components. In JDOM, object hierarchies replace call stacks of `h()` in hyperscript.
 
 ### Single element
 

@@ -511,7 +511,7 @@ class List extends Component {
     }
 
     compose(data) {
-        return ul(this.nodes.slice());
+        return ul(this.nodes);
     }
 
 }

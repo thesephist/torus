@@ -6,6 +6,15 @@
 
 - [-] Keep cutting down that bundle size and complexity / speed!
 
+- [ ] Concurrency
+    - Yielding to the browser at the component level. Treat each Component#render or renderJDOM() as a separately, always-deferrable async event. This gets the interactivity / CPU time benefits of concurrent React.
+    - React uses the defer() function to indicate to the renderer what updates aren't critical. We could try something similar, and have defer be default but indicate high priority updates?
+
+- [ ] Function components
+    - We can abstract away pure components that just render data with a function that returns JDOM (or uses jdom to render JSX to JDOM), and call these functions in #compose of larger class components.
+    - This feels very native, JavaScripty -- just using the function abstraction, because the JDOM is just JSON objects.
+    - But how would we, for example, Style() these components?
+
 - [ ] First release (after all the above are complete)
 
 ## Planned sample projects

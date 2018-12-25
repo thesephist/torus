@@ -1,64 +1,10 @@
-describe('Node factory functions', () => {
-
-    it('should correctly process 1 argument of array as children in an array', () => {
-        const jdom = h1(['Hello']);
-        jdom.tag.should.equal('h1');
-        jdom.children.should.deep.equal(['Hello']);
-    });
-
-    it('should correctly process 1 argument of object as attrs', () => {
-        const jdom = li({
-            style: {fontSize: '20px'},
-        });
-        jdom.tag.should.equal('li');
-        jdom.attrs.should.deep.equal({style:{
-            fontSize: '20px',
-        }});
-    });
-
-    it('should correctly process 2 arguments as attrs and children', () => {
-        const jdom = li({
-            style: {fontSize: '20px'},
-        }, ['List item']);
-        jdom.tag.should.equal('li');
-        jdom.attrs.should.deep.equal({style:{
-            fontSize: '20px',
-        }});
-        jdom.children.should.deep.equal(['List item']);
-    });
-
-    it('should correctly process 2 arguments of objects as attrs and events', () => {
-        const clickHandler = () => {};
-        const jdom = button({
-            disabled: true,
-        }, {
-            click: clickHandler,
-        });
-        jdom.tag.should.equal('button');
-        jdom.attrs.should.deep.equal({disabled: true});
-    });
-
-    it('should correctly process 3 arguments as attrs, events, children', () => {
-        const clickHandler = () => {};
-        const jdom = button({
-            disabled: true,
-        }, {
-            click: clickHandler,
-        }, ['button text']);
-        jdom.tag.should.equal('button');
-        jdom.attrs.should.deep.equal({disabled: true});
-        jdom.children.should.deep.equal(['button text']);
-    });
-
-});
-
 describe('renderJDOM', () => {
 
     const render = jdom => renderJDOM(undefined, undefined, jdom);
 
     describe('Tags', () => {
 
-        it('should support all tags specified in the spec', () => {
+        it('should support an arbitrarily diverse set of tags', () => {
             const supportedTags = [
                 'div',
                 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -483,12 +429,14 @@ describe('renderJDOM', () => {
         second.textContent = 'second';
         third.textContent = 'third';
         fourth.textContent = 'fourth';
-        const prev = ul([
-            first, second, third,
-        ]);
-        const next = ul([
-            third, first, fourth, second,
-        ]);
+        const prev = {
+            tag: 'ul',
+            children: [first, second, third],
+        }
+        const next = {
+            tag: 'ul',
+            children: [third, first, fourth, second],
+        }
 
         const node = render(prev);
         node.textContent.should.equal('firstsecondthird');
@@ -507,12 +455,14 @@ describe('renderJDOM', () => {
         second.textContent = 'second';
         third.textContent = 'third';
         fourth.textContent = 'fourth';
-        const prev = ul([
-            first, second, third, fourth,
-        ]);
-        const next = ul([
-            third, first, second,
-        ]);
+        const prev = {
+            tag: 'ul',
+            children: [first, second, third, fourth],
+        }
+        const next = {
+            tag: 'ul',
+            children: [third, first, second],
+        }
 
         const node = render(prev);
         node.textContent.should.equal('firstsecondthirdfourth');
@@ -597,7 +547,10 @@ describe('Component', () => {
 
         class FooComponent extends Component {
             compose() {
-                return h1(['Hello, World!']);
+                return {
+                    tag: 'h1',
+                    children: ['Hello, World!'],
+                }
             }
         }
 
@@ -680,15 +633,26 @@ describe('Styled', () => {
             compose() {
                 // it's important that we return a button, because
                 //  we test for :focus, and button is focusable.
-                return button({
-                    class: 'invalid',
-                }, [p(['Hello'])]);
+                return {
+                    tag: 'button',
+                    attrs: {
+                        class: 'invalid',
+                    },
+                    children: [
+                        {
+                            tag: 'p',
+                            children: ['Hello'],
+                        },
+                    ],
+                }
             }
         }
 
         it('should render without customization', () => {
             const Vanilla = Styled(class extends Component {
-                compose() {return div()}
+                compose() {
+                    return {tag: 'div'};
+                }
             });
             const v = new Vanilla();
         });
@@ -770,7 +734,10 @@ describe('List', () => {
             this.listen(record, () => this.render);
         }
         compose(data) {
-            return li([data.label]);
+            return {
+                tag: 'li',
+                children: [data.label],
+            }
         }
     }
 

@@ -33,38 +33,6 @@ const HTML_IDL_ATTRIBUTES = [
 
 let render_stack = 0;
 
-const createNodeFactory = tag => {
-    return function(arg1, arg2, arg3) {
-        let attrs,
-            events,
-            children;
-
-        if (arg1 instanceof Array) {
-            children = arg1;
-        } else if (arg2 instanceof Array) {
-            attrs = arg1;
-            children = arg2;
-        } else if (arg3 instanceof Array) {
-            attrs = arg1;
-            events = arg2;
-            children = arg3;
-        } else if (typeof arg1 === 'object' && typeof arg2 === 'undefined') {
-            attrs = arg1;
-        } else if (typeof arg1 === 'object' && typeof arg2 === 'object') {
-            attrs = arg1;
-            events = arg2;
-        }
-
-        const jdom = {
-            tag: tag,
-        };
-        if (attrs !== undefined) jdom.attrs = attrs;
-        if (events !== undefined) jdom.events = events;
-        if (children && children.length > 0) jdom.children = children;
-        return jdom;
-    }
-}
-
 const isObject = o => typeof o === 'object' && o !== null;
 
 const normalizeJDOM = jdom => {
@@ -510,7 +478,10 @@ class List extends Component {
     }
 
     compose(data) {
-        return ul(this.nodes);
+        return {
+            tag: 'ul',
+            children: this.nodes,
+        }
     }
 
 }
@@ -533,7 +504,7 @@ class Evented {
     }
 
     summarize() {
-        throw new Error(`Evented#summarize() not implemented in ${this.constructor.name}`);
+        throw new Error(`#summarize() not implemented in ${this.constructor.name}`);
     }
 
     emitEvent() {
@@ -707,26 +678,11 @@ const exposedNames = {
     StoreOf,
     // Router,
 }
-const builtinElements = [
-    'div',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'p', 'a', 'em', 'strong',
-    'img',
-    'button',
-    'input',
-    'label',
-    'ul', 'ol', 'li',
-];
-for (const tagName of builtinElements) {
-    exposedNames[tagName] = createNodeFactory(tagName);
-}
-
 if (typeof window === 'object') {
     for (const name in exposedNames) {
         window[name] = exposedNames[name];
     }
 }
-
 if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = exposedNames;
 }

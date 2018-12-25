@@ -1,4 +1,4 @@
-const READER_END = Symbol();
+const READER_END = [];
 
 const isNode = (typeof Node === 'undefined') ? (
     () => false
@@ -13,8 +13,8 @@ const clipStringEnd = (base, substr) => {
 class Reader {
 
     constructor(stringParts, dynamicParts) {
-        this.index = 0;
-        this.subIndex = 0;
+        this.idx = 0;
+        this.subIdx = 0;
         this.parts = [stringParts[0]];
 
         for (let i = 1; i < stringParts.length; i++) {
@@ -31,30 +31,30 @@ class Reader {
 
     next() {
         const len = this.parts.length;
-        const currentPart = this.parts[this.index];
-        const nextIndex = this.index >= len ? len : this.index + 1;
+        const currentPart = this.parts[this.idx];
+        const nextIndex = this.idx >= len ? len : this.idx + 1;
         if (typeof currentPart === 'string') {
-            const char = currentPart[this.subIndex] || '';
-            if (++this.subIndex >= currentPart.length) {
-                this.index = nextIndex;
-                this.subIndex = 0;
+            const char = currentPart[this.subIdx] || '';
+            if (++this.subIdx >= currentPart.length) {
+                this.idx = nextIndex;
+                this.subIdx = 0;
             }
             return char;
-        } else if (this.index >= len) {
+        } else if (this.idx >= len) {
             return READER_END;
         } else {
-            this.index = nextIndex;
+            this.idx = nextIndex;
             return currentPart;
         }
     }
 
     backtrack() {
-        if (this.subIndex !== 0) {
-            this.subIndex --;
+        if (this.subIdx !== 0) {
+            this.subIdx --;
         } else {
-            this.index = this.index <= 1 ? 0 : this.index - 1;
-            if (typeof this.parts[this.index] === 'string') {
-                this.subIndex = this.parts[this.index].length - 1;
+            this.idx = this.idx <= 1 ? 0 : this.idx - 1;
+            if (typeof this.parts[this.idx] === 'string') {
+                this.subIdx = this.parts[this.idx].length - 1;
             }
         }
     }
@@ -115,7 +115,9 @@ const kebabToCamel = kebabStr => {
 
 const parseOpeningTagContents = (tplParts, dynamicParts) => {
 
-    if (tplParts.length === 1 && !tplParts[0].includes(' ')) {
+    if (tplParts[0][0] === '!') {
+        return null; // comment
+    } else if (tplParts.length === 1 && !tplParts[0].includes(' ')) {
         const selfClosing = tplParts[0].endsWith('/');
         return {
             jdom: {
@@ -131,21 +133,13 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
     reader.trim();
     const selfClosing = reader.clipEnd('/');
 
-    if (reader.next() === '!') {
-        return null; // comment
-    } else {
-        reader.backtrack();
-    }
-
     let tag = '';
     const attrs = {};
     const events = {};
 
     const commit = (key, val) => {
         if (typeof val === 'function') {
-            const eventName = key.replace('on', '');
-            events[eventName] = [];
-            events[eventName].push(val);
+            events[key.replace('on', '')] = [val];
         } else {
             if (key === 'class') {
                 if (val = val.trim()) {
@@ -340,7 +334,7 @@ const jdom = (tplParts, ...dynamicParts) => {
     try {
         return parseJSX(tplParts.map(part => part.replace(/\s+/g, ' ')), dynamicParts)[0];
     } catch (e) {
-        console.error(`Error parsing invalid HTML template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);
+        console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);
     }
 }
 

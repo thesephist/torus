@@ -40,15 +40,22 @@ class SearchInput extends StyledComponent {
     }
 
     compose() {
-        return div([
-            input({
-                type: 'search',
-                placeholder: 'Search for something...',
-                autofocus: 'autofocus',
-            }, {
-                input: this.boundOnInput,
-            }),
-        ]);
+        return {
+            tag: 'div',
+            children: [
+                {
+                    tag: 'input',
+                    attrs: {
+                        type: 'search',
+                        placeholder: 'Search for something...',
+                        autofocus: 'autofocus',
+                    },
+                    events: {
+                        input: this.boundOnInput,
+                    },
+                },
+            ],
+        }
     }
 
 }
@@ -77,11 +84,13 @@ class SearchButton extends StyledComponent {
     }
 
     compose() {
-        return button({}, {
-            click: this.searchCallback,
-        }, [
-            'Search',
-        ]);
+        return {
+            tag: 'button',
+            events: {
+                click: this.searchCallback,
+            },
+            children: ['Search'],
+        }
     }
 }
 
@@ -133,15 +142,22 @@ class App extends StyledComponent {
     }
 
     compose() {
-        return div([
-            h1(['Torus Search']),
-            div({
-                class: 'bar',
-            }, [
-                this.input.node,
-                this.button.node,
-            ]),
-        ]);
+        return {
+            tag: 'div',
+            children: [
+                {
+                    tag: 'h1',
+                    children: ['Torus Search'],
+                },
+                {
+                    tag: 'div',
+                    attrs: {
+                        class: 'bar',
+                    },
+                    children: [this.input.node, this.button.node],
+                },
+            ],
+        }
     }
 
 }

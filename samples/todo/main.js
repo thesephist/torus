@@ -27,8 +27,9 @@ class TaskItem extends Component {
     }
 
     compose(data) {
-        return (
-            li({
+        return {
+            tag: 'li',
+            attrs: {
                 style: {
                     opacity: data.completed ? 0.4 : 1,
                     height: '50px',
@@ -42,18 +43,21 @@ class TaskItem extends Component {
                     marginBottom: '1px',
                     cursor: 'pointer',
                 },
-            }, {
+            },
+            events: {
                 click: this.boundOnCheck,
-            }, [
-                input({
+            },
+            children: [{
+                tag: 'input',
+                attrs: {
                     type: 'checkbox',
                     checked: data.completed,
-                }, {
+                },
+                events: {
                     change: this.boundOnCheck,
-                }),
-                data.description,
-            ])
-        );
+                },
+            }, data.description],
+        }
     }
 
 }
@@ -61,15 +65,15 @@ class TaskItem extends Component {
 class TaskList extends ListOf(TaskItem) {
 
     compose() {
-        return (
-            ul({
+        return {
+            tag: 'ul',
+            attrs: {
                 style: {
                     padding: 0,
-                }
-            }, [
-                ...this.nodes,
-            ])
-        );
+                },
+            },
+            children: [...this.nodes],
+        }
     }
 
 }
@@ -109,30 +113,38 @@ class TaskInput extends Component {
     }
 
     compose() {
-        return (
-            div({
+        return {
+            tag: 'div',
+            attrs: {
                 style: {
                     width: '100%',
                     display: 'flex',
                     flexDirection: 'row',
                 },
-            },[
-                input({
-                    value: this.value,
-                    style: {
-                        flexGrow: 1,
-                    }
-                }, {
-                    input: this.boundSetValue,
-                    keypress: this.boundOnKeyPress,
-                }),
-                button({}, {
-                    click: this.boundOnAddClick,
-                }, [
-                    'Add',
-                ]),
-            ])
-        );
+            },
+            children: [
+                {
+                    tag: 'input',
+                    attrs: {
+                        value: this.value,
+                        style: {
+                            flexGrow: 1,
+                        }
+                    },
+                    events: {
+                        input: this.boundSetValue,
+                        keypress: this.boundOnKeyPress,
+                    },
+                },
+                {
+                    tag: 'button',
+                    events: {
+                        click: this.boundOnAddClick,
+                    },
+                    children: ['Add'],
+                },
+            ],
+        }
     }
 
 }
@@ -145,19 +157,18 @@ class App extends Component {
     }
 
     compose() {
-        return (
-            div({
+        return {
+            tag: 'div',
+            attrs: {
                 style: {
                     fontFamily: "'Helvetica', 'Ubuntu', sans-serif",
                     width: '100%',
                     maxWidth: '500px',
                     margin: '0 auto',
                 },
-            }, [
-                this.input.node,
-                this.list.node,
-            ])
-        );
+            },
+            children: [this.input.node, this.list.node],
+        }
     }
 
 }

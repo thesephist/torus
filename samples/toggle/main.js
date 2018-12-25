@@ -18,17 +18,15 @@ class Toggle extends Component {
     }
 
     compose() {
-
-        // The composer method returns a JDOM object (dictionary representation)
-        //  of the DOM to be rendered. `this.render()` will take this and
-        //  efficiently render it to the document.
-        return (
-            button({}, {
+        return {
+            tag: 'button',
+            events: {
                 click: this.boundOnToggle,
-            }, [
+            },
+            children: [
                 this.state ? ':D' : ':\'(',
-            ])
-        );
+            ],
+        }
     }
 
 }
@@ -48,41 +46,59 @@ class App extends Component {
     }
 
     compose() {
-        return (
-            div([
+        return {
+            tag: 'div',
+            children: [
                 (
-                    this.clickTimes % 2 ? (
-                        h1([
-                            'Hello, ', em(['World!']),
-                        ])
-                    ) : (
-                        h1(['Hello, World!'])
-                    )
+                    this.clickTimes % 2 ? {
+                        tag: 'h1',
+                        children: [
+                            'Hello, ',
+                            { tag: 'em', children: ['World!'] },
+                        ],
+                    } : {
+                            tag: 'h1',
+                            children: [
+                                'Hello, World!',
+                            ],
+                    }
                 ),
-                p([
-                    'Button has been pressed ', this.clickTimes, ' times.',
-                ]),
-                button({
-                    style: {
-                        background: 'blue',
-                        color: '#fff',
+                {
+                    tag: 'p',
+                    children: [
+                        'Button has been pressed ',
+                        this.clickTimes.toString(),
+                        ' times.',
+                    ],
+                },
+                {
+                    tag: 'button',
+                    attrs: {
+                        style: {
+                            background: 'blue',
+                            color: '#fff',
+                        },
                     },
-                }, {
-                    click: this.boundButtonClick,
-                }, [
-                    'Click me!',
-                ]),
-
-                // Torus's API allows us to use just vanilla JavaScript syntax to render
-                //  dynamic list with very little boilerplate, since a literal HTML
-                //  node is a valid JDOM node.
-                ul([
-                    ...this.toggles.map(t => {
-                        return li([t.node]);
-                    }),
-                ]),
-            ])
-        );
+                    events: {
+                        click: this.boundButtonClick,
+                    },
+                    children: [
+                        'Click me!',
+                    ],
+                },
+                {
+                    tag: 'ul',
+                    children: [
+                        ...this.toggles.map(t => {
+                            return {
+                                tag: 'li',
+                                children: [t.node],
+                            }
+                        }),
+                    ],
+                }
+            ],
+        }
     }
 }
 
@@ -90,4 +106,3 @@ const app = new App();
 // Add the root element of the root component to the DOM,
 //  and subsequent renders will automatically update the page content
 document.body.appendChild(app.node);
-

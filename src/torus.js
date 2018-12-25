@@ -383,7 +383,7 @@ const rulesFromStylesObject = (selector, stylesObject) => {
         if (prop[0] === '@') {
             if (prop.startsWith('@media')) {
                 rules.push(brace(prop, rulesFromStylesObject(selector, val).join('')));
-            } else if (prop.startsWith('@keyframes')) {
+            } else  { // @keyframes or @font-face
                 rules.push(brace(prop, rulesFromStylesObject('', val).join('')));
             }
         } else {

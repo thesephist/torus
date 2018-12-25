@@ -2,6 +2,8 @@
 
 - [-] Keep cutting down that bundle size for `jdom.js`!
 
+- [ ] Think about using streams / observables to abstract data models and events. Also consider l3 concepts in the context of Torus. They should map well.
+
 - [ ] Cover the uncovered [E] branches in tests
 
 - [ ] Concurrency

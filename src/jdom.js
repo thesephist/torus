@@ -1,6 +1,6 @@
 // note: anything where value is a function will be treated as an event listener or ignored.
 
-const READER_END = 1989;
+const READER_END = Symbol();
 
 const isNode = (typeof Node === 'undefined') ? (
     () => false
@@ -8,90 +8,98 @@ const isNode = (typeof Node === 'undefined') ? (
     o => o instanceof Node
 );
 
-class TplReader {
+const clipStringEnd = (base, substr) => {
+    return base.substr(0, base.length - substr.length);
+}
 
-    constructor(tplParts, dynamicParts) {
-        this.tplParts = tplParts;
-        this.dynamicParts = dynamicParts;
+class Reader {
 
-        this.partIdx = 0;
-        this.charIdx = -1;
-        this.end = false;
+    constructor(stringParts, dynamicParts) {
+        this.index = 0;
+        this.subIndex = 0;
+        this.parts = [stringParts[0]];
+
+        for (let i = 1; i < stringParts.length; i++) {
+            this.parts.push(dynamicParts[i - 1]);
+            this.parts.push(stringParts[i]);
+        }
     }
 
     trim() {
-        const l = this.tplParts.length;
-        this.tplParts[0] = this.tplParts[0].replace(/^\s+/, '');
-        this.tplParts[l-1] = this.tplParts[l-1].replace(/\s+$/, '');
+        const l = this.parts.length;
+        this.parts[0] = this.parts[0].replace(/^\s+/g, '');
+        this.parts[l - 1] = this.parts[l - 1].replace(/\s+$/g, '');
     }
 
     next() {
-        if (this.end) return READER_END;
-
-        this.charIdx ++;
-        if (this.charIdx >= this.tplParts[this.partIdx].length) {
-            this.partIdx ++;
-            this.charIdx = -1;
-
-            if (this.partIdx >= this.tplParts.length) {
-                this.end = true;
-                return READER_END;
-            } else {
-                return this.dynamicParts[this.partIdx - 1];
+        const len = this.parts.length;
+        const currentPart = this.parts[this.index];
+        const nextIndex = this.index >= len ? len : this.index + 1;
+        if (typeof currentPart === 'string') {
+            const char = currentPart[this.subIndex] || '';
+            if (++this.subIndex >= currentPart.length) {
+                this.subIndex = 0;
+                if (this.index > len) {
+                    return READER_END;
+                } else {
+                    this.index = nextIndex;
+                }
             }
+            return char;
+        } else if (this.index >= len) {
+            return READER_END;
         } else {
-            return this.tplParts[this.partIdx][this.charIdx];
+            this.index = nextIndex;
+            return currentPart;
         }
     }
 
     backtrack() {
-        if (this.charIdx === -1) {
-            if (this.partIdx !== 0) {
-                this.partIdx --;
-                this.charIdx = this.tplParts[this.partIdx].length - 1;
-            }
+        if (this.subIndex !== 0) {
+            this.subIndex --;
         } else {
-            this.charIdx --;
+            this.index = this.index <= 1 ? 0 : this.index - 1;
+            if (typeof this.parts[this.index] === 'string') {
+                this.subIndex = this.parts[this.index].length - 1;
+            }
         }
-
-        if (this.end) this.end = false;
     }
 
     readUpto(substr) {
-        const [strs, objs] = this.readUntil(substr);
-        strs[strs.length - 1] = strs[strs.length - 1].replace(substr, '');
+        const result = this.readUntil(substr);
+        const strings = result[0];
+        strings[strings.length - 1] = clipStringEnd(strings[strings.length - 1], substr);
 
-        for (const chr of substr) this.backtrack();
-        return [strs, objs];
+        let count = substr.length;
+        while (count--) {
+            this.backtrack();
+        }
+        return result;
     }
 
     readUntil(substr) {
-        const strs = [''];
-        const objs = [];
+        const reversedStrings = [''];
+        const objects = [];
 
         let next;
-        while (!strs[0].endsWith(substr) && next !== READER_END) {
+        while (!reversedStrings[0].endsWith(substr) && next !== READER_END) {
             next = this.next();
-            if (typeof next === 'string' || typeof next === 'undefined') {
-                strs[0] += next;
-            } else if (next !== READER_END) {
-                objs.push(next);
-                strs.unshift('');
+            if (next === READER_END) {
+                break;
+            } else if (typeof next === 'string') {
+                reversedStrings[0] += next;
+            } else {
+                objects.push(next);
+                reversedStrings.unshift('');
             }
         }
-
-        return [strs.reverse(), objs];
-    }
-
-    get lastPart() {
-        return this.tplParts[this.tplParts.length - 1];
+        return [reversedStrings.reverse(), objects];
     }
 
     clipEnd(substr) {
-        const last = this.lastPart;
+        const last = this.parts[this.parts.length - 1];
         if (last.endsWith(substr)) {
-            this.tplParts[this.tplParts.length - 1] =
-                last.substr(0, last.length - substr.length);
+            this.parts[this.parts.length - 1] = clipStringEnd(last, substr);
             return true;
         }
         return false;
@@ -112,7 +120,20 @@ const kebabToCamel = kebabStr => {
 }
 
 const parseOpeningTagContents = (tplParts, dynamicParts) => {
-    const reader = new TplReader(tplParts, dynamicParts);
+
+    if (tplParts.length === 1 && !tplParts[0].includes(' ')) {
+        const selfClosing = tplParts[0].endsWith('/');
+        return {
+            jdom: {
+                tag: selfClosing ? clipStringEnd(tplParts[0], '/') : tplParts[0],
+                attrs: {},
+                events: {},
+            },
+            selfClosing: selfClosing,
+        };
+    }
+
+    const reader = new Reader(tplParts, dynamicParts);
     reader.trim();
     const selfClosing = reader.clipEnd('/');
 
@@ -269,7 +290,7 @@ const interpolate = (tplParts, dynamicParts) => {
 
 const parseJSX = (tplParts, dynamicParts) => {
     const result = [];
-    const reader = new TplReader(tplParts, dynamicParts);
+    const reader = new Reader(tplParts, dynamicParts);
 
     let currentElement = null;
     let inTextNode = false;

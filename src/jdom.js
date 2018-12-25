@@ -1,5 +1,3 @@
-// note: anything where value is a function will be treated as an event listener or ignored.
-
 const READER_END = Symbol();
 
 const isNode = (typeof Node === 'undefined') ? (
@@ -38,12 +36,8 @@ class Reader {
         if (typeof currentPart === 'string') {
             const char = currentPart[this.subIndex] || '';
             if (++this.subIndex >= currentPart.length) {
+                this.index = nextIndex;
                 this.subIndex = 0;
-                if (this.index > len) {
-                    return READER_END;
-                } else {
-                    this.index = nextIndex;
-                }
             }
             return char;
         } else if (this.index >= len) {
@@ -150,7 +144,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
     const commit = (key, val) => {
         if (typeof val === 'function') {
             const eventName = key.replace('on', '');
-            if (!(key in events)) events[eventName] = [];
+            events[eventName] = [];
             events[eventName].push(val);
         } else {
             if (key === 'class') {

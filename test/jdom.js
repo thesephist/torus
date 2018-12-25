@@ -315,6 +315,16 @@ describe('jdom template tag', () => {
         );
 
         noThrow(
+            'attempt to backslash-escape in attributes',
+            () => jdom`<img src=\\*abc\\ />`
+        );
+
+        noThrow(
+            'quotes in attributes',
+            () => jdom`<img src=source"url />`
+        );
+
+        noThrow(
             'broken tag',
             () => jdom`<div>di>`
         );
@@ -327,4 +337,3 @@ describe('jdom template tag', () => {
     });
 
 });
-

@@ -230,6 +230,7 @@ describe('renderJDOM', () => {
                     tag: 'input',
                     attrs: {
                         type: 'checkbox',
+                        'data-x': 'hi',
                         'data-foo': 'bar',
                         'data-magic': 'magic',
                     },
@@ -238,6 +239,7 @@ describe('renderJDOM', () => {
                     tag: 'input',
                     attrs: {
                         type: 'checkbox',
+                        'data-x': 'hi',
                         'data-foo': 'baz',
                     },
                 }
@@ -278,11 +280,16 @@ describe('renderJDOM', () => {
                         checked: false,
                     },
                 }
+                const next2 = {
+                    tag: 'input',
+                }
 
                 const node = render(prev);
                 node.checked.should.be.true;
                 const node2 = renderJDOM(node, prev, next);
                 node2.checked.should.be.false;
+                const node3 = renderJDOM(node2, next, next2);
+                node3.type.should.not.equal('checkbox');
             });
 
         });

@@ -68,12 +68,10 @@ const createNodeFactory = tag => {
 const isObject = o => typeof o === 'object' && o !== null;
 
 const normalizeJDOM = jdom => {
-    if (isObject(jdom)) {
-        if (!('tag' in jdom)) jdom.tag = 'div';
-        if (!('attrs' in jdom)) jdom.attrs = {};
-        if (!('events' in jdom)) jdom.events = {};
-        if (!('children' in jdom)) jdom.children = [];
-    }
+    if (!('tag' in jdom)) jdom.tag = 'div';
+    if (!('attrs' in jdom)) jdom.attrs = {};
+    if (!('events' in jdom)) jdom.events = {};
+    if (!('children' in jdom)) jdom.children = [];
     return jdom;
 }
 
@@ -548,7 +546,7 @@ class Evented {
         const data = this.summarize();
         if (data instanceof Array) {
             return data.slice();
-        } else if (data instanceof Object) {
+        } else {
             return Object.assign({}, data);
         }
     }

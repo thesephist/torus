@@ -1,10 +1,6 @@
 # Torus To-dos
 
-- [-] Keep cutting down that bundle size for `jdom.js`!
-
 - [ ] Think about using streams / observables to abstract data models and events. Also consider l3 concepts in the context of Torus. They should map well.
-
-- [ ] Cover the uncovered [E] branches in tests
 
 - [ ] Concurrency
     - Yielding to the browser at the component level. Treat each Component#render or renderJDOM() as a separately, always-deferrable async event. This gets the interactivity / CPU time benefits of concurrent React.
@@ -36,6 +32,8 @@
         // FancyButton is now a class component!
         ```
         - This function will allow us to transform any functional component into a full-fledged Torus component, that can be styled and composed with other higher order components.
+
+- [ ] Finish Torus `Router`
 
 - [ ] First release (after all the above are complete)
 

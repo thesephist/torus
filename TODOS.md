@@ -1,8 +1,8 @@
 # Torus To-dos
 
-- [-] Add more detailed tests for `Styled[Component]` (media queries?) -- use `getComputedStyle(HTMLElement)` to test.
+- [-] Keep cutting down that bundle size for `jdom.js`!
 
-- [-] Keep cutting down that bundle size and complexity / speed!
+- [ ] Cover the uncovered [E] branches in tests
 
 - [ ] Concurrency
     - Yielding to the browser at the component level. Treat each Component#render or renderJDOM() as a separately, always-deferrable async event. This gets the interactivity / CPU time benefits of concurrent React.

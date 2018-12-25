@@ -11,10 +11,10 @@ const repeat = (str, count) => {
 const render_debug = (msg, header = false) => {
     if (DEBUG_RENDER) {
         if (header) {
-            const prefix = repeat('\t', render_stack.length - 1);
+            const prefix = repeat('\t', render_stack - 1);
             console.log('%c' + prefix + msg, 'font-weight: bold');
         } else {
-            const prefix = repeat('\t', render_stack.length);
+            const prefix = repeat('\t', render_stack);
             console.log(prefix + msg);
         }
     }
@@ -31,9 +31,7 @@ const HTML_IDL_ATTRIBUTES = [
     'disabled',
 ];
 
-const render_stack = [];
-const push_render_stack = component => render_stack.push(component);
-const pop_render_stack = () => render_stack.pop();
+let render_stack = 0;
 
 const createNodeFactory = tag => {
     return function(arg1, arg2, arg3) {
@@ -101,7 +99,7 @@ const renderJDOM = (node, previous, next) => {
         node = newNode;
     };
 
-    push_render_stack(next);
+    render_stack ++;
 
     const isChanged = previous !== next;
     if (isChanged && next instanceof Node) {
@@ -283,9 +281,9 @@ const renderJDOM = (node, previous, next) => {
         }
     }
 
-    pop_render_stack();
+    render_stack --;
 
-    if (render_stack.length === 0) {
+    if (render_stack === 0) {
         replacePlaceholders();
     }
 

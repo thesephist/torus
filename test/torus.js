@@ -642,26 +642,40 @@ describe('Styled', () => {
         const S = class extends StyledComponent {
             styles() {
                 return {
+                    // note that for tests to work, we need to use the
+                    //  lower-level values of some of the CSS props,
+                    //  like rgb() and font-weight: 700.
                     'font-size': '18px',
                     'background': 'rgba(0, 0, 0, 0.4)',
-                    '@keyframes some-name': `{
-                        from {opacity: 0}
-                        to {opacity: 1}
-                    }`,
-                    '@media (max-width: 800px)': {
-                        'font-size': '16px',
+                    '@keyframes some-name': {
+                        'from': {'opacity': 0},
+                        'to': {'opacity': 1},
+                    },
+                    // guaranteed to always match
+                    '@media (min-width: 0px)': {
+                        'border-color': 'rgb(0, 1, 2)',
+                        'p': {
+                            'font-style': 'italic',
+                        },
                     },
                     '&.invalid': {
-                        'color': 'red',
+                        'color': 'rgb(255, 0, 0)',
+                        '&:focus': {
+                            'color': 'rgb(0, 0, 255)',
+                        },
                     },
-                    '::after': {
-                        'display': 'block',
+                    'p': {
+                        'font-weight': '700',
                     },
                 }
             }
 
             compose() {
-                return div();
+                // it's important that we return a button, because
+                //  we test for :focus, and button is focusable.
+                return button({
+                    class: 'invalid',
+                }, [p(['Hello'])]);
             }
         }
 
@@ -673,8 +687,71 @@ describe('Styled', () => {
         });
 
         it('should not throw with styles defined (placeholder test)', () => {
-            const s = new S();
+            expect(() => new S()).to.not.throw();
         });
+
+        describe('Style rendering correctness', () => {
+            const s = new S();
+
+            before(() => {
+                document.body.appendChild(s.node);
+            });
+
+            after(() => {
+                document.body.removeChild(s.node);
+            });
+
+            it('should support styles set on itself', () => {
+                const styles = getComputedStyle(s.node);
+                styles.fontSize.should.equal('18px');
+                styles.backgroundColor.should.equal('rgba(0, 0, 0, 0.4)');
+            });
+
+            it('should support styles set on children', () => {
+                const styles = getComputedStyle(s.node.querySelector('p'));
+                styles.fontWeight.should.equal('700');
+            });
+
+            it('should correctly render @keyframes rules', () => {
+                const sheet = document.querySelector('style[data-torus]').sheet;
+                let hasKeyframeRule = false;
+                for (const rule of sheet.cssRules) {
+                    if (rule instanceof CSSKeyframesRule) {
+                        hasKeyframeRule = true;
+                    }
+                }
+                hasKeyframeRule.should.be.true;
+            });
+
+            it('should correctly render @media queries', () => {
+                const sheet = document.querySelector('style[data-torus]').sheet;
+                let hasMediaRule = false;
+                for (const rule of sheet.cssRules) {
+                    if (rule instanceof CSSMediaRule) {
+                        hasMediaRule = true;
+                    }
+                }
+                hasMediaRule.should.be.true;
+
+                const styles = getComputedStyle(s.node);
+                const childStyles = getComputedStyle(s.node.querySelector('p'));
+                styles.borderColor.should.equal('rgb(0, 1, 2)');
+                childStyles.fontStyle.should.equal('italic');
+            });
+
+            it('should correctly render sub-rules with "&"', () => {
+                const styles = getComputedStyle(s.node);
+                styles.color.should.equal('rgb(255, 0, 0)');
+            });
+
+            it('should correctly render :hover/:focus state styles (nested subrules)', () => {
+                s.node.focus();
+                const styles = getComputedStyle(s.node);
+                styles.color.should.equal('rgb(0, 0, 255)');
+            });
+
+        });
+
     });
 
 });

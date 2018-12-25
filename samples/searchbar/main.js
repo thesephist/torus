@@ -28,7 +28,7 @@ class SearchInput extends StyledComponent {
                 'outline': 'none',
                 'transform': 'opacity .2s',
 
-                ':focus': {
+                '&:focus': {
                     background: '#f7f7f7',
                 },
             }

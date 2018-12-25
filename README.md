@@ -106,12 +106,17 @@ class MyFancyList extends Styled(List) {
             'background': 'rgba(0, 0, 0, 0.4)',
 
             // Keyframes and media queries will be scoped globally
-            '@keyframes some-name': `{
-                from {opacity: 0}
-                to {opacity: 1}
-            }`,
-            '@media (max-width: 800px)': {
-                'font-size': '16px',
+            '@keyframes some-name': {
+                'from': {'opacity': 0},
+                'to': {'opacity': 1},
+            },
+            // note that we don't select the element again
+            //  inside @media -- that's done for us
+            '@media (min-width: 0px)': {
+                'border-color': 'rgb(0, 1, 2)',
+                'p': {
+                    'font-style': 'italic',
+                },
             },
 
             // We can use SCSS-like syntax for hierarchy.
@@ -119,9 +124,12 @@ class MyFancyList extends Styled(List) {
             '&.invalid': {
                 'color': 'red',
             },
-            '::after': {
+            '&::after': {
                 'display': 'block',
             },
+            'p': {
+                'font-weight': 'bold',
+            }
         }
     }
 
@@ -516,6 +524,16 @@ Alternatively, you can also just import Torus with:
 ```
 
 Torus will export all of its default globals to `window`, so they're accessible as global names to your scripts. This isn't recommended, but great for experimenting.
+
+## Internationalization
+
+Torus doesn't concern itself with internationalization, but as developers, we can use the APIs available to us make internationalization possible inside our Torus components. Torus exposes much of the rendering process and the DOM, and importantly allows you us create a `preprocessor` that can take in JDOM, and modify it before it reaches the renderer, so we can make modifications to the DOM that the renderer sees with our own code. This makes Torus highly extensible and ideal for i18n. In fact, the component preprocessor API is what makes `Styled()` possible.
+
+>// TODO
+
+## Accessibility
+
+>// TODO
 
 ## Contributing
 

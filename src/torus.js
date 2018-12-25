@@ -31,7 +31,7 @@ const HTML_IDL_ATTRIBUTES = [
     'disabled',
 ];
 
-let render_stack = [];
+const render_stack = [];
 const push_render_stack = component => render_stack.push(component);
 const pop_render_stack = () => render_stack.pop();
 
@@ -367,7 +367,7 @@ const injectedClassNames = new Set();
 let styledComponentSheet = null;
 const generateUniqueClassName = stylesObject => {
     // Modified from https://github.com/darkskyapp/string-hash/blob/master/index.js
-    const str = JSON.stringify(stylesObject);
+    const str = JSON.stringify(stylesObject).replace(/\s+/g, ' ');
     let i = str.length;
     let hash = 1989;
     while (i) {
@@ -375,52 +375,55 @@ const generateUniqueClassName = stylesObject => {
     }
     return '_torus' + (hash >>> 0);
 }
-const insertCSSDeclarations = (sheet, selector, declarations) => {
-    let str = '';
-    for (const [prop, val] of Object.entries(declarations)) {
-        str += prop + ':' + val + ';';
-    }
-    const rule = selector + '{' + str + '}';
-    sheet.insertRule(rule, sheet.cssRules.length);
-}
-const insertStylesObjectRecursively = (sheet, selector, stylesObject) => {
-    let selfDeclarations = {};
-    for (const [key, val] of Object.entries(stylesObject)) {
-        if (key[0] === '@') {
-            // media query or keyframes or font, which are global CSS names
-            insertStylesObjectRecursively(sheet, key, val);
+const brace = (a, b) => a + '{' + b + '}';
+const rulesFromStylesObject = (selector, stylesObject) => {
+    let rules = [];
+    let selfDeclarations = '';
+    for (const [prop, val] of Object.entries(stylesObject)) {
+        if (prop[0] === '@') {
+            if (prop.startsWith('@media')) {
+                rules.push(brace(prop, rulesFromStylesObject(selector, val).join('')));
+            } else if (prop.startsWith('@keyframes')) {
+                rules.push(brace(prop, rulesFromStylesObject('', val).join('')));
+            }
         } else {
             if (typeof val === 'object') {
-                // key is selector suffix, val is styles object
-                if (key.includes('&')) {
-                    const fullSelector = key.replace(/&/g, selector);
-                    insertStylesObjectRecursively(sheet, fullSelector, val);
+                if (prop.includes('&')) {
+                    const fullSelector = prop.replace(/&/g, selector);
+                    rules = rules.concat(rulesFromStylesObject(fullSelector, val));
                 } else {
-                    insertStylesObjectRecursively(sheet, selector + ' ' + key, val);
+                    rules = rules.concat(rulesFromStylesObject(selector + ' ' + prop, val));
                 }
             } else {
-                // key is CSS property, val is value
-                selfDeclarations[key] = val;
+                selfDeclarations += prop + ':' + val + ';';
             }
         }
     }
-    insertCSSDeclarations(sheet, selector, selfDeclarations);
-}
-const injectStyleSheet = (className, stylesObject) => {
-    if (!styledComponentSheet) {
-        styleElement = document.createElement('style');
-        styleElement.setAttribute('data-torus', '');
-        document.head.appendChild(styleElement);
-        styledComponentSheet = styleElement.sheet;
+    if (selfDeclarations) {
+        rules.push(brace(selector, selfDeclarations));
     }
 
-    insertStylesObjectRecursively(styledComponentSheet, '.' + className, stylesObject);
-    injectedClassNames.add(className);
+    return rules;
+}
+const initSheet = () => {
+    styleElement = document.createElement('style');
+    styleElement.setAttribute('data-torus', '');
+    document.head.appendChild(styleElement);
+    styledComponentSheet = styleElement.sheet;
 }
 const injectStylesOnce = stylesObject => {
     const className = generateUniqueClassName(stylesObject);
     if (!injectedClassNames.has(className)) {
-        injectStyleSheet(className, stylesObject);
+        if (!styledComponentSheet) {
+            initSheet();
+        }
+        const rules = rulesFromStylesObject('.' + className, stylesObject);
+        for (const rule of rules) {
+            // @debug
+            render_debug(`Add new CSS rule: ${rule}`);
+            styledComponentSheet.insertRule(rule, styledComponentSheet.cssRules.length);
+        }
+        injectedClassNames.add(className);
     }
     return className;
 }

@@ -12,27 +12,6 @@
         - As a part of this consideration, maybe we should also make all bulk `replaceChild` calls in the render step asynchronous with rAF? Does that have any benefits?
     - Like concurrent React, we should support the ability to halt rendering and cancel a render pass, render the next render call if render was called before the previous render call began flushing to DOM / being rendered. Multiple calls to `#render()` in succession should result in a single `#render()` call.
 
-- [ ] Function components
-    - We can abstract away pure components that just render data with a function that returns JDOM (or uses jdom to render JSX to JDOM), and call these functions in #compose of larger class components.
-    - This feels very native, JavaScripty -- just using the function abstraction, because the JDOM is just JSON objects.
-    - But how would we, for example, Style() these components? A proposal:
-        - We'll call a "functional component" anything that returns valid JDOM from the function call, like ``data => jdom`<p>${data.content}</p>`;``.
-        - We'll provide a function `Componentize/ComponentFrom`:
-        ```javascript
-        const Componentize = renderFn => {
-            return class extends Component {
-                compose(data) {
-                    return renderFn(data);
-                }
-            }
-        }
-
-        function fancyButton = text => jdom `<button class="fancy">${text}</button>`;
-        const FancyButton = Componentize(fancyButton);
-        // FancyButton is now a class component!
-        ```
-        - This function will allow us to transform any functional component into a full-fledged Torus component, that can be styled and composed with other higher order components.
-
 - [ ] Finish Torus `Router`
 
 - [ ] First release (after all the above are complete)

@@ -84,6 +84,57 @@ One notable difference between Torus's and React's component API, which this res
 
 For a more detailed and real-world example tying in models, please reference `samples/`.
 
+### Pure functional components with `Component.from()`
+
+Often, we want to create a new Component class whose rendered result only depends on its initial input. These might be small UI widgets in a design system like buttons and dialogs, for example. In these cases where we don't need a component to keep local state, listen for events, or create side effects, we can describe the component's view with a pure function.
+
+```javascript
+const FancyButton = buttonText => jdom`<button class="fancy">${buttonText}</button>`;
+```
+
+Because these kinds of function "components" will return valid JDOM, we can compose them into any other `Component#compose()` method. Remember, `FancyButton` is just a JavaScript function! This allows for easy abstraction and code reuse within small parts of our rendering logic.
+
+```javascript
+// compose with a basic function component
+class FancyForm extends Component {
+    compose() {
+        return {
+            tag: 'form',
+            children: [
+                jdom`<h1>Super fancy form!</h1>`,
+                jdom`<input name="full_name"/>`,
+                FancyButton('Submit!'),
+            ],
+        }
+    }
+}
+```
+
+But what if we want to compose our `FancyButton` with `Styled()` or use it in more complex views? We can upgrade the function component `FancyButton` to a full-fledged Torus class component with `Component.from()`.
+
+```javascript
+const ClassyButton = Component.from(FancyButton);
+// equivalent to
+const ClassyButton = Component.from(buttonText => {
+    return jdom`<button class="fancy">${buttonText}</button>`;
+});
+
+class FancyForm extends Component {
+    init() {
+        this.button = new ClassyButton('Submit!');
+    }
+    compose() {
+        return `<form>
+            <h1>Super fancy form!</h1>
+            <input name="full_name"/>
+            ${this.button.node}
+        </form>`;
+    }
+}
+```
+
+Here, `ClassyButton` emits exactly the same DOM as `FancyButton` when rendered, but it's gained additional capabilities accessible to a class component in Torus, like persistence across renders of the parent component and better composability. Once we upgrade the function component into a class with `Component.from()`, we can use it in all the places we can use class components, including inside higher-order component calls like `Styled(FancyButton)`.
+
 ### `Styled()` and `StyledComponent`
 
 By default, Torus components are only styled through inline CSS, through the `attrs.style` field in the JDOM. However, Torus also comes with a higher order component to produce a version of any given Torus component that understands an SCSS-like syntax for declaring styles, `Styled()`, and the `StyledComponent` class, which is equivalent to `Styled(Component)`.

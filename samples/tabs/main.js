@@ -1,23 +1,16 @@
 // The tabs sample project demonstrates the jdom tagged template
-//  function to construct JDOM more easily, from a JSX-like syntax.
+//  function to construct JDOM more easily, from a JSX-like syntax,
+//  and also demonstrates creating function components with Component.from.
 // All of the state here is kept within the views for demonstration purposes,
 //  but should probably be moved to a Record under the App instance
 //  in practice for simplicity.
 
-class Tab extends StyledComponent {
-
-    init(number, content) {
-        this.number = number;
-        this.content = content;
-    }
-
-    compose() {
-        return jdom`<div>
-            <h2>Tab #${this.number}</h2>
-            <p>${this.content}</p>
-        </div>`;
-    }
-}
+const Tab = Component.from((number, content) => {
+    return jdom`<div>
+        <h2>Tab #${number}</h2>
+        <p>${content}</p>
+    </div>`;
+});
 
 class TabButton extends StyledComponent {
 
@@ -59,7 +52,7 @@ class App extends StyledComponent {
         ];
         this.tabButtons = this.tabs.map(tab => {
             return new TabButton({
-                number: tab.number,
+                number: this.tabs.indexOf(tab),
                 setActiveTab: () => this.setActiveTab(tab),
             });
         });
@@ -73,11 +66,12 @@ class App extends StyledComponent {
     }
 
     setActiveTab(tab) {
+        const tabNumber = this.tabs.indexOf(tab);
         if (this.activeTab) {
-            this.tabButtons[this.activeTab.number].markActive(false);
+            this.tabButtons[tabNumber].markActive(false);
         }
         this.activeTab = tab;
-        this.tabButtons[this.activeTab.number].markActive(true);
+        this.tabButtons[tabNumber].markActive(true);
         this.render();
     }
 
@@ -95,4 +89,3 @@ class App extends StyledComponent {
 
 const app = new App();
 document.body.appendChild(app.node);
-

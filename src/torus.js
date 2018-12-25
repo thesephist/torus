@@ -272,6 +272,17 @@ class Component {
         this.render();
     }
 
+    static from(fn) {
+        return class FunctionComponent extends Component {
+            init(...args) {
+                this.args = args;
+            }
+            compose() {
+                return fn(...this.args);
+            }
+        }
+    }
+
     init() {
         // should be overridden
         // Component#init is guaranteed to always be a no-op method

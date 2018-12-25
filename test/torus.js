@@ -500,6 +500,36 @@ describe('Component', () => {
         })();
     });
 
+    describe('Component.from', () => {
+
+        const Comp = Component.from((name, number) => {
+            return {
+                tag: 'h1',
+                attrs: {
+                    'data-number': number,
+                },
+                children: [name],
+            }
+        });
+
+        it('should create a new Component class from a pure function component', () => {
+            const c = new Comp('Dijkstra', 42);
+            c.should.be.an.instanceof(Component);
+        });
+
+        it('should render with the argument values given to the class constructor', () => {
+            const c = new Comp('Dijkstra', 42);
+            expect(c.compose()).to.deep.equal({
+                tag: 'h1',
+                attrs: {
+                    'data-number': 42,
+                },
+                children: ['Dijkstra'],
+            });
+        });
+
+    });
+
     describe('Event bindings to #record', () => {
 
         it('should call event handler defined with #listen on source event', () => {

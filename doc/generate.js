@@ -16,11 +16,11 @@ const linesToRows = lines => {
     let docLine = '';
 
     let inDocComment = false;
-    const pushPair = codeLine => {
+    const pushPair = (codeLine, lineNumber) => {
         if (docLine) {
-            linePairs.push([docLine, codeLine]);
+            linePairs.push([docLine, codeLine, lineNumber]);
         } else {
-            linePairs.push(['', codeLine]);
+            linePairs.push(['', codeLine, lineNumber]);
         }
         docLine = '';
     }
@@ -33,7 +33,7 @@ const linesToRows = lines => {
         }
     };
 
-    for (const line of lines.split('\n')) {
+    lines.split('\n').forEach((line, idx) => {
         if (line.trim().startsWith('//>')) {
             inDocComment = true;
             pushComment(line);
@@ -41,22 +41,22 @@ const linesToRows = lines => {
             if (inDocComment) {
                 pushComment(line)
             } else {
-                pushPair(line);
+                pushPair(line, idx + 1);
             }
         } else {
-            if (inDocComment)  inDocComment = false;
-            pushPair(line);
+            if (inDocComment) inDocComment = false;
+            pushPair(line, idx + 1);
         }
-    }
+    });
 
     return linePairs;
 }
 
 const buildAnnotatedPage = (title, linePairs) => {
-    const lines = linePairs.map(([doc, source], idx) => {
+    const lines = linePairs.map(([doc, source, lineNumber]) => {
         return `<div class="line"><div class="doc">${
             marked(doc)
-        }</div><pre class="source javascript"><strong>${idx + 1}</strong>${source}</pre></div>`;
+        }</div><pre class="source javascript"><strong>${lineNumber}</strong>${source}</pre></div>`;
     }).join('\n');
 
     return template

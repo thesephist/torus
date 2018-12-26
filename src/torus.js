@@ -196,51 +196,51 @@ const renderJDOM = (node, previous, next) => {
         }
 
         // Compare event handlers
-        for (const eventName in next.events) {
-            const prevEvents = arrayNormalize(previous.events[eventName] || []);
-            const nextEvents = arrayNormalize(next.events[eventName]);
-
-            for (const handlerFn of nextEvents) {
-                if (!prevEvents.includes(handlerFn)) {
-                    // @debug
-                    render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
-                    node.addEventListener(eventName, handlerFn);
+        const diffEvents = (whole, sub, cb) => {
+            for (const eventName in whole) {
+                const wholeEvents = arrayNormalize(whole[eventName] || []);
+                const subEvents = arrayNormalize(sub[eventName]);
+                for (const handlerFn of wholeEvents) {
+                    if (!subEvents.includes(handlerFn)) {
+                        cb(eventName, handlerFn);
+                    }
                 }
             }
         }
-        for (const eventName in previous.events) {
-            const prevEvents = arrayNormalize(previous.events[eventName] || []);
-            const nextEvents = arrayNormalize(next.events[eventName]);
-
-            for (const handlerFn of prevEvents) {
-                if (!nextEvents.includes(handlerFn)) {
-                    // @debug
-                    render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
-                    node.removeEventListener(eventName, handlerFn);
-                }
-            }
-        }
+        diffEvents(next.events, previous.events, (eventName, handlerFn) => {
+            // @debug
+            render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
+            node.addEventListener(eventName, handlerFn);
+        });
+        diffEvents(previous.events, next.events, (eventName, handlerFn) => {
+            // @debug
+            render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
+            node.removeEventListener(eventName, handlerFn);
+        });
 
         // Render children
-        if (next.children.length > 0 || previous.children.length > 0) {
-            if (previous.children.length < next.children.length) {
+        const nodeChildren = node.childNodes;
+        const prevChildren = previous.children;
+        const nextChildren = next.children;
+        if (nextChildren.length + prevChildren.length > 0) {
+            if (prevChildren.length < nextChildren.length) {
                 let i;
-                for (i = 0; i < previous.children.length; i ++) {
-                    renderJDOM(node.childNodes[i], previous.children[i], next.children[i]);
+                for (i = 0; i < prevChildren.length; i ++) {
+                    renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
                 }
-                while (i < next.children.length) {
-                    node.appendChild(renderJDOM(undefined, undefined, next.children[i]));
+                while (i < nextChildren.length) {
+                    node.appendChild(renderJDOM(undefined, undefined, nextChildren[i]));
                     i ++;
                 }
             } else {
                 let i;
-                for (i = 0; i < next.children.length; i ++) {
-                    renderJDOM(node.childNodes[i], previous.children[i], next.children[i]);
+                for (i = 0; i < nextChildren.length; i ++) {
+                    renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
                 }
-                while (i < previous.children.length) {
+                while (i < prevChildren.length) {
                     // @debug
-                    render_debug(`Remove child <${node.childNodes[i].tagName}>`);
-                    node.removeChild(node.childNodes[i]);
+                    render_debug(`Remove child <${nodeChildren[i].tagName}>`);
+                    node.removeChild(nodeChildren[i]);
                     i ++;
                 }
             }
@@ -259,15 +259,18 @@ const renderJDOM = (node, previous, next) => {
 /**
  * Unit of UI component
  */
+const emptyEvent = () => {
+    return {
+        source: null,
+        handler: () => { },
+    }
+}
 class Component {
 
     constructor(...args) {
         this.jdom = undefined;
         this.node = undefined;
-        this.event = {
-            source: null,
-            handler: () => {},
-        };
+        this.event = emptyEvent();
         this.init(...args);
         this.render();
     }
@@ -304,14 +307,10 @@ class Component {
     }
 
     unlisten() {
-        if (this.event.source) {
-            this.event.source.removeHandler(this.event.handler);
+        if (this.record) {
+            this.record.removeHandler(this.event.handler);
         }
-
-        this.event = {
-            source: null,
-            handler: () => {},
-        };
+        this.event = emptyEvent();
     }
 
     remove() {
@@ -329,7 +328,7 @@ class Component {
     render(data) {
         // @debug
         render_debug(`Render Component: ${this.constructor.name}`, true);
-        data = data || (this.event.source && this.event.source.serialize())
+        data = data || (this.record && this.record.serialize())
         const jdom = this.preprocess(this.compose(data), data);
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;
@@ -519,18 +518,14 @@ class Evented {
     }
 
     emitEvent() {
+        const summary = this.getCurrentSummary();
         for (const handler of this.eventTargets) {
-            handler(this.getCurrentSummary());
+            handler(summary);
         }
     }
 
     getCurrentSummary() {
-        const data = this.summarize();
-        if (data instanceof Array) {
-            return data.slice();
-        } else {
-            return Object.assign({}, data);
-        }
+        return this.summarize();
     }
 
     addHandler(handler) {
@@ -617,14 +612,12 @@ class Store extends Evented {
     }
 
     summarize() {
-        const unordered_data = [];
-        for (const record of this.records) {
-            unordered_data.push({
+        return [...this.records].map(record => {
+            return {
                 comparator: this.comparator ? this.comparator(record) : null,
                 record: record,
-            });
-        }
-        const ordered_data = unordered_data.sort((a, b) => {
+            }
+        }).sort((a, b) => {
             if (a.comparator < b.comparator) {
                 return -1;
             } else if (a.comparator > b.comparator) {
@@ -632,8 +625,7 @@ class Store extends Evented {
             } else {
                 return 0;
             }
-        });
-        return ordered_data.map(o => o.record);
+        }).map(o => o.record);
     }
 
     serialize() {

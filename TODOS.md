@@ -1,6 +1,13 @@
 # Torus To-dos
 
+- [ ] Comment-annotate both torus and jdom and make it readable.
+
 - [ ] Think about using streams / observables to abstract data models and events. Also consider l3 concepts in the context of Torus. They should map well.
+    - Conclusion after some thought: managing time-dimension events isn't in the purview of Torus. Torus simply lets events flow through its logic asynchronously.
+
+- [ ] On separating application logic and presentation -- application logic should live inside data models, and the Components should only call the application logic by established public APIs.
+
+- [ ] For polyx, longevity is key. Once I write once, I won't touch it again for 3-4 years. Will it stand that testo f time?
 
 - [ ] A library is just a collection of functions that abstract common patterns. For productivity. Look at torus in this light and reaffirm / reject architectural choices / API designs.
 

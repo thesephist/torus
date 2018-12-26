@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{title}} annotated source</title>
+    <title>Torus annotated sources</title>
     <style>
         html,
         body {
@@ -33,9 +33,7 @@
         }
         .line:first-child .doc {
             padding-top: 64px;
-        }
-        .line:last-child .doc {
-            padding-bottom: 64px;
+            min-height: 100vh;
         }
         .doc {
             min-height: 24px;
@@ -46,9 +44,6 @@
             padding-left: 48px;
             padding-right: 48px;
             background: #fff;
-        }
-        .doc p {
-            margin: 0;
         }
         pre {
             margin: 0;
@@ -71,10 +66,6 @@
             opacity: .2;
             margin-right: 24px;
         }
-        .hljs {
-            padding: 0 !important;
-            background: transparent !important;
-        }
         .back {
             opacity: .7;
             color: #777;
@@ -89,20 +80,14 @@
     <main>
         <div class="line">
             <div class="doc">
-                <h1>{{title}} annotated source</h1>
-                <em><a class="back" href="/">Back to index</a></em>
+                <h1>Torus annotated source</h1>
+                <p>This documentation is auto-generated with <code>npm run docs</code> from the Torus repository, from code comments.</p>
+                <p><a class="back" href="/torus.html">src/torus.js</a></p>
+                <p><a class="back" href="/jdom.html">src/jdom.js</a></p>
             </div>
             <pre></pre>
         </div>
-        {{lines}}
     </main>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
-    <script>
-        for (const el of document.querySelectorAll('.line pre')) {
-            hljs.highlightBlock(el);
-        }
-    </script>
 </body>
 
 </html>

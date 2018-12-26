@@ -5,6 +5,7 @@ const fs = require('fs');
 const marked = require('marked');
 const mkdirp = require('mkdirp');
 
+const index = fs.readFileSync('./doc/index.html', 'utf8');
 const template = fs.readFileSync('./doc/template.html', 'utf8');
 const torusSource = fs.readFileSync('./src/torus.js', 'utf8');
 const jdomSource = fs.readFileSync('./src/jdom.js', 'utf8');
@@ -65,6 +66,9 @@ const buildAnnotatedPage = (title, linePairs) => {
 
 mkdirp.sync('./docs/');
 
+fs.writeFile('./docs/index.html', index, 'utf8', (err) => {
+    if (err) console.error('Error writing index page', err);
+});
 fs.writeFile('./docs/torus.html', buildAnnotatedPage('torus.js', linesToRows(torusSource)), 'utf8', (err) => {
     if (err) console.error('Error writing documentation page', err);
 });

@@ -2,6 +2,8 @@
 
 Minimal JS Model-View UI framework focused on being tiny, efficient, and free of dependencies.
 
+Torus also has an annotated, easy to read version of the entire (pretty small) codebase, at its [Github Pages](https://thesephist.github.io/torus/). Check it out if you want to learn more about how the frameworks, and how virtual DOM and templating works!
+
 ## Features
 
 ### Simplicity and size
@@ -475,88 +477,57 @@ class CityStore extends StoreOf(City) {
 
 >// TODO: the Router API is still being built
 
-## A supplement about JDOM (JSON DOM)
+## Contributing
 
-JDOM is an efficient, lightweight (usually internal) representation of the DOM used for diffing and rendering in Torus. While the `jdom` template tag provides an ergonomic, JSX-like templating syntax, we need a more efficient and lightweight format for Torus's internal representation of components, and JDOM fills that role!
+If you find bugs, please open an issue or put in a pull request with a test to recreate the bug against what you expected Torus to do.
 
-Whenever you `#compose()` a component in Torus, you can use the `jdom` template tag to define your DOM, or return the lower-level, JDOM representation of your tree. In the future, we might compile away the `jdom` template processor at build time, inspired by `developit/htm`.
+### Builds
 
-JDOM also bears a resemblance in motivation to [hyperscript](https://github.com/hyperhype/hyperscript). Both try to create a nice interface for describing DOM hierarchies, but hyperscript is more of an authoring interface, whereas JDOM is more of an intermediate representation for rendering markup in Torus components. In JDOM, object hierarchies replace call stacks of `h()` in hyperscript.
+To build Torus, run
 
-### Single element
-
-```javascript
-const jdom = {
-  tag: 'div',
-  attrs: {
-    'data-ref': 42,
-    class: [
-      'firstClass',
-      'second_class',
-      'third-class',
-    ],
-    style: {
-      background: '#fff',
-    },
-  },
-  events: {
-    'click': () => counter ++,
-    'mouseover': [
-        () => console.log('hi'),
-        () => console.log('hello'),
-    ],
-  },
-  children: [...<JDOM>],
-};
+```sh
+~$ npm build
+# or
+~$ yarn build
 ```
 
-### Nested components
+This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`.
 
-```javascript
-const myComponent = new Component();
-const myComponent2 = new Component();
+### Generating documentation from comments
 
-const jdom = {
-  // defaults to 'div' tag
-  children: [
-    myComponent.node,
-    myComponent2.node,
-  ],
-};
+Torus has a unique system for generating documentation from code comments that begin with `//>`. To generate comment docs, run
+
+```sh
+~$ npm run docs
+# or
+~$ yarn docs
 ```
 
-### Text nodes
+Docs files will be generated at `./docs/` and are viewable on a web browser.
 
-```javascript
-const jdom = 'Some text';
-// => TextNode
+![Torus annotated source](doc/screenshot.png)
+
+### Running tests
+
+To run Torus's unit tests and generate a coverage report to `coverage/`, run
+
+```sh
+~$ npm test
+# or
+~$ yarn test
 ```
 
-### Empty nodes
+This will run the basic test suite on a development build of Torus. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
 
-```javascript
-const jdom = null;
-// => CommentNode
+We can also run tests on the production build, with:
+
+```sh
+~$ npm test-prod
+# or
+~$ yarn test-prod
 ```
 
-### Literal Elements
-
-```javascript
-const jdom = document.createElement('div');
-// => <div></div>
-```
-
-### JDOM factory functions
-
-For development ergonomics, Torus suggests using and creating shortcut factory functions when writing JDOM.
-
-In general, a JDOM factory function has the signatures:
-
-```javascript
-tagName([... <children JDOM>])
-tagName({...attributes}, [... <children JDOM>])
-tagName({...attributes}, {...events}, [... <children JDOM>])
-```
+This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occurred.
 
 ## Installation and usage
 
@@ -586,54 +557,35 @@ Torus doesn't concern itself with internationalization, but as developers, we ca
 
 >// TODO
 
-## Contributing
+## A supplement about JDOM (JSON DOM)
 
-If you find bugs, please open an issue or put in a pull request with a test to recreate the bug against what you expected Torus to do.
+JDOM is an efficient, lightweight (usually internal) representation of the DOM used for diffing and rendering in Torus. While the `jdom` template tag provides an ergonomic, JSX-like templating syntax, we need a more efficient and lightweight format for Torus's internal representation of components, and JDOM fills that role!
 
-### Generating documentation from comments
+Whenever you `#compose()` a component in Torus, you can use the `jdom` template tag to define your DOM, or return the lower-level, JDOM representation of your tree. In the future, we might compile away the `jdom` template processor at build time, inspired by `developit/htm`.
 
-Torus has a unique system for generating documentation from code comments that begin with `//>`. To generate comment docs, run
+JDOM also bears a resemblance in motivation to [hyperscript](https://github.com/hyperhype/hyperscript). Both try to create a nice interface for describing DOM hierarchies, but hyperscript is more of an authoring interface, whereas JDOM is more of an intermediate representation for rendering markup in Torus components. In JDOM, object hierarchies replace call stacks of `h()` in hyperscript. Here's an example.
 
-```sh
-~$ npm run docs
-# or
-~$ yarn docs
+```javascript
+const jdom = {
+  tag: 'div',
+  attrs: {
+    'data-ref': 42,
+    class: [
+      'firstClass',
+      'second_class',
+      'third-class',
+    ],
+    style: {
+      background: '#fff',
+    },
+  },
+  events: {
+    'click': () => counter ++,
+    'mouseover': [
+        () => console.log('hi'),
+        () => console.log('hello'),
+    ],
+  },
+  children: [...<JDOM>],
+};
 ```
-
-Docs files will be generated at `./docs/` and are viewable on a web browser.
-
-![Torus annotated source](doc/screenshot.png)
-
-### Builds
-
-To build Torus, run
-
-```sh
-~$ npm build
-# or
-~$ yarn build
-```
-
-This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`.
-
-### Running tests
-
-To run Torus's unit tests and generate a coverage report to `coverage/`, run
-
-```sh
-~$ npm test
-# or
-~$ yarn test
-```
-
-This will run the basic test suite on a development build of Torus. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
-
-We can also run tests on the production build, with:
-
-```sh
-~$ npm test-prod
-# or
-~$ yarn test-prod
-```
-
-This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occurred.

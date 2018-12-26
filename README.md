@@ -590,6 +590,20 @@ Torus doesn't concern itself with internationalization, but as developers, we ca
 
 If you find bugs, please open an issue or put in a pull request with a test to recreate the bug against what you expected Torus to do.
 
+### Generating documentation from comments
+
+Torus has a unique system for generating documentation from code comments that begin with `//>`. To generate comment docs, run
+
+```sh
+~$ npm run docs
+# or
+~$ yarn docs
+```
+
+Docs files will be generated at `./docs/` and are viewable on a web browser.
+
+![Torus annotated source](docs/screenshot.png);
+
 ### Builds
 
 To build Torus, run

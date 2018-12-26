@@ -1,10 +1,12 @@
+//> Check if an object is probably a JDOM. Useful for embedding JDOM directly
+//  inside templates.
+const isJDOM = obj => typeof obj === 'object' && obj !== null && 'tag' in obj;
+
 //> If we're in a browser environment, `isNode()` should check if the given
-//  object is a node. If not, there's no reason an object would be a Node,
-//  so return false. This function is set at load-time to make run-time calls fast.
-const isNode = (typeof Node === 'undefined') ? (
-    () => false
-) : (
-    o => o instanceof Node
+//  object is a node or JDOM. If not, there's no reason an object would be a Node,
+//  so just check for JDOM. This function is set at load-time to make run-time calls fast.
+const isNode = (typeof Node === 'undefined') ? isJDOM : (
+    o => o instanceof Node || isJDOM(o)
 );
 
 //> Clip the end of a given string by the length of a substring
@@ -298,7 +300,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
                 }
                 break;
             default:
-                //> Append all other characaters to the head
+                //> Append all other characters to the head
                 if (typeof next === 'string') {
                     head[0] += next;
                 } else {
@@ -377,6 +379,16 @@ const parseJSX = (tplParts, dynamicParts) => {
         inTextNode = false;
     }
 
+    //> Shortcut to handle string tokens properly, which we do more than once below
+    const handleString = next => {
+        if (!inTextNode) {
+            commit();
+            inTextNode = true;
+            currentElement = '';
+        }
+        currentElement += next;
+    }
+
     //> Main parsing logic
     for (let next = reader.next(); next !== READER_END; next = reader.next()) {
         //> if we see an opening tag...
@@ -397,6 +409,9 @@ const parseJSX = (tplParts, dynamicParts) => {
                     reader.readUntil(closingTag);
                 }
             }
+        //> Because string tokens are the most common, we check for it early
+        } else if (typeof next === 'string') {
+            handleString(next);
         //> Allow the template token to be an array of literal elements.
         //  this makes rendering lists of nodes really easy.
         } else if (next instanceof Array && isNode(next[0])) {
@@ -407,13 +422,9 @@ const parseJSX = (tplParts, dynamicParts) => {
         } else if (isNode(next)) {
             commit();
             currentElement = next;
+        //> If none of the above conditions match, treat it as if it were a string
         } else {
-            if (!inTextNode) {
-                commit();
-                inTextNode = true;
-                currentElement = '';
-            }
-            currentElement += next;
+            handleString(next);
         }
     }
 

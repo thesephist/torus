@@ -100,14 +100,11 @@ Because these kinds of function "components" will return valid JDOM, we can comp
 // compose with a basic function component
 class FancyForm extends Component {
     compose() {
-        return {
-            tag: 'form',
-            children: [
-                jdom`<h1>Super fancy form!</h1>`,
-                jdom`<input name="full_name"/>`,
-                FancyButton('Submit!'),
-            ],
-        }
+        return `<form>
+            <h1>Super fancy form!</h1>
+            <input name="full_name"/>
+            ${FancyButton('Submit!')}
+        </form>`;
     }
 }
 ```

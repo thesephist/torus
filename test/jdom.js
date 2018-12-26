@@ -144,6 +144,14 @@ describe('jdom template tag', () => {
         );
 
         compare(
+            'equals sign in quotes should be treated like normal',
+            jdom`<button data-prop="ab=cd"/>`,
+            {tag: 'button', attrs: {
+                'data-prop': 'ab=cd',
+            }}
+        );
+
+        compare(
             'multiple attributes',
             jdom`<input type="text" name="username" />`,
             {tag: 'input', attrs: {type: 'text', name: 'username'}}
@@ -241,6 +249,7 @@ describe('jdom template tag', () => {
                 {tag: 'li', children: ['Text']}
             ]}
         );
+
         compare(
             'children as Node',
             jdom`<li>${tmpNode}</li>`,
@@ -250,14 +259,37 @@ describe('jdom template tag', () => {
         );
 
         compare(
-            'mixed children',
+            'children as JDOM',
+            jdom`<ul>${
+                jdom`<li>Text</li>`
+            }</ul>`,
+            {tag: 'ul', children: [
+                {tag: 'li', children: ['Text']}
+            ]}
+        );
+
+        compare(
+            'children as array of JDOM',
+            jdom`<ul>${[
+                jdom`<li>Text 1</li>`,
+                jdom`<li>Text 2</li>`
+            ]}</ul>`,
+            {tag: 'ul', children: [
+                {tag: 'li', children: ['Text 1']},
+                {tag: 'li', children: ['Text 2']}
+            ]}
+        );
+
+        compare(
+            'heterogeneous children',
             jdom`<div>
             First
+            ${42}
             <li>Second</li>
             ${tmpNode}
             </div>`,
             {tag: 'div', children: [
-                'First',
+                'First 42',
                 {tag: 'li', children: ['Second']},
                 tmpNode,
             ]}

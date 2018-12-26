@@ -51,8 +51,10 @@ const linesToRows = lines => {
 }
 
 const buildAnnotatedPage = (title, linePairs) => {
-    const lines = linePairs.map(([doc, source]) => {
-        return `<div class="line"><div class="doc">${marked(doc)}</div><pre class="source">${source}</pre></div>`;
+    const lines = linePairs.map(([doc, source], idx) => {
+        return `<div class="line"><div class="doc">${
+            marked(doc)
+        }</div><pre class="source javascript"><strong>${idx + 1}</strong>${source}</pre></div>`;
     }).join('\n');
 
     return template

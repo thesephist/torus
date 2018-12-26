@@ -12,7 +12,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Helvetica', 'Arial', sans-serif;
-            color: #333;
         }
         main {
             display: flex;
@@ -20,7 +19,7 @@
             justify-content: flex-start;
             align-items: left;
             margin: 0 auto;
-            background: #eee;
+            background: #f8f8f8;
         }
         h1 {
             font-weight: normal;
@@ -34,6 +33,9 @@
         }
         .line:first-child .doc {
             padding-top: 64px;
+        }
+        .line:last-child .doc {
+            padding-bottom: 64px;
         }
         .doc {
             min-height: 24px;
@@ -50,15 +52,28 @@
         }
         pre {
             margin: 0;
-            margin-left: 24px;
+            margin-left: 12px;
             line-height: 1.5em;
         }
         code {
             font-size: .9em;
-            background: #f5f5f5;
+            background: #f8f8f8;
             box-sizing: border-box;
             padding: 2px 4px;
             border: 1px solid #aaa;
+        }
+        pre,
+        code {
+            font-family: 'Menlo', 'Monaco', monospace;
+        }
+        .source strong {
+            font-weight: normal;
+            opacity: .2;
+            margin-right: 24px;
+        }
+        .hljs {
+            padding: 0 !important;
+            background: transparent !important;
         }
     </style>
 </head>
@@ -73,6 +88,13 @@
         </div>
         {{lines}}
     </main>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>
+        for (const el of document.querySelectorAll('.line pre')) {
+            hljs.highlightBlock(el);
+        }
+    </script>
 </body>
 
 </html>

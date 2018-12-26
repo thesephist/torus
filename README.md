@@ -602,7 +602,7 @@ Torus has a unique system for generating documentation from code comments that b
 
 Docs files will be generated at `./docs/` and are viewable on a web browser.
 
-![Torus annotated source](docs/screenshot.png);
+![Torus annotated source](doc/screenshot.png)
 
 ### Builds
 

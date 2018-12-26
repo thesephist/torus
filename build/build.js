@@ -100,4 +100,3 @@ fs.writeFile('./dist/torus.no-debug.js', torusSourceNoDebug, 'utf8', (err) => {
         });
     }
 });
-

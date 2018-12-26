@@ -1,5 +1,6 @@
 # torus-specific ignores
 dist/
+docs/
 coverage/
 .vscode/
 
@@ -61,4 +62,3 @@ typings/
 
 # dotenv environment variables file
 .env
-

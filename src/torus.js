@@ -1,5 +1,12 @@
 // @begindebug
+//> These utility functions enable rich debugging statements
+//  during development, when using the development build
+//  (`dist/torus.dev.js`). These give you hierarchical information
+//  about what components are being rendered, and how.
+
+//> Flag to enable rich debugging during renders
 const DEBUG_RENDER = true;
+
 const repeat = (str, count) => {
     let s = '';
     while (count > 0) {
@@ -8,9 +15,17 @@ const repeat = (str, count) => {
     }
     return s;
 }
+
+//> Main rich debug logger function. `render_debug()` depends on
+//  the `render_stack` counter in our rendering algorithm to
+//  figure out how deep in the render tree we are, and indent
+//  the message to the level appropriate to our place in the
+//  render tree.
 const render_debug = (msg, header = false) => {
     if (DEBUG_RENDER) {
         if (header) {
+            //> We want to pull forward headers in front
+            //  of their section contents, so we de-indent 1.
             const prefix = repeat('\t', render_stack - 1);
             console.log('%c' + prefix + msg, 'font-weight: bold');
         } else {
@@ -21,6 +36,10 @@ const render_debug = (msg, header = false) => {
 }
 // @enddebug
 
+//> IDL attributes are attributes that are reflected in `HTMLElement`
+//  objects' JavaScript properties. They're often boolean flags, so
+//  they're easier to set (and sometimes only possible to set) in JS
+//  as opposed to using `HTMLElement.setAttribute()`.
 const HTML_IDL_ATTRIBUTES = [
     'type',
     'value',
@@ -31,21 +50,43 @@ const HTML_IDL_ATTRIBUTES = [
     'disabled',
 ];
 
+//> A global counter for how deep we are in our render tree.
+//  0 indicates that we aren't in the middle of rendering.
 let render_stack = 0;
 
+//> Shortcut utility function to check if a given name is
+//  bound to something that's an actual object (not just null)
 const isObject = o => typeof o === 'object' && o !== null;
 
+//> `normalizeJDOM` takes a JDOM object (dictionary) and modifies
+//  it in place so it has the default JDOM properties, and we don't
+//  have to complicate our rendering code by checking for nulls with
+//  every key access into our serialized virtual DOM.
+//> Note that we don't check `isObject(jdom)` here. We assume
+//  only valid objects are passed in to 'normalize', which is true
+//  in our usage so far. `normalizeJDOM` is a hot path in rendering,
+//  so we need it as fast as it can be.
 const normalizeJDOM = jdom => {
     if (!('tag' in jdom)) jdom.tag = 'div';
     if (!('attrs' in jdom)) jdom.attrs = {};
     if (!('events' in jdom)) jdom.events = {};
     if (!('children' in jdom)) jdom.children = [];
-    return jdom;
 }
 
+//> Quick shorthand to normalize either 1. a single value or 2. an array
+//  of values into an array of values. This is useful because JDOM
+//  accepts either into things like `attrs.class` and `events.<name>`.
 const arrayNormalize = data => data instanceof Array ? data : [data];
 
+//> We use comment nodes as placeholder nodes because they're lightweight
+//  and invisible.
 const tmpNode = () => document.createComment('');
+
+//> `placeholders` is a global unordered queue of placeholders and
+//  the nodes they're place-holding for. While rendering, we use placeholders
+//  to insert or move around any nodes to avoid multi-insertion conflicts.
+//  At the end of each render (when `render_stack` is 0), we replace all
+//  placeholders to the DOM before the browser renders the next frame in one fell swoop.
 const placeholders = new Map();
 function replacePlaceholders() {
     for (const [tmp, newNode] of placeholders.entries()) {
@@ -54,8 +95,18 @@ function replacePlaceholders() {
     placeholders.clear();
 }
 
+//> Torus's virtual DOM rendering algorithm that manages all diffing,
+//  updating, and efficient DOM access. `renderJDOM` takes `node`, the previous
+//  root node; `previous`, the previous JDOM; and `next`, the new JDOM;
+//  and returns the new root node (potentially different from the old
+//  root node.)
+//> Whenever a component is rendered, it calls `renderJDOM`. This
+//  rendering algorithm is recursive into child nodes.
 const renderJDOM = (node, previous, next) => {
 
+    //> This queues up a node to be inserted into a new slot in the
+    //  DOM tree. All queued replacements will flush to DOM at the end
+    //  of the render pass, from `placeholders`.
     function replacePreviousNode(newNode) {
         if (node !== undefined && node !== newNode && node.parentNode) {
             const tmp = tmpNode();
@@ -65,9 +116,12 @@ const renderJDOM = (node, previous, next) => {
         node = newNode;
     };
 
+    //> We're rendering a new node in the render tree. Increment counter.
     render_stack ++;
 
     const isChanged = previous !== next;
+    //> If we need to render a literal DOM Node, just replace
+    //  the old node with the literal node.
     if (isChanged && next instanceof Node) {
         // @begindebug
         if (node === undefined) {
@@ -77,6 +131,10 @@ const renderJDOM = (node, previous, next) => {
         }
         // @enddebug
         replacePreviousNode(next);
+    //> If we need to render a null (comment) node,
+    //  create and insert a comment node. This might seem
+    //  silly, but it keeps the DOM consistent between
+    //  renders and makes diff simpler.
     } else if (isChanged && next === null) {
         // @begindebug
         if (node === undefined) {
@@ -86,6 +144,8 @@ const renderJDOM = (node, previous, next) => {
         }
         // @enddebug
         replacePreviousNode(tmpNode());
+    //> If we're rendering a string or raw number,
+    //  convert it into a string and add a TextNode.
     } else if (isChanged && (typeof next === 'string' || typeof next === 'number')) {
         // @begindebug
         if (node === undefined) {
@@ -95,9 +155,12 @@ const renderJDOM = (node, previous, next) => {
         }
         // @enddebug
         replacePreviousNode(document.createTextNode(next));
+    //> If we're rendering an object literal, assume it's a serialized
+    //  JDOM dictionary. This is the meat of the algorithm.
     } else if (typeof next === 'object') {
         if (previous === undefined) {
-            // Creating a brand-new node.
+            //> If the previous JDOM doesn't exist, we're adding a completely
+            //  new node into the DOM. Stub an empty `previous`.
             previous = {
                 tag: null,
             };
@@ -108,7 +171,10 @@ const renderJDOM = (node, previous, next) => {
         // @debug
         render_debug(`Render pass for <${next.tag.toLowerCase()}>:`, true);
 
-        // Compare tag
+        //> If the tags differ, we assume the subtrees will be different
+        //  as well and just start a completely new element. This is efficient
+        //  in practice, reduces the time complexity of the algorithm, and
+        //  an optimization shared with React's reconciler.
         if (previous.tag !== next.tag) {
             if (node === undefined) {
                 // @debug
@@ -123,10 +189,12 @@ const renderJDOM = (node, previous, next) => {
             replacePreviousNode(document.createElement(next.tag));
         }
 
-        // Compare attrs
+        //> Compare and update attributes
         for (const attrName in next.attrs) {
             switch (attrName) {
                 case 'class':
+                    //> JDOM can pass classes as either a single string
+                    //  or an array of strings, so normalize it into an array.
                     const prevClass = arrayNormalize(previous.attrs.class || []);
                     const nextClass = arrayNormalize(next.attrs.class);
 
@@ -144,6 +212,9 @@ const renderJDOM = (node, previous, next) => {
                     }
                     break;
                 case 'style':
+                    //> JDOM takes style attributes as a dictionary
+                    //  rather than a string for API ergonomics, so we serialize
+                    //  it differently than other attributes.
                     const prevStyle = previous.attrs.style || {};
                     const nextStyle = next.attrs.style;
 
@@ -163,6 +234,10 @@ const renderJDOM = (node, previous, next) => {
                     }
                     break;
                 default:
+                    //> If an attribute is an IDL attribute, we set it
+                    //  through JavaScript properties on the HTML element
+                    //  and not `setAttribute()`. This is necessary for
+                    //  properties like `value` and `indeterminate`.
                     if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
                         // @debug
                         render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
@@ -178,14 +253,17 @@ const renderJDOM = (node, previous, next) => {
             }
 
         }
+        //> For any attributes that were removed in the new JDOM,
+        //  also attempt to remove them from the DOM.
         for (const attrName in previous.attrs) {
             if (!(attrName in next.attrs)) {
                 if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
                     // @debug
                     render_debug(`Remove <${next.tag} property ${attrName}`);
-                    // null seems to be the default for most IDL attrs,
+                    //> `null` seems to be the default for most IDL attrs,
                     //  but even this isn't entirely consistent. This seems
-                    //  like something we should fix as issues come up.
+                    //  like something we should fix as issues come up, not
+                    //  preemptively search for a cross-browser solution.
                     node[attrName] = null;
                 } else {
                     // @debug
@@ -195,7 +273,7 @@ const renderJDOM = (node, previous, next) => {
             }
         }
 
-        // Compare event handlers
+        //> Compare event handlers
         const diffEvents = (whole, sub, cb) => {
             for (const eventName in whole) {
                 const wholeEvents = arrayNormalize(whole[eventName] || []);
@@ -218,7 +296,7 @@ const renderJDOM = (node, previous, next) => {
             node.removeEventListener(eventName, handlerFn);
         });
 
-        // Render children
+        //> Render children recursively
         const nodeChildren = node.childNodes;
         const prevChildren = previous.children;
         const nextChildren = next.children;
@@ -247,8 +325,12 @@ const renderJDOM = (node, previous, next) => {
         }
     }
 
+    //> We're done rendering the current node,
+    //  so decrement the render stack.
     render_stack --;
 
+    //> If we've reached the top of the render tree, it's time
+    //  to flush replaced nodes to the DOM before the next frame.
     if (render_stack === 0) {
         replacePlaceholders();
     }
@@ -256,25 +338,32 @@ const renderJDOM = (node, previous, next) => {
     return node;
 }
 
-/**
- * Unit of UI component
- */
+//> Shorthand function for the default, empty event object in `Component`.
 const emptyEvent = () => {
     return {
         source: null,
         handler: () => { },
     }
 }
+
+//> Torus's Component class
 class Component {
 
     constructor(...args) {
         this.jdom = undefined;
         this.node = undefined;
         this.event = emptyEvent();
+        //> We call init() before render, because it's a common pattern
+        //  to set and initialize "private" fields in `this.init()` (at least
+        //  before the ES-next private fields proposal becomes widely supported.)
+        //  Frequently, rendering will require private values to be set correctly.
         this.init(...args);
         this.render();
     }
 
+    //> `Component.from()` allows us to transform a pure function that
+    //  maps arguments to a JDOM tree, and promote it into a full-fledged
+    //  `Component` class we can compose and use anywhere.
     static from(fn) {
         return class FunctionComponent extends Component {
             init(...args) {
@@ -286,11 +375,13 @@ class Component {
         }
     }
 
+    //> The default `Component#init()` is guaranteed to always be a no-op method
     init() {
         // should be overridden
-        // Component#init is guaranteed to always be a no-op method
     }
 
+    //> Components usually subscribe to events from a Record, either a view model or
+    //  a model that maps to business logic. This is shorthand to access that.
     get record() {
         return this.event.source;
     }
@@ -313,18 +404,31 @@ class Component {
         this.event = emptyEvent();
     }
 
+    //> We use `#remove()` to prepare to remove the component from our application
+    // entirely. By default, it unsubscribes from all updates. However, the component
+    // is still in the render tree -- that's something for the user to decide when to
+    //  hide.
     remove() {
         this.unlisten();
     }
 
+    //> `#compose()` is our primary rendering API for components. By default, it renders
+    //  an invisible comment node.
     compose(data) {
         return null;
     }
 
+    //> `#preprocess()` is an API on the component to allow us to extend `Component` to give
+    //  it additional capabilities idiomatically. It consumes the result of `#compose()` and
+    //  returns JDOM to be used to actually render the component. See `Styled()` for a
+    //  usage example -- it fills similar use cases as React's render props or HOCs.
     preprocess(jdom, data) {
         return jdom;
     }
 
+    //> `#render()` is called to actually render the component again to the DOM,
+    //  and Torus assumes that it's called rarely, only when the component absolutely
+    //  must update. This obviates the need for something like React's `shouldComponentUpdate`.
     render(data) {
         // @debug
         render_debug(`Render Component: ${this.constructor.name}`, true);
@@ -337,8 +441,16 @@ class Component {
 
 }
 
+//> We keep track of unique class names already injected into the
+//  page's stylesheet, so we don't do redundant style reconciliation.
 const injectedClassNames = new Set();
+
+//> Global pointer to the stylesheet on the page that Torus uses to insert
+//  new CSS rules. It's set the first time a styled component renders.
 let styledComponentSheet = null;
+
+//> Fast pure function to map a style rule to a very reasonably unique class name
+//  that won't conflict with other classes on the page.
 const generateUniqueClassName = stylesObject => {
     // Modified from https://github.com/darkskyapp/string-hash/blob/master/index.js
     const str = JSON.stringify(stylesObject).replace(/\s+/g, ' ');
@@ -349,11 +461,20 @@ const generateUniqueClassName = stylesObject => {
     }
     return '_torus' + (hash >>> 0);
 }
+
+//> We have to construct lots of a{b} syntax in CSS, so here's a shorthand.
 const brace = (a, b) => a + '{' + b + '}';
+
+//> The meat of `Styled()`. This function maps an ergonomic, dictionary-based
+//  set of CSS declarations to an array of CSS rules that can be inserted onto
+//  the page stylesheet, and recursively resolves nested CSS, handles keyframes
+//  and media queries, and parses other SCSS-like things.
 const rulesFromStylesObject = (selector, stylesObject) => {
     let rules = [];
     let selfDeclarations = '';
     for (const [prop, val] of Object.entries(stylesObject)) {
+        //> CSS declarations that start with '@' are globally namespaced
+        //  (like @keyframes and @media), so we need to treat them differently.
         if (prop[0] === '@') {
             if (prop.startsWith('@media')) {
                 rules.push(brace(prop, rulesFromStylesObject(selector, val).join('')));
@@ -362,6 +483,8 @@ const rulesFromStylesObject = (selector, stylesObject) => {
             }
         } else {
             if (typeof val === 'object') {
+                //> SCSS-like syntax means we use '&' to nest declarations about
+                //  the parent selector.
                 if (prop.includes('&')) {
                     const fullSelector = prop.replace(/&/g, selector);
                     rules = rules.concat(rulesFromStylesObject(fullSelector, val));
@@ -379,12 +502,20 @@ const rulesFromStylesObject = (selector, stylesObject) => {
 
     return rules;
 }
+
+//> Function called once to initialize a stylesheet for Torus
+//  to use on every subsequent style render.
 const initSheet = () => {
     styleElement = document.createElement('style');
     styleElement.setAttribute('data-torus', '');
     document.head.appendChild(styleElement);
     styledComponentSheet = styleElement.sheet;
 }
+
+//> The preprocessor on `Styled()` components call this to
+//  make sure a given set of CSS rules for a component is inserted
+//  into the page stylesheet, but only once for a unique set of rules.
+//> We disambiguate by the class name, which is a hash of the CSS rules.
 const injectStylesOnce = stylesObject => {
     const className = generateUniqueClassName(stylesObject);
     if (!injectedClassNames.has(className)) {
@@ -401,10 +532,11 @@ const injectStylesOnce = stylesObject => {
     }
     return className;
 }
+
+//> Higher-order component to enable styling for any Component class.
 const Styled = Base => {
     return class extends Base {
         styles(data) {
-            // should be overridden in subclasses
             return {};
         }
 
@@ -418,11 +550,11 @@ const Styled = Base => {
         }
     }
 }
+
+//> Provide a default, `StyledComponent` class
 const StyledComponent = Styled(Component);
 
-/**
- * Generic list implementation based on stores
- */
+//> Torus's generic List implementation, based on Stores
 class List extends Component {
 
     get itemClass() {
@@ -439,7 +571,10 @@ class List extends Component {
     }
 
     itemsChanged() {
-        const data = this.store.getCurrentSummary();
+        //> For every record in the store, if it isn't already in
+        //  `this.items`, add it and its view; if any were removed,
+        //  also remove it from `this.items`.
+        const data = this.store.summarize();
         for (const record of this.items.keys()) {
             if (!data.includes(record)) {
                 this.items.get(record).remove();
@@ -453,15 +588,15 @@ class List extends Component {
         }
 
         let sorter = [...this.items.entries()];
+        //> Sort by the provided filter function if there is one
         if (this.filterFn !== null) {
             sorter = sorter.filter(item => this.filterFn(item[0]));
         }
+        //> Sort the list the way the associated Store is sorted.
         sorter.sort((a, b) => data.indexOf(a[0]) - data.indexOf(b[0]));
 
-        this.items = new Map();
-        for (const [record, item] of sorter) {
-            this.items.set(record, item);
-        }
+        //> Store the new items in a new (insertion-ordered) Map at this.items
+        this.items = new Map(sorter);
 
         this.render();
     }
@@ -476,17 +611,22 @@ class List extends Component {
         this.itemsChanged();
     }
 
+    //> `List#nodes` returns the HTML nodes for each of its item
+    //  views, sorted in order. Designed to make writing `#compose()` easier.
     get nodes() {
         return [...this.items.values()].map(item => item.node);
     }
 
     remove() {
         super.remove();
+        //> When we remove a list, we also want to call `remove()` on each
+        //  child components.
         for (const c of this.items.values()) {
             c.remove();
         }
     }
 
+    //> By default, just render the children views in a <ul/>
     compose(data) {
         return {
             tag: 'ul',
@@ -496,6 +636,8 @@ class List extends Component {
 
 }
 
+//> Higher-order component to create a list component for a given
+//  child item component.
 const ListOf = itemClass => {
     return class extends List {
         get itemClass() {
@@ -504,9 +646,8 @@ const ListOf = itemClass => {
     }
 }
 
-/**
- * A base class for evented data stores. Not exposed to the public API.
- */
+//> A base class for evented data stores. Not exposed to the public API, but
+//  all observables in Torus inherit from `Evented`.
 class Evented {
 
     constructor() {
@@ -517,15 +658,13 @@ class Evented {
         throw new Error(`#summarize() not implemented in ${this.constructor.name}`);
     }
 
+    //> Whenever something changes, we fire an event to all subscribed
+    //  listeners, with a summary of its state.
     emitEvent() {
-        const summary = this.getCurrentSummary();
+        const summary = this.summarize();
         for (const handler of this.eventTargets) {
             handler(summary);
         }
-    }
-
-    getCurrentSummary() {
-        return this.summarize();
     }
 
     addHandler(handler) {
@@ -538,14 +677,15 @@ class Evented {
 
 }
 
-/**
- * Unit of data
- */
+//> `Record` is Torus's unit of individual data source, used for view models and
+//  Models from business logic.
 class Record extends Evented {
 
     constructor(id, data = {}) {
         super();
 
+        //> We can create a Record by either passing in just the properties,
+        //  or an ID and a dictionary of props. We disambiguate here.
         if (typeof id === 'object' && !Object.keys(data).length) {
             data = id;
             id = null;
@@ -555,15 +695,19 @@ class Record extends Evented {
         this.data = data;
     }
 
+    //> Setter for properties
     update(data) {
         Object.assign(this.data, data);
         this.emitEvent();
     }
 
+    //> Getter
     get(name) {
         return this.data[name];
     }
 
+    //> We summarize a Record by returning a dictionary of
+    //  all of its properties and the ID
     summarize() {
         return Object.assign(
             {},
@@ -572,25 +716,28 @@ class Record extends Evented {
         );
     }
 
+    //> The JSON-serialized version of a Record is the same as its
+    //  summary, since it's a shallow data store with just plain properties.
     serialize() {
         return this.summarize();
     }
 
 }
 
-/**
- * Collection of like data into a table / collection
- */
+//> A list of Records, represents a collection or a table
 class Store extends Evented {
 
     constructor(records = []) {
         super();
-
+        //> Internally, we represent the store as an unordered set.
+        //  we only order by comparator when we summarize. This prevents
+        //  us from having to perform sorting checks on every insert/update,
+        //  and is efficient as long as we don't re-render excessively.
         this.records = new Set(records);
     }
 
     get recordClass() {
-        return Record; // default value, should be overridden
+        return Record;
     }
 
     get comparator() {
@@ -612,28 +759,33 @@ class Store extends Evented {
     }
 
     summarize() {
-        return [...this.records].map(record => {
-            return {
-                comparator: this.comparator ? this.comparator(record) : null,
-                record: record,
-            }
-        }).sort((a, b) => {
-            if (a.comparator < b.comparator) {
+        //> The summary of a store is defined functionally. We just sort
+        //  the records in our store by the comparator (but we use a list
+        //  of pairs of cached comparators and records to be fast.
+        return [...this.records].map(record => [
+            this.comparator ? this.comparator(record) : null,
+            record,
+        ]).sort((a, b) => {
+            if (a[0] < b[0]) {
                 return -1;
-            } else if (a.comparator > b.comparator) {
+            } else if (a[0] > b[0]) {
                 return 1;
             } else {
                 return 0;
             }
-        }).map(o => o.record);
+        }).map(o => o[1]);
     }
 
+    //> To serialize a store, we serialize each record and put them
+    //  in a giant list.
     serialize() {
         return this.summarize().map(record => record.serialize());
     }
 
 }
 
+//> Higher-order component to create a Store for a given
+//  record class.
 const StoreOf = recordClass => {
     return class extends Store {
         get recordClass() {
@@ -642,34 +794,21 @@ const StoreOf = recordClass => {
     }
 }
 
-/**
- * Front-end router
- *
- * Router stands in the place of a component somewhere in the DOM tree.
- */
+//> Front-end router. A routing component can listen
+//  to updates from the Router instead of a Record, and re-render
+//  different subviews when the routes change.
 class Router extends Evented {
-
-    get paths() {
-        return {};
-    }
 
     summarize() {
         // TODO
     }
 
-    route(path) {
-        for (const [pathRegex, composer] of this.paths) {
-            const match = pathRegex.exec(path);
-            if (match !== null) {
-                const parameters = match.slice(1);
-                return composer(...parameters);
-            }
-        }
-    }
-
 }
 
+//> Torus exposes these public APIs
 const exposedNames = {
+    //> `renderJDOM` isn't designed to be a public API and the API
+    //  might change, but it's exposed to make unit testing easier.
     renderJDOM,
     Styled,
     StyledComponent,
@@ -681,11 +820,13 @@ const exposedNames = {
     StoreOf,
     // Router,
 }
+//> If there is a global `window` object, bind API names to it.
 if (typeof window === 'object') {
     for (const name in exposedNames) {
         window[name] = exposedNames[name];
     }
 }
+//> Export public APIs CommonJS-style
 if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = exposedNames;
 }

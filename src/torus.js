@@ -62,7 +62,7 @@ const isObject = o => typeof o === 'object' && o !== null;
 //  it in place so it has the default JDOM properties, and we don't
 //  have to complicate our rendering code by checking for nulls with
 //  every key access into our serialized virtual DOM.
-//> Note that we don't check `isObject(jdom)` here. We assume
+//  Note that we don't check `isObject(jdom)` here. We assume
 //  only valid objects are passed in to 'normalize', which is true
 //  in our usage so far. `normalizeJDOM` is a hot path in rendering,
 //  so we need it as fast as it can be.
@@ -99,8 +99,7 @@ function replacePlaceholders() {
 //  updating, and efficient DOM access. `renderJDOM` takes `node`, the previous
 //  root node; `previous`, the previous JDOM; and `next`, the new JDOM;
 //  and returns the new root node (potentially different from the old
-//  root node.)
-//> Whenever a component is rendered, it calls `renderJDOM`. This
+//  root node.) Whenever a component is rendered, it calls `renderJDOM`. This
 //  rendering algorithm is recursive into child nodes.
 const renderJDOM = (node, previous, next) => {
 
@@ -515,7 +514,7 @@ const initSheet = () => {
 //> The preprocessor on `Styled()` components call this to
 //  make sure a given set of CSS rules for a component is inserted
 //  into the page stylesheet, but only once for a unique set of rules.
-//> We disambiguate by the class name, which is a hash of the CSS rules.
+//  We disambiguate by the class name, which is a hash of the CSS rules.
 const injectStylesOnce = stylesObject => {
     const className = generateUniqueClassName(stylesObject);
     if (!injectedClassNames.has(className)) {

@@ -1,6 +1,5 @@
 # torus-specific ignores
 dist/
-docs/
 coverage/
 .vscode/
 

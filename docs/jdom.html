@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>jdom.js annotated source</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <main>
+        <div class="line">
+            <div class="doc">
+                <h1>jdom.js annotated source</h1>
+                <em><a class="back" href="/">Back to index</a></em>
+            </div>
+            <pre></pre>
+        </div>
+        <div class="line"><div class="doc"><p>If we&#39;re in a browser environment, <code>isNode()</code> should check if the given object is a node. If not, there&#39;s no reason an object would be a Node, so return false. This function is set at load-time to make run-time calls fast.</p>
+</div><pre class="source javascript"><strong>1</strong>const isNode = (typeof Node === 'undefined') ? (</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>2</strong>    () => false</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>3</strong>) : (</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>4</strong>    o => o instanceof Node</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>5</strong>);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>6</strong></pre></div>
+<div class="line"><div class="doc"><p>Clip the end of a given string by the length of a substring</p>
+</div><pre class="source javascript"><strong>7</strong>const clipStringEnd = (base, substr) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>8</strong>    return base.substr(0, base.length - substr.length);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>9</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>10</strong></pre></div>
+<div class="line"><div class="doc"><p>Interpolate between lists of string and non-string parts into a single string. this is particularly useful when objects and strings are mixed in an attribute value.</p>
+</div><pre class="source javascript"><strong>11</strong>const interpolate = (tplParts, dynamicParts) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>12</strong>    let str = tplParts[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>13</strong>    for (let i = 1; i <= dynamicParts.length; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>14</strong>        str += dynamicParts[i - 1] + tplParts[i];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>15</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>16</strong>    return str;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>17</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>18</strong></pre></div>
+<div class="line"><div class="doc"><p><code>READER_END</code> is a unique symbol that represents that the reader has reached the end of the template. Making it an array ensures that no other === comparisons can return true. We can use Symbol() here but [] is shorter, and enough.</p>
+</div><pre class="source javascript"><strong>19</strong>const READER_END = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>20</strong></pre></div>
+<div class="line"><div class="doc"><p>The <code>Reader</code> class represents a sequence of tokens we can read from a JDOM template. It can distinguish between string / number tokens and tokens that are more complex objects or functions, to be passed directly into the renderer.</p>
+</div><pre class="source javascript"><strong>21</strong>class Reader {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>22</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>23</strong>    constructor(stringParts, dynamicParts) {</pre></div>
+<div class="line"><div class="doc"><p>The major index which points to the item in <code>this.parts</code> that contains our current token.</p>
+</div><pre class="source javascript"><strong>24</strong>        this.idx = 0;</pre></div>
+<div class="line"><div class="doc"><p>The minor (sub) index is nonzero iff the major index points to a string, and points to the character inside that string that&#39;s our current token.</p>
+</div><pre class="source javascript"><strong>25</strong>        this.subIdx = 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>26</strong>        this.parts = [stringParts[0]];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>27</strong></pre></div>
+<div class="line"><div class="doc"><p>Parse the string and dynamic (object, function) parts into a single heterogeneous array. We&#39;ll read from this using two indexes above.</p>
+</div><pre class="source javascript"><strong>28</strong>        for (let i = 1; i < stringParts.length; i++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>29</strong>            this.parts.push(dynamicParts[i - 1]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>30</strong>            this.parts.push(stringParts[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>31</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>32</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>33</strong></pre></div>
+<div class="line"><div class="doc"><p>Trim whitespace around the entire template.</p>
+</div><pre class="source javascript"><strong>34</strong>    trim() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>35</strong>        const l = this.parts.length;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>36</strong>        this.parts[0] = this.parts[0].replace(/^\s+/g, '');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>37</strong>        this.parts[l - 1] = this.parts[l - 1].replace(/\s+$/g, '');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>38</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>39</strong></pre></div>
+<div class="line"><div class="doc"><p>Returns the next token (like a <code>generator.next()</code>), compatible with the heterogeneous nature of the template.</p>
+</div><pre class="source javascript"><strong>40</strong>    next() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>41</strong>        const len = this.parts.length;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>42</strong>        const currentPart = this.parts[this.idx];</pre></div>
+<div class="line"><div class="doc"><p>We allow the reader index pointer to go one over the length of the template -- that represents <code>READER_END</code>. This is also helpful because we allow the reader to be backtracked.</p>
+</div><pre class="source javascript"><strong>43</strong>        const nextIndex = this.idx >= len ? len : this.idx + 1;</pre></div>
+<div class="line"><div class="doc"><p>Read character-by-character if the part is a string</p>
+</div><pre class="source javascript"><strong>44</strong>        if (typeof currentPart === 'string') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>45</strong>            const char = currentPart[this.subIdx] || '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>46</strong>            if (++this.subIdx >= currentPart.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>47</strong>                this.idx = nextIndex;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>48</strong>                this.subIdx = 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>49</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>50</strong>            return char;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>51</strong>        } else if (this.idx >= len) {</pre></div>
+<div class="line"><div class="doc"><p>If the index goes more than one over the template length, return <code>READER_END</code></p>
+</div><pre class="source javascript"><strong>52</strong>            return READER_END;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>53</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>54</strong>            this.idx = nextIndex;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>55</strong>            return currentPart;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>56</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>57</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>58</strong></pre></div>
+<div class="line"><div class="doc"><p>Move back the token pointer one place.</p>
+</div><pre class="source javascript"><strong>59</strong>    backtrack() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>60</strong>        if (this.subIdx !== 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>61</strong>            this.subIdx --;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>62</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>63</strong>            this.idx = this.idx <= 1 ? 0 : this.idx - 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>64</strong>            if (typeof this.parts[this.idx] === 'string') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>65</strong>                this.subIdx = this.parts[this.idx].length - 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>66</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>67</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>68</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>69</strong></pre></div>
+<div class="line"><div class="doc"><p>Read all the tokens up to a specified <em>contiguous</em> substring, but not including the substring. In practice this is achieved by leaning on <code>#readUntil()</code>, and then backtracking.</p>
+</div><pre class="source javascript"><strong>70</strong>    readUpto(substr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>71</strong>        const result = this.readUntil(substr);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>72</strong>        const strings = result[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>73</strong>        strings[strings.length - 1] = clipStringEnd(strings[strings.length - 1], substr);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>74</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>75</strong>        let count = substr.length;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>76</strong>        while (count--) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>77</strong>            this.backtrack();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>78</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>79</strong>        return result;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>80</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>81</strong></pre></div>
+<div class="line"><div class="doc"><p>Read up to and including a <em>contiguous</em> substring, or read until the end of the template.</p>
+</div><pre class="source javascript"><strong>82</strong>    readUntil(substr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>83</strong>        const strings = [''];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>84</strong>        const objects = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>85</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>86</strong>        let next;</pre></div>
+<div class="line"><div class="doc"><p>Read until the read queue of strings ends in the substring, or the end</p>
+</div><pre class="source javascript"><strong>87</strong>        while (!strings[strings.length - 1].endsWith(substr) && next !== READER_END) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>88</strong>            next = this.next();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>89</strong>            if (next === READER_END) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>90</strong>                break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>91</strong>            } else if (typeof next === 'string') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>92</strong>                strings[strings.length - 1] += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>93</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>94</strong>                objects.push(next);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>95</strong>                strings.push('');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>96</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>97</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>98</strong>        return [strings, objects];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>99</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>100</strong></pre></div>
+<div class="line"><div class="doc"><p>Remove some substring from the end of the template, if it ends in the substring. This also returns whether the given substring was a valid ending substring.</p>
+</div><pre class="source javascript"><strong>101</strong>    clipEnd(substr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>102</strong>        const last = this.parts[this.parts.length - 1];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>103</strong>        if (last.endsWith(substr)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>104</strong>            this.parts[this.parts.length - 1] = clipStringEnd(last, substr);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>105</strong>            return true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>106</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>107</strong>        return false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>108</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>109</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>110</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>111</strong></pre></div>
+<div class="line"><div class="doc"><p>For converting CSS property names to their JavaScript counterparts</p>
+</div><pre class="source javascript"><strong>112</strong>const kebabToCamel = kebabStr => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>113</strong>    let result = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>114</strong>    for (let i = 0; i < kebabStr.length; i++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>115</strong>        result += kebabStr[i] === '-' ? kebabStr[++i].toUpperCase() : kebabStr[i];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>116</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>117</strong>    return result;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>118</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>119</strong></pre></div>
+<div class="line"><div class="doc"><p>Pure function to parse the contents of an HTML opening tag to a JDOM stub</p>
+</div><pre class="source javascript"><strong>120</strong>const parseOpeningTagContents = (tplParts, dynamicParts) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>121</strong></pre></div>
+<div class="line"><div class="doc"><p>If the opening tag is just the tag name (the most common case), take a shortcut and run a simpler algorithm.</p>
+</div><pre class="source javascript"><strong>122</strong>    if (tplParts[0][0] === '!') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>123</strong>        return null; // comment</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>124</strong>    } else if (tplParts.length === 1 && !tplParts[0].includes(' ')) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>125</strong>        const selfClosing = tplParts[0].endsWith('/');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>126</strong>        return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>127</strong>            jdom: {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>128</strong>                tag: selfClosing ? clipStringEnd(tplParts[0], '/') : tplParts[0],</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>129</strong>                attrs: {},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>130</strong>                events: {},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>131</strong>            },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>132</strong>            selfClosing: selfClosing,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>133</strong>        };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>134</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>135</strong></pre></div>
+<div class="line"><div class="doc"><p>Make another reader to read the tag contents</p>
+</div><pre class="source javascript"><strong>136</strong>    const reader = new Reader(tplParts, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>137</strong>    reader.trim();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>138</strong>    const selfClosing = reader.clipEnd('/');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>139</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>140</strong>    let tag = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>141</strong>    const attrs = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>142</strong>    const events = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>143</strong></pre></div>
+<div class="line"><div class="doc"><p><code>commit()</code> commits a given key-value pair of attributes to the JDOM stub. it treats class lists and style dictionaries separately, and adds function values as event handlers.</p>
+</div><pre class="source javascript"><strong>144</strong>    const commit = (key, val) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>145</strong>        if (typeof val === 'function') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>146</strong>            events[key.replace('on', '')] = [val];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>147</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>148</strong>            if (key === 'class') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>149</strong>                if (val = val.trim()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>150</strong>                    attrs[key] = val.split(' ');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>151</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>152</strong>            } else if (key === 'style') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>153</strong>                const declarations = val.split(';').filter(s => !!s).map(pair => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>154</strong>                    const [first, ...rest] = pair.split(':');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>155</strong>                    return [kebabToCamel(first.trim()), rest.join(':').trim()];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>156</strong>                });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>157</strong>                const rule = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>158</strong>                for (const [prop, val] of declarations) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>159</strong>                    rule[prop] = val;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>160</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>161</strong>                attrs[key] = rule;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>162</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>163</strong>                attrs[key] = val;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>164</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>165</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>166</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>167</strong></pre></div>
+<div class="line"><div class="doc"><p>Read the individual tokens into a list of higher level tokens: things that may be attribute names, and values.</p>
+</div><pre class="source javascript"><strong>168</strong>    let head = [''];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>169</strong>    let head_obj = [];</pre></div>
+<div class="line"><div class="doc"><p>Are we waiting to read an attribute value?</p>
+</div><pre class="source javascript"><strong>170</strong>    let waitingForAttr = false;</pre></div>
+<div class="line"><div class="doc"><p>Are we in a quoted attribute value?</p>
+</div><pre class="source javascript"><strong>171</strong>    let inQuotes = false;</pre></div>
+<div class="line"><div class="doc"><p>Array of parsed higher-level tokens</p>
+</div><pre class="source javascript"><strong>172</strong>    const tokens = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>173</strong>    const TYPE_KEY = 0,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>174</strong>        TYPE_VALUE = 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>175</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>176</strong>    let nextType = TYPE_KEY;</pre></div>
+<div class="line"><div class="doc"><p>Push a given token into the tokens list, called by <code>commitToken()</code></p>
+</div><pre class="source javascript"><strong>177</strong>    const push = (type, val, force) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>178</strong>        if (val !== '' || force) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>179</strong>            tokens.push({</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>180</strong>                type: type,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>181</strong>                value: val,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>182</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>183</strong>            waitingForAttr = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>184</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>185</strong>    }</pre></div>
+<div class="line"><div class="doc"><p>Read from the list of currently read characters/parts and commit the result as a token, interpolating any spread-out string parts.</p>
+</div><pre class="source javascript"><strong>186</strong>    const commitToken = (force) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>187</strong>        head.reverse();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>188</strong>        if (head.length == 2 && head[0] === '' && head[1] === '') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>189</strong>            if (head_obj.length === 1 && nextType === TYPE_VALUE) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>190</strong>                push(TYPE_VALUE, head_obj[0], force);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>191</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>192</strong>                push(nextType, interpolate(head, head_obj), force);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>193</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>194</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>195</strong>            push(nextType, interpolate(head, head_obj).trim(), force);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>196</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>197</strong>        head = [''];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>198</strong>        head_obj = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>199</strong>    }</pre></div>
+<div class="line"><div class="doc"><p>Iterate through each read character or object from the reader and parse the token stream into larger tokens.</p>
+</div><pre class="source javascript"><strong>200</strong>    for (let next = reader.next(); next !== READER_END; next = reader.next()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>201</strong>        switch (next) {</pre></div>
+<div class="line"><div class="doc"><p>Equals sign denotes the start of an attribute value unless in quotes</p>
+</div><pre class="source javascript"><strong>202</strong>            case '=':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>203</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>204</strong>                    head[0] += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>205</strong>                } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>206</strong>                    commitToken();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>207</strong>                    waitingForAttr = true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>208</strong>                    nextType = TYPE_VALUE;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>209</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>210</strong>                break;</pre></div>
+<div class="line"><div class="doc"><p>Because we replaced all whitespace with spaces earlier, this catches all whitespaces. Whitespaces are only meaningful separates of values if we&#39;re not in quotes.</p>
+</div><pre class="source javascript"><strong>211</strong>            case ' ':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>212</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>213</strong>                    head[0] += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>214</strong>                } else if (!waitingForAttr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>215</strong>                    commitToken();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>216</strong>                    nextType = TYPE_KEY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>217</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>218</strong>                break;</pre></div>
+<div class="line"><div class="doc"><p>Allow backslash to escape characters if we&#39;re in quotes.</p>
+</div><pre class="source javascript"><strong>219</strong>            case '\\':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>220</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>221</strong>                    next = reader.next();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>222</strong>                    head[0] += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>223</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>224</strong>                break;</pre></div>
+<div class="line"><div class="doc"><p>If we&#39;re in quotes, &#39;&quot;&#39; escapes quotes. Otherwise, it opens a quoted section.</p>
+</div><pre class="source javascript"><strong>225</strong>            case '"':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>226</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>227</strong>                    inQuotes = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>228</strong>                    commitToken(true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>229</strong>                    nextType = TYPE_KEY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>230</strong>                } else if (nextType === TYPE_VALUE) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>231</strong>                    inQuotes = true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>232</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>233</strong>                break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>234</strong>            default:</pre></div>
+<div class="line"><div class="doc"><p>Append all other characaters to the head</p>
+</div><pre class="source javascript"><strong>235</strong>                if (typeof next === 'string') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>236</strong>                    head[0] += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>237</strong>                } else {</pre></div>
+<div class="line"><div class="doc"><p>If we get a non-string value, append it to the array of non-string values (<code>head_obj</code>) and push a new contiguous string onto the string list.</p>
+</div><pre class="source javascript"><strong>238</strong>                    head_obj.unshift(next);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>239</strong>                    head.unshift('');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>240</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>241</strong>                waitingForAttr = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>242</strong>                break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>243</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>244</strong>    }</pre></div>
+<div class="line"><div class="doc"><p>if we haven&#39;t committed any last-read tokens, commit it now.</p>
+</div><pre class="source javascript"><strong>245</strong>    commitToken();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>246</strong></pre></div>
+<div class="line"><div class="doc"><p>Now, we parse the previous token stream into tag, attribute, and events values in the JDOM.</p>
+</div><pre class="source javascript"><strong>247</strong></pre></div>
+<div class="line"><div class="doc"><p>The tag name is always the first token</p>
+</div><pre class="source javascript"><strong>248</strong>    tag = tokens.shift().value;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>249</strong>    let last = null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>250</strong>        curr = tokens.shift();</pre></div>
+<div class="line"><div class="doc"><p>Function to step through to the next token</p>
+</div><pre class="source javascript"><strong>251</strong>    const step = () => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>252</strong>        last = curr;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>253</strong>        curr = tokens.shift();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>254</strong>    }</pre></div>
+<div class="line"><div class="doc"><p>Walk through the token list. If the token is a value token, the previous token is its key. If the current token is a key, the previous token is an attribute without value (like <code>disabled</code>).</p>
+</div><pre class="source javascript"><strong>255</strong>    while (curr !== undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>256</strong>        if (curr.type === TYPE_VALUE) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>257</strong>            commit(last.value, curr.value);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>258</strong>            step();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>259</strong>        } else if (last) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>260</strong>            commit(last.value, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>261</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>262</strong>        step();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>263</strong>    }</pre></div>
+<div class="line"><div class="doc"><p>If the last value is a value-less attribute (like <code>disabled</code>), commit it.</p>
+</div><pre class="source javascript"><strong>264</strong>    if (last && last.type === TYPE_KEY) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>265</strong>        commit(last.value, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>266</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>267</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>268</strong>    return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>269</strong>        jdom: {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>270</strong>            tag: tag,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>271</strong>            attrs: attrs,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>272</strong>            events: events,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>273</strong>        },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>274</strong>        selfClosing: selfClosing,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>275</strong>    };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>276</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>277</strong></pre></div>
+<div class="line"><div class="doc"><p>Function to parse an entire JDOM template tree (which we vague call JSX here). This recursively calls itself on children elements.</p>
+</div><pre class="source javascript"><strong>278</strong>const parseJSX = (tplParts, dynamicParts) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>279</strong>    const result = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>280</strong>    const reader = new Reader(tplParts, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>281</strong></pre></div>
+<div class="line"><div class="doc"><p>The current JDOM object being worked on. Sort of an &quot;element register&quot;</p>
+</div><pre class="source javascript"><strong>282</strong>    let currentElement = null;</pre></div>
+<div class="line"><div class="doc"><p>Are we reading a text node (and should ignore special characters)?</p>
+</div><pre class="source javascript"><strong>283</strong>    let inTextNode = false;</pre></div>
+<div class="line"><div class="doc"><p>Commit currently reading element to the result list, and reset the current element</p>
+</div><pre class="source javascript"><strong>284</strong>    const commit = () => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>285</strong>        if (inTextNode) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>286</strong>            currentElement = currentElement.trim();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>287</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>288</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>289</strong>        if (currentElement) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>290</strong>            result.push(currentElement);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>291</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>292</strong>        currentElement = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>293</strong>        inTextNode = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>294</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>295</strong></pre></div>
+<div class="line"><div class="doc"><p>Main parsing logic</p>
+</div><pre class="source javascript"><strong>296</strong>    for (let next = reader.next(); next !== READER_END; next = reader.next()) {</pre></div>
+<div class="line"><div class="doc"><p>if we see an opening tag...</p>
+</div><pre class="source javascript"><strong>297</strong>        if (next === '<') {</pre></div>
+<div class="line"><div class="doc"><p>first, commit any previously read element</p>
+</div><pre class="source javascript"><strong>298</strong>            commit();</pre></div>
+<div class="line"><div class="doc"><p>then read and parse the contents of the tag up to the end of the opening tag.</p>
+</div><pre class="source javascript"><strong>299</strong>            const result = parseOpeningTagContents(...reader.readUpto('>'));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>300</strong>            reader.readUntil('>');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>301</strong>            currentElement = result && result.jdom;</pre></div>
+<div class="line"><div class="doc"><p>If the current element is a full-fledged element (and not a comment or text node), let&#39;s try to parse the children.</p>
+</div><pre class="source javascript"><strong>302</strong>            if (typeof currentElement === 'object' && currentElement !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>303</strong>                if (!result.selfClosing) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>304</strong>                    const closingTag = `</${currentElement.tag}>`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>305</strong>                    currentElement.children = parseJSX(...reader.readUpto(closingTag));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>306</strong>                    reader.readUntil(closingTag);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>307</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>308</strong>            }</pre></div>
+<div class="line"><div class="doc"><p>Allow the template token to be an array of literal elements. this makes rendering lists of nodes really easy.</p>
+</div><pre class="source javascript"><strong>309</strong>        } else if (next instanceof Array && isNode(next[0])) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>310</strong>            for (const component of next) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>311</strong>                commit();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>312</strong>                currentElement = component;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>313</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>314</strong>        } else if (isNode(next)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>315</strong>            commit();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>316</strong>            currentElement = next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>317</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>318</strong>            if (!inTextNode) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>319</strong>                commit();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>320</strong>                inTextNode = true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>321</strong>                currentElement = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>322</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>323</strong>            currentElement += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>324</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>325</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>326</strong></pre></div>
+<div class="line"><div class="doc"><p>Commit any last remaining tokens as-is</p>
+</div><pre class="source javascript"><strong>327</strong>    commit();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>328</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>329</strong>    return result;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>330</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>331</strong></pre></div>
+<div class="line"><div class="doc"><p><code>jdom</code> template tag. It just calls <code>parseJSX()</code> and returns the first parsed element</p>
+</div><pre class="source javascript"><strong>332</strong>const jdom = (tplParts, ...dynamicParts) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>333</strong>    try {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>334</strong>        return parseJSX(tplParts.map(part => part.replace(/\s+/g, ' ')), dynamicParts)[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>335</strong>    } catch (e) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>336</strong>        console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>337</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>338</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>339</strong></pre></div>
+<div class="line"><div class="doc"><p>We only expose one public API: <code>jdom</code></p>
+</div><pre class="source javascript"><strong>340</strong>const exposedNames = {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>341</strong>    jdom,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>342</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>343</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>344</strong>    for (const name in exposedNames) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>345</strong>        window[name] = exposedNames[name];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>346</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>347</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>348</strong>if (typeof module === 'object' && typeof module.exports === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>349</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>350</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>351</strong></pre></div>
+    </main>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>
+        for (const el of document.querySelectorAll('.line pre')) {
+            hljs.highlightBlock(el);
+        }
+    </script>
+</body>
+
+</html>

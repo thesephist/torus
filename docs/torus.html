@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>torus.js annotated source</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <main>
+        <div class="line">
+            <div class="doc">
+                <h1>torus.js annotated source</h1>
+                <em><a class="back" href="/">Back to index</a></em>
+            </div>
+            <pre></pre>
+        </div>
+        <div class="line"><div class="doc"></div><pre class="source javascript"><strong>1</strong>// @begindebug</pre></div>
+<div class="line"><div class="doc"><p>These utility functions enable rich debugging statements during development, when using the development build (<code>dist/torus.dev.js</code>). These give you hierarchical information about what components are being rendered, and how.</p>
+</div><pre class="source javascript"><strong>2</strong></pre></div>
+<div class="line"><div class="doc"><p>Flag to enable rich debugging during renders</p>
+</div><pre class="source javascript"><strong>3</strong>const DEBUG_RENDER = true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>4</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>5</strong>const repeat = (str, count) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>6</strong>    let s = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>7</strong>    while (count > 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>8</strong>        s += str;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>9</strong>        count --;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>10</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>11</strong>    return s;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>12</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>13</strong></pre></div>
+<div class="line"><div class="doc"><p>Main rich debug logger function. <code>render_debug()</code> depends on the <code>render_stack</code> counter in our rendering algorithm to figure out how deep in the render tree we are, and indent the message to the level appropriate to our place in the render tree.</p>
+</div><pre class="source javascript"><strong>14</strong>const render_debug = (msg, header = false) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>15</strong>    if (DEBUG_RENDER) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>16</strong>        if (header) {</pre></div>
+<div class="line"><div class="doc"><p>We want to pull forward headers in front of their section contents, so we de-indent 1.</p>
+</div><pre class="source javascript"><strong>17</strong>            const prefix = repeat('\t', render_stack - 1);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>18</strong>            console.log('%c' + prefix + msg, 'font-weight: bold');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>19</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>20</strong>            const prefix = repeat('\t', render_stack);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>21</strong>            console.log(prefix + msg);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>22</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>23</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>24</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>25</strong>// @enddebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>26</strong></pre></div>
+<div class="line"><div class="doc"><p>IDL attributes are attributes that are reflected in <code>HTMLElement</code> objects&#39; JavaScript properties. They&#39;re often boolean flags, so they&#39;re easier to set (and sometimes only possible to set) in JS as opposed to using <code>HTMLElement.setAttribute()</code>.</p>
+</div><pre class="source javascript"><strong>27</strong>const HTML_IDL_ATTRIBUTES = [</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>28</strong>    'type',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>29</strong>    'value',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>30</strong>    'selected',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>31</strong>    'indeterminate',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>32</strong>    'tabIndex',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>33</strong>    'checked',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>34</strong>    'disabled',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>35</strong>];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>36</strong></pre></div>
+<div class="line"><div class="doc"><p>A global counter for how deep we are in our render tree. 0 indicates that we aren&#39;t in the middle of rendering.</p>
+</div><pre class="source javascript"><strong>37</strong>let render_stack = 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>38</strong></pre></div>
+<div class="line"><div class="doc"><p>Shortcut utility function to check if a given name is bound to something that&#39;s an actual object (not just null)</p>
+</div><pre class="source javascript"><strong>39</strong>const isObject = o => typeof o === 'object' && o !== null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>40</strong></pre></div>
+<div class="line"><div class="doc"><p>Note that we don&#39;t check <code>isObject(jdom)</code> here. We assume only valid objects are passed in to &#39;normalize&#39;, which is true in our usage so far. <code>normalizeJDOM</code> is a hot path in rendering, so we need it as fast as it can be.</p>
+</div><pre class="source javascript"><strong>41</strong>const normalizeJDOM = jdom => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>42</strong>    if (!('tag' in jdom)) jdom.tag = 'div';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>43</strong>    if (!('attrs' in jdom)) jdom.attrs = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>44</strong>    if (!('events' in jdom)) jdom.events = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>45</strong>    if (!('children' in jdom)) jdom.children = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>46</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>47</strong></pre></div>
+<div class="line"><div class="doc"><p>Quick shorthand to normalize either 1. a single value or 2. an array of values into an array of values. This is useful because JDOM accepts either into things like <code>attrs.class</code> and <code>events.&lt;name&gt;</code>.</p>
+</div><pre class="source javascript"><strong>48</strong>const arrayNormalize = data => data instanceof Array ? data : [data];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>49</strong></pre></div>
+<div class="line"><div class="doc"><p>We use comment nodes as placeholder nodes because they&#39;re lightweight and invisible.</p>
+</div><pre class="source javascript"><strong>50</strong>const tmpNode = () => document.createComment('');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>51</strong></pre></div>
+<div class="line"><div class="doc"><p><code>placeholders</code> is a global unordered queue of placeholders and the nodes they&#39;re place-holding for. While rendering, we use placeholders to insert or move around any nodes to avoid multi-insertion conflicts. At the end of each render (when <code>render_stack</code> is 0), we replace all placeholders to the DOM before the browser renders the next frame in one fell swoop.</p>
+</div><pre class="source javascript"><strong>52</strong>const placeholders = new Map();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>53</strong>function replacePlaceholders() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>54</strong>    for (const [tmp, newNode] of placeholders.entries()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>55</strong>        tmp.parentNode.replaceChild(newNode, tmp);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>56</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>57</strong>    placeholders.clear();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>58</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>59</strong></pre></div>
+<div class="line"><div class="doc"><p>Whenever a component is rendered, it calls <code>renderJDOM</code>. This rendering algorithm is recursive into child nodes.</p>
+</div><pre class="source javascript"><strong>60</strong>const renderJDOM = (node, previous, next) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>61</strong></pre></div>
+<div class="line"><div class="doc"><p>This queues up a node to be inserted into a new slot in the DOM tree. All queued replacements will flush to DOM at the end of the render pass, from <code>placeholders</code>.</p>
+</div><pre class="source javascript"><strong>62</strong>    function replacePreviousNode(newNode) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>63</strong>        if (node !== undefined && node !== newNode && node.parentNode) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>64</strong>            const tmp = tmpNode();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>65</strong>            placeholders.set(tmp, newNode);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>66</strong>            node.parentNode.replaceChild(tmp, node);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>67</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>68</strong>        node = newNode;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>69</strong>    };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>70</strong></pre></div>
+<div class="line"><div class="doc"><p>We&#39;re rendering a new node in the render tree. Increment counter.</p>
+</div><pre class="source javascript"><strong>71</strong>    render_stack ++;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>72</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>73</strong>    const isChanged = previous !== next;</pre></div>
+<div class="line"><div class="doc"><p>If we need to render a literal DOM Node, just replace the old node with the literal node.</p>
+</div><pre class="source javascript"><strong>74</strong>    if (isChanged && next instanceof Node) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>75</strong>        // @begindebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>76</strong>        if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>77</strong>            render_debug(`Add literal element <${next.tagName}>`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>78</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>79</strong>            render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>80</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>81</strong>        // @enddebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>82</strong>        replacePreviousNode(next);</pre></div>
+<div class="line"><div class="doc"><p>If we need to render a null (comment) node, create and insert a comment node. This might seem silly, but it keeps the DOM consistent between renders and makes diff simpler.</p>
+</div><pre class="source javascript"><strong>83</strong>    } else if (isChanged && next === null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>84</strong>        // @begindebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>85</strong>        if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>86</strong>            render_debug('Add comment node');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>87</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>88</strong>            render_debug(`Replace previous node <${node.tagName}> with comment node`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>89</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>90</strong>        // @enddebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>91</strong>        replacePreviousNode(tmpNode());</pre></div>
+<div class="line"><div class="doc"><p>If we&#39;re rendering a string or raw number, convert it into a string and add a TextNode.</p>
+</div><pre class="source javascript"><strong>92</strong>    } else if (isChanged && (typeof next === 'string' || typeof next === 'number')) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>93</strong>        // @begindebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>94</strong>        if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>95</strong>            render_debug(`Add text node "${next}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>96</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>97</strong>            render_debug(`Replace previous node "${previous}" with text node "${next}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>98</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>99</strong>        // @enddebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>100</strong>        replacePreviousNode(document.createTextNode(next));</pre></div>
+<div class="line"><div class="doc"><p>If we&#39;re rendering an object literal, assume it&#39;s a serialized JDOM dictionary. This is the meat of the algorithm.</p>
+</div><pre class="source javascript"><strong>101</strong>    } else if (typeof next === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>102</strong>        if (previous === undefined) {</pre></div>
+<div class="line"><div class="doc"><p>If the previous JDOM doesn&#39;t exist, we&#39;re adding a completely new node into the DOM. Stub an empty <code>previous</code>.</p>
+</div><pre class="source javascript"><strong>103</strong>            previous = {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>104</strong>                tag: null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>105</strong>            };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>106</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>107</strong>        normalizeJDOM(previous);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>108</strong>        normalizeJDOM(next);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>109</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>110</strong>        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>111</strong>        render_debug(`Render pass for <${next.tag.toLowerCase()}>:`, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>112</strong></pre></div>
+<div class="line"><div class="doc"><p>If the tags differ, we assume the subtrees will be different as well and just start a completely new element. This is efficient in practice, reduces the time complexity of the algorithm, and an optimization shared with React&#39;s reconciler.</p>
+</div><pre class="source javascript"><strong>113</strong>        if (previous.tag !== next.tag) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>114</strong>            if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>115</strong>                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>116</strong>                render_debug(`Add <${next.tag}>`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>117</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>118</strong>                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>119</strong>                render_debug(`Replace previous node <${node.tagName}> with <${next.tag}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>120</strong>                // new root element, so "reset" previous</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>121</strong>                previous = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>122</strong>                normalizeJDOM(previous);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>123</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>124</strong>            replacePreviousNode(document.createElement(next.tag));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>125</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>126</strong></pre></div>
+<div class="line"><div class="doc"><p>Compare and update attributes</p>
+</div><pre class="source javascript"><strong>127</strong>        for (const attrName in next.attrs) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>128</strong>            switch (attrName) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>129</strong>                case 'class':</pre></div>
+<div class="line"><div class="doc"><p>JDOM can pass classes as either a single string or an array of strings, so normalize it into an array.</p>
+</div><pre class="source javascript"><strong>130</strong>                    const prevClass = arrayNormalize(previous.attrs.class || []);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>131</strong>                    const nextClass = arrayNormalize(next.attrs.class);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>132</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>133</strong>                    for (const className of nextClass) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>134</strong>                        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>135</strong>                        render_debug(`Add <${next.tag}> class "${className}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>136</strong>                        node.classList.add(className);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>137</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>138</strong>                    for (const className of prevClass) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>139</strong>                        if (!nextClass.includes(className)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>140</strong>                            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>141</strong>                            render_debug(`Remove <${next.tag}> class "${className}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>142</strong>                            node.classList.remove(className);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>143</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>144</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>145</strong>                    break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>146</strong>                case 'style':</pre></div>
+<div class="line"><div class="doc"><p>JDOM takes style attributes as a dictionary rather than a string for API ergonomics, so we serialize it differently than other attributes.</p>
+</div><pre class="source javascript"><strong>147</strong>                    const prevStyle = previous.attrs.style || {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>148</strong>                    const nextStyle = next.attrs.style;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>149</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>150</strong>                    for (const styleKey in nextStyle) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>151</strong>                        if (nextStyle[styleKey] !== prevStyle[styleKey]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>152</strong>                            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>153</strong>                            render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>154</strong>                            node.style[styleKey] = nextStyle[styleKey];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>155</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>156</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>157</strong>                    for (const styleKey in prevStyle) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>158</strong>                        if (!(styleKey in next.attrs.style)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>159</strong>                            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>160</strong>                            render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>161</strong>                            node.style[styleKey] = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>162</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>163</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>164</strong>                    break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>165</strong>                default:</pre></div>
+<div class="line"><div class="doc"><p>If an attribute is an IDL attribute, we set it through JavaScript properties on the HTML element and not <code>setAttribute()</code>. This is necessary for properties like <code>value</code> and <code>indeterminate</code>.</p>
+</div><pre class="source javascript"><strong>166</strong>                    if (HTML_IDL_ATTRIBUTES.includes(attrName)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>167</strong>                        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>168</strong>                        render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>169</strong>                        node[attrName] = next.attrs[attrName];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>170</strong>                    } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>171</strong>                        if (next.attrs[attrName] !== previous.attrs[attrName]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>172</strong>                            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>173</strong>                            render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>174</strong>                            node.setAttribute(attrName, next.attrs[attrName]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>175</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>176</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>177</strong>                    break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>178</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>179</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>180</strong>        }</pre></div>
+<div class="line"><div class="doc"><p>For any attributes that were removed in the new JDOM, also attempt to remove them from the DOM.</p>
+</div><pre class="source javascript"><strong>181</strong>        for (const attrName in previous.attrs) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>182</strong>            if (!(attrName in next.attrs)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>183</strong>                if (HTML_IDL_ATTRIBUTES.includes(attrName)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>184</strong>                    // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>185</strong>                    render_debug(`Remove <${next.tag} property ${attrName}`);</pre></div>
+<div class="line"><div class="doc"><p><code>null</code> seems to be the default for most IDL attrs, but even this isn&#39;t entirely consistent. This seems like something we should fix as issues come up, not preemptively search for a cross-browser solution.</p>
+</div><pre class="source javascript"><strong>186</strong>                    node[attrName] = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>187</strong>                } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>188</strong>                    // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>189</strong>                    render_debug(`Remove <${next.tag}> attribute ${attrName}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>190</strong>                    node.removeAttribute(attrName);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>191</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>192</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>193</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>194</strong></pre></div>
+<div class="line"><div class="doc"><p>Compare event handlers</p>
+</div><pre class="source javascript"><strong>195</strong>        const diffEvents = (whole, sub, cb) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>196</strong>            for (const eventName in whole) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>197</strong>                const wholeEvents = arrayNormalize(whole[eventName] || []);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>198</strong>                const subEvents = arrayNormalize(sub[eventName]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>199</strong>                for (const handlerFn of wholeEvents) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>200</strong>                    if (!subEvents.includes(handlerFn)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>201</strong>                        cb(eventName, handlerFn);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>202</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>203</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>204</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>205</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>206</strong>        diffEvents(next.events, previous.events, (eventName, handlerFn) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>207</strong>            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>208</strong>            render_debug(`Set new ${eventName} event listener on <${next.tag}>`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>209</strong>            node.addEventListener(eventName, handlerFn);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>210</strong>        });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>211</strong>        diffEvents(previous.events, next.events, (eventName, handlerFn) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>212</strong>            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>213</strong>            render_debug(`Remove ${eventName} event listener on <${next.tag}>`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>214</strong>            node.removeEventListener(eventName, handlerFn);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>215</strong>        });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>216</strong></pre></div>
+<div class="line"><div class="doc"><p>Render children recursively</p>
+</div><pre class="source javascript"><strong>217</strong>        const nodeChildren = node.childNodes;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>218</strong>        const prevChildren = previous.children;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>219</strong>        const nextChildren = next.children;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>220</strong>        if (nextChildren.length + prevChildren.length > 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>221</strong>            if (prevChildren.length < nextChildren.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>222</strong>                let i;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>223</strong>                for (i = 0; i < prevChildren.length; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>224</strong>                    renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>225</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>226</strong>                while (i < nextChildren.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>227</strong>                    node.appendChild(renderJDOM(undefined, undefined, nextChildren[i]));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>228</strong>                    i ++;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>229</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>230</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>231</strong>                let i;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>232</strong>                for (i = 0; i < nextChildren.length; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>233</strong>                    renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>234</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>235</strong>                while (i < prevChildren.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>236</strong>                    // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>237</strong>                    render_debug(`Remove child <${nodeChildren[i].tagName}>`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>238</strong>                    node.removeChild(nodeChildren[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>239</strong>                    i ++;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>240</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>241</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>242</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>243</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>244</strong></pre></div>
+<div class="line"><div class="doc"><p>We&#39;re done rendering the current node, so decrement the render stack.</p>
+</div><pre class="source javascript"><strong>245</strong>    render_stack --;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>246</strong></pre></div>
+<div class="line"><div class="doc"><p>If we&#39;ve reached the top of the render tree, it&#39;s time to flush replaced nodes to the DOM before the next frame.</p>
+</div><pre class="source javascript"><strong>247</strong>    if (render_stack === 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>248</strong>        replacePlaceholders();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>249</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>250</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>251</strong>    return node;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>252</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>253</strong></pre></div>
+<div class="line"><div class="doc"><p>Shorthand function for the default, empty event object in <code>Component</code>.</p>
+</div><pre class="source javascript"><strong>254</strong>const emptyEvent = () => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>255</strong>    return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>256</strong>        source: null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>257</strong>        handler: () => { },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>258</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>259</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>260</strong></pre></div>
+<div class="line"><div class="doc"><p>Torus&#39;s Component class</p>
+</div><pre class="source javascript"><strong>261</strong>class Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>262</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>263</strong>    constructor(...args) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>264</strong>        this.jdom = undefined;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>265</strong>        this.node = undefined;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>266</strong>        this.event = emptyEvent();</pre></div>
+<div class="line"><div class="doc"><p>We call init() before render, because it&#39;s a common pattern to set and initialize &quot;private&quot; fields in <code>this.init()</code> (at least before the ES-next private fields proposal becomes widely supported.) Frequently, rendering will require private values to be set correctly.</p>
+</div><pre class="source javascript"><strong>267</strong>        this.init(...args);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>268</strong>        this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>269</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>270</strong></pre></div>
+<div class="line"><div class="doc"><p><code>Component.from()</code> allows us to transform a pure function that maps arguments to a JDOM tree, and promote it into a full-fledged <code>Component</code> class we can compose and use anywhere.</p>
+</div><pre class="source javascript"><strong>271</strong>    static from(fn) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>272</strong>        return class FunctionComponent extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>273</strong>            init(...args) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>274</strong>                this.args = args;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>275</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>276</strong>            compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>277</strong>                return fn(...this.args);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>278</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>279</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>280</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>281</strong></pre></div>
+<div class="line"><div class="doc"><p>The default <code>Component#init()</code> is guaranteed to always be a no-op method</p>
+</div><pre class="source javascript"><strong>282</strong>    init() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>283</strong>        // should be overridden</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>284</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>285</strong></pre></div>
+<div class="line"><div class="doc"><p>Components usually subscribe to events from a Record, either a view model or a model that maps to business logic. This is shorthand to access that.</p>
+</div><pre class="source javascript"><strong>286</strong>    get record() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>287</strong>        return this.event.source;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>288</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>289</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>290</strong>    listen(source, handler) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>291</strong>        this.unlisten();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>292</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>293</strong>        if (source instanceof Evented) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>294</strong>            this.event = {source, handler};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>295</strong>            source.addHandler(handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>296</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>297</strong>            throw new Error('Event source to listen() is not an instance of Evented');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>298</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>299</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>300</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>301</strong>    unlisten() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>302</strong>        if (this.record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>303</strong>            this.record.removeHandler(this.event.handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>304</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>305</strong>        this.event = emptyEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>306</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>307</strong></pre></div>
+<div class="line"><div class="doc"><p>We use <code>#remove()</code> to prepare to remove the component from our application entirely. By default, it unsubscribes from all updates. However, the component is still in the render tree -- that&#39;s something for the user to decide when to hide.</p>
+</div><pre class="source javascript"><strong>308</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>309</strong>        this.unlisten();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>310</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>311</strong></pre></div>
+<div class="line"><div class="doc"><p><code>#compose()</code> is our primary rendering API for components. By default, it renders an invisible comment node.</p>
+</div><pre class="source javascript"><strong>312</strong>    compose(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>313</strong>        return null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>314</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>315</strong></pre></div>
+<div class="line"><div class="doc"><p><code>#preprocess()</code> is an API on the component to allow us to extend <code>Component</code> to give it additional capabilities idiomatically. It consumes the result of <code>#compose()</code> and returns JDOM to be used to actually render the component. See <code>Styled()</code> for a usage example -- it fills similar use cases as React&#39;s render props or HOCs.</p>
+</div><pre class="source javascript"><strong>316</strong>    preprocess(jdom, data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>317</strong>        return jdom;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>318</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>319</strong></pre></div>
+<div class="line"><div class="doc"><p><code>#render()</code> is called to actually render the component again to the DOM, and Torus assumes that it&#39;s called rarely, only when the component absolutely must update. This obviates the need for something like React&#39;s <code>shouldComponentUpdate</code>.</p>
+</div><pre class="source javascript"><strong>320</strong>    render(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>321</strong>        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>322</strong>        render_debug(`Render Component: ${this.constructor.name}`, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>323</strong>        data = data || (this.record && this.record.serialize())</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>324</strong>        const jdom = this.preprocess(this.compose(data), data);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>325</strong>        this.node = renderJDOM(this.node, this.jdom, jdom);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>326</strong>        this.jdom = jdom;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>327</strong>        return this.jdom;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>328</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>329</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>330</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>331</strong></pre></div>
+<div class="line"><div class="doc"><p>We keep track of unique class names already injected into the page&#39;s stylesheet, so we don&#39;t do redundant style reconciliation.</p>
+</div><pre class="source javascript"><strong>332</strong>const injectedClassNames = new Set();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>333</strong></pre></div>
+<div class="line"><div class="doc"><p>Global pointer to the stylesheet on the page that Torus uses to insert new CSS rules. It&#39;s set the first time a styled component renders.</p>
+</div><pre class="source javascript"><strong>334</strong>let styledComponentSheet = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>335</strong></pre></div>
+<div class="line"><div class="doc"><p>Fast pure function to map a style rule to a very reasonably unique class name that won&#39;t conflict with other classes on the page.</p>
+</div><pre class="source javascript"><strong>336</strong>const generateUniqueClassName = stylesObject => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>337</strong>    // Modified from https://github.com/darkskyapp/string-hash/blob/master/index.js</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>338</strong>    const str = JSON.stringify(stylesObject).replace(/\s+/g, ' ');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>339</strong>    let i = str.length;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>340</strong>    let hash = 1989;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>341</strong>    while (i) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>342</strong>        hash = (hash * 13) ^ str.charCodeAt(--i);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>343</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>344</strong>    return '_torus' + (hash >>> 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>345</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>346</strong></pre></div>
+<div class="line"><div class="doc"><p>We have to construct lots of a{b} syntax in CSS, so here&#39;s a shorthand.</p>
+</div><pre class="source javascript"><strong>347</strong>const brace = (a, b) => a + '{' + b + '}';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>348</strong></pre></div>
+<div class="line"><div class="doc"><p>The meat of <code>Styled()</code>. This function maps an ergonomic, dictionary-based set of CSS declarations to an array of CSS rules that can be inserted onto the page stylesheet, and recursively resolves nested CSS, handles keyframes and media queries, and parses other SCSS-like things.</p>
+</div><pre class="source javascript"><strong>349</strong>const rulesFromStylesObject = (selector, stylesObject) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>350</strong>    let rules = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>351</strong>    let selfDeclarations = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>352</strong>    for (const [prop, val] of Object.entries(stylesObject)) {</pre></div>
+<div class="line"><div class="doc"><p>CSS declarations that start with &#39;@&#39; are globally namespaced (like @keyframes and @media), so we need to treat them differently.</p>
+</div><pre class="source javascript"><strong>353</strong>        if (prop[0] === '@') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>354</strong>            if (prop.startsWith('@media')) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>355</strong>                rules.push(brace(prop, rulesFromStylesObject(selector, val).join('')));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>356</strong>            } else  { // @keyframes or @font-face</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>357</strong>                rules.push(brace(prop, rulesFromStylesObject('', val).join('')));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>358</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>359</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>360</strong>            if (typeof val === 'object') {</pre></div>
+<div class="line"><div class="doc"><p>SCSS-like syntax means we use &#39;&amp;&#39; to nest declarations about the parent selector.</p>
+</div><pre class="source javascript"><strong>361</strong>                if (prop.includes('&')) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>362</strong>                    const fullSelector = prop.replace(/&/g, selector);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>363</strong>                    rules = rules.concat(rulesFromStylesObject(fullSelector, val));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>364</strong>                } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>365</strong>                    rules = rules.concat(rulesFromStylesObject(selector + ' ' + prop, val));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>366</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>367</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>368</strong>                selfDeclarations += prop + ':' + val + ';';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>369</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>370</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>371</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>372</strong>    if (selfDeclarations) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>373</strong>        rules.push(brace(selector, selfDeclarations));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>374</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>375</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>376</strong>    return rules;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>377</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>378</strong></pre></div>
+<div class="line"><div class="doc"><p>Function called once to initialize a stylesheet for Torus to use on every subsequent style render.</p>
+</div><pre class="source javascript"><strong>379</strong>const initSheet = () => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>380</strong>    styleElement = document.createElement('style');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>381</strong>    styleElement.setAttribute('data-torus', '');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>382</strong>    document.head.appendChild(styleElement);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>383</strong>    styledComponentSheet = styleElement.sheet;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>384</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>385</strong></pre></div>
+<div class="line"><div class="doc"><p>We disambiguate by the class name, which is a hash of the CSS rules.</p>
+</div><pre class="source javascript"><strong>386</strong>const injectStylesOnce = stylesObject => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>387</strong>    const className = generateUniqueClassName(stylesObject);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>388</strong>    if (!injectedClassNames.has(className)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>389</strong>        if (!styledComponentSheet) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>390</strong>            initSheet();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>391</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>392</strong>        const rules = rulesFromStylesObject('.' + className, stylesObject);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>393</strong>        for (const rule of rules) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>394</strong>            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>395</strong>            render_debug(`Add new CSS rule: ${rule}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>396</strong>            styledComponentSheet.insertRule(rule, styledComponentSheet.cssRules.length);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>397</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>398</strong>        injectedClassNames.add(className);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>399</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>400</strong>    return className;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>401</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>402</strong></pre></div>
+<div class="line"><div class="doc"><p>Higher-order component to enable styling for any Component class.</p>
+</div><pre class="source javascript"><strong>403</strong>const Styled = Base => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>404</strong>    return class extends Base {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>405</strong>        styles(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>406</strong>            return {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>407</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>408</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>409</strong>        preprocess(jdom, data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>410</strong>            if (isObject(jdom)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>411</strong>                jdom.attrs = jdom.attrs || {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>412</strong>                jdom.attrs.class = arrayNormalize(jdom.attrs.class || []);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>413</strong>                jdom.attrs.class.push(injectStylesOnce(this.styles(data)));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>414</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>415</strong>            return jdom;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>416</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>417</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>418</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>419</strong></pre></div>
+<div class="line"><div class="doc"><p>Provide a default, <code>StyledComponent</code> class</p>
+</div><pre class="source javascript"><strong>420</strong>const StyledComponent = Styled(Component);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>421</strong></pre></div>
+<div class="line"><div class="doc"><p>Torus&#39;s generic List implementation, based on Stores</p>
+</div><pre class="source javascript"><strong>422</strong>class List extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>423</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>424</strong>    get itemClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>425</strong>        return Component; // default value, should be overridden</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>426</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>427</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>428</strong>    init(store) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>429</strong>        this.store = store;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>430</strong>        this.items = new Map();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>431</strong>        this.filterFn = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>432</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>433</strong>        this.listen(this.store, () => this.itemsChanged());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>434</strong>        this.itemsChanged();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>435</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>436</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>437</strong>    itemsChanged() {</pre></div>
+<div class="line"><div class="doc"><p>For every record in the store, if it isn&#39;t already in <code>this.items</code>, add it and its view; if any were removed, also remove it from <code>this.items</code>.</p>
+</div><pre class="source javascript"><strong>438</strong>        const data = this.store.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>439</strong>        for (const record of this.items.keys()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>440</strong>            if (!data.includes(record)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>441</strong>                this.items.get(record).remove();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>442</strong>                this.items.delete(record);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>443</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>444</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>445</strong>        for (const record of data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>446</strong>            if (!this.items.has(record)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>447</strong>                this.items.set(record, new this.itemClass(record));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>448</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>449</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>450</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>451</strong>        let sorter = [...this.items.entries()];</pre></div>
+<div class="line"><div class="doc"><p>Sort by the provided filter function if there is one</p>
+</div><pre class="source javascript"><strong>452</strong>        if (this.filterFn !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>453</strong>            sorter = sorter.filter(item => this.filterFn(item[0]));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>454</strong>        }</pre></div>
+<div class="line"><div class="doc"><p>Sort the list the way the associated Store is sorted.</p>
+</div><pre class="source javascript"><strong>455</strong>        sorter.sort((a, b) => data.indexOf(a[0]) - data.indexOf(b[0]));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>456</strong></pre></div>
+<div class="line"><div class="doc"><p>Store the new items in a new (insertion-ordered) Map at this.items</p>
+</div><pre class="source javascript"><strong>457</strong>        this.items = new Map(sorter);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>458</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>459</strong>        this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>460</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>461</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>462</strong>    filter(filterFn) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>463</strong>        this.filterFn = filterFn;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>464</strong>        this.itemsChanged();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>465</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>466</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>467</strong>    unfilter() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>468</strong>        this.filterFn = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>469</strong>        this.itemsChanged();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>470</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>471</strong></pre></div>
+<div class="line"><div class="doc"><p><code>List#nodes</code> returns the HTML nodes for each of its item views, sorted in order. Designed to make writing <code>#compose()</code> easier.</p>
+</div><pre class="source javascript"><strong>472</strong>    get nodes() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>473</strong>        return [...this.items.values()].map(item => item.node);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>474</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>475</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>476</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>477</strong>        super.remove();</pre></div>
+<div class="line"><div class="doc"><p>When we remove a list, we also want to call <code>remove()</code> on each child components.</p>
+</div><pre class="source javascript"><strong>478</strong>        for (const c of this.items.values()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>479</strong>            c.remove();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>480</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>481</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>482</strong></pre></div>
+<div class="line"><div class="doc"><p>By default, just render the children views in a <ul/></p>
+</div><pre class="source javascript"><strong>483</strong>    compose(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>484</strong>        return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>485</strong>            tag: 'ul',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>486</strong>            children: this.nodes,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>487</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>488</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>489</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>490</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>491</strong></pre></div>
+<div class="line"><div class="doc"><p>Higher-order component to create a list component for a given child item component.</p>
+</div><pre class="source javascript"><strong>492</strong>const ListOf = itemClass => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>493</strong>    return class extends List {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>494</strong>        get itemClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>495</strong>            return itemClass;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>496</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>497</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>498</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>499</strong></pre></div>
+<div class="line"><div class="doc"><p>A base class for evented data stores. Not exposed to the public API, but all observables in Torus inherit from <code>Evented</code>.</p>
+</div><pre class="source javascript"><strong>500</strong>class Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>501</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>502</strong>    constructor() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>503</strong>        this.eventTargets = new Set();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>504</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>505</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>506</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>507</strong>        throw new Error(`#summarize() not implemented in ${this.constructor.name}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>508</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>509</strong></pre></div>
+<div class="line"><div class="doc"><p>Whenever something changes, we fire an event to all subscribed listeners, with a summary of its state.</p>
+</div><pre class="source javascript"><strong>510</strong>    emitEvent() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>511</strong>        const summary = this.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>512</strong>        for (const handler of this.eventTargets) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>513</strong>            handler(summary);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>514</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>515</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>516</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>517</strong>    addHandler(handler) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>518</strong>        this.eventTargets.add(handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>519</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>520</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>521</strong>    removeHandler(handler) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>522</strong>        this.eventTargets.delete(handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>523</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>524</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>525</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>526</strong></pre></div>
+<div class="line"><div class="doc"><p><code>Record</code> is Torus&#39;s unit of individual data source, used for view models and Models from business logic.</p>
+</div><pre class="source javascript"><strong>527</strong>class Record extends Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>528</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>529</strong>    constructor(id, data = {}) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>530</strong>        super();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>531</strong></pre></div>
+<div class="line"><div class="doc"><p>We can create a Record by either passing in just the properties, or an ID and a dictionary of props. We disambiguate here.</p>
+</div><pre class="source javascript"><strong>532</strong>        if (typeof id === 'object' && !Object.keys(data).length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>533</strong>            data = id;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>534</strong>            id = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>535</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>536</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>537</strong>        this.id = id;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>538</strong>        this.data = data;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>539</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>540</strong></pre></div>
+<div class="line"><div class="doc"><p>Setter for properties</p>
+</div><pre class="source javascript"><strong>541</strong>    update(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>542</strong>        Object.assign(this.data, data);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>543</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>544</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>545</strong></pre></div>
+<div class="line"><div class="doc"><p>Getter</p>
+</div><pre class="source javascript"><strong>546</strong>    get(name) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>547</strong>        return this.data[name];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>548</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>549</strong></pre></div>
+<div class="line"><div class="doc"><p>We summarize a Record by returning a dictionary of all of its properties and the ID</p>
+</div><pre class="source javascript"><strong>550</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>551</strong>        return Object.assign(</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>552</strong>            {},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>553</strong>            this.data,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>554</strong>            {id: this.id}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>555</strong>        );</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>556</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>557</strong></pre></div>
+<div class="line"><div class="doc"><p>The JSON-serialized version of a Record is the same as its summary, since it&#39;s a shallow data store with just plain properties.</p>
+</div><pre class="source javascript"><strong>558</strong>    serialize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>559</strong>        return this.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>560</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>561</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>562</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>563</strong></pre></div>
+<div class="line"><div class="doc"><p>A list of Records, represents a collection or a table</p>
+</div><pre class="source javascript"><strong>564</strong>class Store extends Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>565</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>566</strong>    constructor(records = []) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>567</strong>        super();</pre></div>
+<div class="line"><div class="doc"><p>Internally, we represent the store as an unordered set. we only order by comparator when we summarize. This prevents us from having to perform sorting checks on every insert/update, and is efficient as long as we don&#39;t re-render excessively.</p>
+</div><pre class="source javascript"><strong>568</strong>        this.records = new Set(records);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>569</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>570</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>571</strong>    get recordClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>572</strong>        return Record;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>573</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>574</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>575</strong>    get comparator() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>576</strong>        return null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>577</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>578</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>579</strong>    create(id, data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>580</strong>        this.add(new this.recordClass(id, data));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>581</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>582</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>583</strong>    add(record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>584</strong>        this.records.add(record);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>585</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>586</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>587</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>588</strong>    remove(record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>589</strong>        this.records.delete(record);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>590</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>591</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>592</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>593</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"><p>The summary of a store is defined functionally. We just sort the records in our store by the comparator (but we use a list of pairs of cached comparators and records to be fast.</p>
+</div><pre class="source javascript"><strong>594</strong>        return [...this.records].map(record => [</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>595</strong>            this.comparator ? this.comparator(record) : null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>596</strong>            record,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>597</strong>        ]).sort((a, b) => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>598</strong>            if (a[0] < b[0]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>599</strong>                return -1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>600</strong>            } else if (a[0] > b[0]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>601</strong>                return 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>602</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>603</strong>                return 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>604</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>605</strong>        }).map(o => o[1]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>606</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>607</strong></pre></div>
+<div class="line"><div class="doc"><p>To serialize a store, we serialize each record and put them in a giant list.</p>
+</div><pre class="source javascript"><strong>608</strong>    serialize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>609</strong>        return this.summarize().map(record => record.serialize());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>610</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>611</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>612</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>613</strong></pre></div>
+<div class="line"><div class="doc"><p>Higher-order component to create a Store for a given record class.</p>
+</div><pre class="source javascript"><strong>614</strong>const StoreOf = recordClass => {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>615</strong>    return class extends Store {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>616</strong>        get recordClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>617</strong>            return recordClass;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>618</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>619</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>620</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>621</strong></pre></div>
+<div class="line"><div class="doc"><p>Front-end router. A routing component can listen to updates from the Router instead of a Record, and re-render different subviews when the routes change.</p>
+</div><pre class="source javascript"><strong>622</strong>class Router extends Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>623</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>624</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>625</strong>        // TODO</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>626</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>627</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>628</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>629</strong></pre></div>
+<div class="line"><div class="doc"><p>Torus exposes these public APIs</p>
+</div><pre class="source javascript"><strong>630</strong>const exposedNames = {</pre></div>
+<div class="line"><div class="doc"><p><code>renderJDOM</code> isn&#39;t designed to be a public API and the API might change, but it&#39;s exposed to make unit testing easier.</p>
+</div><pre class="source javascript"><strong>631</strong>    renderJDOM,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>632</strong>    Styled,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>633</strong>    StyledComponent,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>634</strong>    Component,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>635</strong>    List,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>636</strong>    ListOf,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>637</strong>    Record,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>638</strong>    Store,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>639</strong>    StoreOf,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>640</strong>    // Router,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>641</strong>}</pre></div>
+<div class="line"><div class="doc"><p>If there is a global <code>window</code> object, bind API names to it.</p>
+</div><pre class="source javascript"><strong>642</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>643</strong>    for (const name in exposedNames) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>644</strong>        window[name] = exposedNames[name];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>645</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>646</strong>}</pre></div>
+<div class="line"><div class="doc"><p>Export public APIs CommonJS-style</p>
+</div><pre class="source javascript"><strong>647</strong>if (typeof module === 'object' && typeof module.exports === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>648</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>649</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong>650</strong></pre></div>
+    </main>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>
+        for (const el of document.querySelectorAll('.line pre')) {
+            hljs.highlightBlock(el);
+        }
+    </script>
+</body>
+
+</html>

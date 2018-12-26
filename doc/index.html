@@ -6,72 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Torus annotated sources</title>
+    <link rel="stylesheet" href="main.css">
     <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Helvetica', 'Arial', sans-serif;
-        }
-        main {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: left;
-            margin: 0 auto;
-            background: #f8f8f8;
-        }
-        h1 {
-            font-weight: normal;
-        }
-        .line {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: flex-end;
-            font-size: 16px;
-        }
         .line:first-child .doc {
             padding-top: 64px;
-            min-height: 100vh;
-        }
-        .doc {
-            min-height: 24px;
-            width: 400px;
-            line-height: 1.5em;
-            flex-shrink: 0;
-            flex-grow: 0;
-            padding-left: 48px;
-            padding-right: 48px;
-            background: #fff;
-        }
-        pre {
-            margin: 0;
-            margin-left: 12px;
-            line-height: 1.5em;
-        }
-        code {
-            font-size: .9em;
-            background: #f8f8f8;
-            box-sizing: border-box;
-            padding: 2px 4px;
-            border: 1px solid #aaa;
-        }
-        pre,
-        code {
-            font-family: 'Menlo', 'Monaco', monospace;
-        }
-        .source strong {
-            font-weight: normal;
-            opacity: .2;
-            margin-right: 24px;
-        }
-        .back {
-            opacity: .7;
-            color: #777;
-        }
-        .back:hover {
-            opacity: .9;
+            min-height: calc(100vh - 64px);
         }
     </style>
 </head>
@@ -82,8 +21,11 @@
             <div class="doc">
                 <h1>Torus annotated source</h1>
                 <p>This documentation is auto-generated with <code>npm run docs</code> from the Torus repository, from code comments.</p>
-                <p><a class="back" href="/torus.html">src/torus.js</a></p>
-                <p><a class="back" href="/jdom.html">src/jdom.js</a></p>
+                <p>
+                    Source files:
+                    <a class="back" href="/torus.html">src/torus.js</a>,
+                    <a class="back" href="/jdom.html">src/jdom.js</a>
+                </p>
             </div>
             <pre></pre>
         </div>

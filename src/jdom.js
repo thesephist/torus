@@ -371,8 +371,9 @@ const parseJSX = reader => {
     let inTextNode = false;
     //> Commit currently reading element to the result list, and reset the current element
     const commit = () => {
-        if (inTextNode) {
-            currentElement = currentElement.trim();
+        //> If the text node we're about to commit is just whitespace, don't bother
+        if (inTextNode && currentElement.trim() === '') {
+            currentElement = null;
         }
         if (currentElement) {
             result.push(currentElement);

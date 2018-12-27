@@ -189,7 +189,7 @@ describe('jdom template tag', () => {
 
         compare(
             'quoted attributes with no space',
-            jdom`<div type="a"kind="b></div>"`,
+            jdom`<div type="a"kind="b></div>`,
             {tag: 'div', attrs: {type: 'a', kind: 'b'}}
         );
 
@@ -311,6 +311,28 @@ describe('jdom template tag', () => {
                     ]},
                 ]},
             ]},
+        );
+
+        compare(
+            'non-tag parts outside of the root node should be treated as top-level children',
+            jdom`<div>hello</div>hi`,
+            {tag: 'div', children: ['hello']}
+        );
+
+        compare(
+            'nesting same tags',
+            jdom`<div>
+                <div>
+                    <div>hi</div>
+                </div>
+                <div></div>
+            </div>`,
+            {tag: 'div', children: [
+                {tag: 'div', children: [
+                    {tag: 'div', children: ['hi']},
+                ]},
+                {tag: 'div'},
+            ]}
         );
 
     });

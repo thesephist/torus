@@ -358,9 +358,8 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
 
 //> Function to parse an entire JDOM template tree (which we vague call JSX here).
 //  This recursively calls itself on children elements.
-const parseJSX = (tplParts, dynamicParts) => {
+const parseJSX = reader => {
     const result = [];
-    const reader = new Reader(tplParts, dynamicParts);
 
     //> The current JDOM object being worked on. Sort of an "element register"
     let currentElement = null;
@@ -371,7 +370,6 @@ const parseJSX = (tplParts, dynamicParts) => {
         if (inTextNode) {
             currentElement = currentElement.trim();
         }
-
         if (currentElement) {
             result.push(currentElement);
         }
@@ -393,21 +391,34 @@ const parseJSX = (tplParts, dynamicParts) => {
     for (let next = reader.next(); next !== READER_END; next = reader.next()) {
         //> if we see an opening tag...
         if (next === '<') {
-            //> first, commit any previously read element
+            //> ... first, commit any previously read element ...
             commit();
-            //> then read and parse the contents of the tag up to the end of
-            //  the opening tag.
-            const result = parseOpeningTagContents(...reader.readUpto('>'));
-            reader.readUntil('>');
-            currentElement = result && result.jdom;
-            //> If the current element is a full-fledged element (and not a comment
-            //  or text node), let's try to parse the children.
-            if (typeof currentElement === 'object' && currentElement !== null) {
-                if (!result.selfClosing) {
-                    const closingTag = `</${currentElement.tag}>`;
-                    currentElement.children = parseJSX(...reader.readUpto(closingTag));
-                    reader.readUntil(closingTag);
+            //> ... it's an opening tag if the next character isn't `'/'`.
+            if (reader.next() !== '/') {
+                reader.backtrack();
+                //> Read and parse the contents of the tag up to the end of
+                //  the opening tag.
+                const result = parseOpeningTagContents(...reader.readUpto('>'));
+                reader.next(); // read the '>'
+                currentElement = result && result.jdom;
+                //> If the current element is a full-fledged element (and not a comment
+                //  or text node), let's try to parse the children by handing the reader
+                //  to a recursively call of this function.
+                if (!result.selfClosing &&
+                    typeof currentElement === 'object' &&
+                    currentElement !== null
+                ) {
+                    currentElement.children = parseJSX(reader);
                 }
+            //> ... it's a closing tag otherwise.
+            } else {
+                //> So finish out reading the closing tag, and commit the whole current element.
+                //  A top-level closing tag means it's actually closing the parent tag, so
+                //  we need to stop parsing and hand the parsing flow back to the parent
+                //  call in this recursive function.
+                reader.readUntil('>');
+                commit();
+                break;
             }
         //> Because string tokens are the most common, we check for it early
         } else if (typeof next === 'string') {
@@ -437,7 +448,11 @@ const parseJSX = (tplParts, dynamicParts) => {
 //> `jdom` template tag. It just calls `parseJSX()` and returns the first parsed element
 const jdom = (tplParts, ...dynamicParts) => {
     try {
-        return parseJSX(tplParts.map(part => part.replace(/\s+/g, ' ')), dynamicParts)[0];
+        const reader = new Reader(
+            tplParts.map(part => part.replace(/\s+/g, ' ')),
+            dynamicParts
+        );
+        return parseJSX(reader)[0];
     } catch (e) {
         console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);
     }

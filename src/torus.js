@@ -729,11 +729,8 @@ class Store extends Evented {
 
     constructor(records = []) {
         super();
-        //> Internally, we represent the store as an unordered set.
-        //  we only order by comparator when we summarize. This prevents
-        //  us from having to perform sorting checks on every insert/update,
-        //  and is efficient as long as we don't re-render excessively.
-        this.records = new Set(records);
+        //> Reset the store's contents with the given records
+        this.reset(records);
     }
 
     get recordClass() {
@@ -755,6 +752,15 @@ class Store extends Evented {
 
     remove(record) {
         this.records.delete(record);
+        this.emitEvent();
+    }
+
+    reset(records) {
+        //> Internally, we represent the store as an unordered set.
+        //  we only order by comparator when we summarize. This prevents
+        //  us from having to perform sorting checks on every insert/update,
+        //  and is efficient as long as we don't re-render excessively.
+        this.records = new Set(records);
         this.emitEvent();
     }
 

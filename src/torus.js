@@ -385,18 +385,18 @@ class Component {
         return this.event.source;
     }
 
-    listen(source, handler) {
-        this.unlisten();
+    bind(source, handler) {
+        this.unbind();
 
         if (source instanceof Evented) {
             this.event = {source, handler};
             source.addHandler(handler);
         } else {
-            throw new Error('Event source to listen() is not an instance of Evented');
+            throw new Error('Event source to bind() to is not an instance of Evented');
         }
     }
 
-    unlisten() {
+    unbind() {
         if (this.record) {
             this.record.removeHandler(this.event.handler);
         }
@@ -408,7 +408,7 @@ class Component {
     // is still in the render tree -- that's something for the user to decide when to
     //  hide.
     remove() {
-        this.unlisten();
+        this.unbind();
     }
 
     //> `#compose()` is our primary rendering API for components. By default, it renders
@@ -431,7 +431,7 @@ class Component {
     render(data) {
         // @debug
         render_debug(`Render Component: ${this.constructor.name}`, true);
-        data = data || (this.record && this.record.serialize())
+        data = data || (this.record && this.record.summarize())
         const jdom = this.preprocess(this.compose(data), data);
         this.node = renderJDOM(this.node, this.jdom, jdom);
         this.jdom = jdom;
@@ -565,7 +565,7 @@ class List extends Component {
         this.items = new Map();
         this.filterFn = null;
 
-        this.listen(this.store, () => this.itemsChanged());
+        this.bind(this.store, () => this.itemsChanged());
         this.itemsChanged();
     }
 
@@ -668,6 +668,7 @@ class Evented {
 
     addHandler(handler) {
         this.eventTargets.add(handler);
+        handler(this.summarize());
     }
 
     removeHandler(handler) {

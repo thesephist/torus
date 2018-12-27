@@ -191,10 +191,10 @@ class MyFancyList extends Styled(List) {
 1. Create new component
     - call `#init()`
     - call `#render()` (which calls `#compose()` in the process)
-2. Render triggered (can happen through `#listen(...)` binding the component to state updates, or through manual triggers from local state changes)
+2. Render triggered (can happen through `#bind(...)` binding the component to state updates, or through manual triggers from local state changes)
     - call `#render()` (which calls `#compose()`)
 3. Remove component (cleanly destroy component to be garbage collected)
-    - call `#remove()`, cleans up any event listeners attached with `#listen(...)`
+    - call `#remove()`, cleans up any subscriptions attached with `#bind(...)`
 
 **Note**: It's generally a good idea to call `Component#remove()` when the component no longer becomes needed, like when a model tied to it is destroyed or the user switches to a completely different view. But because Torus components are lightweight, there's no need to use it as a memory management mechanism or to trigger garbage collection. Torus components, unlike React components, are designed to be long-lived and last through a full session or page lifecycle.
 
@@ -265,7 +265,7 @@ React and similar virtual-dom view libraries depend on [key-based reconciliation
 
 ```javascript
 // This represents the collection of todo items.
-//  Updates to a Store is reflected in any List listening to it by default.
+//  Updates to a Store is reflected in any List bound to it by default.
 class Task extends Record {}
 // The StoreOf(<RecordClass>) syntax creates a Store class that defaults to
 //  the given record type. (StoreOf is a higher order class constructor)
@@ -338,7 +338,7 @@ Here, we make a new Store called `movies`, which is going to hold all our movie 
 
 When we define `MovieListView` as `ListOf(MovieView)`, we're telling Torus that we want `MovieListView` to behave like a `List`, but we want each individual child view to be a `MovieView` we defined earlier.
 
-Lastly, we can create an instance of the list view that listens to our `movies` store for changes, and updates the view accordingly by rendering a list of the movies that are in that list.
+Lastly, we can create an instance of the list view that binds to our `movies` store for changes, and updates the view accordingly by rendering a list of the movies that are in that list.
 
 By default, a `List` is going to render the children inside a `<ul>...</ul>` wrapper element, but we can fully customize how our list is rendered by overriding `List#compose()`. For example, this is going to add the children to a container element, and add a header at the top of the list.
 
@@ -373,6 +373,23 @@ movieList.unfilter();
 
 ## Data models (`Record`, `Store`)
 
+Records and stores are Torus's way of storing data and binding data updates to component renders. When we update the data behind a data model, the data model emits an event, and we can bind components to those events by calling `Component#bind(eventSource, handlerFunction)`.
+
+```javascript
+class MovieListing extends Component {
+
+    init(movieRecord) {
+        // The callback is passed the "summary" state of the data model
+        //  here, we bind our data model's updates to re-renders
+        //  of our component.
+        this.bind(movieRecord, _attrs => this.render());
+    }
+
+}
+```
+
+Call `Component#unbind()` to undo binding a component to a model. Binding a component to a different event source will unbind it from all other previous sources.
+
 ### Records
 
 An instance of `Record` represents a single source of data, and we can bind a Torus component to a record to have the component perform some action (usually re-compose and render) when the record emits an event (usually data update).
@@ -399,7 +416,7 @@ movie1.update({
 movie1.get('release_year'); // 2019
 ```
 
-When we call `#update()` to set new values on a record, any components listening to the record will be notified after the new attributes are set.
+When we call `#update()` to set new values on a record, any components bound to the record will be notified after the new attributes are set.
 
 When we want to serialize the record for rendering or sharing on the network, we can use one of two methods. By default, both of these methods, `#serialize()` and `#summarize`, return the same, JSON representation of the record's attributes.
 
@@ -434,7 +451,7 @@ const destinations = new CityStore([
 destinations.serialize(); // [{name: 'Dublin'}, {name: 'Melbourne'}]
 ```
 
-We can add new records to our store in two ways, and remove with `#remove()`. All of these operations update the underlying data, so they'll fire individual events for any components listening to updates.
+We can add new records to our store in two ways, and remove with `#remove()`. All of these operations update the underlying data, so they'll fire individual events for any components bound to updates.
 
 ```javascript
 // create an instance of destinations.recordClass (City)

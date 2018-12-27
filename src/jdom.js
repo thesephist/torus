@@ -15,7 +15,7 @@ const clipStringEnd = (base, substr) => {
 }
 
 const decodeEntity = entity => {
-    return String.fromCodePoint(+((/&#(\d+);/).exec(entity)[1]));
+    return String.fromCodePoint((+('0' + (/&#(\w+);/).exec(entity)[1])));
 }
 
 //> Interpolate between lists of string and non-string parts into a single string.

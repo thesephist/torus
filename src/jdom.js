@@ -387,7 +387,12 @@ const parseJSX = reader => {
         currentElement += next;
     }
 
-    //> Main parsing logic
+    //> Main parsing logic. This can be confusingly recursive. In essence, the parser
+    //  recursively calls itself with its `reader` if it has children to parse,
+    //  and trusts that the parser will return when it encounters the closing tag
+    //  that marks the end of the list of children. So, the parser breaks the loop
+    //  and returns if it encounters a closing tag. This cooperation between the function
+    //  and the parent function that called it recursively makes this parser work.
     for (let next = reader.next(); next !== READER_END; next = reader.next()) {
         //> if we see an opening tag...
         if (next === '<') {

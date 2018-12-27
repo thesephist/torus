@@ -283,26 +283,31 @@ class StoryListing extends StyledComponent {
     }
 
     compose(attrs) {
-        const text = this.expanded ? decodeHTML(attrs.text) : ':: text post ::';
+        const text = this.expanded ? decodeHTML(attrs.text || '') : ':: text post ::';
+
+        const score = attrs.score || 0;
+        const descendants = attrs.descendants || 0;
+        const title = attrs.title || '...';
+        const url = attrs.url || '';
+        const time = attrs.time || 0;
+        const author = attrs.by || '...';
 
         return jdom`<li data-id=${attrs.id} onclick="${this.setActiveStory}">
-            <div class="stats mono" title="${attrs.score} upvotes, ${attrs.descendants} comments">
-                <div class="score">${attrs.score}</div>
-                <div class="comments">
-                    ${attrs.descendants}
-                </div>
+            <div class="stats mono" title="${score} upvotes, ${descendants} comments">
+                <div class="score">${score}</div>
+                <div class="comments">${descendants}</div>
             </div>
             <div class="synopsis">
-                <div class="title">${attrs.order ? attrs.order + '.' : ''} ${attrs.title}</div>
-                <div class="url ${(attrs.url || !this.expanded) ? 'mono' : 'content'}">
-                    ${attrs.url ? (
-                        jdom`<a href="${attrs.url}" target="_blank" noreferrer>${attrs.url}</a>`
+                <div class="title">${attrs.order ? attrs.order + '.' : ''} ${title}</div>
+                <div class="url ${(url || !this.expanded) ? 'mono' : 'content'}">
+                    ${url ? (
+                        jdom`<a href="${url}" target="_blank" noreferrer>${url}</a>`
                     ) : text}
                 </div>
                 <div class="meta">
-                    <span class="time">${formatDate(attrs.time)}</span>
+                    <span class="time">${formatDate(time)}</span>
                     |
-                    <span class="author">${userLink(attrs.by)}</span>
+                    <span class="author">${userLink(author)}</span>
                 </div>
             </div>
         </li>`;
@@ -372,14 +377,19 @@ class CommentListing extends StyledComponent {
     }
 
     compose(attrs) {
+        const time = attrs.time || 0;
+        const author = attrs.by || '...';
+        const text = attrs.text || ''
+        const kids = attrs.kids || [];
+
         return jdom`<div class="comment" onclick="${this.toggleFolded}">
             <div class="byline">
-                ${formatDate(attrs.time)}
+                ${formatDate(time)}
                 |
-                ${userLink(attrs.by)}
+                ${userLink(author)}
                 |
-                ${attrs.kids ? attrs.kids.length : 0} replies</div>
-            <div class="text">${decodeHTML(attrs.text)}</div>
+                ${kids.length} replies</div>
+            <div class="text">${decodeHTML(text)}</div>
             ${!this.folded ? (jdom`<div class="children">
                 ${this.kidsList.node}
             </div>`) : ''}

@@ -1,5 +1,5 @@
 {
-  "name": "torus-vdom",
+  "name": "torus-dom",
   "version": "0.1.0",
   "description": "Minimal JS UI framework focused on being lightweight and free of dependencies",
   "repository": "git@github.com:thesephist/torus.git",

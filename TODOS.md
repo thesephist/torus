@@ -1,14 +1,5 @@
 # Torus To-dos
 
-- [ ] Think about using streams / observables to abstract data models and events. Also consider l3 concepts in the context of Torus. They should map well.
-    - Conclusion after some thought: managing time-dimension events isn't in the purview of Torus. Torus simply lets events flow through its logic asynchronously.
-
-- [ ] On separating application logic and presentation -- application logic should live inside data models, and the Components should only call the application logic by established public APIs.
-
-- [ ] For polyx, longevity is key. Once I write once, I won't touch it again for 3-4 years. Will it stand that test of time?
-
-- [ ] A library is just a collection of functions that abstract common patterns. For productivity. Look at torus in this light and reaffirm / reject architectural choices / API designs.
-
 - [ ] Concurrency
     - Yielding to the browser at the component level. Treat each Component#render or renderJDOM() as a separately, always-deferrable async event. This gets the interactivity / CPU time benefits of concurrent React.
     - React uses the defer() function to indicate to the renderer what updates aren't critical. We could try something similar, and have defer be default but indicate high priority updates?
@@ -18,11 +9,7 @@
         - Using this method, at each subtree in the `renderJDOM` render tree, we can choose to defer the render of that subtree, a la concurrent React and React suspense.
         - As a part of this consideration, maybe we should also make all bulk `replaceChild` calls in the render step asynchronous with rAF? Does that have any benefits?
     - Like concurrent React, we should support the ability to halt rendering and cancel a render pass, render the next render call if render was called before the previous render call began flushing to DOM / being rendered. Multiple calls to `#render()` in succession should result in a single `#render()` call.
-
-- [ ] Finish Torus `Router`
-    - The router should be a special Evented that emits route info when the URL changes. A master component (stand in for ReactRouter in the component tree) listens to this and renders different views in the subtree. I think this would work better than each subview managing its own visibility (which should be possible with the same extensible API), and lead to simpler in-document DOM.
-
-- [ ] First release (after all the above are complete)
+    - Trying to see if Torus has the capability to be extended to React's suspense-like API (lazy loading, etc.)
 
 ## Planned sample projects
 

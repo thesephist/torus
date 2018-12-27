@@ -15,7 +15,8 @@
     "verify": "node build/build.js && karma start karma.min.conf.js",
     "clean": "rm -rvf dist/* coverage/* docs/",
     "docs": "node doc/generate.js",
-    "postinstall": "node build/build.js"
+    "postinstall": "node build/build.js",
+    "deploy:hn": "cp dist/index.min.js samples/hn-reader/ && surge -p samples/hn-reader/ --domain https://torushn.surge.sh"
   },
   "devDependencies": {
     "chai": "^4.2.0",

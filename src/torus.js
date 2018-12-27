@@ -794,13 +794,77 @@ const StoreOf = recordClass => {
     }
 }
 
-//> Front-end router. A routing component can listen
+//> Helper function for the router. It takes a route string
+//  that contains parameters like, `/path/:param1/path/:param2`
+//  and returns a regular expression to match that route
+//  and a list of params in that route.
+const routeStringToRegExp = route => {
+    let match;
+    const paramNames = [];
+    while (match !== null) {
+        match = (/:\w+/).exec(route);
+        if (match) {
+            const paramName = match[0];
+            paramNames.push(paramName.substr(1));
+            route = route.replace(paramName, '(.*)');
+        }
+    }
+    return [new RegExp(route), paramNames];
+}
+
+//> Front-end router. A routing component can bind
 //  to updates from the Router instead of a Record, and re-render
 //  different subviews when the routes change.
 class Router extends Evented {
 
+    constructor(routes) {
+        super();
+        //> We parse the given dictionary of routes into three things:
+        //  the name of the route, the route regular expression, and
+        //  the list of params in that route.
+        this.routes = Object.entries(routes)
+            .map(([name, route]) => [name, ...routeStringToRegExp(route)]);
+        //> Last matched route's information is cached here
+        this.lastMatch = ['', null];
+        //> Whenever the browser pops the history state (i.e. when the user
+        //  goes back with the back button or forward with the forward button),
+        //  we need to route again.
+        window.addEventListener('popstate', () => this.route(location.pathname));
+        //> Route the current URL, if it's already a deep link to a path.
+        this.route(location.pathname);
+    }
+
+    //> The "summary" of this Evented (components can bindto this object)
+    //  is the information about the last route.
     summarize() {
-        // TODO
+        return this.lastMatch;
+    }
+
+    //> Click events from links can call `this.go()` with the destination URL
+    //  to trigger going to a new route without reloading the page.
+    go(destination) {
+        history.pushState(null, document.title, destination);
+        this.route(destination);
+    }
+
+    //> Main procedure to reconcile which of the defined route the current
+    //  location path matches, and dispatch the right event.
+    route(path) {
+        //> Match destination against the route regular expressions
+        for (const [name, routeRe, paramNames] of this.routes) {
+            const match = routeRe.exec(path);
+            if (match !== null) {
+                const result = {};
+                const paramValues = match.slice(1);
+                //> Given the matched values and parameter names,
+                //  build a dictionary of params that components can use
+                //  to re-render based on the route.
+                paramNames.forEach((name, i) => result[name] = paramValues[i]);
+                this.lastMatch = [name, result];
+                break;
+            }
+        }
+        this.emitEvent();
     }
 
 }
@@ -818,7 +882,7 @@ const exposedNames = {
     Record,
     Store,
     StoreOf,
-    // Router,
+    Router,
 }
 //> If there is a global `window` object, bind API names to it.
 if (typeof window === 'object') {

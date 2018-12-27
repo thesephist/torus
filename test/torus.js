@@ -532,43 +532,45 @@ describe('Component', () => {
 
     describe('Event bindings to #record', () => {
 
-        it('should call event handler defined with #listen on source event', () => {
+        it('should call event handler defined with #bind on source event', () => {
             let handlerCalled = false;
 
             const c = new Component();
             const r = new Record();
-            c.listen(r, () => handlerCalled = true);
+            c.bind(r, () => handlerCalled = true);
 
             r.update({key: 'value'});
             handlerCalled.should.be.true;
         });
 
-        it('should no longer call the event handler after #unlisten()', () => {
+        it('should no longer call the event handler after #unbind()', () => {
             let handlerCallCount = 0;
 
             const c = new Component();
             const r = new Record();
-            c.listen(r, () => handlerCallCount++);
+            c.bind(r, () => handlerCallCount++);
 
             r.update({key: 'value'});
-            handlerCallCount.should.equal(1);
-            c.unlisten();
+            handlerCallCount.should.be.greaterThan(0);
+            c.unbind();
+            const lastHandlerCallCallCount = handlerCallCount;
             r.update({key: 'value'});
-            handlerCallCount.should.equal(1);
+            handlerCallCount.should.equal(lastHandlerCallCallCount);
         });
 
-        it('should remove the previous lister when a new source is set', () => {
+        it('should remove the previous event source when a new source is set', () => {
             let handlerCallCount = 0;
 
             const c = new Component();
             const r = new Record();
-            c.listen(r, () => handlerCallCount++);
+            c.bind(r, () => handlerCallCount++);
 
             r.update({key: 'value'});
-            handlerCallCount.should.equal(1);
-            c.listen(new Record(), () => {});
+            handlerCallCount.should.be.greaterThan(0);
+            c.bind(new Record(), () => {});
+            const lastHandlerCallCallCount = handlerCallCount;
             r.update({key: 'value'});
-            handlerCallCount.should.equal(1);
+            handlerCallCount.should.equal(lastHandlerCallCallCount);
         });
 
     });
@@ -600,18 +602,18 @@ describe('Component', () => {
 
     describe('#remove', () => {
 
-        it('should remove all existing event listeners', () => {
-            let unlistened = false;
+        it('should remove all bound event sources', () => {
+            let unbound = false;
 
             class Foo extends Component {
-                unlisten() {
-                    unlistened = true;
+                unbind() {
+                    unbound = true;
                 }
             }
             const f = new Foo();
-            unlistened.should.be.false;
+            unbound.should.be.false;
             f.remove();
-            unlistened.should.be.true;
+            unbound.should.be.true;
         });
 
     });
@@ -761,7 +763,7 @@ describe('List', () => {
 
     class ItemComponent extends Component {
         init(record) {
-            this.listen(record, () => this.render);
+            this.bind(record, () => this.render);
         }
         compose(data) {
             return {

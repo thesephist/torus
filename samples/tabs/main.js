@@ -49,9 +49,11 @@ class App extends StyledComponent {
                     break;
                 default:
                     //> If no routes match, let's make tab 0 active
-                    router.go('/tabs/0');
+                    this.setActiveTab(0);
                     break;
             }
+            //> This is also the right place to set the document title based on the route.
+            document.title = `Tab ${params.tabNumber || 0} | Torus Tabbed UI`;
         });
     }
 

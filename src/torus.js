@@ -829,12 +829,13 @@ class Router extends Evented {
         //> Whenever the browser pops the history state (i.e. when the user
         //  goes back with the back button or forward with the forward button),
         //  we need to route again.
-        window.addEventListener('popstate', () => this.route(location.pathname));
+        this._cb = () => this.route(location.pathname);
+        window.addEventListener('popstate', this._cb);
         //> Route the current URL, if it's already a deep link to a path.
-        this.route(location.pathname);
+        this._cb();
     }
 
-    //> The "summary" of this Evented (components can bindto this object)
+    //> The "summary" of this Evented (components can bind to this object)
     //  is the information about the last route.
     summarize() {
         return this.lastMatch;
@@ -848,7 +849,8 @@ class Router extends Evented {
     }
 
     //> Main procedure to reconcile which of the defined route the current
-    //  location path matches, and dispatch the right event.
+    //  location path matches, and dispatch the right event. Routes are checked
+    //  in order of declaration.
     route(path) {
         //> Match destination against the route regular expressions
         for (const [name, routeRe, paramNames] of this.routes) {
@@ -865,6 +867,12 @@ class Router extends Evented {
             }
         }
         this.emitEvent();
+    }
+
+    //> When we don't want the router to work anymore / stop listening / be gc'd,
+    //  we can call `#remove()` to do just that.
+    remove() {
+        window.removeEventListener('popstate', this._cb);
     }
 
 }

@@ -1160,3 +1160,156 @@ describe('StoreOf', () => {
     });
 
 });
+
+describe('Router', () => {
+
+    it('should fire a new event with the matching route when #go() is called', () => {
+        let routeName = null;
+        let routeParams = null;
+        const router = new Router({
+            'tabs': '/tabs/:tabNumber',
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, ([name, params]) => {
+                    switch (name) {
+                        case 'tabs':
+                            routeName = name;
+                            routeParams = params;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            }
+        }
+        const v = new RouterView(router);
+        router.go('/tabs/3');
+        expect(routeName).to.equal('tabs');
+        expect(routeParams).to.deep.equal({tabNumber: '3'});
+        router.remove();
+    });
+
+    it('should correctly parse multi-parameter routes', () => {
+        let routeParams = null;
+        const router = new Router({
+            'page': '/page/:pageNumber/item/:itemNumber/:itemID',
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, ([name, params]) => {
+                    switch (name) {
+                        case 'page':
+                            routeParams = params;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            }
+        }
+        const v = new RouterView(router);
+        router.go('/page/13/item/42/abc-123');
+        expect(routeParams).to.deep.equal({
+            pageNumber: '13',
+            itemNumber: '42',
+            itemID: 'abc-123',
+        });
+        router.remove();
+    });
+
+    it('should emit an event when the user goes back', () => {
+        let eventEmitted = false;
+        const router = new Router({
+            'item': '/page/:pageNumber/item/:itemNumber/:itemID',
+            'page': '/page/:pageNumber', // shouldn't do this in real apps
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, () => eventEmitted = true);
+            }
+        }
+        const v = new RouterView(router);
+        eventEmitted = false;
+        window.dispatchEvent(new Event('popstate'));
+        expect(eventEmitted).to.be.true;
+        router.remove();
+    });
+
+    it('should check the routes in order in which they were defined', () => {
+        let routeName = null;
+        const router = new Router({
+            'page': '/page/:pageNumber', // shouldn't do this in real apps
+            'item': '/page/:pageNumber/item/:itemNumber/:itemID',
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, ([name, _params]) => routeName = name);
+            }
+        }
+        const v = new RouterView(router);
+        router.go('/page/13/item/42/abc-123');
+        expect(routeName).to.equal('page');
+        router.remove();
+        history.back();
+    });
+
+    it('should emit an event with the current location when first bound', () => {
+        history.pushState(null, document.title, '/page/13/item/42/abc-123');
+        let routeParams = null;
+        const router = new Router({
+            'item': '/page/:pageNumber/item/:itemNumber/:itemID',
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, ([name, params]) => routeParams = params);
+            }
+        }
+        const v = new RouterView(router);
+        expect(routeParams).to.deep.equal({
+            pageNumber: '13',
+            itemNumber: '42',
+            itemID: 'abc-123',
+        });
+        router.remove();
+    });
+
+    it('should have the summary match the last route details', () => {
+        const router = new Router({
+            'page': '/page/:pageNumber/item/:itemNumber/:itemID',
+            'default': '/',
+        });
+        router.go('/page/13/item/42/abc-123');
+        router.summarize().should.deep.equal(['page', {
+            pageNumber: '13',
+            itemNumber: '42',
+            itemID: 'abc-123',
+        }]);
+        router.remove();
+    });
+
+    it('should stop firing events after it\'s removed', () => {
+        let eventEmitted = false;
+        const router = new Router({
+            'item': '/page/:pageNumber/item/:itemNumber/:itemID',
+            'page': '/page/:pageNumber', // shouldn't do this in real apps
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, () => eventEmitted = true);
+            }
+        }
+        const v = new RouterView(router);
+        router.remove();
+        eventEmitted = false;
+        window.dispatchEvent(new Event('popstate'));
+        expect(eventEmitted).to.be.false;
+    });
+
+});

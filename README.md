@@ -20,7 +20,7 @@ Combined with the small size of Torus, this makes it reasonable to ship torus wi
 
 ## Influences
 
-Torus's API is a mixture of declarative interfaces for defining user interfaces and views, and imperative patterns for state management, which I personally find is the best balance of the two styles when building large applications.
+Torus's API is a mixture of declarative interfaces for defining user interfaces and views, and imperative patterns for state management, which I personally find is the best balance of the two styles when building large applications. As a general practice, components should try to remain declarative and idempotent, and interact with data models / state via public, stable imperative APIs exposed by data models.
 
 Torus's design is inspired by React's component-driven architecture, and borrows common concepts from the React ecosystem, like the idea of diffing in virtual DOM before rendering, composition with higher order components, and mixing CSS and markup into JavaScript to separate concerns for each component into a single class. But Torus builds on those ideas by providing a more minimal, less opinionated lower-level APIs, and opting for a stateful data model rather than a view/controller layer that strives to be purely functional.
 
@@ -489,7 +489,75 @@ class CityStore extends StoreOf(City) {
 
 ## Client-side routing: Components bound to `Router`
 
->// TODO: the Router API is still being built
+Torus comes with an extensible router class that integrates well with the component system. Components can bind to route events just like they can bind to data models, so we can bind our top-level component in the app to listen to updates from the router, and re-render the app based on the route.
+
+```javascript
+class ShoppingApp extends Component {
+
+    init(router) {
+        // Router events are dispatched with two arguments in an array:
+        //  the name of the route defined in the router, and the route
+        //  parameters in a dictionary.
+        this.bind(router, ([name, params]) => {
+            switch (name) {
+                case 'page':
+                    this.renderTabPage(params.tabName, params.pagNumber);
+                case 'tab':
+                    this.renderTab(params.tabName);
+                    break;
+                default:
+                    this.renderHomePage();
+                    break;
+            }
+        });
+    }
+
+}
+
+const shoppingAppRouter = new Router({
+    page: '/tab/:tabName/page/:pageNumber',
+    tab: '/tab/:tabName',
+    default: '/',
+});
+const app = new ShoppingApp(router);
+```
+
+Routes that are given to the router are checked in the order of definition. So in the above example, `'/tab/groceries/page/3'` would match the first route, `'page'`, rather than the others, which also match, but are defined later.
+
+Once we've defined our router, we can call `Router#go(destination)` to navigate to a different route within the app without reloading the page.
+
+```javascript
+const TabButton = (tabName) => {
+    return jdom`<button onclick="${() => router.go('/tab/' + tabName)}">
+        Go to tab ${tabName}
+    </button>`;
+}
+```
+
+If you prefer `react-router`'s style of having a reusable component that acts as the link element for routing, we can create that in Torus.
+
+```javascript
+import { shoppingAppRouter } from './app.js';
+
+class Link extends Component {
+
+    init(destination, children) {
+        this.destination = destination;
+    }
+
+    compose() {
+        return jdom`<a
+            href="${this.destination}"
+            onclick="${evt => {
+                evt.preventDefault();
+                shoppingAppRouter.go(this.destination);
+            }}">
+            ${children}
+        </a>`;
+    }
+
+}
+```
 
 ## Contributing
 
@@ -517,9 +585,7 @@ Torus has a unique system for generating documentation from code comments that b
 ~$ yarn docs
 ```
 
-Docs files will be generated at `./docs/` and are viewable on a web browser.
-
-![Torus annotated source](doc/screenshot.png)
+Docs files will be generated at `./docs/` and are viewable on a web browser. Check out [the Github page for this project](https://thesephist.github.io/torus/) for an example of what this script generates.
 
 ### Running tests
 

@@ -281,6 +281,12 @@ describe('jdom template tag', () => {
         );
 
         compare(
+            'HTML entities in children',
+            jdom`<span>&#60;test&#62;</span>`,
+            {tag: 'span', children: ['<test>']}
+        );
+
+        compare(
             'heterogeneous children',
             jdom`<div>
             First

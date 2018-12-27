@@ -14,6 +14,10 @@ const clipStringEnd = (base, substr) => {
     return base.substr(0, base.length - substr.length);
 }
 
+const decodeEntity = entity => {
+    return String.fromCodePoint(+((/&#(\d+);/).exec(entity)[1]));
+}
+
 //> Interpolate between lists of string and non-string parts into a single string.
 //  this is particularly useful when objects and strings are mixed in an attribute value.
 const interpolate = (tplParts, dynamicParts) => {
@@ -426,7 +430,12 @@ const parseJSX = reader => {
             }
         //> Because string tokens are the most common, we check for it early
         } else if (typeof next === 'string') {
-            handleString(next);
+            //> If an HTML entity is encoded (e.g. &#60; is '<'), decode it and handle it.
+            if (next === '&') {
+                handleString(decodeEntity(next + reader.readUntil(';')[0][0]));
+            } else {
+                handleString(next);
+            }
         //> Allow the template token to be an array of literal elements.
         //  this makes rendering lists of nodes really easy.
         } else if (next instanceof Array && isNode(next[0])) {

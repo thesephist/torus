@@ -1,6 +1,9 @@
 //> Hacker News reader in Torus!
 
 const API_ROOT = 'https://hacker-news.firebaseio.com/v0';
+const NOW = new Date();
+
+const BRAND_COLOR = '#1fada2';
 
 const hnFetch = async apiPath => {
     const result = await fetch(API_ROOT + apiPath + '.json');
@@ -13,18 +16,34 @@ const formatTime = date => {
 }
 
 const formatDate = unix => {
-    let result = 'unknown time';
-    if (unix) {
-        const date = new Date(unix * 1000);
-        result = date.toLocaleDateString() + ' ' + formatTime(date);
+    if (!unix) return 'unknown';
+
+    const date = new Date(unix * 1000);
+    const delta = (NOW - date) / 1000;
+    if (delta < 60) {
+        return '&#60;1 min';
+    } else if (delta < 3600) {
+        return `${~~(delta / 60)} min`;
+    } else if (delta < 86400) {
+        return `${~~(delta / 3600)} hr`;
+    } else if (delta < 86400 * 2) {
+        return 'yesterday';
+    } else if (delta < 86400 * 3) {
+        return '2 days ago';
+    } else {
+        return date.toLocaleDateString() + ' ' + formatTime(date);
     }
-    return result;
 }
 
 const decodeHTML = html => {
     const textarea = document.createElement("textarea");
     textarea.innerHTML = html;
-    return textarea.value;
+    return textarea.value.replace(/&/g, '&#38;');
+}
+
+const userLink = username => {
+    const href = `https://news.ycombinator.com/user?id=${username}`;
+    return jdom`<a href="${href}" target="_blank" noreferrer>${username}</a>`;
 }
 
 //> ## Records and Stores
@@ -69,17 +88,34 @@ class StoryStore extends StoreOf(Story) {
         super();
         this.slug = slug;
         this.limit = limit;
+        this.start = 0;
     }
 
     fetch() {
         hnFetch('/' + this.slug).then(stories => {
-            const storyRecords = stories.slice(0, this.limit)
-                .map(id => new Story(id));
+            const storyRecords = stories.slice(
+                this.start * this.limit,
+                (this.start + 1) * this.limit
+            ).map((id, idx) => {
+                return new Story(id, {
+                    order: this.start * this.limit + 1 + idx,
+                })
+            });
             this.reset(storyRecords);
             for (const story of storyRecords) {
                 story.fetch();
             }
         });
+    }
+
+    nextPage() {
+        this.start ++;
+        this.fetch();
+    }
+
+    previousPage() {
+        this.start = Math.max(0, this.start - 1);
+        this.fetch();
     }
 
 }
@@ -91,6 +127,7 @@ class CommentStore extends StoreOf(Comment) {
     constructor(comment_ids = [], limit = 25) {
         super();
         this.resetWith(comment_ids);
+        this.hiddenCount = 0;
         this.limit = limit;
     }
 
@@ -101,6 +138,7 @@ class CommentStore extends StoreOf(Comment) {
     }
 
     resetWith(comment_ids) {
+        this.hiddenCount = Math.max(comment_ids.length - this.limit, 0);
         this.reset(comment_ids.slice(0, this.limit).map(id => new Comment(id)));
     }
 
@@ -110,7 +148,8 @@ class CommentStore extends StoreOf(Comment) {
 
 class StoryListing extends StyledComponent {
 
-    init(story) {
+    init(story, expanded = false) {
+        this.expanded = expanded;
         this.bind(story, data => this.render(data));
         this.setActiveStory = this.setActiveStory.bind(this);
     }
@@ -122,12 +161,14 @@ class StoryListing extends StyledComponent {
             'align-items': 'center',
             'justify-content': 'flex-start',
             'margin-bottom': '24px',
+            'width': '100%',
+            'cursor': 'pointer',
             '.mono': {
                 'font-family': '"Monaco", "Menlo", monospace',
             },
             '.meta': {
                 'font-size': '.9em',
-                'opacity': .6,
+                'opacity': .7,
                 'span': {
                     'display': 'inline-block',
                     'margin': '0 4px',
@@ -139,19 +180,47 @@ class StoryListing extends StyledComponent {
                 'font-size': '.8em',
             },
             '.stats': {
-                'height': '100%',
-                'width': '52px',
+                'height': '64px',
+                'width': '64px',
                 'flex-shrink': 0,
                 'text-align': 'center',
                 'display': 'flex',
                 'flex-direction': 'column',
                 'align-items': 'center',
                 'justify-content': 'center',
+                'overflow': 'hidden',
+                'border-radius': '6px',
+                'background': '#eee',
+                'transition': 'background .2s, transform .2s',
+                'position': 'relative',
+                '&::after': {
+                    'content': '""',
+                    'display': 'block',
+                    'height': '1px',
+                    'background': '#555',
+                    'width': '52px',
+                    'position': 'absolute',
+                    'top': '31.5px',
+                    'left': '6px',
+                },
+            },
+            '&:hover .stats': {
+                'background': BRAND_COLOR,
+                'color': '#fff',
+                'transform': 'translate(0, -4px)',
+                '&::after': {
+                    'background': '#fff',
+                },
             },
             '.score, .comments': {
-                'background': '#eee',
-                'height': '50%',
+                'height': '32px',
                 'width': '100%',
+                'line-height': '32px',
+            },
+            '.synopsis': {
+                'margin-left': '12px',
+                'flex-shrink': 1,
+                'overflow': 'hidden',
             },
         }
     }
@@ -161,24 +230,26 @@ class StoryListing extends StyledComponent {
     }
 
     compose(attrs) {
-        return jdom`<li data-id=${attrs.id}>
-            <div class="stats">
+        const text = this.expanded ? decodeHTML(attrs.text) : ':: text post ::';
+
+        return jdom`<li data-id=${attrs.id} onclick="${this.setActiveStory}">
+            <div class="stats mono" title="${attrs.score} upvotes, ${attrs.descendants} comments">
                 <div class="score">${attrs.score}</div>
-                <div class="comments" onclick="${this.setActiveStory}">
+                <div class="comments">
                     ${attrs.descendants}
                 </div>
             </div>
             <div class="synopsis">
-                <div class="title">${attrs.title}</div>
-                <div class="url mono">
+                <div class="title">${attrs.order ? attrs.order + '.' : ''} ${attrs.title}</div>
+                <div class="url ${attrs.url || this.expanded ? 'mono' : ''}">
                     ${attrs.url ? (
                         jdom`<a href="${attrs.url}" target="_blank" noreferrer>${attrs.url}</a>`
-                    ) : (':: text thread')}
+                    ) : text}
                 </div>
                 <div class="meta">
-                    <span class="time mono">${formatDate(attrs.time)}</span>
+                    <span class="time">${formatDate(attrs.time)}</span>
                     |
-                    <span class="author">${attrs.by}</span>
+                    <span class="author">${userLink(attrs.by)}</span>
                 </div>
             </div>
         </li>`;
@@ -202,11 +273,33 @@ class CommentListing extends StyledComponent {
 
     styles() {
         return {
+            'background': '#eee',
+            'margin-bottom': '12px',
+            'padding': '12px',
+            'border-radius': '6px',
+            'cursor': 'pointer',
+            'overflow': 'hidden',
             '.byline': {
-                'color': '#777',
+                'background': '#aaa',
+                'padding': '1px 8px',
+                'border-radius': '6px',
+                'color': '#fff',
+                'display': 'inline-block',
+                'margin-bottom': '8px',
+                'font-size': '.9em',
+                'a': {
+                    'color': '#fff',
+                },
             },
             '.children': {
                 'margin-top': '12px',
+                'margin-left': '12px',
+            },
+            '@media (max-width: 600px)': {
+                '.text': {
+                    'font-size': '.9em',
+                    'line-height': '1.4em',
+                },
             },
         }
     }
@@ -218,9 +311,14 @@ class CommentListing extends StyledComponent {
     }
 
     compose(attrs) {
-        return jdom`<div class="comment">
-            <div class="byline">${formatDate(attrs.time)} | ${attrs.by} | ${attrs.kids ? attrs.kids.length : 0} children</div>
-            <div class="text" onclick="${this.toggleFolded}">${decodeHTML(attrs.text)}</div>
+        return jdom`<div class="comment" onclick="${this.toggleFolded}">
+            <div class="byline">
+                ${formatDate(attrs.time)}
+                |
+                ${userLink(attrs.by)}
+                |
+                ${attrs.kids ? attrs.kids.length : 0} replies</div>
+            <div class="text">${decodeHTML(attrs.text)}</div>
             ${!this.folded ? (jdom`<div class="children">
                 ${this.kidsList.node}
             </div>`) : ''}
@@ -236,6 +334,19 @@ class CommentListing extends StyledComponent {
 
 class CommentList extends Styled(ListOf(CommentListing)) {
 
+    styles() {
+        return {
+            'padding-left': 0,
+        }
+    }
+
+    compose() {
+        return jdom`<ul>
+            ${this.nodes}
+            ...${this.record.hiddenCount || 'no'} more comments truncated
+        </ul>`;
+    }
+
 }
 
 class StoryList extends Styled(ListOf(StoryListing)) {
@@ -250,8 +361,8 @@ class StoryList extends Styled(ListOf(StoryListing)) {
 
 class StoryPage extends StyledComponent {
 
-    init(story) {
-        this.listing = new StoryListing(story);
+    init(story, expanded = false) {
+        this.listing = new StoryListing(story, expanded);
         this.comments = new CommentStore();
         this.commentList = new CommentList(this.comments);
         this.bind(story, data => {
@@ -265,6 +376,9 @@ class StoryPage extends StyledComponent {
         return jdom`<section>
             ${this.listing.node}
             ${this.commentList.node}
+            <a href="https://news.ycombinator.com/item?id=${this.record.id}" target="_blank" noreferrer>
+                See on news.ycombinator.com
+            </a>
         </section>`;
     }
 
@@ -284,6 +398,9 @@ class App extends StyledComponent {
         this.stories = new StoryStore('topstories', 20);
         this.list = new StoryList(this.stories);
         this.stories.fetch();
+
+        this.nextPage = this.nextPage.bind(this);
+        this.previousPage = this.previousPage.bind(this);
     }
 
     styles() {
@@ -291,7 +408,31 @@ class App extends StyledComponent {
             'font-family': '"San Francisco", "Helvetica", "Roboto", sans-serif',
             'color': '#333',
             'box-sizing': 'border-box',
-            'padding': '24px 48px',
+            'padding': '14px',
+            'padding-bottom': '24px',
+            'line-height': '1.5em',
+            'max-width': '800px',
+            'margin': '0 auto',
+            'h1': {
+                'cursor': 'pointer',
+            },
+            'a': {
+                'color': BRAND_COLOR,
+            },
+            'button': {
+                'color': '#fff',
+                'background': BRAND_COLOR,
+                'padding': '6px 10px',
+                'border': 0,
+                'font-size': '1em',
+                'margin-right': '12px',
+                'border-radius': '6px',
+                'cursor': 'pointer',
+                'transition': 'opacity .2s',
+                '&:hover': {
+                    'opacity': '.7',
+                },
+            },
         }
     }
 
@@ -299,16 +440,37 @@ class App extends StyledComponent {
         if (this.activeStory !== story) {
             this.activeStory = story;
             if (story) {
-                this.activePage = new StoryPage(story);
+                this.activePage = new StoryPage(story, true);
+            } else {
+                this.activePage = null;
             }
+            document.scrollingElement.scrollTop = 0;
             this.render();
         }
     }
 
+    nextPage() {
+        this.stories.nextPage();
+    }
+
+    previousPage() {
+        this.stories.previousPage();
+    }
+
     compose() {
         return jdom`<main>
-            <h1 onclick="${() => this.setActiveStory(null)}">Hacker News</h1>
-            ${this.activeStory ? this.activePage.node : this.list.node}
+            <h1 onclick="${() => this.setActiveStory(null)}">
+                ${this.activePage ? '👈' : '🏠'} Hacker News
+            </h1>
+            ${this.activeStory ? (
+                this.activePage.node
+            ) : (
+                jdom`<div>
+                    ${this.list.node}
+                    <button onclick="${this.previousPage}">👈 previous</button>
+                    <button onclick="${this.nextPage}">next 👉</button>
+                </div>`
+            )}
         </main>`;
     }
 

@@ -15,9 +15,10 @@ const ANNOTATION_CONTINUE = '//';
 const FILES_TO_ANNOTATE = {
     'torus.js': './src/torus.js',
     'jdom.js': './src/jdom.js',
-    'Search demo': './samples/searchbar/main.js',
+    'Hacker News Reader': './samples/hn-reader/main.js',
     'Todo demo': './samples/todo/main.js',
     'Tabbed UI demo': './samples/tabs/main.js',
+    'Search UI demo': './samples/searchbar/main.js',
 }
 
 const encodeHTML = code => {

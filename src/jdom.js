@@ -394,9 +394,9 @@ const parseJSX = reader => {
     //  and returns if it encounters a closing tag. This cooperation between the function
     //  and the parent function that called it recursively makes this parser work.
     for (let next = reader.next(); next !== READER_END; next = reader.next()) {
-        //> if we see an opening tag...
+        //> if we see the start of a tag ...
         if (next === '<') {
-            //> ... first, commit any previously read element ...
+            //> ... first commit any previous reads, since we're starting a new node ...
             commit();
             //> ... it's an opening tag if the next character isn't `'/'`.
             if (reader.next() !== '/') {
@@ -415,14 +415,13 @@ const parseJSX = reader => {
                 ) {
                     currentElement.children = parseJSX(reader);
                 }
-            //> ... it's a closing tag otherwise.
+            //> ... it's a closing tag otherwise ...
             } else {
-                //> So finish out reading the closing tag, and commit the whole current element.
+                //> ... so finish out reading the closing tag.
                 //  A top-level closing tag means it's actually closing the parent tag, so
                 //  we need to stop parsing and hand the parsing flow back to the parent
                 //  call in this recursive function.
                 reader.readUntil('>');
-                commit();
                 break;
             }
         //> Because string tokens are the most common, we check for it early

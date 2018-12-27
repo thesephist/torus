@@ -1,5 +1,9 @@
 # Torus
 
+![npm torus-dom](https://badge.fury.io/js/torus-dom.svg)
+![bundle size](https://img.shields.io/bundlephobia/minzip/torus-dom.svg)
+![TypeScript types](https://img.shields.io/npm/types/torus-dom.svg)
+
 Minimal JS Model-View UI framework focused on being tiny, efficient, and free of dependencies.
 
 Torus also has an annotated, easy to read version of the entire (pretty small) codebase, at its [Github Pages](https://thesephist.github.io/torus/). Check it out if you want to learn more about how the frameworks, and how virtual DOM and templating works!
@@ -598,8 +602,6 @@ yarn build
 ```
 
 This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`.
-
-Unfortunately, there's a quick right now where we can only build the production version of the full module. `index.js`, after two builds. This is a low-priority fix for me but is on my list.
 
 ### Generating documentation from comments
 

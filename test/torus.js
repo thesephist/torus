@@ -1015,6 +1015,20 @@ describe('Store', () => {
 
     });
 
+    describe('#records', () => {
+
+        it('should point to an unordered set of records', () => {
+            const s = new MyStore([
+                new MyRecord({label: 1}),
+                new MyRecord({label: 2}),
+                new MyRecord({label: 3}),
+                new MyRecord({label: 4}),
+            ]);
+            s.records.should.be.an.instanceof(Set);
+        });
+
+    });
+
     describe('#constructor', () => {
 
         it('creates #records, a Set of the given records', () => {
@@ -1091,6 +1105,51 @@ describe('Store', () => {
             s.addHandler(() => eventEmitted = true);
             s.remove(r);
 
+            eventEmitted.should.be.true;
+        });
+
+    });
+
+    describe('#reset', () => {
+
+        it('should reset the contents of the store with the new given ones', () => {
+            const s = new MyStore([
+                new MyRecord({label: 1}),
+                new MyRecord({label: 2}),
+                new MyRecord({label: 3}),
+                new MyRecord({label: 4}),
+            ]);
+            s.records.size.should.equal(4);
+            s.reset([
+                new MyRecord({label: 'a'}),
+                new MyRecord({label: 'b'}),
+            ]);
+            s.records.size.should.equal(2);
+        });
+
+        it('should accept no arguments as an acceptable input, and empty the store', () => {
+            const s = new MyStore([
+                new MyRecord({label: 1}),
+                new MyRecord({label: 2}),
+                new MyRecord({label: 3}),
+                new MyRecord({label: 4}),
+            ]);
+            s.records.size.should.equal(4);
+            s.reset();
+            s.records.size.should.equal(0);
+        });
+
+        it('should fire an event', () => {
+            let eventEmitted = false;
+            const s = new MyStore([
+                new MyRecord({label: 1}),
+                new MyRecord({label: 2}),
+                new MyRecord({label: 3}),
+                new MyRecord({label: 4}),
+            ]);
+            eventEmitted = false;
+            s.addHandler(() => eventEmitted = true);
+            s.reset();
             eventEmitted.should.be.true;
         });
 

@@ -157,8 +157,8 @@ const renderJDOM = (node, previous, next) => {
     //> If we're rendering an object literal, assume it's a serialized
     //  JDOM dictionary. This is the meat of the algorithm.
     } else if (typeof next === 'object') {
-        if (previous === undefined) {
-            //> If the previous JDOM doesn't exist, we're adding a completely
+        if (!isObject(previous)) {
+            //> If the previous JDOM doesn't exist or wasn't JDOM, we're adding a completely
             //  new node into the DOM. Stub an empty `previous`.
             previous = {
                 tag: null,
@@ -174,7 +174,7 @@ const renderJDOM = (node, previous, next) => {
         //  as well and just start a completely new element. This is efficient
         //  in practice, reduces the time complexity of the algorithm, and
         //  an optimization shared with React's reconciler.
-        if (previous.tag !== next.tag) {
+        if (previous.tag !== next.tag || !(node instanceof Node)) {
             if (node === undefined) {
                 // @debug
                 render_debug(`Add <${next.tag}>`);

@@ -137,8 +137,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">156</strong>        replacePreviousNode(document.createTextNode(next));</pre></div>
 <div class="line"><div class="doc"><p>If we&#39;re rendering an object literal, assume it&#39;s a serialized JDOM dictionary. This is the meat of the algorithm.</p>
 </div><pre class="source javascript"><strong class="lineNumber">159</strong>    } else if (typeof next === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">160</strong>        if (previous === undefined) {</pre></div>
-<div class="line"><div class="doc"><p>If the previous JDOM doesn&#39;t exist, we&#39;re adding a completely new node into the DOM. Stub an empty <code>previous</code>.</p>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">160</strong>        if (!isObject(previous)) {</pre></div>
+<div class="line"><div class="doc"><p>If the previous JDOM doesn&#39;t exist or wasn&#39;t JDOM, we&#39;re adding a completely new node into the DOM. Stub an empty <code>previous</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">163</strong>            previous = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong>                tag: null,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">165</strong>            };</pre></div>
@@ -150,7 +150,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">171</strong>        render_debug(`Render pass for &#60;${next.tag.toLowerCase()}&#62;:`, true);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">172</strong></pre></div>
 <div class="line"><div class="doc"><p>If the tags differ, we assume the subtrees will be different as well and just start a completely new element. This is efficient in practice, reduces the time complexity of the algorithm, and an optimization shared with React&#39;s reconciler.</p>
-</div><pre class="source javascript"><strong class="lineNumber">177</strong>        if (previous.tag !== next.tag) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">177</strong>        if (previous.tag !== next.tag || !(node instanceof Node)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">178</strong>            if (node === undefined) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">179</strong>                // @debug</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">180</strong>                render_debug(`Add &#60;${next.tag}&#62;`);</pre></div>
@@ -655,159 +655,165 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">729</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">730</strong>    constructor(records = []) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">731</strong>        super();</pre></div>
+<div class="line"><div class="doc"><p>Reset the store&#39;s contents with the given records</p>
+</div><pre class="source javascript"><strong class="lineNumber">733</strong>        this.reset(records);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">734</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">735</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">736</strong>    get recordClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">737</strong>        return Record;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">738</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">739</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">740</strong>    get comparator() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">741</strong>        return null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">742</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">743</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">744</strong>    create(id, data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">745</strong>        this.add(new this.recordClass(id, data));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">746</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">747</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">748</strong>    add(record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">749</strong>        this.records.add(record);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">750</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">751</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">752</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">753</strong>    remove(record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">754</strong>        this.records.delete(record);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">755</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">756</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">757</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">758</strong>    reset(records) {</pre></div>
 <div class="line"><div class="doc"><p>Internally, we represent the store as an unordered set. we only order by comparator when we summarize. This prevents us from having to perform sorting checks on every insert/update, and is efficient as long as we don&#39;t re-render excessively.</p>
-</div><pre class="source javascript"><strong class="lineNumber">736</strong>        this.records = new Set(records);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">737</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">738</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">739</strong>    get recordClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">740</strong>        return Record;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">741</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">742</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">743</strong>    get comparator() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">744</strong>        return null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">745</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">746</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">747</strong>    create(id, data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">748</strong>        this.add(new this.recordClass(id, data));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">749</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">750</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">751</strong>    add(record) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">752</strong>        this.records.add(record);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">753</strong>        this.emitEvent();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">754</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">755</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">756</strong>    remove(record) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">757</strong>        this.records.delete(record);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">758</strong>        this.emitEvent();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">759</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">760</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">761</strong>    summarize() {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">763</strong>        this.records = new Set(records);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">764</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">765</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">766</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">767</strong>    summarize() {</pre></div>
 <div class="line"><div class="doc"><p>The summary of a store is defined functionally. We just sort the records in our store by the comparator (but we use a list of pairs of cached comparators and records to be fast.</p>
-</div><pre class="source javascript"><strong class="lineNumber">765</strong>        return [...this.records].map(record =&#62; [</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">766</strong>            this.comparator ? this.comparator(record) : null,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">767</strong>            record,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">768</strong>        ]).sort((a, b) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">769</strong>            if (a[0] &#60; b[0]) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">770</strong>                return -1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">771</strong>            } else if (a[0] &#62; b[0]) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">772</strong>                return 1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">773</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">774</strong>                return 0;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">775</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">776</strong>        }).map(o =&#62; o[1]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">777</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">778</strong></pre></div>
-<div class="line"><div class="doc"><p>To serialize a store, we serialize each record and put them in a giant list.</p>
-</div><pre class="source javascript"><strong class="lineNumber">781</strong>    serialize() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">782</strong>        return this.summarize().map(record =&#62; record.serialize());</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">771</strong>        return [...this.records].map(record =&#62; [</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">772</strong>            this.comparator ? this.comparator(record) : null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">773</strong>            record,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">774</strong>        ]).sort((a, b) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">775</strong>            if (a[0] &#60; b[0]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">776</strong>                return -1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">777</strong>            } else if (a[0] &#62; b[0]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">778</strong>                return 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">779</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">780</strong>                return 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">781</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">782</strong>        }).map(o =&#62; o[1]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">783</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">784</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">785</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">786</strong></pre></div>
+<div class="line"><div class="doc"><p>To serialize a store, we serialize each record and put them in a giant list.</p>
+</div><pre class="source javascript"><strong class="lineNumber">787</strong>    serialize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">788</strong>        return this.summarize().map(record =&#62; record.serialize());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">789</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">790</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">791</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">792</strong></pre></div>
 <div class="line"><div class="doc"><p>Higher-order component to create a Store for a given record class.</p>
-</div><pre class="source javascript"><strong class="lineNumber">789</strong>const StoreOf = recordClass =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">790</strong>    return class extends Store {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">791</strong>        get recordClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">792</strong>            return recordClass;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">793</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">794</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">795</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">796</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">795</strong>const StoreOf = recordClass =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">796</strong>    return class extends Store {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">797</strong>        get recordClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">798</strong>            return recordClass;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">799</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">800</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">801</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong></pre></div>
 <div class="line"><div class="doc"><p>Helper function for the router. It takes a route string that contains parameters like, <code>/path/:param1/path/:param2</code> and returns a regular expression to match that route and a list of params in that route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">801</strong>const routeStringToRegExp = route =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong>    let match;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong>    const paramNames = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong>    while (match !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">805</strong>        match = (/:\w+/).exec(route);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">806</strong>        if (match) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">807</strong>            const paramName = match[0];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">808</strong>            paramNames.push(paramName.substr(1));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">809</strong>            route = route.replace(paramName, '(.*)');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">810</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>    return [new RegExp(route), paramNames];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">814</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">807</strong>const routeStringToRegExp = route =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">808</strong>    let match;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">809</strong>    const paramNames = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">810</strong>    while (match !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong>        match = (/:\w+/).exec(route);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>        if (match) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong>            const paramName = match[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">814</strong>            paramNames.push(paramName.substr(1));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">815</strong>            route = route.replace(paramName, '(.*)');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">816</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">817</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">818</strong>    return [new RegExp(route), paramNames];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">819</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong></pre></div>
 <div class="line"><div class="doc"><p>Front-end router. A routing component can bind to updates from the Router instead of a Record, and re-render different subviews when the routes change.</p>
-</div><pre class="source javascript"><strong class="lineNumber">818</strong>class Router extends Evented {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">819</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong>    constructor(routes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">821</strong>        super();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">824</strong>class Router extends Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">825</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">826</strong>    constructor(routes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">827</strong>        super();</pre></div>
 <div class="line"><div class="doc"><p>We parse the given dictionary of routes into three things: the name of the route, the route regular expression, and the list of params in that route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">825</strong>        this.routes = Object.entries(routes)</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">826</strong>            .map(([name, route]) =&#62; [name, ...routeStringToRegExp(route)]);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">831</strong>        this.routes = Object.entries(routes)</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">832</strong>            .map(([name, route]) =&#62; [name, ...routeStringToRegExp(route)]);</pre></div>
 <div class="line"><div class="doc"><p>Last matched route&#39;s information is cached here</p>
-</div><pre class="source javascript"><strong class="lineNumber">828</strong>        this.lastMatch = ['', null];</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">834</strong>        this.lastMatch = ['', null];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Whenever the browser pops the history state (i.e. when the user goes back with the back button or forward with the forward button), we need to route again.</p>
-</div><pre class="source javascript"><strong class="lineNumber">832</strong>        this._cb = () =&#62; this.route(location.pathname);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">833</strong>        window.addEventListener('popstate', this._cb);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">838</strong>        this._cb = () =&#62; this.route(location.pathname);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">839</strong>        window.addEventListener('popstate', this._cb);</pre></div>
 <div class="line"><div class="doc"><p>Route the current URL, if it&#39;s already a deep link to a path.</p>
-</div><pre class="source javascript"><strong class="lineNumber">835</strong>        this._cb();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">836</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">837</strong></pre></div>
-<div class="line"><div class="doc"><p>The &quot;summary&quot; of this Evented (components can bind to this object) is the information about the last route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">840</strong>    summarize() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">841</strong>        return this.lastMatch;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">841</strong>        this._cb();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">842</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">843</strong></pre></div>
+<div class="line"><div class="doc"><p>The &quot;summary&quot; of this Evented (components can bind to this object) is the information about the last route.</p>
+</div><pre class="source javascript"><strong class="lineNumber">846</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">847</strong>        return this.lastMatch;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">848</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">849</strong></pre></div>
 <div class="line"><div class="doc"><p>Click events from links can call <code>this.go()</code> with the destination URL to trigger going to a new route without reloading the page.</p>
-</div><pre class="source javascript"><strong class="lineNumber">846</strong>    go(destination) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">847</strong>        history.pushState(null, document.title, destination);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">848</strong>        this.route(destination);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">849</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">850</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">852</strong>    go(destination) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">853</strong>        history.pushState(null, document.title, destination);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">854</strong>        this.route(destination);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">855</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">856</strong></pre></div>
 <div class="line"><div class="doc"><p>Main procedure to reconcile which of the defined route the current location path matches, and dispatch the right event. Routes are checked in order of declaration.</p>
-</div><pre class="source javascript"><strong class="lineNumber">854</strong>    route(path) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">860</strong>    route(path) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Match destination against the route regular expressions</p>
-</div><pre class="source javascript"><strong class="lineNumber">856</strong>        for (const [name, routeRe, paramNames] of this.routes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">857</strong>            const match = routeRe.exec(path);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">858</strong>            if (match !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">859</strong>                const result = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">860</strong>                const paramValues = match.slice(1);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">862</strong>        for (const [name, routeRe, paramNames] of this.routes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">863</strong>            const match = routeRe.exec(path);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">864</strong>            if (match !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">865</strong>                const result = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">866</strong>                const paramValues = match.slice(1);</pre></div>
 <div class="line"><div class="doc"><p>Given the matched values and parameter names, build a dictionary of params that components can use to re-render based on the route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">864</strong>                paramNames.forEach((name, i) =&#62; result[name] = paramValues[i]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">865</strong>                this.lastMatch = [name, result];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">866</strong>                break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">867</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">868</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">869</strong>        this.emitEvent();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">870</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">871</strong></pre></div>
-<div class="line"><div class="doc"><p>When we don&#39;t want the router to work anymore / stop listening / be gc&#39;d, we can call <code>#remove()</code> to do just that.</p>
-</div><pre class="source javascript"><strong class="lineNumber">874</strong>    remove() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">875</strong>        window.removeEventListener('popstate', this._cb);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">870</strong>                paramNames.forEach((name, i) =&#62; result[name] = paramValues[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">871</strong>                this.lastMatch = [name, result];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">872</strong>                break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">873</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">874</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">875</strong>        this.emitEvent();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">876</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">877</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">878</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">879</strong></pre></div>
+<div class="line"><div class="doc"><p>When we don&#39;t want the router to work anymore / stop listening / be gc&#39;d, we can call <code>#remove()</code> to do just that.</p>
+</div><pre class="source javascript"><strong class="lineNumber">880</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">881</strong>        window.removeEventListener('popstate', this._cb);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">882</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">883</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">884</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">885</strong></pre></div>
 <div class="line"><div class="doc"><p>Torus exposes these public APIs</p>
-</div><pre class="source javascript"><strong class="lineNumber">881</strong>const exposedNames = {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">887</strong>const exposedNames = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p><code>renderJDOM</code> isn&#39;t designed to be a public API and the API might change, but it&#39;s exposed to make unit testing easier.</p>
-</div><pre class="source javascript"><strong class="lineNumber">884</strong>    renderJDOM,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">885</strong>    Component,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">886</strong>    Styled,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">887</strong>    StyledComponent,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">888</strong>    List,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">889</strong>    ListOf,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">890</strong>    Record,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">891</strong>    Store,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">892</strong>    StoreOf,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">893</strong>    Router,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">894</strong>}</pre></div>
-<div class="line"><div class="doc"><p>If there is a global <code>window</code> object, bind API names to it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">896</strong>if (typeof window === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">897</strong>    for (const name in exposedNames) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">898</strong>        window[name] = exposedNames[name];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">899</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">890</strong>    renderJDOM,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">891</strong>    Component,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">892</strong>    Styled,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">893</strong>    StyledComponent,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">894</strong>    List,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">895</strong>    ListOf,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">896</strong>    Record,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">897</strong>    Store,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">898</strong>    StoreOf,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">899</strong>    Router,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">900</strong>}</pre></div>
+<div class="line"><div class="doc"><p>If there is a global <code>window</code> object, bind API names to it.</p>
+</div><pre class="source javascript"><strong class="lineNumber">902</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">903</strong>    for (const name in exposedNames) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">904</strong>        window[name] = exposedNames[name];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">905</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">906</strong>}</pre></div>
 <div class="line"><div class="doc"><p>Export public APIs CommonJS-style</p>
-</div><pre class="source javascript"><strong class="lineNumber">902</strong>if (typeof module === 'object' &#38;&#38; typeof module.exports === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">903</strong>    module.exports = exposedNames;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">904</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">905</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">908</strong>if (typeof module === 'object' &#38;&#38; typeof module.exports === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">909</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">910</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">911</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

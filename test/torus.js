@@ -851,6 +851,24 @@ describe('List', () => {
             l.node.tagName.toLowerCase().should.equal('ul');
         });
 
+        it('should remove all items when the list is reset', () => {
+            class MyList extends List {
+                get itemClass() {
+                    return ItemComponent;
+                }
+            }
+            const s = new Store([
+                new Record({label: 'first'}),
+                new Record({label: 'second'}),
+                new Record({label: 'third'}),
+            ]);
+            const l = new MyList(s);
+
+            l.node.textContent.should.equal('firstsecondthird');
+            s.reset();
+            l.node.textContent.should.equal('');
+        });
+
     });
 
     describe('Events', () => {

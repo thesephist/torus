@@ -90,7 +90,11 @@ const tmpNode = () => document.createComment('');
 const placeholders = new Map();
 function replacePlaceholders() {
     for (const [tmp, newNode] of placeholders.entries()) {
-        tmp.parentNode.replaceChild(newNode, tmp);
+        if (newNode === null) {
+            tmp.parentNode.removeChild(tmp);
+        } else {
+            tmp.parentNode.replaceChild(newNode, tmp);
+        }
     }
     placeholders.clear();
 }
@@ -317,8 +321,14 @@ const renderJDOM = (node, previous, next) => {
                 while (i < prevChildren.length) {
                     // @debug
                     render_debug(`Remove child <${nodeChildren[i].tagName}>`);
-                    node.removeChild(nodeChildren[i]);
-                    i ++;
+                    //> If we need to remove a child element, removing
+                    //  it from the DOM immediately might lead to race conditions.
+                    //  instead, we add a placeholder and remove the placeholder
+                    //  at the end.
+                    const tmp = tmpNode();
+                    node.replaceChild(tmp, nodeChildren[i]);
+                    placeholders.set(tmp, null);
+                    i++;
                 }
             }
         }

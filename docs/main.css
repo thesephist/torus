@@ -14,6 +14,7 @@ main {
 }
 h1 {
     font-weight: normal;
+    line-height: 1.3em;
 }
 .line {
     display: flex;
@@ -46,7 +47,7 @@ h1 {
 }
 pre {
     margin: 0;
-    margin-left: 12px;
+    margin-left: 8px;
     line-height: 1.5em;
     font-size: 14px;
 }
@@ -61,21 +62,27 @@ pre,
 code {
     font-family: 'Menlo', 'Monaco', monospace;
 }
-.source strong {
+.source .lineNumber {
     font-weight: normal;
     opacity: .2;
-    margin-right: 24px;
+    margin-right: 18px;
+    width: 36px;
+    text-align: right;
+    display: inline-block;
 }
 .hljs {
     padding: 0 !important;
     background: transparent !important;
 }
-.back {
-    opacity: .7;
+.fade {
+    opacity: .35;
+}
+a {
+    opacity: .8;
     color: #777;
     display: inline-block;
     margin-bottom: 18px;
 }
-.back:hover {
-    opacity: .9;
+a:hover {
+    opacity: 1;
 }

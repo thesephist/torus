@@ -2,14 +2,29 @@
 //  in torus source files.
 
 const fs = require('fs');
+const path = require('path');
 const marked = require('marked');
 const mkdirp = require('mkdirp');
 
 const index = fs.readFileSync('./doc/index.html', 'utf8');
 const css = fs.readFileSync('./doc/main.css', 'utf8');
 const template = fs.readFileSync('./doc/template.html', 'utf8');
-const torusSource = fs.readFileSync('./src/torus.js', 'utf8');
-const jdomSource = fs.readFileSync('./src/jdom.js', 'utf8');
+
+const ANNOTATION_START = '//>';
+const ANNOTATION_CONTINUE = '//';
+const FILES_TO_ANNOTATE = {
+    'torus.js': './src/torus.js',
+    'jdom.js': './src/jdom.js',
+    'Search demo': './samples/searchbar/main.js',
+    'Todo demo': './samples/todo/main.js',
+    'Tabbed UI demo': './samples/tabs/main.js',
+}
+
+const encodeHTML = code => {
+    return code.replace(/[\u00A0-\u9999<>\&]/gim, i => {
+        return '&#' + i.charCodeAt(0) + ';';
+    })
+}
 
 const linesToRows = lines => {
     const linePairs = [];
@@ -18,26 +33,30 @@ const linesToRows = lines => {
     let inDocComment = false;
     const pushPair = (codeLine, lineNumber) => {
         if (docLine) {
-            linePairs.push([docLine, codeLine, lineNumber]);
+            const lastLine = linePairs[linePairs.length - 1];
+            if (lastLine && lastLine[0]) {
+                linePairs.push(['', '', '']);
+            }
+            linePairs.push([docLine, encodeHTML(codeLine), lineNumber]);
         } else {
-            linePairs.push(['', codeLine, lineNumber]);
+            linePairs.push(['', encodeHTML(codeLine), lineNumber]);
         }
         docLine = '';
     }
 
     const pushComment = line => {
-        if (line.trim().startsWith('//>')) {
-            docLine = line.replace('//>', '').trim();
+        if (line.trim().startsWith(ANNOTATION_START)) {
+            docLine = line.replace(ANNOTATION_START, '').trim();
         } else {
-            docLine += ' ' + line.replace('//', '').trim();
+            docLine += ' ' + line.replace(ANNOTATION_CONTINUE, '').trim();
         }
     };
 
     lines.split('\n').forEach((line, idx) => {
-        if (line.trim().startsWith('//>')) {
+        if (line.trim().startsWith(ANNOTATION_START)) {
             inDocComment = true;
             pushComment(line);
-        } else if (line.trim().startsWith('//')) {
+        } else if (line.trim().startsWith(ANNOTATION_CONTINUE)) {
             if (inDocComment) {
                 pushComment(line)
             } else {
@@ -56,7 +75,7 @@ const buildAnnotatedPage = (title, linePairs) => {
     const lines = linePairs.map(([doc, source, lineNumber]) => {
         return `<div class="line"><div class="doc">${
             marked(doc)
-        }</div><pre class="source javascript"><strong>${lineNumber}</strong>${source}</pre></div>`;
+        }</div><pre class="source javascript"><strong class="lineNumber">${lineNumber}</strong>${source}</pre></div>`;
     }).join('\n');
 
     return template
@@ -64,18 +83,29 @@ const buildAnnotatedPage = (title, linePairs) => {
         .replace(/{{lines}}/g, lines);
 }
 
+const buildIndex = indexPage => {
+    const sources = Object.entries(FILES_TO_ANNOTATE).map(([name, sourcePath]) => {
+        const errFn = err => console.error('Error building documentation page:', sourcePath, err);
+        const fileName = `${name.replace(/\s+/g, '-').toLowerCase()}.html`;
+        fs.readFile(sourcePath, 'utf8', (err, content) => {
+            if (err) errFn(err);
+
+            const annotatedPage = buildAnnotatedPage(name, linesToRows(content));
+            fs.writeFile(path.join('./docs/', fileName), annotatedPage, 'utf8', err => {
+                if (err) errorFn(err);
+            });
+        });
+
+        return `<p><a title="${name} annotated source" href="${fileName}">${name}</a></p>`;
+    });
+
+    return indexPage.replace(/{{sources}}/, sources.join('\n'));
+}
 
 mkdirp.sync('./docs/');
-
-fs.writeFile('./docs/index.html', index, 'utf8', (err) => {
+fs.writeFile('./docs/index.html', buildIndex(index), 'utf8', (err) => {
     if (err) console.error('Error writing index page', err);
 });
 fs.writeFile('./docs/main.css', css, 'utf8', (err) => {
     if (err) console.error('Error writing main.css', err);
-});
-fs.writeFile('./docs/torus.html', buildAnnotatedPage('torus.js', linesToRows(torusSource)), 'utf8', (err) => {
-    if (err) console.error('Error writing documentation page', err);
-});
-fs.writeFile('./docs/jdom.html', buildAnnotatedPage('jdom.js', linesToRows(jdomSource)), 'utf8', (err) => {
-    if (err) console.error('Error writing documentation page', err);
 });

@@ -7,8 +7,7 @@ module.exports = function(config) {
         frameworks: ['mocha', 'chai'],
 
         files: [
-            'dist/torus.min.js',
-            'dist/jdom.dev.js',
+            'dist/index.min.js',
             'test/*.js'
         ],
 

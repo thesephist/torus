@@ -882,9 +882,9 @@ const exposedNames = {
     //> `renderJDOM` isn't designed to be a public API and the API
     //  might change, but it's exposed to make unit testing easier.
     renderJDOM,
+    Component,
     Styled,
     StyledComponent,
-    Component,
     List,
     ListOf,
     Record,

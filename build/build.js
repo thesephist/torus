@@ -68,6 +68,14 @@ const webpackConfigs = {
             filename: 'jdom.min.js',
         },
     },
+    index: {
+        entry: './src/index.js',
+        mode: 'production',
+        output: {
+            path: path.resolve('./dist/'),
+            filename: 'index.min.js',
+        },
+    },
 }
 
 const iife = s => `(function(){${s}})();`;

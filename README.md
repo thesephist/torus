@@ -559,62 +559,18 @@ class Link extends Component {
 }
 ```
 
-## Contributing
-
-If you find bugs, please open an issue or put in a pull request with a test to recreate the bug against what you expected Torus to do.
-
-### Builds
-
-To build Torus, run
-
-```sh
-~$ npm build
-# or
-~$ yarn build
-```
-
-This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`.
-
-### Generating documentation from comments
-
-Torus has a unique system for generating documentation from code comments that begin with `//>`. To generate comment docs, run
-
-```sh
-~$ npm run docs
-# or
-~$ yarn docs
-```
-
-Docs files will be generated at `./docs/` and are viewable on a web browser. Check out [the Github page for this project](https://thesephist.github.io/torus/) for an example of what this script generates.
-
-### Running tests
-
-To run Torus's unit tests and generate a coverage report to `coverage/`, run
-
-```sh
-~$ npm test
-# or
-~$ yarn test
-```
-
-This will run the basic test suite on a development build of Torus. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
-
-We can also run tests on the production build, with:
-
-```sh
-~$ npm test-prod
-# or
-~$ yarn test-prod
-```
-
-This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occurred.
-
 ## Installation and usage
 
-Torus is still in active development (now making sure we have good test coverage, and then testing it out on larger projects before marking a release). So we aren't on NPM yet. But you can install `torus` locally and import it via node's require:
+You can install Torus from NPM as `torus-dom`. Torus is still considered _beta_, and not to a 1.0 release yet. I believe the API is stable now and most of the major bugs have been squashed, but no guarantees until 1.0.
+
+```sh
+npm install --save torus-dom
+# or
+yarn add torus-dom
+```
 
 ```javascript
-const { Component, Record, Store } = require('torus-vdom');
+import { Component, Record, Store } from 'torus-dom';
 ```
 
 Note that, used this way, Torus will print all debug statements. To use Torus without debug statements, build a version of Torus (section below), and import a development or production build with debug disabled into your project.
@@ -626,6 +582,58 @@ Alternatively, you can also just import Torus with:
 ```
 
 Torus will export all of its default globals to `window`, so they're accessible as global names to your scripts. This isn't recommended, but great for experimenting.
+
+## Contributing
+
+If you find bugs, please open an issue or put in a pull request with a test to recreate the bug against what you expected Torus to do. If you have feature requests, I might not necessarily honor it, because Torus is being built mostly to suit my personal workflow and architecture preferences. But I'm open to hearing your opinion! So feel free to open an issue, with the expectation that I might not decide to add the feature to Torus (especially if it'll inflate the bundle size or require a transpiler.)
+
+### Builds
+
+To build Torus, run
+
+```sh
+npm build
+# or
+yarn build
+```
+
+This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`.
+
+Unfortunately, there's a quick right now where we can only build the production version of the full module. `index.js`, after two builds. This is a low-priority fix for me but is on my list.
+
+### Generating documentation from comments
+
+Torus has a unique system for generating documentation from code comments that begin with `//>`. To generate comment docs, run
+
+```sh
+npm run docs
+# or
+yarn docs
+```
+
+Docs files will be generated at `./docs/` and are viewable on a web browser. Check out [the Github page for this project](https://thesephist.github.io/torus/) for an example of what this script generates.
+
+### Running tests
+
+To run Torus's unit tests and generate a coverage report to `coverage/`, run
+
+```sh
+npm test
+# or
+yarn test
+```
+
+This will run the basic test suite on a development build of Torus. More comprehensive integration tests using full user interfaces like todo apps is on the roadmap.
+
+We can also run tests on the production build, with:
+
+```sh
+npm test:prod
+# or
+yarn test:prod
+```
+
+This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occurred.
 
 ## Internationalization
 

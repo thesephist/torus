@@ -10,12 +10,20 @@ const BRAND_COLOR = '#1fada2';
 
 //> An abstraction over the Hacker News JSON API. Given a short path, it
 //  expands it out and makes sure no requests are cached by the browser,
-//  then returns the result in a JSON format.
-const hnFetch = async apiPath => {
-    const result = await fetch(API_ROOT + apiPath + '.json', {
-        cache: 'no-cache',
-    });
-    return await result.json();
+//  then returns the result in a JSON format. `hnFetch()` also handles caching,
+//  so multiple requests about the same thing only result on one request
+//  using the `CACHE`, which is a map from API routes to responses.
+const CACHE = new Map();
+const hnFetch = async (apiPath, skipCache) => {
+    if (!CACHE.has(apiPath) || skipCache) {
+        const result = await fetch(API_ROOT + apiPath + '.json', {
+            cache: 'no-cache',
+        }).then(resp => resp.json());
+        CACHE.set(apiPath, result)
+        return result;
+    } else {
+        return CACHE.get(apiPath);
+    }
 }
 
 //> Formats times into 24-hour format, which is what I personally prefer.
@@ -27,22 +35,22 @@ const formatTime = date => {
 //> A date formatter that does relative dates in English for the last
 //  2 days.
 const formatDate = unix => {
-    if (!unix) return 'unknown';
+    if (!unix) return 'some time ago';
 
     const date = new Date(unix * 1000);
     const delta = (NOW - date) / 1000;
     if (delta < 60) {
-        return '&#60;1 min';
+        return '&#60;1 min ago';
     } else if (delta < 3600) {
-        return `${~~(delta / 60)} min`;
+        return `${~~(delta / 60)} min ago`;
     } else if (delta < 86400) {
-        return `${~~(delta / 3600)} hr`;
+        return `${~~(delta / 3600)} hr ago`;
     } else if (delta < 86400 * 2) {
         return 'yesterday';
     } else if (delta < 86400 * 3) {
         return '2 days ago';
     } else {
-        return date.toLocaleDateString() + ' ' + formatTime(date);
+        return date.toLocaleDateString() + ' ' + formatTime(date) + ' ago';
     }
 }
 
@@ -377,6 +385,18 @@ class CommentListing extends StyledComponent {
     }
 
     compose(attrs) {
+        //> If a comment has been deleted, all the other information are zeroed out,
+        //  so we have to treat it separately and show a placeholder.
+        if (attrs.deleted) {
+            return jdom`<div class="comment" onclick="${this.toggleFolded}">
+                <div class="byline">unknown</div>
+                <div class="text">- deleted comment -</div>
+                ${!this.folded ? (jdom`<div class="children">
+                    ${this.kidsList.node}
+                </div>`) : ''}
+            </div>`;
+        }
+
         const time = attrs.time || 0;
         const author = attrs.by || '...';
         const text = attrs.text || ''

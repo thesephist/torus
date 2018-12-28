@@ -258,7 +258,9 @@ describe('jdom template tag', () => {
 
         compare(
             'children as Node',
-            jdom`<li>${tmpNode}</li>`,
+            jdom`<li>
+                ${tmpNode}
+            </li>`,
             {tag: 'li', children: [
                 tmpNode,
             ]}
@@ -415,6 +417,18 @@ describe('jdom template tag', () => {
         noThrow(
             'invalid attributes',
             () => jdom`<div ${{santa: 'claus'}}></div>`
+        );
+
+        noThrow(
+            'Invalid JDOM into children',
+            () => jdom`<div>${{
+                tag: 'div',
+                name: ['1', {
+                    name2: 'thing',
+                }, [{
+                    name3: 'thing',
+                }]]
+            }}</div>`
         );
 
     });

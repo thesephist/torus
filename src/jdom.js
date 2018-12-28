@@ -9,6 +9,8 @@ const isNode = (typeof Node === 'undefined') ? isJDOM : (
     o => o instanceof Node || isJDOM(o)
 );
 
+//> JDOM treats strings and numbers as both string-like things (text nodes),
+//  so this is a shortcut for that check.
 const isStringLike = x => typeof x === 'string' || typeof x === 'number';
 
 //> Clip the end of a given string by the length of a substring
@@ -16,12 +18,14 @@ const clipStringEnd = (base, substr) => {
     return base.substr(0, base.length - substr.length);
 }
 
+//> This allows us to write HTML entities like '<' and '>' without breaking
+//  the parser.
 const decodeEntity = entity => {
     return String.fromCodePoint((+('0' + (/&#(\w+);/).exec(entity)[1])));
 }
 
-//> Interpolate between lists of string and non-string parts into a single string.
-//  this is particularly useful when objects and strings are mixed in an attribute value.
+//> Interpolate between lists of strings into a single string. Used to
+//  merge the two parts of a template tag's arguments.
 const interpolate = (tplParts, dynamicParts) => {
     let str = tplParts[0];
     for (let i = 1; i <= dynamicParts.length; i++) {
@@ -36,10 +40,7 @@ const interpolate = (tplParts, dynamicParts) => {
 //  here but [] is shorter, and enough.
 const READER_END = [];
 
-//> The `Reader` class represents a sequence of tokens we can read from
-//  a JDOM template. It can distinguish between string / number tokens
-//  and tokens that are more complex objects or functions, to be passed
-//  directly into the renderer.
+//> The `Reader` class represents a sequence of characters we can read from a JDOM template.
 class Reader {
 
     constructor(content) {
@@ -47,8 +48,7 @@ class Reader {
         this.content = content;
     }
 
-    //> Returns the next token (like a `generator.next()`), compatible
-    //  with the heterogeneous nature of the template.
+    //> Returns the current character and moves the pointer one place farther.
     next() {
         let char = this.content[this.idx ++] || READER_END;
         if (this.idx > this.content.length) {
@@ -57,7 +57,7 @@ class Reader {
         return char;
     }
 
-    //> Move back the token pointer one place.
+    //> Move back the pointer one place.
     backtrack() {
         this.idx --;
         if (this.idx < 0) {
@@ -65,9 +65,8 @@ class Reader {
         }
     }
 
-    //> Read all the tokens up to a specified _contiguous_ substring,
-    //  but not including the substring. In practice this is achieved
-    //  by leaning on `#readUntil()`, and then backtracking.
+    //> Read up to a specified _contiguous_ substring,
+    //  but not including the substring.
     readUpto(substr) {
         const rest = this.content.substr(this.idx);
         const nextIdx = rest.indexOf(substr);
@@ -82,6 +81,7 @@ class Reader {
         return this.readToNextIdx(nextIdx);
     }
 
+    //> Abstraction used for both `readUpto` and `readdUntil` above.
     readToNextIdx(nextIdx) {
         const rest = this.content.substr(this.idx);
         if (nextIdx === -1) {
@@ -173,38 +173,36 @@ const parseOpeningTagContents = content => {
         }
     }
 
-    //> Read the individual tokens into a list of higher level tokens:
+    //> Read the individual characters into a list of tokens:
     //  things that may be attribute names, and values.
     let head = '';
     //> Are we waiting to read an attribute value?
     let waitingForAttr = false;
     //> Are we in a quoted attribute value?
     let inQuotes = false;
-    //> Array of parsed higher-level tokens
+    //> Array of parsed tokens
     const tokens = [];
     const TYPE_KEY = 0,
         TYPE_VALUE = 1;
 
+    //> Is the next token a key or a value? This is determined by the presence
+    //  of equals signs `=`, quotations, and whitespace.
     let nextType = TYPE_KEY;
-    //> Push a given token into the tokens list, called by `commitToken()`
-    const push = (type, val, force) => {
-        if (val !== '' || force) {
+
+    //> Commit what's currently read as a new token.
+    const commitToken = force => {
+        head = head.trim();
+        if (head !== '' || force) {
             tokens.push({
-                type: type,
-                value: val,
+                type: nextType,
+                value: head,
             });
             waitingForAttr = false;
+            head = '';
         }
     }
-    //> Read from the list of currently read characters/parts
-    //  and commit the result as a token, interpolating any spread-out
-    //  string parts.
-    const commitToken = force => {
-        push(nextType, head.trim(), force);
-        head = '';
-    }
-    //> Iterate through each read character or object from the reader and parse
-    //  the token stream into larger tokens.
+    //> Iterate through each read character from the reader and parse the character
+    //  stream into tokens.
     for (let next = reader.next(); next !== READER_END; next = reader.next()) {
         switch (next) {
             //> Equals sign denotes the start of an attribute value unless in quotes
@@ -253,11 +251,10 @@ const parseOpeningTagContents = content => {
                 break;
         }
     }
-    //> if we haven't committed any last-read tokens, commit it now.
+    //> If we haven't committed any last-read tokens, commit it now.
     commitToken();
 
-    //> Now, we parse the previous token stream into tag, attribute, and events
-    //  values in the JDOM.
+    //> Now, we parse the tokens into tag, attribute, and events values in the JDOM.
 
     //> The tag name is always the first token
     tag = tokens.shift().value;
@@ -295,7 +292,7 @@ const parseOpeningTagContents = content => {
     };
 }
 
-//> Function to parse an entire JDOM template tree (which we vague call JSX here).
+//> Function to parse an entire JDOM template tree (which we vaguely call JSX here).
 //  This recursively calls itself on children elements.
 const parseJSX = reader => {
     const result = [];
@@ -317,7 +314,7 @@ const parseJSX = reader => {
         inTextNode = false;
     }
 
-    //> Shortcut to handle string tokens properly, which we do more than once below
+    //> Shortcut to handle/commit string tokens properly, which we do more than once below.
     const handleString = next => {
         if (!inTextNode) {
             commit();
@@ -327,7 +324,7 @@ const parseJSX = reader => {
         currentElement += next;
     }
 
-    //> Main parsing logic. This can be confusingly recursive. In essence, the parser
+    //> Main parsing logic. This might be confusingly recursive. In essence, the parser
     //  recursively calls itself with its `reader` if it has children to parse,
     //  and trusts that the parser will return when it encounters the closing tag
     //  that marks the end of the list of children. So, the parser breaks the loop
@@ -364,17 +361,13 @@ const parseJSX = reader => {
                 reader.readUntil('>');
                 break;
             }
-        //> Because string tokens are the most common, we check for it early
-        } else if (typeof next === 'string') {
+        } else {
             //> If an HTML entity is encoded (e.g. &#60; is '<'), decode it and handle it.
             if (next === '&') {
                 handleString(decodeEntity(next + reader.readUntil(';')));
             } else {
                 handleString(next);
             }
-        //> If none of the above conditions match, treat it as if it were a string
-        } else {
-            handleString(next);
         }
     }
 
@@ -385,11 +378,27 @@ const parseJSX = reader => {
 }
 
 //> Cache for `jdom`, keyed by the string parts, value is a function that takes the dynamic
-//  parts as input and returns the result of parseJSX
+//  parts of the template as input and returns the result of parseJSX. We make an assumption
+//  here that the user of the template won't swap between having an element attribute being
+//  a function once and something that isn't a function the next time. In practice this is fine.
 const JDOM_CACHE = new Map();
+//> This HTML parsing algorithm works by replacing all the dynamic parts with a unique string,
+//  parsing the string markup into a JSON tree, and caching that tree. On renders, we walk the tree
+//  and replace any matching strings with their correct dynamic parts. This makes the algorithm
+//  cache-friendly and relatively fast, despite doing a lot at runtime. `JDOM_PLACEHOLDER_RE` is
+//  the regex we use to correlate string keys to their correct dynamic parts.
 const JDOM_PLACEHOLDER_RE = /jdom_placeholder_(?:function|object|node)_\[(\d+)\]/;
+
+//> Does a given string have a placeholder for the template values?
 const hasPlaceholder = str => typeof str == 'string' && str.includes('jdom_placeholder_');
 
+//> **Utility functions for walking a JSON tree and filling in placeholders**
+//  The functions here that take mutable values (arrays, objects) will mutate the
+//  given value to be faster than creating new objects.
+
+//> Given a string, replace placeholders with their correct dynamic parts and return
+//  the result as an array, so if any dynamic values are objects or HTML nodes, they
+//  are not cast to strings. Used to parse HTML children.
 const splitByPlaceholder = (str, dynamicParts) => {
     if (hasPlaceholder(str)) {
         const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);
@@ -409,6 +418,9 @@ const splitByPlaceholder = (str, dynamicParts) => {
         return str ? [str] : [];
     }
 }
+
+//> Given an array of child JDOM elements, flatten that list of children
+//  into a flat array and parse any placeholders in it.
 const replaceChildrenToFlatArray = (children, dynamicParts) => {
     let newChildren = [];
     for (const childString of children) {
@@ -420,6 +432,8 @@ const replaceChildrenToFlatArray = (children, dynamicParts) => {
     if (typeof last === 'string' && !last.trim()) newChildren.pop();
     return newChildren;
 }
+
+//> Given a string, replace any placeholder values and return a new string.
 const replaceInString = (str, dynamicParts) => {
     if (hasPlaceholder(str)) {
         const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);
@@ -433,6 +447,8 @@ const replaceInString = (str, dynamicParts) => {
         return str;
     }
 }
+
+//> Given an array literal, replace placeholders in it and its children, recursively.
 const replaceInArrayLiteral = (arr, dynamicParts) => {
     arr.forEach((val, idx) => {
         if (isStringLike(val)) {
@@ -444,12 +460,17 @@ const replaceInArrayLiteral = (arr, dynamicParts) => {
         }
     });
 }
+
+//> Given an object, replace placeholders in it and its values.
 const replaceInObjectLiteral = (obj, dynamicParts) => {
     for (const [prop, val] of Object.entries(obj)) {
         if (isStringLike(val)) {
             obj[prop] = replaceInString(val.toString(), dynamicParts);
         } else if (val instanceof Array) {
             if (prop === 'children') {
+                //> We need to treat children of JDOM objects differently because
+                //  they need to all be flat arrays, and sometimes for API convenience
+                //  they're passed in as nested arrays.
                 obj.children = replaceChildrenToFlatArray(val, dynamicParts);
                 for (const child of obj.children) {
                     if (typeof val === 'object' && val !== null) {
@@ -465,29 +486,43 @@ const replaceInObjectLiteral = (obj, dynamicParts) => {
     }
 }
 
-
-//> `jdom` template tag. It just calls `parseJSX()` and returns the first parsed element
+//> `jdom` template tag, using the JDOM parsed templates cache from above.
 const jdom = (tplParts, ...dynamicParts) => {
+    //> The key for our cache is just the string parts, joined together with a unique joiner string.
     const cacheKey = tplParts.join('jdom_tpl_joiner');
     try {
+        //> If we don't have the template in cache, we need to put a translator function
+        //  in the cache now.
         if (!JDOM_CACHE.has(cacheKey)) {
             const dpPlaceholders = dynamicParts.map((obj, i) => {
-                if (isNode(obj)) {
-                    return `jdom_placeholder_node_[${i}]`;
-                } else if (obj instanceof Function) {
+                //> Different kinds of template values are replaced by different
+                //  strings, since some of them need to be dealt with differently
+                //  during parse.
+                if (obj instanceof Function) {
+                    //> Function values are treated as event listeners.
                     return `jdom_placeholder_function_[${i}]`;
                 } else {
                     return `jdom_placeholder_object_[${i}]`;
                 }
             });
+
+            //> Make a new reader, interpolating the template's static and dynamic parts together.
             const reader = new Reader(interpolate(tplParts.map(part => part.replace(/\s+/g, ' ')), dpPlaceholders));
+            //> Parse the template and take the first child, if there are more, as the element we care about.
             const result = parseJSX(reader)[0];
 
+            //> Put a function into the cache that translates an array of the dynamic parts of a template
+            //  into the full JDOM for the template.
             JDOM_CACHE.set(cacheKey, dynamicParts => {
                 if (typeof result === 'string') {
+                    //> If the result of the template is just a string, replace stuff in the string
                     return replaceInString(result, dynamicParts);
                 } else if (typeof result === 'object') {
+                    //> Recall that the template translating functions above mutate the object passed
+                    //  in wherever possible. so we make a brand-new object to represent a new result.
                     const target = {};
+                    //> Since the non-dynamic parts of JDOM objects are by definition completely JSON
+                    //  serializable, this is a good enough way to deep-copy the cached result of `parseJSX()`.
                     const template = JSON.parse(JSON.stringify((result)));
                     replaceInObjectLiteral(Object.assign(target, template), dynamicParts);
                     return target;
@@ -495,6 +530,7 @@ const jdom = (tplParts, ...dynamicParts) => {
                 return null;
             });
         }
+        //> Now that we have a translator function in the cache, call that to get a new template result.
         return JDOM_CACHE.get(cacheKey)(dynamicParts);
     } catch (e) {
         console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);

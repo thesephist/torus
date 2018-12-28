@@ -1,14 +1,3 @@
-//> Check if an object is probably a JDOM. Useful for embedding JDOM directly
-//  inside templates.
-const isJDOM = obj => typeof obj === 'object' && obj !== null && 'tag' in obj;
-
-//> If we're in a browser environment, `isNode()` should check if the given
-//  object is a node or JDOM. If not, there's no reason an object would be a Node,
-//  so just check for JDOM. This function is set at load-time to make run-time calls fast.
-const isNode = (typeof Node === 'undefined') ? isJDOM : (
-    o => o instanceof Node || isJDOM(o)
-);
-
 //> JDOM treats strings and numbers as both string-like things (text nodes),
 //  so this is a shortcut for that check.
 const isStringLike = x => typeof x === 'string' || typeof x === 'number';

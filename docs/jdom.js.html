@@ -17,521 +17,513 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>Check if an object is probably a JDOM. Useful for embedding JDOM directly inside templates.</p>
-</div><pre class="source javascript"><strong class="lineNumber">3</strong>const isJDOM = obj =&#62; typeof obj === 'object' &#38;&#38; obj !== null &#38;&#38; 'tag' in obj;</pre></div>
+        <div class="line"><div class="doc"><p>JDOM treats strings and numbers as both string-like things (text nodes), so this is a shortcut for that check.</p>
+</div><pre class="source javascript"><strong class="lineNumber">3</strong>const isStringLike = x =&#62; typeof x === 'string' || typeof x === 'number';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">4</strong></pre></div>
-<div class="line"><div class="doc"><p>If we&#39;re in a browser environment, <code>isNode()</code> should check if the given object is a node or JDOM. If not, there&#39;s no reason an object would be a Node, so just check for JDOM. This function is set at load-time to make run-time calls fast.</p>
-</div><pre class="source javascript"><strong class="lineNumber">8</strong>const isNode = (typeof Node === 'undefined') ? isJDOM : (</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong>    o =&#62; o instanceof Node || isJDOM(o)</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">10</strong>);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">11</strong></pre></div>
-<div class="line"><div class="doc"><p>JDOM treats strings and numbers as both string-like things (text nodes), so this is a shortcut for that check.</p>
-</div><pre class="source javascript"><strong class="lineNumber">14</strong>const isStringLike = x =&#62; typeof x === 'string' || typeof x === 'number';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong></pre></div>
 <div class="line"><div class="doc"><p>Clip the end of a given string by the length of a substring</p>
-</div><pre class="source javascript"><strong class="lineNumber">17</strong>const clipStringEnd = (base, substr) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">18</strong>    return base.substr(0, base.length - substr.length);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">19</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">6</strong>const clipStringEnd = (base, substr) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">7</strong>    return base.substr(0, base.length - substr.length);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong></pre></div>
 <div class="line"><div class="doc"><p>This allows us to write HTML entities like &#39;&lt;&#39; and &#39;&gt;&#39; without breaking the parser.</p>
-</div><pre class="source javascript"><strong class="lineNumber">23</strong>const decodeEntity = entity =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">24</strong>    return String.fromCodePoint((+('0' + (/&#38;#(\w+);/).exec(entity)[1])));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">26</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">12</strong>const decodeEntity = entity =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">13</strong>    return String.fromCodePoint((+('0' + (/&#38;#(\w+);/).exec(entity)[1])));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong></pre></div>
 <div class="line"><div class="doc"><p>Interpolate between lists of strings into a single string. Used to merge the two parts of a template tag&#39;s arguments.</p>
-</div><pre class="source javascript"><strong class="lineNumber">29</strong>const interpolate = (tplParts, dynamicParts) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">30</strong>    let str = tplParts[0];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">31</strong>    for (let i = 1; i &#60;= dynamicParts.length; i++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">32</strong>        str += dynamicParts[i - 1] + tplParts[i];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">33</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">34</strong>    return str;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">35</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">36</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">18</strong>const interpolate = (tplParts, dynamicParts) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">19</strong>    let str = tplParts[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong>    for (let i = 1; i &#60;= dynamicParts.length; i++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong>        str += dynamicParts[i - 1] + tplParts[i];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">22</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">23</strong>    return str;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">24</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong></pre></div>
 <div class="line"><div class="doc"><p><code>READER_END</code> is a unique symbol that represents that the reader has reached the end of the template. Making it an array ensures that no other === comparisons can return true. We can use Symbol() here but [] is shorter, and enough.</p>
-</div><pre class="source javascript"><strong class="lineNumber">41</strong>const READER_END = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">30</strong>const READER_END = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">31</strong></pre></div>
 <div class="line"><div class="doc"><p>The <code>Reader</code> class represents a sequence of characters we can read from a JDOM template.</p>
-</div><pre class="source javascript"><strong class="lineNumber">44</strong>class Reader {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">45</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">46</strong>    constructor(content) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong>        this.idx = 0;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong>        this.content = content;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">33</strong>class Reader {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">34</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">35</strong>    constructor(content) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">36</strong>        this.idx = 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">37</strong>        this.content = content;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">38</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">39</strong></pre></div>
 <div class="line"><div class="doc"><p>Returns the current character and moves the pointer one place farther.</p>
-</div><pre class="source javascript"><strong class="lineNumber">52</strong>    next() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">53</strong>        let char = this.content[this.idx ++] || READER_END;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">54</strong>        if (this.idx &#62; this.content.length) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">55</strong>            this.idx = this.content.length;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">56</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">57</strong>        return char;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">58</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">59</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">41</strong>    next() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>        let char = this.content[this.idx ++] || READER_END;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">43</strong>        if (this.idx &#62; this.content.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">44</strong>            this.idx = this.content.length;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">45</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">46</strong>        return char;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong></pre></div>
 <div class="line"><div class="doc"><p>Move back the pointer one place.</p>
-</div><pre class="source javascript"><strong class="lineNumber">61</strong>    backtrack() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>        this.idx --;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">63</strong>        if (this.idx &#60; 0) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">64</strong>            this.idx = 0;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">65</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">66</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">67</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">50</strong>    backtrack() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong>        this.idx --;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">52</strong>        if (this.idx &#60; 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">53</strong>            this.idx = 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">54</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">55</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">56</strong></pre></div>
 <div class="line"><div class="doc"><p>Read up to a specified <em>contiguous</em> substring, but not including the substring.</p>
-</div><pre class="source javascript"><strong class="lineNumber">70</strong>    readUpto(substr) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">71</strong>        const rest = this.content.substr(this.idx);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">72</strong>        const nextIdx = rest.indexOf(substr);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">73</strong>        return this.readToNextIdx(nextIdx);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">74</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">75</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">59</strong>    readUpto(substr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">60</strong>        const rest = this.content.substr(this.idx);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">61</strong>        const nextIdx = rest.indexOf(substr);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>        return this.readToNextIdx(nextIdx);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">63</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">64</strong></pre></div>
 <div class="line"><div class="doc"><p>Read up to and including a <em>contiguous</em> substring, or read until the end of the template.</p>
-</div><pre class="source javascript"><strong class="lineNumber">78</strong>    readUntil(substr) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">79</strong>        const rest = this.content.substr(this.idx);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">80</strong>        const nextIdx = rest.indexOf(substr) + substr.length;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">81</strong>        return this.readToNextIdx(nextIdx);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">83</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">67</strong>    readUntil(substr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">68</strong>        const rest = this.content.substr(this.idx);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">69</strong>        const nextIdx = rest.indexOf(substr) + substr.length;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">70</strong>        return this.readToNextIdx(nextIdx);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">71</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">72</strong></pre></div>
 <div class="line"><div class="doc"><p>Abstraction used for both <code>readUpto</code> and <code>readdUntil</code> above.</p>
-</div><pre class="source javascript"><strong class="lineNumber">85</strong>    readToNextIdx(nextIdx) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">86</strong>        const rest = this.content.substr(this.idx);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">87</strong>        if (nextIdx === -1) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">88</strong>            this.idx = this.content.length;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">89</strong>            return rest;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">90</strong>        } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">91</strong>            const part = rest.substr(0, nextIdx);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>            this.idx += nextIdx;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">93</strong>            return part;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">94</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">96</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">74</strong>    readToNextIdx(nextIdx) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">75</strong>        const rest = this.content.substr(this.idx);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">76</strong>        if (nextIdx === -1) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">77</strong>            this.idx = this.content.length;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">78</strong>            return rest;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">79</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">80</strong>            const part = rest.substr(0, nextIdx);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">81</strong>            this.idx += nextIdx;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong>            return part;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">83</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">84</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">85</strong></pre></div>
 <div class="line"><div class="doc"><p>Remove some substring from the end of the template, if it ends in the substring. This also returns whether the given substring was a valid ending substring.</p>
-</div><pre class="source javascript"><strong class="lineNumber">99</strong>    clipEnd(substr) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">100</strong>        if (this.content.endsWith(substr)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>            this.content = clipStringEnd(this.content, substr);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong>            return true;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">103</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">104</strong>        return false;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">105</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">106</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">107</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">108</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">88</strong>    clipEnd(substr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">89</strong>        if (this.content.endsWith(substr)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">90</strong>            this.content = clipStringEnd(this.content, substr);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">91</strong>            return true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">93</strong>        return false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">94</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">96</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">97</strong></pre></div>
 <div class="line"><div class="doc"><p>For converting CSS property names to their JavaScript counterparts</p>
-</div><pre class="source javascript"><strong class="lineNumber">110</strong>const kebabToCamel = kebabStr =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">111</strong>    let result = '';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">112</strong>    for (let i = 0; i &#60; kebabStr.length; i++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">113</strong>        result += kebabStr[i] === '-' ? kebabStr[++i].toUpperCase() : kebabStr[i];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">114</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">115</strong>    return result;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">116</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">117</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">99</strong>const kebabToCamel = kebabStr =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">100</strong>    let result = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>    for (let i = 0; i &#60; kebabStr.length; i++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong>        result += kebabStr[i] === '-' ? kebabStr[++i].toUpperCase() : kebabStr[i];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">103</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">104</strong>    return result;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">105</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">106</strong></pre></div>
 <div class="line"><div class="doc"><p>Pure function to parse the contents of an HTML opening tag to a JDOM stub</p>
-</div><pre class="source javascript"><strong class="lineNumber">119</strong>const parseOpeningTagContents = content =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">108</strong>const parseOpeningTagContents = content =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">109</strong></pre></div>
 <div class="line"><div class="doc"><p>If the opening tag is just the tag name (the most common case), take a shortcut and run a simpler algorithm.</p>
-</div><pre class="source javascript"><strong class="lineNumber">123</strong>    if (content[0] === '!') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">124</strong>        // comment</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong>        return {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>            jdom: null,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>            selfClosing: true,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>        };</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">129</strong>    } else if (!content.includes(' ')) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">130</strong>        const selfClosing = content.endsWith('/');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">131</strong>        return {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">132</strong>            jdom: {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">133</strong>                tag: selfClosing ? clipStringEnd(content, '/') : content,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">134</strong>                attrs: {},</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">135</strong>                events: {},</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">136</strong>            },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">137</strong>            selfClosing: selfClosing,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">138</strong>        };</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">139</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">140</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">112</strong>    if (content[0] === '!') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">113</strong>        // comment</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">114</strong>        return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">115</strong>            jdom: null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">116</strong>            selfClosing: true,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">117</strong>        };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">118</strong>    } else if (!content.includes(' ')) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">119</strong>        const selfClosing = content.endsWith('/');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong>        return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong>            jdom: {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">122</strong>                tag: selfClosing ? clipStringEnd(content, '/') : content,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">123</strong>                attrs: {},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">124</strong>                events: {},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong>            },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>            selfClosing: selfClosing,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>        };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">129</strong></pre></div>
 <div class="line"><div class="doc"><p>Make another reader to read the tag contents</p>
-</div><pre class="source javascript"><strong class="lineNumber">142</strong>    const reader = new Reader(content.trim());</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">143</strong>    const selfClosing = reader.clipEnd('/');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">144</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">145</strong>    let tag = '';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">146</strong>    const attrs = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">147</strong>    const events = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">148</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">131</strong>    const reader = new Reader(content.trim());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">132</strong>    const selfClosing = reader.clipEnd('/');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">133</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">134</strong>    let tag = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">135</strong>    const attrs = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">136</strong>    const events = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">137</strong></pre></div>
 <div class="line"><div class="doc"><p><code>commit()</code> commits a given key-value pair of attributes to the JDOM stub. it treats class lists and style dictionaries separately, and adds function values as event handlers.</p>
-</div><pre class="source javascript"><strong class="lineNumber">152</strong>    const commit = (key, val) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">153</strong>        if (typeof val === 'string' &#38;&#38; val.startsWith('jdom_placeholder_function_')) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">154</strong>            events[key.replace('on', '')] = [val];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">155</strong>        } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">156</strong>            if (key === 'class') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">157</strong>                if (val = val.trim()) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">158</strong>                    attrs[key] = val.split(' ');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">159</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">160</strong>            } else if (key === 'style') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">161</strong>                const declarations = val.split(';').filter(s =&#62; !!s).map(pair =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">162</strong>                    const [first, ...rest] = pair.split(':');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">163</strong>                    return [kebabToCamel(first.trim()), rest.join(':').trim()];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong>                });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">165</strong>                const rule = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">166</strong>                for (const [prop, val] of declarations) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">167</strong>                    rule[prop] = val;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">168</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">169</strong>                attrs[key] = rule;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">170</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">171</strong>                attrs[key] = val;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">172</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">173</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">174</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">175</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">141</strong>    const commit = (key, val) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">142</strong>        if (typeof val === 'string' &#38;&#38; val.startsWith('jdom_placeholder_function_')) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">143</strong>            events[key.replace('on', '')] = [val];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">144</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">145</strong>            if (key === 'class') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">146</strong>                if (val = val.trim()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">147</strong>                    attrs[key] = val.split(' ');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">148</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">149</strong>            } else if (key === 'style') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">150</strong>                const declarations = val.split(';').filter(s =&#62; !!s).map(pair =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">151</strong>                    const [first, ...rest] = pair.split(':');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">152</strong>                    return [kebabToCamel(first.trim()), rest.join(':').trim()];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">153</strong>                });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">154</strong>                const rule = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">155</strong>                for (const [prop, val] of declarations) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">156</strong>                    rule[prop] = val;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">157</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">158</strong>                attrs[key] = rule;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">159</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">160</strong>                attrs[key] = val;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">161</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">162</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">163</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong></pre></div>
 <div class="line"><div class="doc"><p>Read the individual characters into a list of tokens: things that may be attribute names, and values.</p>
-</div><pre class="source javascript"><strong class="lineNumber">178</strong>    let head = '';</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">167</strong>    let head = '';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Are we waiting to read an attribute value?</p>
-</div><pre class="source javascript"><strong class="lineNumber">180</strong>    let waitingForAttr = false;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">169</strong>    let waitingForAttr = false;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Are we in a quoted attribute value?</p>
-</div><pre class="source javascript"><strong class="lineNumber">182</strong>    let inQuotes = false;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">171</strong>    let inQuotes = false;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Array of parsed tokens</p>
-</div><pre class="source javascript"><strong class="lineNumber">184</strong>    const tokens = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong>    const TYPE_KEY = 0,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong>        TYPE_VALUE = 1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">187</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">173</strong>    const tokens = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">174</strong>    const TYPE_KEY = 0,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">175</strong>        TYPE_VALUE = 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">176</strong></pre></div>
 <div class="line"><div class="doc"><p>Is the next token a key or a value? This is determined by the presence of equals signs <code>=</code>, quotations, and whitespace.</p>
-</div><pre class="source javascript"><strong class="lineNumber">190</strong>    let nextType = TYPE_KEY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">191</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">179</strong>    let nextType = TYPE_KEY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">180</strong></pre></div>
 <div class="line"><div class="doc"><p>Commit what&#39;s currently read as a new token.</p>
-</div><pre class="source javascript"><strong class="lineNumber">193</strong>    const commitToken = force =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">194</strong>        head = head.trim();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">195</strong>        if (head !== '' || force) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">196</strong>            tokens.push({</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">197</strong>                type: nextType,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">198</strong>                value: head,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">199</strong>            });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">200</strong>            waitingForAttr = false;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong>            head = '';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">203</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">182</strong>    const commitToken = force =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">183</strong>        head = head.trim();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">184</strong>        if (head !== '' || force) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong>            tokens.push({</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong>                type: nextType,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">187</strong>                value: head,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">188</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">189</strong>            waitingForAttr = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">190</strong>            head = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">191</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">192</strong>    }</pre></div>
 <div class="line"><div class="doc"><p>Iterate through each read character from the reader and parse the character stream into tokens.</p>
-</div><pre class="source javascript"><strong class="lineNumber">206</strong>    for (let next = reader.next(); next !== READER_END; next = reader.next()) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">207</strong>        switch (next) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">195</strong>    for (let next = reader.next(); next !== READER_END; next = reader.next()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">196</strong>        switch (next) {</pre></div>
 <div class="line"><div class="doc"><p>Equals sign denotes the start of an attribute value unless in quotes</p>
-</div><pre class="source javascript"><strong class="lineNumber">209</strong>            case '=':</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">210</strong>                if (inQuotes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">211</strong>                    head += next;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">212</strong>                } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">213</strong>                    commitToken();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">214</strong>                    waitingForAttr = true;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">215</strong>                    nextType = TYPE_VALUE;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">198</strong>            case '=':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">199</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">200</strong>                    head += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong>                } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong>                    commitToken();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">203</strong>                    waitingForAttr = true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">204</strong>                    nextType = TYPE_VALUE;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">205</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">206</strong>                break;</pre></div>
+<div class="line"><div class="doc"><p>Because we replaced all whitespace with spaces earlier, this catches all whitespaces. Whitespaces are only meaningful separates of values if we&#39;re not in quotes.</p>
+</div><pre class="source javascript"><strong class="lineNumber">210</strong>            case ' ':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">211</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">212</strong>                    head += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">213</strong>                } else if (!waitingForAttr) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">214</strong>                    commitToken();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">215</strong>                    nextType = TYPE_KEY;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">216</strong>                }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">217</strong>                break;</pre></div>
-<div class="line"><div class="doc"><p>Because we replaced all whitespace with spaces earlier, this catches all whitespaces. Whitespaces are only meaningful separates of values if we&#39;re not in quotes.</p>
-</div><pre class="source javascript"><strong class="lineNumber">221</strong>            case ' ':</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">222</strong>                if (inQuotes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">223</strong>                    head += next;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">224</strong>                } else if (!waitingForAttr) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">225</strong>                    commitToken();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">226</strong>                    nextType = TYPE_KEY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>                break;</pre></div>
 <div class="line"><div class="doc"><p>Allow backslash to escape characters if we&#39;re in quotes.</p>
-</div><pre class="source javascript"><strong class="lineNumber">230</strong>            case '\\':</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">231</strong>                if (inQuotes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">232</strong>                    next = reader.next();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">233</strong>                    head += next;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">219</strong>            case '\\':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">220</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">221</strong>                    next = reader.next();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">222</strong>                    head += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">223</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">224</strong>                break;</pre></div>
+<div class="line"><div class="doc"><p>If we&#39;re in quotes, &#39;&quot;&#39; escapes quotes. Otherwise, it opens a quoted section.</p>
+</div><pre class="source javascript"><strong class="lineNumber">227</strong>            case '"':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>                if (inQuotes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">229</strong>                    inQuotes = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">230</strong>                    commitToken(true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">231</strong>                    nextType = TYPE_KEY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">232</strong>                } else if (nextType === TYPE_VALUE) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">233</strong>                    inQuotes = true;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>                break;</pre></div>
-<div class="line"><div class="doc"><p>If we&#39;re in quotes, &#39;&quot;&#39; escapes quotes. Otherwise, it opens a quoted section.</p>
-</div><pre class="source javascript"><strong class="lineNumber">238</strong>            case '"':</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">239</strong>                if (inQuotes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">240</strong>                    inQuotes = false;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">241</strong>                    commitToken(true);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">242</strong>                    nextType = TYPE_KEY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">243</strong>                } else if (nextType === TYPE_VALUE) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">244</strong>                    inQuotes = true;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">245</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">246</strong>                break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">247</strong>            default:</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">236</strong>            default:</pre></div>
 <div class="line"><div class="doc"><p>Append all other characters to the head</p>
-</div><pre class="source javascript"><strong class="lineNumber">249</strong>                head += next;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">250</strong>                waitingForAttr = false;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">251</strong>                break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">252</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">253</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">238</strong>                head += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">239</strong>                waitingForAttr = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">240</strong>                break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">241</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">242</strong>    }</pre></div>
 <div class="line"><div class="doc"><p>If we haven&#39;t committed any last-read tokens, commit it now.</p>
-</div><pre class="source javascript"><strong class="lineNumber">255</strong>    commitToken();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">256</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">244</strong>    commitToken();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">245</strong></pre></div>
 <div class="line"><div class="doc"><p>Now, we parse the tokens into tag, attribute, and events values in the JDOM.</p>
-</div><pre class="source javascript"><strong class="lineNumber">258</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">247</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>The tag name is always the first token</p>
-</div><pre class="source javascript"><strong class="lineNumber">260</strong>    tag = tokens.shift().value;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">261</strong>    let last = null,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">262</strong>        curr = tokens.shift();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">249</strong>    tag = tokens.shift().value;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">250</strong>    let last = null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">251</strong>        curr = tokens.shift();</pre></div>
 <div class="line"><div class="doc"><p>Function to step through to the next token</p>
-</div><pre class="source javascript"><strong class="lineNumber">264</strong>    const step = () =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">265</strong>        last = curr;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">266</strong>        curr = tokens.shift();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">267</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">253</strong>    const step = () =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">254</strong>        last = curr;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">255</strong>        curr = tokens.shift();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">256</strong>    }</pre></div>
 <div class="line"><div class="doc"><p>Walk through the token list. If the token is a value token, the previous token is its key. If the current token is a key, the previous token is an attribute without value (like <code>disabled</code>).</p>
-</div><pre class="source javascript"><strong class="lineNumber">271</strong>    while (curr !== undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">272</strong>        if (curr.type === TYPE_VALUE) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">273</strong>            commit(last.value, curr.value);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">274</strong>            step();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong>        } else if (last) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong>            commit(last.value, true);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">278</strong>        step();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">279</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">260</strong>    while (curr !== undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">261</strong>        if (curr.type === TYPE_VALUE) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">262</strong>            commit(last.value, curr.value);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">263</strong>            step();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">264</strong>        } else if (last) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">265</strong>            commit(last.value, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">266</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">267</strong>        step();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">268</strong>    }</pre></div>
 <div class="line"><div class="doc"><p>If the last value is a value-less attribute (like <code>disabled</code>), commit it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">281</strong>    if (last &#38;&#38; last.type === TYPE_KEY) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">282</strong>        commit(last.value, true);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">283</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">284</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">285</strong>    return {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">286</strong>        jdom: {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">287</strong>            tag: tag,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong>            attrs: attrs,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">289</strong>            events: events,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">290</strong>        },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">291</strong>        selfClosing: selfClosing,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">292</strong>    };</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">293</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">294</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">270</strong>    if (last &#38;&#38; last.type === TYPE_KEY) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">271</strong>        commit(last.value, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">272</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">273</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">274</strong>    return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong>        jdom: {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong>            tag: tag,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>            attrs: attrs,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">278</strong>            events: events,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">279</strong>        },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">280</strong>        selfClosing: selfClosing,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">281</strong>    };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">282</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">283</strong></pre></div>
 <div class="line"><div class="doc"><p>Function to parse an entire JDOM template tree (which we vaguely call JSX here). This recursively calls itself on children elements.</p>
-</div><pre class="source javascript"><strong class="lineNumber">297</strong>const parseJSX = reader =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">298</strong>    const result = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">299</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">286</strong>const parseJSX = reader =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">287</strong>    const result = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong></pre></div>
 <div class="line"><div class="doc"><p>The current JDOM object being worked on. Sort of an &quot;element register&quot;</p>
-</div><pre class="source javascript"><strong class="lineNumber">301</strong>    let currentElement = null;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">290</strong>    let currentElement = null;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Are we reading a text node (and should ignore special characters)?</p>
-</div><pre class="source javascript"><strong class="lineNumber">303</strong>    let inTextNode = false;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">292</strong>    let inTextNode = false;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Commit currently reading element to the result list, and reset the current element</p>
-</div><pre class="source javascript"><strong class="lineNumber">305</strong>    const commit = () =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">294</strong>    const commit = () =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>If the text node we&#39;re about to commit is just whitespace, don&#39;t bother</p>
-</div><pre class="source javascript"><strong class="lineNumber">307</strong>        if (inTextNode &#38;&#38; currentElement.trim() === '') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">308</strong>            currentElement = null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">309</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">310</strong>        if (currentElement) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong>            result.push(currentElement);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">312</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">313</strong>        currentElement = null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">314</strong>        inTextNode = false;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">315</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">316</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">296</strong>        if (inTextNode &#38;&#38; currentElement.trim() === '') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">297</strong>            currentElement = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">298</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">299</strong>        if (currentElement) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">300</strong>            result.push(currentElement);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">301</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">302</strong>        currentElement = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">303</strong>        inTextNode = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">304</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">305</strong></pre></div>
 <div class="line"><div class="doc"><p>Shortcut to handle/commit string tokens properly, which we do more than once below.</p>
-</div><pre class="source javascript"><strong class="lineNumber">318</strong>    const handleString = next =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">319</strong>        if (!inTextNode) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">320</strong>            commit();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>            inTextNode = true;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">322</strong>            currentElement = '';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">323</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">324</strong>        currentElement += next;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">325</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">326</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">307</strong>    const handleString = next =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">308</strong>        if (!inTextNode) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">309</strong>            commit();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">310</strong>            inTextNode = true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong>            currentElement = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">312</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">313</strong>        currentElement += next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">314</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">315</strong></pre></div>
 <div class="line"><div class="doc"><p>Main parsing logic. This might be confusingly recursive. In essence, the parser recursively calls itself with its <code>reader</code> if it has children to parse, and trusts that the parser will return when it encounters the closing tag that marks the end of the list of children. So, the parser breaks the loop and returns if it encounters a closing tag. This cooperation between the function and the parent function that called it recursively makes this parser work.</p>
-</div><pre class="source javascript"><strong class="lineNumber">333</strong>    for (let next = reader.next(); next !== READER_END; next = reader.next()) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">322</strong>    for (let next = reader.next(); next !== READER_END; next = reader.next()) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>if we see the start of a tag ...</p>
-</div><pre class="source javascript"><strong class="lineNumber">335</strong>        if (next === '&#60;') {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">324</strong>        if (next === '&#60;') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>... first commit any previous reads, since we&#39;re starting a new node ...</p>
-</div><pre class="source javascript"><strong class="lineNumber">337</strong>            commit();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">326</strong>            commit();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>... it&#39;s an opening tag if the next character isn&#39;t <code>&#39;/&#39;</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">339</strong>            if (reader.next() !== '/') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">340</strong>                reader.backtrack();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">328</strong>            if (reader.next() !== '/') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">329</strong>                reader.backtrack();</pre></div>
 <div class="line"><div class="doc"><p>Read and parse the contents of the tag up to the end of the opening tag.</p>
-</div><pre class="source javascript"><strong class="lineNumber">343</strong>                const result = parseOpeningTagContents(reader.readUpto('&#62;'));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">344</strong>                reader.next(); // read the '&#62;'</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">345</strong>                currentElement = result &#38;&#38; result.jdom;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">332</strong>                const result = parseOpeningTagContents(reader.readUpto('&#62;'));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">333</strong>                reader.next(); // read the '&#62;'</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">334</strong>                currentElement = result &#38;&#38; result.jdom;</pre></div>
 <div class="line"><div class="doc"><p>If the current element is a full-fledged element (and not a comment or text node), let&#39;s try to parse the children by handing the reader to a recursively call of this function.</p>
-</div><pre class="source javascript"><strong class="lineNumber">349</strong>                if (!result.selfClosing &#38;&#38;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">350</strong>                    typeof currentElement === 'object' &#38;&#38;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">351</strong>                    currentElement !== null</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">352</strong>                ) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">353</strong>                    currentElement.children = parseJSX(reader);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">354</strong>                }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">338</strong>                if (!result.selfClosing &#38;&#38;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">339</strong>                    typeof currentElement === 'object' &#38;&#38;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">340</strong>                    currentElement !== null</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">341</strong>                ) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">342</strong>                    currentElement.children = parseJSX(reader);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">343</strong>                }</pre></div>
 <div class="line"><div class="doc"><p>... it&#39;s a closing tag otherwise ...</p>
-</div><pre class="source javascript"><strong class="lineNumber">356</strong>            } else {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">345</strong>            } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>... so finish out reading the closing tag. A top-level closing tag means it&#39;s actually closing the parent tag, so we need to stop parsing and hand the parsing flow back to the parent call in this recursive function.</p>
-</div><pre class="source javascript"><strong class="lineNumber">361</strong>                reader.readUntil('&#62;');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">362</strong>                break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">363</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">364</strong>        } else {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">350</strong>                reader.readUntil('&#62;');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">351</strong>                break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">352</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">353</strong>        } else {</pre></div>
 <div class="line"><div class="doc"><p>If an HTML entity is encoded (e.g. &#60; is &#39;&lt;&#39;), decode it and handle it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">366</strong>            if (next === '&#38;') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">367</strong>                handleString(decodeEntity(next + reader.readUntil(';')));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">368</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">369</strong>                handleString(next);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">370</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">371</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">372</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">355</strong>            if (next === '&#38;') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">356</strong>                handleString(decodeEntity(next + reader.readUntil(';')));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">357</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">358</strong>                handleString(next);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">359</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">360</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">361</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">362</strong></pre></div>
 <div class="line"><div class="doc"><p>Commit any last remaining tokens as-is</p>
-</div><pre class="source javascript"><strong class="lineNumber">375</strong>    commit();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">376</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">377</strong>    return result;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">378</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">379</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">364</strong>    commit();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">365</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">366</strong>    return result;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">367</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">368</strong></pre></div>
 <div class="line"><div class="doc"><p>Cache for <code>jdom</code>, keyed by the string parts, value is a function that takes the dynamic parts of the template as input and returns the result of parseJSX. We make an assumption here that the user of the template won&#39;t swap between having an element attribute being a function once and something that isn&#39;t a function the next time. In practice this is fine.</p>
-</div><pre class="source javascript"><strong class="lineNumber">384</strong>const JDOM_CACHE = new Map();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">373</strong>const JDOM_CACHE = new Map();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>This HTML parsing algorithm works by replacing all the dynamic parts with a unique string, parsing the string markup into a JSON tree, and caching that tree. On renders, we walk the tree and replace any matching strings with their correct dynamic parts. This makes the algorithm cache-friendly and relatively fast, despite doing a lot at runtime. <code>JDOM_PLACEHOLDER_RE</code> is the regex we use to correlate string keys to their correct dynamic parts.</p>
-</div><pre class="source javascript"><strong class="lineNumber">390</strong>const JDOM_PLACEHOLDER_RE = /jdom_placeholder_(?:function|object|node)_\[(\d+)\]/;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">391</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">379</strong>const JDOM_PLACEHOLDER_RE = /jdom_placeholder_(?:function|object|node)_\[(\d+)\]/;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">380</strong></pre></div>
 <div class="line"><div class="doc"><p>Does a given string have a placeholder for the template values?</p>
-</div><pre class="source javascript"><strong class="lineNumber">393</strong>const hasPlaceholder = str =&#62; typeof str == 'string' &#38;&#38; str.includes('jdom_placeholder_');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">382</strong>const hasPlaceholder = str =&#62; typeof str == 'string' &#38;&#38; str.includes('jdom_placeholder_');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">383</strong></pre></div>
 <div class="line"><div class="doc"><p><strong>Utility functions for walking a JSON tree and filling in placeholders</strong> The functions here that take mutable values (arrays, objects) will mutate the given value to be faster than creating new objects.</p>
-</div><pre class="source javascript"><strong class="lineNumber">398</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">387</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Given a string, replace placeholders with their correct dynamic parts and return the result as an array, so if any dynamic values are objects or HTML nodes, they are not cast to strings. Used to parse HTML children.</p>
-</div><pre class="source javascript"><strong class="lineNumber">402</strong>const splitByPlaceholder = (str, dynamicParts) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">403</strong>    if (hasPlaceholder(str)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">404</strong>        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">405</strong>        const [front, back] = str.split(fullMatch);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">406</strong>        const processedBack = splitByPlaceholder(back, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">407</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">408</strong>        let result = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">409</strong>        if (front) result.push(front);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">410</strong>        if (dynamicParts[number] instanceof Array) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">411</strong>            result = result.concat(dynamicParts[number]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">412</strong>        } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">413</strong>            result.push(dynamicParts[number]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>        if (processedBack.length) result = result.concat(processedBack);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>        return result;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>    } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>        return str ? [str] : [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">420</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">421</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">391</strong>const splitByPlaceholder = (str, dynamicParts) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">392</strong>    if (hasPlaceholder(str)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong>        const [front, back] = str.split(fullMatch);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">395</strong>        const processedBack = splitByPlaceholder(back, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">397</strong>        let result = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">398</strong>        if (front) result.push(front);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">399</strong>        if (dynamicParts[number] instanceof Array) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">400</strong>            result = result.concat(dynamicParts[number]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">401</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">402</strong>            result.push(dynamicParts[number]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">403</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">404</strong>        if (processedBack.length) result = result.concat(processedBack);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">405</strong>        return result;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">406</strong>    } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">407</strong>        return str ? [str] : [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">408</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">409</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">410</strong></pre></div>
 <div class="line"><div class="doc"><p>Given an array of child JDOM elements, flatten that list of children into a flat array and parse any placeholders in it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">424</strong>const replaceChildrenToFlatArray = (children, dynamicParts) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">425</strong>    let newChildren = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">426</strong>    for (const childString of children) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">427</strong>        newChildren = newChildren.concat(splitByPlaceholder(childString, dynamicParts));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">428</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">429</strong>    const first = newChildren[0];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">430</strong>    const last = newChildren[newChildren.length - 1];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">431</strong>    if (typeof first === 'string' &#38;&#38; !first.trim()) newChildren.shift();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">432</strong>    if (typeof last === 'string' &#38;&#38; !last.trim()) newChildren.pop();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">433</strong>    return newChildren;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">434</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">435</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">413</strong>const replaceChildrenToFlatArray = (children, dynamicParts) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>    let newChildren = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>    for (const childString of children) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>        newChildren = newChildren.concat(splitByPlaceholder(childString, dynamicParts));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>    const first = newChildren[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong>    const last = newChildren[newChildren.length - 1];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">420</strong>    if (typeof first === 'string' &#38;&#38; !first.trim()) newChildren.shift();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">421</strong>    if (typeof last === 'string' &#38;&#38; !last.trim()) newChildren.pop();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">422</strong>    return newChildren;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">424</strong></pre></div>
 <div class="line"><div class="doc"><p>Given a string, replace any placeholder values and return a new string.</p>
-</div><pre class="source javascript"><strong class="lineNumber">437</strong>const replaceInString = (str, dynamicParts) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">438</strong>    if (hasPlaceholder(str)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">439</strong>        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">440</strong>        if (str.trim() === fullMatch) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">441</strong>            return dynamicParts[number];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">442</strong>        } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">443</strong>            const [front, back] = str.split(fullMatch);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">444</strong>            return front + dynamicParts[number] + replaceInString(back, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">445</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">446</strong>    } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">447</strong>        return str;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">448</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">449</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">450</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">426</strong>const replaceInString = (str, dynamicParts) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">427</strong>    if (hasPlaceholder(str)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">428</strong>        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">429</strong>        if (str.trim() === fullMatch) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">430</strong>            return dynamicParts[number];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">431</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">432</strong>            const [front, back] = str.split(fullMatch);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">433</strong>            return front + dynamicParts[number] + replaceInString(back, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">434</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">435</strong>    } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">436</strong>        return str;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">437</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">438</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">439</strong></pre></div>
 <div class="line"><div class="doc"><p>Given an array literal, replace placeholders in it and its children, recursively.</p>
-</div><pre class="source javascript"><strong class="lineNumber">452</strong>const replaceInArrayLiteral = (arr, dynamicParts) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">453</strong>    arr.forEach((val, idx) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">454</strong>        if (isStringLike(val)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">455</strong>            arr[idx] = replaceInString(val.toString(), dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">456</strong>        } else if (val instanceof Array) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">457</strong>            replaceInArrayLiteral(val, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">458</strong>        } else if (typeof val === 'object' &#38;&#38; val !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">459</strong>            replaceInObjectLiteral(val, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">460</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">461</strong>    });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">462</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">463</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">441</strong>const replaceInArrayLiteral = (arr, dynamicParts) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">442</strong>    arr.forEach((val, idx) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">443</strong>        if (isStringLike(val)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">444</strong>            arr[idx] = replaceInString(val.toString(), dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">445</strong>        } else if (val instanceof Array) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">446</strong>            replaceInArrayLiteral(val, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">447</strong>        } else if (typeof val === 'object' &#38;&#38; val !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">448</strong>            replaceInObjectLiteral(val, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">449</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">450</strong>    });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">451</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">452</strong></pre></div>
 <div class="line"><div class="doc"><p>Given an object, replace placeholders in it and its values.</p>
-</div><pre class="source javascript"><strong class="lineNumber">465</strong>const replaceInObjectLiteral = (obj, dynamicParts) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">466</strong>    for (const [prop, val] of Object.entries(obj)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">467</strong>        if (isStringLike(val)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">468</strong>            obj[prop] = replaceInString(val.toString(), dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">469</strong>        } else if (val instanceof Array) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">470</strong>            if (prop === 'children') {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">454</strong>const replaceInObjectLiteral = (obj, dynamicParts) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">455</strong>    for (const [prop, val] of Object.entries(obj)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">456</strong>        if (isStringLike(val)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">457</strong>            obj[prop] = replaceInString(val.toString(), dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">458</strong>        } else if (val instanceof Array) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">459</strong>            if (prop === 'children') {</pre></div>
 <div class="line"><div class="doc"><p>We need to treat children of JDOM objects differently because they need to all be flat arrays, and sometimes for API convenience they&#39;re passed in as nested arrays.</p>
-</div><pre class="source javascript"><strong class="lineNumber">474</strong>                obj.children = replaceChildrenToFlatArray(val, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">475</strong>                for (const child of obj.children) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">476</strong>                    if (typeof val === 'object' &#38;&#38; val !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">477</strong>                        replaceInObjectLiteral(child, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">478</strong>                    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">479</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">480</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">481</strong>                replaceInArrayLiteral(val, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">482</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">483</strong>        } else if (typeof val === 'object' &#38;&#38; val !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">484</strong>            replaceInObjectLiteral(val, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">485</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">486</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">487</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">488</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">463</strong>                obj.children = replaceChildrenToFlatArray(val, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">464</strong>                for (const child of obj.children) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">465</strong>                    if (typeof val === 'object' &#38;&#38; val !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">466</strong>                        replaceInObjectLiteral(child, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">467</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">468</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">469</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">470</strong>                replaceInArrayLiteral(val, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">471</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">472</strong>        } else if (typeof val === 'object' &#38;&#38; val !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">473</strong>            replaceInObjectLiteral(val, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">474</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">475</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">476</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">477</strong></pre></div>
 <div class="line"><div class="doc"><p><code>jdom</code> template tag, using the JDOM parsed templates cache from above.</p>
-</div><pre class="source javascript"><strong class="lineNumber">490</strong>const jdom = (tplParts, ...dynamicParts) =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">479</strong>const jdom = (tplParts, ...dynamicParts) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>The key for our cache is just the string parts, joined together with a unique joiner string.</p>
-</div><pre class="source javascript"><strong class="lineNumber">492</strong>    const cacheKey = tplParts.join('jdom_tpl_joiner');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">493</strong>    try {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">481</strong>    const cacheKey = tplParts.join('jdom_tpl_joiner');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">482</strong>    try {</pre></div>
 <div class="line"><div class="doc"><p>If we don&#39;t have the template in cache, we need to put a translator function in the cache now.</p>
-</div><pre class="source javascript"><strong class="lineNumber">496</strong>        if (!JDOM_CACHE.has(cacheKey)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">497</strong>            const dpPlaceholders = dynamicParts.map((obj, i) =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">485</strong>        if (!JDOM_CACHE.has(cacheKey)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">486</strong>            const dpPlaceholders = dynamicParts.map((obj, i) =&#62; {</pre></div>
 <div class="line"><div class="doc"><p>Different kinds of template values are replaced by different strings, since some of them need to be dealt with differently during parse.</p>
-</div><pre class="source javascript"><strong class="lineNumber">501</strong>                if (obj instanceof Function) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">490</strong>                if (obj instanceof Function) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Function values are treated as event listeners.</p>
-</div><pre class="source javascript"><strong class="lineNumber">503</strong>                    return `jdom_placeholder_function_[${i}]`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">504</strong>                } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">505</strong>                    return `jdom_placeholder_object_[${i}]`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">506</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">507</strong>            });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">508</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">492</strong>                    return `jdom_placeholder_function_[${i}]`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">493</strong>                } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">494</strong>                    return `jdom_placeholder_object_[${i}]`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">495</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">496</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">497</strong></pre></div>
 <div class="line"><div class="doc"><p>Make a new reader, interpolating the template&#39;s static and dynamic parts together.</p>
-</div><pre class="source javascript"><strong class="lineNumber">510</strong>            const reader = new Reader(interpolate(tplParts.map(part =&#62; part.replace(/\s+/g, ' ')), dpPlaceholders));</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">499</strong>            const reader = new Reader(interpolate(tplParts.map(part =&#62; part.replace(/\s+/g, ' ')), dpPlaceholders));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Parse the template and take the first child, if there are more, as the element we care about.</p>
-</div><pre class="source javascript"><strong class="lineNumber">512</strong>            const result = parseJSX(reader)[0];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">513</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">501</strong>            const result = parseJSX(reader)[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">502</strong></pre></div>
 <div class="line"><div class="doc"><p>Put a function into the cache that translates an array of the dynamic parts of a template into the full JDOM for the template.</p>
-</div><pre class="source javascript"><strong class="lineNumber">516</strong>            JDOM_CACHE.set(cacheKey, dynamicParts =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">517</strong>                if (typeof result === 'string') {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">505</strong>            JDOM_CACHE.set(cacheKey, dynamicParts =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">506</strong>                if (typeof result === 'string') {</pre></div>
 <div class="line"><div class="doc"><p>If the result of the template is just a string, replace stuff in the string</p>
-</div><pre class="source javascript"><strong class="lineNumber">519</strong>                    return replaceInString(result, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">520</strong>                } else if (typeof result === 'object') {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">508</strong>                    return replaceInString(result, dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">509</strong>                } else if (typeof result === 'object') {</pre></div>
 <div class="line"><div class="doc"><p>Recall that the template translating functions above mutate the object passed in wherever possible. so we make a brand-new object to represent a new result.</p>
-</div><pre class="source javascript"><strong class="lineNumber">523</strong>                    const target = {};</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">512</strong>                    const target = {};</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Since the non-dynamic parts of JDOM objects are by definition completely JSON serializable, this is a good enough way to deep-copy the cached result of <code>parseJSX()</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">526</strong>                    const template = JSON.parse(JSON.stringify((result)));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">527</strong>                    replaceInObjectLiteral(Object.assign(target, template), dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">528</strong>                    return target;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">529</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">530</strong>                return null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">531</strong>            });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">532</strong>        }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">515</strong>                    const template = JSON.parse(JSON.stringify((result)));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">516</strong>                    replaceInObjectLiteral(Object.assign(target, template), dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">517</strong>                    return target;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">518</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">519</strong>                return null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">520</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">521</strong>        }</pre></div>
 <div class="line"><div class="doc"><p>Now that we have a translator function in the cache, call that to get a new template result.</p>
-</div><pre class="source javascript"><strong class="lineNumber">534</strong>        return JDOM_CACHE.get(cacheKey)(dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">535</strong>    } catch (e) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">536</strong>        console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">537</strong>        return '';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">538</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">539</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">540</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">523</strong>        return JDOM_CACHE.get(cacheKey)(dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">524</strong>    } catch (e) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">525</strong>        console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">526</strong>        return '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">527</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">528</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">529</strong></pre></div>
 <div class="line"><div class="doc"><p>We only expose one public API: <code>jdom</code></p>
-</div><pre class="source javascript"><strong class="lineNumber">542</strong>const exposedNames = {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">543</strong>    jdom,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">544</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">545</strong>if (typeof window === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">546</strong>    for (const name in exposedNames) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">547</strong>        window[name] = exposedNames[name];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">548</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">549</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">550</strong>if (typeof module === 'object' &#38;&#38; typeof module.exports === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">551</strong>    module.exports = exposedNames;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">552</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">553</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">531</strong>const exposedNames = {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">532</strong>    jdom,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">533</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">534</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">535</strong>    for (const name in exposedNames) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">536</strong>        window[name] = exposedNames[name];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">537</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">538</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">539</strong>if (typeof module === 'object' &#38;&#38; typeof module.exports === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">540</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">541</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">542</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

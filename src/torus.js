@@ -122,213 +122,215 @@ const renderJDOM = (node, previous, next) => {
     //> We're rendering a new node in the render tree. Increment counter.
     render_stack ++;
 
-    const isChanged = previous !== next;
-    //> If we need to render a literal DOM Node, just replace
-    //  the old node with the literal node.
-    if (isChanged && next instanceof Node) {
-        // @begindebug
-        if (node === undefined) {
-            render_debug(`Add literal element <${next.tagName}>`);
-        } else {
-            render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
-        }
-        // @enddebug
-        replacePreviousNode(next);
-    //> If we need to render a null (comment) node,
-    //  create and insert a comment node. This might seem
-    //  silly, but it keeps the DOM consistent between
-    //  renders and makes diff simpler.
-    } else if (isChanged && next === null) {
-        // @begindebug
-        if (node === undefined) {
-            render_debug('Add comment node');
-        } else {
-            render_debug(`Replace previous node <${node.tagName}> with comment node`);
-        }
-        // @enddebug
-        replacePreviousNode(tmpNode());
-    //> If we're rendering a string or raw number,
-    //  convert it into a string and add a TextNode.
-    } else if (isChanged && (typeof next === 'string' || typeof next === 'number')) {
-        // @begindebug
-        if (node === undefined) {
-            render_debug(`Add text node "${next}"`);
-        } else {
-            render_debug(`Replace previous node "${previous}" with text node "${next}"`);
-        }
-        // @enddebug
-        replacePreviousNode(document.createTextNode(next));
-    //> If we're rendering an object literal, assume it's a serialized
-    //  JDOM dictionary. This is the meat of the algorithm.
-    } else if (typeof next === 'object') {
-        if (!isObject(previous)) {
-            //> If the previous JDOM doesn't exist or wasn't JDOM, we're adding a completely
-            //  new node into the DOM. Stub an empty `previous`.
-            previous = {
-                tag: null,
-            };
-        }
-        normalizeJDOM(previous);
-        normalizeJDOM(next);
-
-        // @debug
-        render_debug(`Render pass for <${next.tag.toLowerCase()}>:`, true);
-
-        //> If the tags differ, we assume the subtrees will be different
-        //  as well and just start a completely new element. This is efficient
-        //  in practice, reduces the time complexity of the algorithm, and
-        //  an optimization shared with React's reconciler.
-        if (previous.tag !== next.tag || !(node instanceof Node)) {
+    //> We only do diff operations if the previous and next items are not the same.
+    if (previous !== next) {
+        //> If we need to render a literal DOM Node, just replace
+        //  the old node with the literal node.
+        if (next instanceof Node) {
+            // @begindebug
             if (node === undefined) {
-                // @debug
-                render_debug(`Add <${next.tag}>`);
+                render_debug(`Add literal element <${next.tagName}>`);
             } else {
-                // @debug
-                render_debug(`Replace previous node <${node.tagName}> with <${next.tag}`);
-                // new root element, so "reset" previous
-                previous = {};
-                normalizeJDOM(previous);
+                render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
             }
-            replacePreviousNode(document.createElement(next.tag));
-        }
-
-        //> Compare and update attributes
-        for (const attrName in next.attrs) {
-            switch (attrName) {
-                case 'class':
-                    //> JDOM can pass classes as either a single string
-                    //  or an array of strings, so normalize it into an array.
-                    const prevClass = arrayNormalize(previous.attrs.class || []);
-                    const nextClass = arrayNormalize(next.attrs.class);
-
-                    for (const className of nextClass) {
-                        // @debug
-                        render_debug(`Add <${next.tag}> class "${className}"`);
-                        node.classList.add(className);
-                    }
-                    for (const className of prevClass) {
-                        if (!nextClass.includes(className)) {
-                            // @debug
-                            render_debug(`Remove <${next.tag}> class "${className}"`);
-                            node.classList.remove(className);
-                        }
-                    }
-                    break;
-                case 'style':
-                    //> JDOM takes style attributes as a dictionary
-                    //  rather than a string for API ergonomics, so we serialize
-                    //  it differently than other attributes.
-                    const prevStyle = previous.attrs.style || {};
-                    const nextStyle = next.attrs.style;
-
-                    for (const styleKey in nextStyle) {
-                        if (nextStyle[styleKey] !== prevStyle[styleKey]) {
-                            // @debug
-                            render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
-                            node.style[styleKey] = nextStyle[styleKey];
-                        }
-                    }
-                    for (const styleKey in prevStyle) {
-                        if (!(styleKey in next.attrs.style)) {
-                            // @debug
-                            render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
-                            node.style[styleKey] = '';
-                        }
-                    }
-                    break;
-                default:
-                    //> If an attribute is an IDL attribute, we set it
-                    //  through JavaScript properties on the HTML element
-                    //  and not `setAttribute()`. This is necessary for
-                    //  properties like `value` and `indeterminate`.
-                    if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
-                        // @debug
-                        render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
-                        node[attrName] = next.attrs[attrName];
-                    } else {
-                        if (next.attrs[attrName] !== previous.attrs[attrName]) {
-                            // @debug
-                            render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
-                            node.setAttribute(attrName, next.attrs[attrName]);
-                        }
-                    }
-                    break;
+            // @enddebug
+            replacePreviousNode(next);
+        //> If we need to render a null (comment) node,
+        //  create and insert a comment node. This might seem
+        //  silly, but it keeps the DOM consistent between
+        //  renders and makes diff simpler.
+        } else if (next === null) {
+            // @begindebug
+            if (node === undefined) {
+                render_debug('Add comment node');
+            } else {
+                render_debug(`Replace previous node <${node.tagName}> with comment node`);
             }
+            // @enddebug
+            replacePreviousNode(tmpNode());
+        //> If we're rendering a string or raw number,
+        //  convert it into a string and add a TextNode.
+        } else if ((typeof next === 'string' || typeof next === 'number')) {
+            // @begindebug
+            if (node === undefined) {
+                render_debug(`Add text node "${next}"`);
+            } else {
+                render_debug(`Replace previous node "${previous}" with text node "${next}"`);
+            }
+            // @enddebug
+            replacePreviousNode(document.createTextNode(next));
+        //> If we're rendering an object literal, assume it's a serialized
+        //  JDOM dictionary. This is the meat of the algorithm.
+        } else if (isObject(next)) {
+            if (!isObject(previous) || (previous instanceof Node)) {
+                //> If the previous JDOM doesn't exist or wasn't JDOM, we're adding a completely
+                //  new node into the DOM. Stub an empty `previous`.
+                previous = {
+                    tag: null,
+                };
+            }
+            normalizeJDOM(previous);
+            normalizeJDOM(next);
 
-        }
-        //> For any attributes that were removed in the new JDOM,
-        //  also attempt to remove them from the DOM.
-        for (const attrName in previous.attrs) {
-            if (!(attrName in next.attrs)) {
-                if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
+            // @debug
+            render_debug(`Render pass for <${next.tag.toLowerCase()}>:`, true);
+
+            //> If the tags differ, we assume the subtrees will be different
+            //  as well and just start a completely new element. This is efficient
+            //  in practice, reduces the time complexity of the algorithm, and
+            //  an optimization shared with React's reconciler.
+            if (previous.tag !== next.tag || !node) {
+                if (node === undefined) {
                     // @debug
-                    render_debug(`Remove <${next.tag} property ${attrName}`);
-                    //> `null` seems to be the default for most IDL attrs,
-                    //  but even this isn't entirely consistent. This seems
-                    //  like something we should fix as issues come up, not
-                    //  preemptively search for a cross-browser solution.
-                    node[attrName] = null;
+                    render_debug(`Add <${next.tag}>`);
                 } else {
                     // @debug
-                    render_debug(`Remove <${next.tag}> attribute ${attrName}`);
-                    node.removeAttribute(attrName);
+                    render_debug(`Replace previous node <${node.tagName}> with <${next.tag}`);
+                    // new root element, so "reset" previous
+                    previous = {};
+                    normalizeJDOM(previous);
                 }
+                replacePreviousNode(document.createElement(next.tag));
             }
-        }
 
-        //> Compare event handlers
-        const diffEvents = (whole, sub, cb) => {
-            for (const eventName in whole) {
-                const wholeEvents = arrayNormalize(whole[eventName] || []);
-                const subEvents = arrayNormalize(sub[eventName]);
-                for (const handlerFn of wholeEvents) {
-                    if (!subEvents.includes(handlerFn)) {
-                        cb(eventName, handlerFn);
+            //> Compare and update attributes
+            for (const attrName in next.attrs) {
+                switch (attrName) {
+                    case 'class':
+                        //> JDOM can pass classes as either a single string
+                        //  or an array of strings, so normalize it into an array.
+                        const prevClass = arrayNormalize(previous.attrs.class || []);
+                        const nextClass = arrayNormalize(next.attrs.class);
+
+                        for (const className of nextClass) {
+                            // @debug
+                            render_debug(`Add <${next.tag}> class "${className}"`);
+                            node.classList.add(className);
+                        }
+                        for (const className of prevClass) {
+                            if (!nextClass.includes(className)) {
+                                // @debug
+                                render_debug(`Remove <${next.tag}> class "${className}"`);
+                                node.classList.remove(className);
+                            }
+                        }
+                        break;
+                    case 'style':
+                        //> JDOM takes style attributes as a dictionary
+                        //  rather than a string for API ergonomics, so we serialize
+                        //  it differently than other attributes.
+                        const prevStyle = previous.attrs.style || {};
+                        const nextStyle = next.attrs.style;
+
+                        for (const styleKey in nextStyle) {
+                            if (nextStyle[styleKey] !== prevStyle[styleKey]) {
+                                // @debug
+                                render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
+                                node.style[styleKey] = nextStyle[styleKey];
+                            }
+                        }
+                        for (const styleKey in prevStyle) {
+                            if (!(styleKey in next.attrs.style)) {
+                                // @debug
+                                render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
+                                node.style[styleKey] = '';
+                            }
+                        }
+                        break;
+                    default:
+                        //> If an attribute is an IDL attribute, we set it
+                        //  through JavaScript properties on the HTML element
+                        //  and not `setAttribute()`. This is necessary for
+                        //  properties like `value` and `indeterminate`.
+                        if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
+                            // @debug
+                            render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
+                            node[attrName] = next.attrs[attrName];
+                        } else {
+                            if (next.attrs[attrName] !== previous.attrs[attrName]) {
+                                // @debug
+                                render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
+                                node.setAttribute(attrName, next.attrs[attrName]);
+                            }
+                        }
+                        break;
+                }
+
+            }
+            //> For any attributes that were removed in the new JDOM,
+            //  also attempt to remove them from the DOM.
+            for (const attrName in previous.attrs) {
+                if (!(attrName in next.attrs)) {
+                    if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
+                        // @debug
+                        render_debug(`Remove <${next.tag} property ${attrName}`);
+                        //> `null` seems to be the default for most IDL attrs,
+                        //  but even this isn't entirely consistent. This seems
+                        //  like something we should fix as issues come up, not
+                        //  preemptively search for a cross-browser solution.
+                        node[attrName] = null;
+                    } else {
+                        // @debug
+                        render_debug(`Remove <${next.tag}> attribute ${attrName}`);
+                        node.removeAttribute(attrName);
                     }
                 }
             }
-        }
-        diffEvents(next.events, previous.events, (eventName, handlerFn) => {
-            // @debug
-            render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
-            node.addEventListener(eventName, handlerFn);
-        });
-        diffEvents(previous.events, next.events, (eventName, handlerFn) => {
-            // @debug
-            render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
-            node.removeEventListener(eventName, handlerFn);
-        });
 
-        //> Render children recursively
-        const nodeChildren = node.childNodes;
-        const prevChildren = previous.children;
-        const nextChildren = next.children;
-        if (nextChildren.length + prevChildren.length > 0) {
-            if (prevChildren.length < nextChildren.length) {
-                let i;
-                for (i = 0; i < prevChildren.length; i ++) {
-                    renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
+            //> Compare event handlers
+            const diffEvents = (whole, sub, cb) => {
+                for (const eventName in whole) {
+                    const wholeEvents = arrayNormalize(whole[eventName] || []);
+                    const subEvents = arrayNormalize(sub[eventName]);
+                    for (const handlerFn of wholeEvents) {
+                        if (!subEvents.includes(handlerFn)) {
+                            cb(eventName, handlerFn);
+                        }
+                    }
                 }
-                while (i < nextChildren.length) {
-                    node.appendChild(renderJDOM(undefined, undefined, nextChildren[i]));
-                    i ++;
-                }
-            } else {
-                let i;
-                for (i = 0; i < nextChildren.length; i ++) {
-                    renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
-                }
-                while (i < prevChildren.length) {
-                    // @debug
-                    render_debug(`Remove child <${nodeChildren[i].tagName}>`);
-                    //> If we need to remove a child element, removing
-                    //  it from the DOM immediately might lead to race conditions.
-                    //  instead, we add a placeholder and remove the placeholder
-                    //  at the end.
-                    const tmp = tmpNode();
-                    node.replaceChild(tmp, nodeChildren[i]);
-                    placeholders.set(tmp, null);
-                    i++;
+            }
+            diffEvents(next.events, previous.events, (eventName, handlerFn) => {
+                // @debug
+                render_debug(`Set new ${eventName} event listener on <${next.tag}>`);
+                node.addEventListener(eventName, handlerFn);
+            });
+            diffEvents(previous.events, next.events, (eventName, handlerFn) => {
+                // @debug
+                render_debug(`Remove ${eventName} event listener on <${next.tag}>`);
+                node.removeEventListener(eventName, handlerFn);
+            });
+
+            //> Render children recursively
+            const nodeChildren = node.childNodes;
+            const prevChildren = previous.children;
+            const nextChildren = next.children;
+            if (nextChildren.length + prevChildren.length > 0) {
+                if (prevChildren.length < nextChildren.length) {
+                    let i;
+                    for (i = 0; i < prevChildren.length; i ++) {
+                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
+                    }
+                    while (i < nextChildren.length) {
+                        node.appendChild(renderJDOM(undefined, undefined, nextChildren[i]));
+                        i ++;
+                    }
+                } else {
+                    let i;
+                    for (i = 0; i < nextChildren.length; i ++) {
+                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
+                    }
+                    while (i < prevChildren.length) {
+                        // @debug
+                        render_debug(`Remove child <${nodeChildren[i].tagName}>`);
+                        //> If we need to remove a child element, removing
+                        //  it from the DOM immediately might lead to race conditions.
+                        //  instead, we add a placeholder and remove the placeholder
+                        //  at the end.
+                        const tmp = tmpNode();
+                        node.replaceChild(tmp, nodeChildren[i]);
+                        placeholders.set(tmp, null);
+                        i++;
+                    }
                 }
             }
         }

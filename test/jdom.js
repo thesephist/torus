@@ -32,13 +32,19 @@ describe('jdom template tag', () => {
     compare(
         'empty string',
         jdom``,
-        undefined
+        null
+    );
+
+    compare(
+        'text node',
+        jdom`torus`,
+        'torus'
     );
 
     compare(
         'comment',
         jdom`<!--- some comment that should be ignored -->`,
-        undefined,
+        null,
     );
 
     const tn = document.createElement('video');
@@ -280,6 +286,20 @@ describe('jdom template tag', () => {
             ]}
         );
 
+        const fnA = () => {};
+        compare(
+            'deeply nested template variables',
+            jdom`<ul><li><button onclick="${fnA}">${{b: 'a'}}</button>${'test'}</li></ul>`,
+            {tag: 'ul', children: [
+                {tag: 'li', children: [
+                    {tag: 'button', events: {
+                        click: [fnA],
+                    }, children: [{b: 'a'}]},
+                    'test',
+                ]},
+            ]}
+        );
+
         compare(
             'HTML entities in children',
             jdom`<span>&#60;test&#62;</span>`,
@@ -293,11 +313,13 @@ describe('jdom template tag', () => {
             ${42}
             <li>Second</li>
             ${tmpNode}
+            last
             </div>`,
             {tag: 'div', children: [
-                ' First 42 ',
+                ' First ', 42,
                 {tag: 'li', children: ['Second']},
                 tmpNode,
+                ' last ',
             ]}
         );
 

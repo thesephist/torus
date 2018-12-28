@@ -170,7 +170,11 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
     //> If the opening tag is just the tag name (the most common case), take
     //  a shortcut and run a simpler algorithm.
     if (tplParts[0][0] === '!') {
-        return null; // comment
+        // comment
+        return {
+            jdom: null,
+            selfClosing: true,
+        };
     } else if (tplParts.length === 1 && !tplParts[0].includes(' ')) {
         const selfClosing = tplParts[0].endsWith('/');
         return {
@@ -196,7 +200,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
     //  it treats class lists and style dictionaries separately, and adds function
     //  values as event handlers.
     const commit = (key, val) => {
-        if (typeof val === 'function') {
+        if (typeof val === 'string' && val.startsWith('jdom_placeholder_function_')) {
             events[key.replace('on', '')] = [val];
         } else {
             if (key === 'class') {
@@ -437,16 +441,6 @@ const parseJSX = reader => {
             } else {
                 handleString(next);
             }
-        //> Allow the template token to be an array of literal elements.
-        //  this makes rendering lists of nodes really easy.
-        } else if (next instanceof Array && isNode(next[0])) {
-            for (const component of next) {
-                commit();
-                currentElement = component;
-            }
-        } else if (isNode(next)) {
-            commit();
-            currentElement = next;
         //> If none of the above conditions match, treat it as if it were a string
         } else {
             handleString(next);
@@ -459,16 +453,117 @@ const parseJSX = reader => {
     return result;
 }
 
+//> Cache for `jdom`, keyed by the string parts, value is a function that takes the dynamic
+//  parts as input and returns the result of parseJSX
+const JDOM_CACHE = new Map();
+const JDOM_PLACEHOLDER_RE = /jdom_placeholder_(?:function|object|node)_\[(\d+)\]/;
+const hasPlaceholder = str => typeof str == 'string' && str.includes('jdom_placeholder_');
+
+const splitByPlaceholder = (str, dynamicParts) => {
+    if (hasPlaceholder(str)) {
+        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);
+        const [front, back] = str.split(fullMatch);
+        const processedBack = splitByPlaceholder(back, dynamicParts);
+
+        let result = [];
+        if (front) result.push(front);
+        if (dynamicParts[number] instanceof Array) {
+            result = result.concat(dynamicParts[number]);
+        } else {
+            result.push(dynamicParts[number]);
+        }
+        if (processedBack.length) result = result.concat(processedBack);
+        return result;
+    } else {
+        return str ? [str] : [];
+    }
+}
+const replaceChildrenToFlatArray = (children, dynamicParts) => {
+    let newChildren = [];
+    for (const childString of children) {
+        newChildren = newChildren.concat(splitByPlaceholder(childString, dynamicParts));
+    }
+    return newChildren.filter(s => (typeof s !== 'string') || s.trim());
+}
+const replaceInString = (str, dynamicParts) => {
+    if (hasPlaceholder(str)) {
+        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);
+        if (str.trim() === fullMatch) {
+            return dynamicParts[number];
+        } else {
+            const [front, back] = str.split(fullMatch);
+            return front + dynamicParts[number] + replaceInString(back, dynamicParts);
+        }
+    } else {
+        return str;
+    }
+}
+const replaceInArrayLiteral = (arr, dynamicParts) => {
+    arr.forEach((val, idx) => {
+        if (typeof val === 'string' || typeof val === 'number') {
+            arr[idx] = replaceInString(val.toString(), dynamicParts);
+        } else if (val instanceof Array) {
+            replaceInArrayLiteral(val, dynamicParts);
+        } else if (typeof val === 'object' && val !== null) {
+            replaceInObjectLiteral(val, dynamicParts);
+        }
+    });
+}
+const replaceInObjectLiteral = (obj, dynamicParts) => {
+    for (const [prop, val] of Object.entries(obj)) {
+        if (typeof val === 'string' || typeof val === 'number') {
+            obj[prop] = replaceInString(val.toString(), dynamicParts);
+        } else if (val instanceof Array) {
+            if (prop === 'children') {
+                obj.children = replaceChildrenToFlatArray(val, dynamicParts);
+                for (const child of obj.children) {
+                    if (typeof val === 'object' && val !== null) {
+                        replaceInObjectLiteral(child, dynamicParts);
+                    }
+                }
+            } else {
+                replaceInArrayLiteral(val, dynamicParts);
+            }
+        } else if (typeof val === 'object' && val !== null) {
+            replaceInObjectLiteral(val, dynamicParts);
+        }
+    }
+}
+
+
 //> `jdom` template tag. It just calls `parseJSX()` and returns the first parsed element
 const jdom = (tplParts, ...dynamicParts) => {
+    const cacheKey = tplParts.join('jdom_template_joiner');
     try {
-        const reader = new Reader(
-            tplParts.map(part => part.replace(/\s+/g, ' ')),
-            dynamicParts
-        );
-        return parseJSX(reader)[0];
+        if (!JDOM_CACHE.has(cacheKey)) {
+            const dpPlaceholders = dynamicParts.map((obj, i) => {
+                if (isNode(obj)) {
+                    return `jdom_placeholder_node_[${i}]`;
+                } else if (obj instanceof Function) {
+                    return `jdom_placeholder_function_[${i}]`;
+                } else {
+                    return `jdom_placeholder_object_[${i}]`;
+                }
+            });
+            const reader = new Reader(tplParts.map(part => part.replace(/\s+/g, ' ')), dpPlaceholders);
+            const result = parseJSX(reader)[0];
+
+            JDOM_CACHE.set(cacheKey, dynamicParts => {
+                if (typeof result === 'string') {
+                    return replaceInString(result, dynamicParts);
+                } else if (typeof result === 'object') {
+                    const target = {};
+                    const template = JSON.parse(JSON.stringify((result)));
+                    replaceInObjectLiteral(Object.assign(target, template), dynamicParts);
+                    return target;
+                }
+                return null;
+            });
+        }
+        return JDOM_CACHE.get(cacheKey)(dynamicParts);
     } catch (e) {
         console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);
+        return '';
     }
 }
 

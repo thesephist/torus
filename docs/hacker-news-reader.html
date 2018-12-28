@@ -68,11 +68,11 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">54</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">55</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">56</strong></pre></div>
-<div class="line"><div class="doc"><p>Hacker News&#39;s text posts have content in escaped HTML. This is the most consistent way I&#39;ve found to decode that easily. Torus&#39;s HTML renderer can render HTML entities encoded with the char code, but not names.</p>
+<div class="line"><div class="doc"><p>Hacker News&#39;s text posts have content in escaped HTML, so this is the easiest way to display that HTML through Torus&#39;s renderer -- create a wrapper element, and pass that off to JDOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">60</strong>const decodeHTML = html =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">61</strong>    const textarea = document.createElement("textarea");</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>    textarea.innerHTML = html;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">63</strong>    return textarea.value.replace(/&#38;/g, '&#38;#38;');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">61</strong>    const container = document.createElement('span');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>    container.innerHTML = html</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">63</strong>    return container;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">64</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">65</strong></pre></div>
 <div class="line"><div class="doc"><p>Shortcut function to go from a username to the link to the user&#39;s profile on news.ycombinator.com. I didn&#39;t make a user view in this app because I personally rarely visit profiles on HN.</p>

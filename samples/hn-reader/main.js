@@ -54,14 +54,13 @@ const formatDate = unix => {
     }
 }
 
-//> Hacker News's text posts have content in escaped HTML. This is the
-//  most consistent way I've found to decode that easily. Torus's HTML
-//  renderer can render HTML entities encoded with the char code, but not names.
+//> Hacker News's text posts have content in escaped HTML, so this
+//  is the easiest way to display that HTML through Torus's renderer --
+//  create a wrapper element, and pass that off to JDOM.
 const decodeHTML = html => {
-    const textarea = document.createElement("textarea");
-    textarea.innerHTML = html;
-    const markup = textarea.value.replace(/&/g, '&#38;');
-    return jdom(['<span>' + markup + '</span>']);
+    const container = document.createElement('span');
+    container.innerHTML = html
+    return container;
 }
 
 //> Shortcut function to go from a username to the link to the user's profile

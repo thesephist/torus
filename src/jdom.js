@@ -9,6 +9,8 @@ const isNode = (typeof Node === 'undefined') ? isJDOM : (
     o => o instanceof Node || isJDOM(o)
 );
 
+const isStringLike = x => typeof x === 'string' || typeof x === 'number';
+
 //> Clip the end of a given string by the length of a substring
 const clipStringEnd = (base, substr) => {
     return base.substr(0, base.length - substr.length);
@@ -22,7 +24,7 @@ const decodeEntity = entity => {
 //  this is particularly useful when objects and strings are mixed in an attribute value.
 const interpolate = (tplParts, dynamicParts) => {
     let str = tplParts[0];
-    for (let i = 1; i <= dynamicParts.length; i ++) {
+    for (let i = 1; i <= dynamicParts.length; i++) {
         str += dynamicParts[i - 1] + tplParts[i];
     }
     return str;
@@ -40,68 +42,26 @@ const READER_END = [];
 //  directly into the renderer.
 class Reader {
 
-    constructor(stringParts, dynamicParts) {
-        //> The major index which points to the item in `this.parts`
-        //  that contains our current token.
+    constructor(content) {
         this.idx = 0;
-        //> The minor (sub) index is nonzero iff the major index points to
-        //  a string, and points to the character inside that string that's our
-        //  current token.
-        this.subIdx = 0;
-        this.parts = [stringParts[0]];
-
-        //> Parse the string and dynamic (object, function) parts
-        //  into a single heterogeneous array. We'll read from this
-        //  using two indexes above.
-        for (let i = 1; i < stringParts.length; i++) {
-            this.parts.push(dynamicParts[i - 1]);
-            this.parts.push(stringParts[i]);
-        }
-    }
-
-    //> Trim whitespace around the entire template.
-    trim() {
-        const l = this.parts.length;
-        this.parts[0] = this.parts[0].replace(/^\s+/g, '');
-        this.parts[l - 1] = this.parts[l - 1].replace(/\s+$/g, '');
+        this.content = content;
     }
 
     //> Returns the next token (like a `generator.next()`), compatible
     //  with the heterogeneous nature of the template.
     next() {
-        const len = this.parts.length;
-        const currentPart = this.parts[this.idx];
-        //> We allow the reader index pointer to go one over the length
-        //  of the template -- that represents `READER_END`. This is also
-        //  helpful because we allow the reader to be backtracked.
-        const nextIndex = this.idx >= len ? len : this.idx + 1;
-        //> Read character-by-character if the part is a string
-        if (typeof currentPart === 'string') {
-            const char = currentPart[this.subIdx] || '';
-            if (++this.subIdx >= currentPart.length) {
-                this.idx = nextIndex;
-                this.subIdx = 0;
-            }
-            return char;
-        } else if (this.idx >= len) {
-            //> If the index goes more than one over the template length,
-            //  return `READER_END`
-            return READER_END;
-        } else {
-            this.idx = nextIndex;
-            return currentPart;
+        let char = this.content[this.idx ++] || READER_END;
+        if (this.idx > this.content.length) {
+            this.idx = this.content.length;
         }
+        return char;
     }
 
     //> Move back the token pointer one place.
     backtrack() {
-        if (this.subIdx !== 0) {
-            this.subIdx --;
-        } else {
-            this.idx = this.idx <= 1 ? 0 : this.idx - 1;
-            if (typeof this.parts[this.idx] === 'string') {
-                this.subIdx = this.parts[this.idx].length - 1;
-            }
+        this.idx --;
+        if (this.idx < 0) {
+            this.idx = 0;
         }
     }
 
@@ -109,45 +69,36 @@ class Reader {
     //  but not including the substring. In practice this is achieved
     //  by leaning on `#readUntil()`, and then backtracking.
     readUpto(substr) {
-        const result = this.readUntil(substr);
-        const strings = result[0];
-        strings[strings.length - 1] = clipStringEnd(strings[strings.length - 1], substr);
-
-        let count = substr.length;
-        while (count--) {
-            this.backtrack();
-        }
-        return result;
+        const rest = this.content.substr(this.idx);
+        const nextIdx = rest.indexOf(substr);
+        return this.readToNextIdx(nextIdx);
     }
 
     //> Read up to and including a _contiguous_ substring, or read until
     //  the end of the template.
     readUntil(substr) {
-        const strings = [''];
-        const objects = [];
+        const rest = this.content.substr(this.idx);
+        const nextIdx = rest.indexOf(substr) + substr.length;
+        return this.readToNextIdx(nextIdx);
+    }
 
-        let next;
-        //> Read until the read queue of strings ends in the substring, or the end
-        while (!strings[strings.length - 1].endsWith(substr) && next !== READER_END) {
-            next = this.next();
-            if (next === READER_END) {
-                break;
-            } else if (typeof next === 'string') {
-                strings[strings.length - 1] += next;
-            } else {
-                objects.push(next);
-                strings.push('');
-            }
+    readToNextIdx(nextIdx) {
+        const rest = this.content.substr(this.idx);
+        if (nextIdx === -1) {
+            this.idx = this.content.length;
+            return rest;
+        } else {
+            const part = rest.substr(0, nextIdx);
+            this.idx += nextIdx;
+            return part;
         }
-        return [strings, objects];
     }
 
     //> Remove some substring from the end of the template, if it ends in the substring.
     //  This also returns whether the given substring was a valid ending substring.
     clipEnd(substr) {
-        const last = this.parts[this.parts.length - 1];
-        if (last.endsWith(substr)) {
-            this.parts[this.parts.length - 1] = clipStringEnd(last, substr);
+        if (this.content.endsWith(substr)) {
+            this.content = clipStringEnd(this.content, substr);
             return true;
         }
         return false;
@@ -165,21 +116,21 @@ const kebabToCamel = kebabStr => {
 }
 
 //> Pure function to parse the contents of an HTML opening tag to a JDOM stub
-const parseOpeningTagContents = (tplParts, dynamicParts) => {
+const parseOpeningTagContents = content => {
 
     //> If the opening tag is just the tag name (the most common case), take
     //  a shortcut and run a simpler algorithm.
-    if (tplParts[0][0] === '!') {
+    if (content[0] === '!') {
         // comment
         return {
             jdom: null,
             selfClosing: true,
         };
-    } else if (tplParts.length === 1 && !tplParts[0].includes(' ')) {
-        const selfClosing = tplParts[0].endsWith('/');
+    } else if (!content.includes(' ')) {
+        const selfClosing = content.endsWith('/');
         return {
             jdom: {
-                tag: selfClosing ? clipStringEnd(tplParts[0], '/') : tplParts[0],
+                tag: selfClosing ? clipStringEnd(content, '/') : content,
                 attrs: {},
                 events: {},
             },
@@ -188,8 +139,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
     }
 
     //> Make another reader to read the tag contents
-    const reader = new Reader(tplParts, dynamicParts);
-    reader.trim();
+    const reader = new Reader(content.trim());
     const selfClosing = reader.clipEnd('/');
 
     let tag = '';
@@ -225,8 +175,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
 
     //> Read the individual tokens into a list of higher level tokens:
     //  things that may be attribute names, and values.
-    let head = [''];
-    let head_obj = [];
+    let head = '';
     //> Are we waiting to read an attribute value?
     let waitingForAttr = false;
     //> Are we in a quoted attribute value?
@@ -250,19 +199,9 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
     //> Read from the list of currently read characters/parts
     //  and commit the result as a token, interpolating any spread-out
     //  string parts.
-    const commitToken = (force) => {
-        head.reverse();
-        if (head.length == 2 && head[0] === '' && head[1] === '') {
-            if (head_obj.length === 1 && nextType === TYPE_VALUE) {
-                push(TYPE_VALUE, head_obj[0], force);
-            } else {
-                push(nextType, interpolate(head, head_obj), force);
-            }
-        } else {
-            push(nextType, interpolate(head, head_obj).trim(), force);
-        }
-        head = [''];
-        head_obj = [];
+    const commitToken = force => {
+        push(nextType, head.trim(), force);
+        head = '';
     }
     //> Iterate through each read character or object from the reader and parse
     //  the token stream into larger tokens.
@@ -271,7 +210,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             //> Equals sign denotes the start of an attribute value unless in quotes
             case '=':
                 if (inQuotes) {
-                    head[0] += next;
+                    head += next;
                 } else {
                     commitToken();
                     waitingForAttr = true;
@@ -283,7 +222,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             //  if we're not in quotes.
             case ' ':
                 if (inQuotes) {
-                    head[0] += next;
+                    head += next;
                 } else if (!waitingForAttr) {
                     commitToken();
                     nextType = TYPE_KEY;
@@ -293,7 +232,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
             case '\\':
                 if (inQuotes) {
                     next = reader.next();
-                    head[0] += next;
+                    head += next;
                 }
                 break;
             //> If we're in quotes, '"' escapes quotes. Otherwise, it opens
@@ -309,15 +248,7 @@ const parseOpeningTagContents = (tplParts, dynamicParts) => {
                 break;
             default:
                 //> Append all other characters to the head
-                if (typeof next === 'string') {
-                    head[0] += next;
-                } else {
-                    //> If we get a non-string value, append it to the array
-                    //  of non-string values (`head_obj`) and push a new
-                    //  contiguous string onto the string list.
-                    head_obj.unshift(next);
-                    head.unshift('');
-                }
+                head += next;
                 waitingForAttr = false;
                 break;
         }
@@ -412,7 +343,7 @@ const parseJSX = reader => {
                 reader.backtrack();
                 //> Read and parse the contents of the tag up to the end of
                 //  the opening tag.
-                const result = parseOpeningTagContents(...reader.readUpto('>'));
+                const result = parseOpeningTagContents(reader.readUpto('>'));
                 reader.next(); // read the '>'
                 currentElement = result && result.jdom;
                 //> If the current element is a full-fledged element (and not a comment
@@ -437,7 +368,7 @@ const parseJSX = reader => {
         } else if (typeof next === 'string') {
             //> If an HTML entity is encoded (e.g. &#60; is '<'), decode it and handle it.
             if (next === '&') {
-                handleString(decodeEntity(next + reader.readUntil(';')[0][0]));
+                handleString(decodeEntity(next + reader.readUntil(';')));
             } else {
                 handleString(next);
             }
@@ -483,7 +414,11 @@ const replaceChildrenToFlatArray = (children, dynamicParts) => {
     for (const childString of children) {
         newChildren = newChildren.concat(splitByPlaceholder(childString, dynamicParts));
     }
-    return newChildren.filter(s => (typeof s !== 'string') || s.trim());
+    const first = newChildren[0];
+    const last = newChildren[newChildren.length - 1];
+    if (typeof first === 'string' && !first.trim()) newChildren.shift();
+    if (typeof last === 'string' && !last.trim()) newChildren.pop();
+    return newChildren;
 }
 const replaceInString = (str, dynamicParts) => {
     if (hasPlaceholder(str)) {
@@ -500,7 +435,7 @@ const replaceInString = (str, dynamicParts) => {
 }
 const replaceInArrayLiteral = (arr, dynamicParts) => {
     arr.forEach((val, idx) => {
-        if (typeof val === 'string' || typeof val === 'number') {
+        if (isStringLike(val)) {
             arr[idx] = replaceInString(val.toString(), dynamicParts);
         } else if (val instanceof Array) {
             replaceInArrayLiteral(val, dynamicParts);
@@ -511,7 +446,7 @@ const replaceInArrayLiteral = (arr, dynamicParts) => {
 }
 const replaceInObjectLiteral = (obj, dynamicParts) => {
     for (const [prop, val] of Object.entries(obj)) {
-        if (typeof val === 'string' || typeof val === 'number') {
+        if (isStringLike(val)) {
             obj[prop] = replaceInString(val.toString(), dynamicParts);
         } else if (val instanceof Array) {
             if (prop === 'children') {
@@ -533,7 +468,7 @@ const replaceInObjectLiteral = (obj, dynamicParts) => {
 
 //> `jdom` template tag. It just calls `parseJSX()` and returns the first parsed element
 const jdom = (tplParts, ...dynamicParts) => {
-    const cacheKey = tplParts.join('jdom_template_joiner');
+    const cacheKey = tplParts.join('jdom_tpl_joiner');
     try {
         if (!JDOM_CACHE.has(cacheKey)) {
             const dpPlaceholders = dynamicParts.map((obj, i) => {
@@ -545,7 +480,7 @@ const jdom = (tplParts, ...dynamicParts) => {
                     return `jdom_placeholder_object_[${i}]`;
                 }
             });
-            const reader = new Reader(tplParts.map(part => part.replace(/\s+/g, ' ')), dpPlaceholders);
+            const reader = new Reader(interpolate(tplParts.map(part => part.replace(/\s+/g, ' ')), dpPlaceholders));
             const result = parseJSX(reader)[0];
 
             JDOM_CACHE.set(cacheKey, dynamicParts => {

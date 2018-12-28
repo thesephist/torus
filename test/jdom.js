@@ -316,8 +316,9 @@ describe('jdom template tag', () => {
             last
             </div>`,
             {tag: 'div', children: [
-                ' First ', 42,
+                ' First ', 42, ' ',
                 {tag: 'li', children: ['Second']},
+                ' ',
                 tmpNode,
                 ' last ',
             ]}

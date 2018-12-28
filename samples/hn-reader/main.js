@@ -66,9 +66,10 @@ const decodeHTML = html => {
 //> Shortcut function to go from a username to the link to the user's profile
 //  on news.ycombinator.com. I didn't make a user view in this app
 //  because I personally rarely visit profiles on HN.
+const stopProp = evt => evt.stopPropagation();
 const userLink = username => {
     const href = `https://news.ycombinator.com/user?id=${username}`;
-    return jdom`<a href="${href}" target="_blank" noreferrer>${username}</a>`;
+    return jdom`<a href="${href}" target="_blank" onclick="${stopProp}" noreferrer>${username}</a>`;
 }
 
 //> ## Records and Stores
@@ -152,13 +153,15 @@ class StoryStore extends StoreOf(Story) {
     //  It could be more efficient, but it works, and flipping pages is
     //  not super frequent in the average HN reader use case, so it's not a catastrophe.
     nextPage() {
-        this.start ++;
-        this.reset();
-        this.fetch();
+        this.gotoPage(this.start + 1);
     }
 
     previousPage() {
-        this.start = Math.max(0, this.start - 1);
+        this.gotoPage(Math.max(0, this.start - 1));
+    }
+
+    gotoPage(pageNumber) {
+        this.start = pageNumber;
         this.reset();
         this.fetch();
     }
@@ -309,7 +312,7 @@ class StoryListing extends StyledComponent {
                 <div class="title">${attrs.order ? attrs.order + '.' : ''} ${title}</div>
                 <div class="url ${(url || !this.expanded) ? 'mono' : 'content'}">
                     ${url ? (
-                        jdom`<a href="${url}" target="_blank" noreferrer>${url}</a>`
+                        jdom`<a href="${url}" target="_blank" onclick="${stopProp}" noreferrer>${url}</a>`
                     ) : text}
                 </div>
                 <div class="meta">
@@ -408,7 +411,7 @@ class CommentListing extends StyledComponent {
                 |
                 ${userLink(author)}
                 |
-                ${kids.length} replies</div>
+                ${kids.length === 1 ? '1 reply' : kids.length + ' replies'}</div>
             <div class="text">${decodeHTML(text)}</div>
             ${!this.folded ? (jdom`<div class="children">
                 ${this.kidsList.node}
@@ -450,7 +453,20 @@ class StoryList extends Styled(ListOf(StoryListing)) {
     styles() {
         return {
             'padding-left': 0,
+            '.loadingMessage': {
+                'margin': '52px 0',
+                'font-style': 'italic',
+            },
         }
+    }
+
+    compose() {
+        const nodes = this.nodes;
+        //> On slow connections, the list of stories may take a second or two to load. Rather
+        //  than awkwardly showing an empty list wit no stories, let's show a message.
+        return jdom`<ul>
+            ${nodes.length ? nodes : jdom`<div class="loadingMessage">loading your stories...</div>`}
+        </ul>`;
     }
 
 }
@@ -508,6 +524,7 @@ class App extends StyledComponent {
 
         this.nextPage = this.nextPage.bind(this);
         this.previousPage = this.previousPage.bind(this);
+        this.homeClick = this.homeClick.bind(this);
 
         //> Define our routing actions.
         this.bind(router, ([name, params]) => {
@@ -548,6 +565,9 @@ class App extends StyledComponent {
             //> These styles still cascade, so this styles all links on the page
             'a': {
                 'color': BRAND_COLOR,
+                '&:visited': {
+                    'color': '#a4abbb',
+                },
             },
             //> This styles all buttons on the page
             'button': {
@@ -596,6 +616,11 @@ class App extends StyledComponent {
         this.resetScroll();
     }
 
+    homeClick() {
+        router.go('/');
+        this.stories.gotoPage(0);
+    }
+
     //> When views switch, it's nice to automatically scroll up to the top of the page
     //  to read the new stuff. This does that.
     resetScroll() {
@@ -604,7 +629,7 @@ class App extends StyledComponent {
 
     compose() {
         return jdom`<main>
-            <h1 onclick="${() => router.go('/')}">
+            <h1 onclick="${this.homeClick}">
                 ${this.activePage ? '👈' : '🏠'} Hacker News
             </h1>
             ${this.activeStory ? (

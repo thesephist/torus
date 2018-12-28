@@ -60,7 +60,8 @@ const formatDate = unix => {
 const decodeHTML = html => {
     const textarea = document.createElement("textarea");
     textarea.innerHTML = html;
-    return textarea.value.replace(/&/g, '&#38;');
+    const markup = textarea.value.replace(/&/g, '&#38;');
+    return jdom(['<span>' + markup + '</span>']);
 }
 
 //> Shortcut function to go from a username to the link to the user's profile

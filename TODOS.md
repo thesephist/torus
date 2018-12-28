@@ -1,6 +1,6 @@
 # Torus To-dos
 
-- [ ] `jdom` needs better error handling.
+- [-] "Saved for later" stories list tab feature on the hn reader. URL should be `/saved`. Use localstorage, save an array of IDs.
 
 - [ ] Concurrency
     - Yielding to the browser at the component level. Treat each Component#render or renderJDOM() as a separately, always-deferrable async event. This gets the interactivity / CPU time benefits of concurrent React.

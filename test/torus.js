@@ -92,6 +92,21 @@ describe('renderJDOM', () => {
                 node.classList.contains('third-class').should.be.true;
             });
 
+            it('should remove old classes if the new JDOM has no class array', () => {
+                const prev = {
+                    tag: 'img',
+                    attrs: {class: ['firstClass', 'second_class']},
+                }
+                const next = {
+                    tag: 'img',
+                }
+
+                let node = render(prev);
+                node = renderJDOM(node, prev, next);
+                node.classList.contains('firstClass').should.be.false;
+                node.classList.contains('second_class').should.be.false;
+            });
+
         });
 
         describe('style', () => {

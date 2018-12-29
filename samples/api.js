@@ -2,7 +2,7 @@
 
 //> ## JDOM
 
-//> Torus, like React, Preact, and VUe, uses a virtual DOM to reconcile
+//> Torus, like React, Preact, and Vue, uses a virtual DOM to reconcile
 //  differences between a previous render of a component and the new render
 //  of a component before committing any changes to the DOM. To run the reconciliation
 //  algorithm, we need an intermediate representation of the component render tree
@@ -17,7 +17,7 @@ null; // <!---->
 
 //> HTML elements are represented with an object with four keys: **tag**,
 //  **attrs**, **events**, and **children**. `tag` is the name of the HTML
-//  tag for the element. All fields are optional, and `tag` will default to `'div'`.
+//  tag for the element. All fields are optional, except `tag`, which is required.
 const el = {
     tag: 'ul',
     attrs: {},

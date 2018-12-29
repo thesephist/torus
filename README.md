@@ -14,7 +14,7 @@ Torus also has an annotated, easy to read version of the entire (pretty concise)
 
 ### Small and lightweight
 
-Torus has no production dependencies, requires no build step to take advantage of all of its features, and weighs in at under 5kb gzipped including the templating engine, renderer, component system, and CSS-in-JS wrapper. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
+Torus has no production dependencies, requires no build step to take advantage of all of its features, and weighs in at under 5kB gzipped including the templating engine, renderer, component system, and CSS-in-JS wrapper. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
 
 ### Portable across the web platform
 

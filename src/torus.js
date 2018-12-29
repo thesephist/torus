@@ -9,9 +9,8 @@ const DEBUG_RENDER = true;
 
 const repeat = (str, count) => {
     let s = '';
-    while (count > 0) {
+    while (count -- > 0) {
         s += str;
-        count --;
     }
     return s;
 }
@@ -67,16 +66,15 @@ const isObject = o => typeof o === 'object' && o !== null;
 //  in our usage so far. `normalizeJDOM` is a hot path in rendering,
 //  so we need it as fast as it can be.
 const normalizeJDOM = jdom => {
-    if (!('tag' in jdom)) jdom.tag = 'div';
-    if (!('attrs' in jdom)) jdom.attrs = {};
-    if (!('events' in jdom)) jdom.events = {};
-    if (!('children' in jdom)) jdom.children = [];
+    if (jdom.attrs === undefined) jdom.attrs = {};
+    if (jdom.events === undefined) jdom.events = {};
+    if (jdom.children === undefined) jdom.children = [];
 }
 
 //> Quick shorthand to normalize either 1. a single value or 2. an array
 //  of values into an array of values. This is useful because JDOM
 //  accepts either into things like `attrs.class` and `events.<name>`.
-const arrayNormalize = data => data instanceof Array ? data : [data];
+const arrayNormalize = data => Array.isArray(data) ? data : [data];
 
 //> We use comment nodes as placeholder nodes because they're lightweight
 //  and invisible.
@@ -194,13 +192,13 @@ const renderJDOM = (node, previous, next) => {
             }
 
             //> Compare and update attributes
-            for (const attrName in next.attrs) {
+            for (const attrName of Object.keys(next.attrs)) {
                 switch (attrName) {
                     case 'class':
                         //> JDOM can pass classes as either a single string
                         //  or an array of strings, so normalize it into an array.
                         const prevClass = arrayNormalize(previous.attrs.class || []);
-                        const nextClass = arrayNormalize(next.attrs.class);
+                        const nextClass = arrayNormalize(next.attrs.class || []);
 
                         for (const className of nextClass) {
                             // @debug
@@ -220,17 +218,17 @@ const renderJDOM = (node, previous, next) => {
                         //  rather than a string for API ergonomics, so we serialize
                         //  it differently than other attributes.
                         const prevStyle = previous.attrs.style || {};
-                        const nextStyle = next.attrs.style;
+                        const nextStyle = next.attrs.style || {};
 
-                        for (const styleKey in nextStyle) {
+                        for (const styleKey of Object.keys(nextStyle)) {
                             if (nextStyle[styleKey] !== prevStyle[styleKey]) {
                                 // @debug
                                 render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
                                 node.style[styleKey] = nextStyle[styleKey];
                             }
                         }
-                        for (const styleKey in prevStyle) {
-                            if (!(styleKey in next.attrs.style)) {
+                        for (const styleKey of Object.keys(prevStyle)) {
+                            if (nextStyle[styleKey] === undefined) {
                                 // @debug
                                 render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
                                 node.style[styleKey] = '';
@@ -259,8 +257,8 @@ const renderJDOM = (node, previous, next) => {
             }
             //> For any attributes that were removed in the new JDOM,
             //  also attempt to remove them from the DOM.
-            for (const attrName in previous.attrs) {
-                if (!(attrName in next.attrs)) {
+            for (const attrName of Object.keys(previous.attrs)) {
+                if (next.attrs[attrName] === undefined) {
                     if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
                         // @debug
                         render_debug(`Remove <${next.tag} property ${attrName}`);
@@ -353,7 +351,7 @@ const renderJDOM = (node, previous, next) => {
 const emptyEvent = () => {
     return {
         source: null,
-        handler: () => { },
+        handler: () => {},
     }
 }
 
@@ -483,7 +481,8 @@ const brace = (a, b) => a + '{' + b + '}';
 const rulesFromStylesObject = (selector, stylesObject) => {
     let rules = [];
     let selfDeclarations = '';
-    for (const [prop, val] of Object.entries(stylesObject)) {
+    for (const prop of Object.keys(stylesObject)) {
+        const val = stylesObject[prop];
         //> CSS declarations that start with '@' are globally namespaced
         //  (like @keyframes and @media), so we need to treat them differently.
         if (prop[0] === '@') {
@@ -547,6 +546,8 @@ const injectStylesOnce = stylesObject => {
 //> Higher-order component to enable styling for any Component class.
 const Styled = Base => {
     return class extends Base {
+        //> In a styled component, the `#styles()` method is passed in
+        //  the same data as `#compose()`, and returns a JSON of nested CSS.
         styles(data) {
             return {};
         }
@@ -707,7 +708,7 @@ class Record extends Evented {
 
         //> We can create a Record by either passing in just the properties,
         //  or an ID and a dictionary of props. We disambiguate here.
-        if (typeof id === 'object' && !Object.keys(data).length) {
+        if (isObject(id)) {
             data = id;
             id = null;
         }
@@ -921,7 +922,7 @@ const exposedNames = {
 }
 //> If there is a global `window` object, bind API names to it.
 if (typeof window === 'object') {
-    for (const name in exposedNames) {
+    for (const name of Object.keys(exposedNames)) {
         window[name] = exposedNames[name];
     }
 }

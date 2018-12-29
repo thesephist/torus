@@ -23,7 +23,7 @@
 <div class="line"><div class="doc"><h2 id="jdom">JDOM</h2>
 </div><pre class="source javascript"><strong class="lineNumber">4</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Torus, like React, Preact, and VUe, uses a virtual DOM to reconcile differences between a previous render of a component and the new render of a component before committing any changes to the DOM. To run the reconciliation algorithm, we need an intermediate representation of the component render tree that&#39;s efficient to create and traverse. Torus achieves this with <code>JDOM</code>, a JSON format for representing all DOM nodes.</p>
+<div class="line"><div class="doc"><p>Torus, like React, Preact, and Vue, uses a virtual DOM to reconcile differences between a previous render of a component and the new render of a component before committing any changes to the DOM. To run the reconciliation algorithm, we need an intermediate representation of the component render tree that&#39;s efficient to create and traverse. Torus achieves this with <code>JDOM</code>, a JSON format for representing all DOM nodes.</p>
 </div><pre class="source javascript"><strong class="lineNumber">11</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p><code>null</code> values are always translated to comments</p>
@@ -32,7 +32,7 @@
 <div class="line"><div class="doc"><p>String values represent text (they map to <code>TextNode</code>s)</p>
 </div><pre class="source javascript"><strong class="lineNumber">16</strong>'Hello, World!'; // 'Hello, World!'</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">17</strong></pre></div>
-<div class="line"><div class="doc"><p>HTML elements are represented with an object with four keys: <strong>tag</strong>, <strong>attrs</strong>, <strong>events</strong>, and <strong>children</strong>. <code>tag</code> is the name of the HTML tag for the element. All fields are optional, and <code>tag</code> will default to <code>&#39;div&#39;</code>.</p>
+<div class="line"><div class="doc"><p>HTML elements are represented with an object with four keys: <strong>tag</strong>, <strong>attrs</strong>, <strong>events</strong>, and <strong>children</strong>. <code>tag</code> is the name of the HTML tag for the element. All fields are optional, except <code>tag</code>, which is required.</p>
 </div><pre class="source javascript"><strong class="lineNumber">21</strong>const el = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">22</strong>    tag: 'ul',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">23</strong>    attrs: {},</pre></div>

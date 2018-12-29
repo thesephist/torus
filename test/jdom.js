@@ -4,7 +4,6 @@ describe('jdom template tag', () => {
 
     const normalizeJDOM = jdom => {
         if (isObject(jdom)) {
-            if (!('tag' in jdom)) jdom.tag = 'div';
             if (!('attrs' in jdom)) jdom.attrs = {};
             if (!('events' in jdom)) jdom.events = {};
             if (!('children' in jdom)) jdom.children = [];
@@ -52,6 +51,18 @@ describe('jdom template tag', () => {
         'literal Node',
         jdom`${tn}`,
         tn
+    );
+
+    compare(
+        'cached templates with different variables should output different results (pt 1)',
+        jdom`<h1>${'Hello, World'}</h1>`,
+        {tag: 'h1', children: ['Hello, World']}
+    );
+
+    compare(
+        'cached templates with different variables should output different results (pt 2)',
+        jdom`<h1>${'Goodbye, World'}</h1>`,
+        {tag: 'h1', children: ['Goodbye, World']}
     );
 
     describe('tags', () => {
@@ -143,6 +154,17 @@ describe('jdom template tag', () => {
         );
 
         compare(
+            'styles in to a styles JDOM object with semicolon ending',
+            jdom`<div style=" display: flex;flex-direction
+                :column; transition: opacity .9s; "></div>`,
+            {tag: 'div', attrs: {style: {
+                'display': 'flex',
+                'flexDirection': 'column',
+                'transition': 'opacity .9s',
+            }}}
+        );
+
+        compare(
             'URLs in self-closing tags with /',
             jdom`<img src="/static/img.png"/>`,
             {tag: 'img', attrs: {
@@ -200,6 +222,12 @@ describe('jdom template tag', () => {
             'interpolate mixed values to a string',
             jdom`<img data-prop="first ${{a: 'b'}}"`,
             {tag: 'img', attrs: {'data-prop': 'first [object Object]'}}
+        );
+
+        compare(
+            'multiple interpolated template values in a single attribute',
+            jdom`<img data-prop="first${1}second${2}" />`,
+            {tag: 'img', attrs: {'data-prop': 'first1second2'}}
         );
 
         compare(

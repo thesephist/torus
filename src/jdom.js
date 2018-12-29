@@ -2,6 +2,10 @@
 //  so this is a shortcut for that check.
 const isStringLike = x => typeof x === 'string' || typeof x === 'number';
 
+//> Shortcut utility function to check if a given name is
+//  bound to something that's an actual object (not just null)
+const isObject = o => typeof o === 'object' && o !== null;
+
 //> Clip the end of a given string by the length of a substring
 const clipStringEnd = (base, substr) => {
     return base.substr(0, base.length - substr.length);
@@ -17,17 +21,11 @@ const decodeEntity = entity => {
 //  merge the two parts of a template tag's arguments.
 const interpolate = (tplParts, dynamicParts) => {
     let str = tplParts[0];
-    for (let i = 1; i <= dynamicParts.length; i++) {
+    for (let i = 1; i <= dynamicParts.length; i ++) {
         str += dynamicParts[i - 1] + tplParts[i];
     }
     return str;
 }
-
-//> `READER_END` is a unique symbol that represents that the reader
-//  has reached the end of the template. Making it an array ensures
-//  that no other === comparisons can return true. We can use Symbol()
-//  here but [] is shorter, and enough.
-const READER_END = [];
 
 //> The `Reader` class represents a sequence of characters we can read from a JDOM template.
 class Reader {
@@ -39,7 +37,7 @@ class Reader {
 
     //> Returns the current character and moves the pointer one place farther.
     next() {
-        let char = this.content[this.idx ++] || READER_END;
+        let char = this.content[this.idx ++];
         if (this.idx > this.content.length) {
             this.idx = this.content.length;
         }
@@ -57,16 +55,14 @@ class Reader {
     //> Read up to a specified _contiguous_ substring,
     //  but not including the substring.
     readUpto(substr) {
-        const rest = this.content.substr(this.idx);
-        const nextIdx = rest.indexOf(substr);
+        const nextIdx = this.content.substr(this.idx).indexOf(substr);
         return this.readToNextIdx(nextIdx);
     }
 
     //> Read up to and including a _contiguous_ substring, or read until
     //  the end of the template.
     readUntil(substr) {
-        const rest = this.content.substr(this.idx);
-        const nextIdx = rest.indexOf(substr) + substr.length;
+        const nextIdx = this.content.substr(this.idx).indexOf(substr) + substr.length;
         return this.readToNextIdx(nextIdx);
     }
 
@@ -98,8 +94,8 @@ class Reader {
 //> For converting CSS property names to their JavaScript counterparts
 const kebabToCamel = kebabStr => {
     let result = '';
-    for (let i = 0; i < kebabStr.length; i++) {
-        result += kebabStr[i] === '-' ? kebabStr[++i].toUpperCase() : kebabStr[i];
+    for (let i = 0, len = kebabStr.length; i < len; i ++) {
+        result += kebabStr[i] === '-' ? kebabStr[++ i].toUpperCase() : kebabStr[i];
     }
     return result;
 }
@@ -109,6 +105,7 @@ const parseOpeningTagContents = content => {
 
     //> If the opening tag is just the tag name (the most common case), take
     //  a shortcut and run a simpler algorithm.
+    content = content.trim();
     if (content[0] === '!') {
         // comment
         return {
@@ -128,39 +125,8 @@ const parseOpeningTagContents = content => {
     }
 
     //> Make another reader to read the tag contents
-    const reader = new Reader(content.trim());
+    const reader = new Reader(content);
     const selfClosing = reader.clipEnd('/');
-
-    let tag = '';
-    const attrs = {};
-    const events = {};
-
-    //> `commit()` commits a given key-value pair of attributes to the JDOM stub.
-    //  it treats class lists and style dictionaries separately, and adds function
-    //  values as event handlers.
-    const commit = (key, val) => {
-        if (typeof val === 'string' && val.startsWith('jdom_placeholder_function_')) {
-            events[key.replace('on', '')] = [val];
-        } else {
-            if (key === 'class') {
-                if (val = val.trim()) {
-                    attrs[key] = val.split(' ');
-                }
-            } else if (key === 'style') {
-                const declarations = val.split(';').filter(s => !!s).map(pair => {
-                    const [first, ...rest] = pair.split(':');
-                    return [kebabToCamel(first.trim()), rest.join(':').trim()];
-                });
-                const rule = {};
-                for (const [prop, val] of declarations) {
-                    rule[prop] = val;
-                }
-                attrs[key] = rule;
-            } else {
-                attrs[key] = val;
-            }
-        }
-    }
 
     //> Read the individual characters into a list of tokens:
     //  things that may be attribute names, and values.
@@ -192,7 +158,7 @@ const parseOpeningTagContents = content => {
     }
     //> Iterate through each read character from the reader and parse the character
     //  stream into tokens.
-    for (let next = reader.next(); next !== READER_END; next = reader.next()) {
+    for (let next = reader.next(); next !== undefined; next = reader.next()) {
         switch (next) {
             //> Equals sign denotes the start of an attribute value unless in quotes
             case '=':
@@ -244,6 +210,9 @@ const parseOpeningTagContents = content => {
     commitToken();
 
     //> Now, we parse the tokens into tag, attribute, and events values in the JDOM.
+    let tag = '';
+    const attrs = {};
+    const events = {};
 
     //> The tag name is always the first token
     tag = tokens.shift().value;
@@ -259,16 +228,43 @@ const parseOpeningTagContents = content => {
     //  the previous token is an attribute without value (like `disabled`).
     while (curr !== undefined) {
         if (curr.type === TYPE_VALUE) {
-            commit(last.value, curr.value);
+            let key = last.value;
+            let val = curr.value.trim();
+            //> Commit a key-value pair of string attributes to the JDOM stub. This section
+            //  treats class lists and style dictionaries separately, and adds function
+            //  values as event handlers.
+            if (val.startsWith('jdom_tmp_func')) {
+                events[key.substr(2)] = [val];
+            } else {
+                if (key === 'class') {
+                    if (val) {
+                        attrs[key] = val.split(' ');
+                    }
+                } else if (key === 'style') {
+                    if (val.endsWith(';')) {
+                        val = val.substr(0, val.length - 1);
+                    }
+                    const rule = {};
+                    for (const pair of val.split(';')) {
+                        const idx = pair.indexOf(':');
+                        const first = pair.substr(0, idx);
+                        const rest = pair.substr(idx + 1);
+                        rule[kebabToCamel(first.trim())] = rest.trim();
+                    }
+                    attrs[key] = rule;
+                } else {
+                    attrs[key] = val;
+                }
+            }
             step();
         } else if (last) {
-            commit(last.value, true);
+            attrs[last.value] = true;
         }
         step();
     }
     //> If the last value is a value-less attribute (like `disabled`), commit it.
     if (last && last.type === TYPE_KEY) {
-        commit(last.value, true);
+        attrs[last.value] = true;
     }
 
     return {
@@ -283,7 +279,7 @@ const parseOpeningTagContents = content => {
 
 //> Function to parse an entire JDOM template tree (which we vaguely call JSX here).
 //  This recursively calls itself on children elements.
-const parseJSX = reader => {
+const parseTemplate = reader => {
     const result = [];
 
     //> The current JDOM object being worked on. Sort of an "element register"
@@ -293,10 +289,9 @@ const parseJSX = reader => {
     //> Commit currently reading element to the result list, and reset the current element
     const commit = () => {
         //> If the text node we're about to commit is just whitespace, don't bother
-        if (inTextNode && currentElement.trim() === '') {
-            currentElement = null;
-        }
-        if (currentElement) {
+        if (inTextNode && !currentElement.trim()) {
+            // pass
+        } else if (currentElement) {
             result.push(currentElement);
         }
         currentElement = null;
@@ -319,7 +314,7 @@ const parseJSX = reader => {
     //  that marks the end of the list of children. So, the parser breaks the loop
     //  and returns if it encounters a closing tag. This cooperation between the function
     //  and the parent function that called it recursively makes this parser work.
-    for (let next = reader.next(); next !== READER_END; next = reader.next()) {
+    for (let next = reader.next(); next !== undefined; next = reader.next()) {
         //> if we see the start of a tag ...
         if (next === '<') {
             //> ... first commit any previous reads, since we're starting a new node ...
@@ -335,11 +330,8 @@ const parseJSX = reader => {
                 //> If the current element is a full-fledged element (and not a comment
                 //  or text node), let's try to parse the children by handing the reader
                 //  to a recursively call of this function.
-                if (!result.selfClosing &&
-                    typeof currentElement === 'object' &&
-                    currentElement !== null
-                ) {
-                    currentElement.children = parseJSX(reader);
+                if (!result.selfClosing && currentElement !== null) {
+                    currentElement.children = parseTemplate(reader);
                 }
             //> ... it's a closing tag otherwise ...
             } else {
@@ -367,7 +359,7 @@ const parseJSX = reader => {
 }
 
 //> Cache for `jdom`, keyed by the string parts, value is a function that takes the dynamic
-//  parts of the template as input and returns the result of parseJSX. We make an assumption
+//  parts of the template as input and returns the result of parseTemplate. We make an assumption
 //  here that the user of the template won't swap between having an element attribute being
 //  a function once and something that isn't a function the next time. In practice this is fine.
 const JDOM_CACHE = new Map();
@@ -376,10 +368,14 @@ const JDOM_CACHE = new Map();
 //  and replace any matching strings with their correct dynamic parts. This makes the algorithm
 //  cache-friendly and relatively fast, despite doing a lot at runtime. `JDOM_PLACEHOLDER_RE` is
 //  the regex we use to correlate string keys to their correct dynamic parts.
-const JDOM_PLACEHOLDER_RE = /jdom_placeholder_(?:function|object|node)_\[(\d+)\]/;
+const JDOM_PLACEHOLDER_RE = /jdom_tmp_(?:func|obj)_\[(\d+)\]/;
+//> This is for a performance optimization, that when we're filling out template
+//  strings, if a string in which we're searching for a placeholder is shorter than
+//  placeholder strings, we just stop searching.
+const JDOM_PLACEHOLDER_MIN_LENGTH = 16;
 
 //> Does a given string have a placeholder for the template values?
-const hasPlaceholder = str => typeof str == 'string' && str.includes('jdom_placeholder_');
+const hasPlaceholder = str => typeof str == 'string' && str.includes('jdom_tmp_');
 
 //> **Utility functions for walking a JSON tree and filling in placeholders**
 //  The functions here that take mutable values (arrays, objects) will mutate the
@@ -391,12 +387,12 @@ const hasPlaceholder = str => typeof str == 'string' && str.includes('jdom_place
 const splitByPlaceholder = (str, dynamicParts) => {
     if (hasPlaceholder(str)) {
         const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);
-        const [front, back] = str.split(fullMatch);
-        const processedBack = splitByPlaceholder(back, dynamicParts);
+        const parts = str.split(fullMatch);
+        const processedBack = splitByPlaceholder(parts[1], dynamicParts);
 
         let result = [];
-        if (front) result.push(front);
-        if (dynamicParts[number] instanceof Array) {
+        if (parts[0]) result.push(parts[0]);
+        if (Array.isArray(dynamicParts[number])) {
             result = result.concat(dynamicParts[number]);
         } else {
             result.push(dynamicParts[number]);
@@ -419,20 +415,28 @@ const replaceChildrenToFlatArray = (children, dynamicParts) => {
     const last = newChildren[newChildren.length - 1];
     if (typeof first === 'string' && !first.trim()) newChildren.shift();
     if (typeof last === 'string' && !last.trim()) newChildren.pop();
+    for (const child of newChildren) {
+        if (isObject(child)) {
+            replaceInObjectLiteral(child, dynamicParts);
+        }
+    }
     return newChildren;
 }
 
 //> Given a string, replace any placeholder values and return a new string.
 const replaceInString = (str, dynamicParts) => {
-    if (hasPlaceholder(str)) {
-        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);
-        if (str.trim() === fullMatch) {
-            return dynamicParts[number];
-        } else {
-            const [front, back] = str.split(fullMatch);
-            return front + dynamicParts[number] + replaceInString(back, dynamicParts);
-        }
+    if (str.length < JDOM_PLACEHOLDER_MIN_LENGTH) {
+        return str;
     } else {
+        let match = JDOM_PLACEHOLDER_RE.exec(str);
+        if (match && str.trim() === match[0]) {
+            return dynamicParts[match[1]];
+        }
+        while (match) {
+            let parts = str.split(match[0]);
+            str = parts[0] + dynamicParts[match[1]] + parts[1];
+            match = JDOM_PLACEHOLDER_RE.exec(str);
+        }
         return str;
     }
 }
@@ -442,9 +446,9 @@ const replaceInArrayLiteral = (arr, dynamicParts) => {
     arr.forEach((val, idx) => {
         if (isStringLike(val)) {
             arr[idx] = replaceInString(val.toString(), dynamicParts);
-        } else if (val instanceof Array) {
+        } else if (Array.isArray(val)) {
             replaceInArrayLiteral(val, dynamicParts);
-        } else if (typeof val === 'object' && val !== null) {
+        } else if (isObject(val)) {
             replaceInObjectLiteral(val, dynamicParts);
         }
     });
@@ -452,24 +456,20 @@ const replaceInArrayLiteral = (arr, dynamicParts) => {
 
 //> Given an object, replace placeholders in it and its values.
 const replaceInObjectLiteral = (obj, dynamicParts) => {
-    for (const [prop, val] of Object.entries(obj)) {
+    for (const prop of Object.keys(obj)) {
+        const val = obj[prop];
         if (isStringLike(val)) {
             obj[prop] = replaceInString(val.toString(), dynamicParts);
-        } else if (val instanceof Array) {
+        } else if (Array.isArray(val)) {
             if (prop === 'children') {
                 //> We need to treat children of JDOM objects differently because
                 //  they need to all be flat arrays, and sometimes for API convenience
                 //  they're passed in as nested arrays.
                 obj.children = replaceChildrenToFlatArray(val, dynamicParts);
-                for (const child of obj.children) {
-                    if (typeof val === 'object' && val !== null) {
-                        replaceInObjectLiteral(child, dynamicParts);
-                    }
-                }
             } else {
                 replaceInArrayLiteral(val, dynamicParts);
             }
-        } else if (typeof val === 'object' && val !== null) {
+        } else if (isObject(val)) {
             replaceInObjectLiteral(val, dynamicParts);
         }
     }
@@ -489,16 +489,16 @@ const jdom = (tplParts, ...dynamicParts) => {
                 //  during parse.
                 if (obj instanceof Function) {
                     //> Function values are treated as event listeners.
-                    return `jdom_placeholder_function_[${i}]`;
+                    return `jdom_tmp_func_[${i}]`;
                 } else {
-                    return `jdom_placeholder_object_[${i}]`;
+                    return `jdom_tmp_obj_[${i}]`;
                 }
             });
 
             //> Make a new reader, interpolating the template's static and dynamic parts together.
             const reader = new Reader(interpolate(tplParts.map(part => part.replace(/\s+/g, ' ')), dpPlaceholders));
             //> Parse the template and take the first child, if there are more, as the element we care about.
-            const result = parseJSX(reader)[0];
+            const result = parseTemplate(reader)[0];
 
             //> Put a function into the cache that translates an array of the dynamic parts of a template
             //  into the full JDOM for the template.
@@ -511,7 +511,7 @@ const jdom = (tplParts, ...dynamicParts) => {
                     //  in wherever possible. so we make a brand-new object to represent a new result.
                     const target = {};
                     //> Since the non-dynamic parts of JDOM objects are by definition completely JSON
-                    //  serializable, this is a good enough way to deep-copy the cached result of `parseJSX()`.
+                    //  serializable, this is a good enough way to deep-copy the cached result of `parseTemplate()`.
                     const template = JSON.parse(JSON.stringify((result)));
                     replaceInObjectLiteral(Object.assign(target, template), dynamicParts);
                     return target;

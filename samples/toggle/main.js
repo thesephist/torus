@@ -57,10 +57,10 @@ class App extends Component {
                             { tag: 'em', children: ['World!'] },
                         ],
                     } : {
-                            tag: 'h1',
-                            children: [
-                                'Hello, World!',
-                            ],
+                        tag: 'h1',
+                        children: [
+                            'Hello, World!',
+                        ],
                     }
                 ),
                 {

@@ -1,7 +1,13 @@
 # Torus To-dos
 
+- [ ] Make the api documentation polished, and make README polished modeled after Preact's Github README. What badges do they use?
+
 - [-] "Saved for later" stories list tab feature on the hn reader. URL should be `/saved`. Use localstorage, save an array of IDs.
     - [ ] No more comments truncated should only show on the top level comment thread, not sub-threads. This is weird in practical UI. Subthreads should show iff the trancated count is not 0.
+
+- [ ] Look again at event delegation, since it's a measurable performance hit to create handlers on every node vs. on every component.
+
+- [ ] Error boundaries -- when something in render() call throws an uncaught error, catch it and render either the last render or a placeholder or something. Otherwise errors during render will mess up DOM (though not as badly as RAeact's renderer, which re-renders the whole app).
 
 - [ ] Continuous build during development!
 

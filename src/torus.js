@@ -80,21 +80,48 @@ const arrayNormalize = data => Array.isArray(data) ? data : [data];
 //  and invisible.
 const tmpNode = () => document.createComment('');
 
-//> `placeholders` is a global unordered queue of placeholders and
-//  the nodes they're place-holding for. While rendering, we use placeholders
-//  to insert or move around any nodes to avoid multi-insertion conflicts.
-//  At the end of each render (when `render_stack` is 0), we replace all
-//  placeholders to the DOM before the browser renders the next frame in one fell swoop.
-const placeholders = new Map();
-function replacePlaceholders() {
-    for (const [tmp, newNode] of placeholders.entries()) {
-        if (newNode === null) {
-            tmp.parentNode.removeChild(tmp);
-        } else {
-            tmp.parentNode.replaceChild(newNode, tmp);
+//> `placeholders` is a global queue of node-level operations to be performed.
+//  These are calculated during the diff, but because operations touching the
+//  page DOM are expensive, we defer them until the end of a render pass
+//  and run them all at once, asynchronously. Each item in the queue is an array
+//  that starts with an opcode (one of the three below), and is followed
+//  by the list of arguments the operation takes. We render all operations in the queue
+//  to the DOM before the browser renders the next frame in one fell swoop.
+let placeholders = [];
+const OP_APPEND = 0; // append, parent, new
+const OP_REMOVE = 1; // remove, parent, old
+const OP_REPLACE = 2; // replace, old, new
+function runDOMOperations() {
+    const replacements = [];
+
+    for (let i = 0, len = placeholders.length; i < len; i ++) {
+        const next = placeholders[i];
+        const op = next[0];
+        if (op === OP_APPEND) {
+            next[1].appendChild(next[2]);
+        } else if (op === OP_REMOVE) {
+            next[1].removeChild(next[2]);
+        } else { // op is implied to be OP_REPLACE
+            const oldNode = next[1];
+            const newNode = next[2];
+            const parent = oldNode.parentNode;
+            //> We use a temporary node to run the replace operation
+            //  then replace these temporary nodes later,
+            //  because otherwise operations where nodes switch places
+            //  in a list may break the DOM, since a node can't be inserted
+            //  into the DOM in two places at once.
+            const tmp = tmpNode();
+            parent.replaceChild(tmp, oldNode);
+            replacements.push([parent, tmp, newNode]);
         }
     }
-    placeholders.clear();
+    placeholders = [];
+
+    for (let i = 0, len = replacements.length; i < len; i ++) {
+        const nodes = replacements[i];
+        // parent.replaceChild(newNode, placeholderNode);
+        nodes[0].replaceChild(nodes[2], nodes[1]);
+    }
 }
 
 //> Torus's virtual DOM rendering algorithm that manages all diffing,
@@ -108,11 +135,9 @@ const renderJDOM = (node, previous, next) => {
     //> This queues up a node to be inserted into a new slot in the
     //  DOM tree. All queued replacements will flush to DOM at the end
     //  of the render pass, from `placeholders`.
-    function replacePreviousNode(newNode) {
-        if (node !== undefined && node !== newNode && node.parentNode) {
-            const tmp = tmpNode();
-            placeholders.set(tmp, newNode);
-            node.parentNode.replaceChild(tmp, node);
+    const replacePreviousNode = newNode => {
+        if (node && node !== newNode) {
+            placeholders.push([OP_REPLACE, node, newNode]);
         }
         node = newNode;
     };
@@ -148,7 +173,7 @@ const renderJDOM = (node, previous, next) => {
             replacePreviousNode(tmpNode());
         //> If we're rendering a string or raw number,
         //  convert it into a string and add a TextNode.
-        } else if ((typeof next === 'string' || typeof next === 'number')) {
+        } else if (typeof next === 'string' || typeof next === 'number') {
             // @begindebug
             if (node === undefined) {
                 render_debug(`Add text node "${next}"`);
@@ -309,7 +334,7 @@ const renderJDOM = (node, previous, next) => {
                         renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
                     }
                     while (i < nextChildren.length) {
-                        node.appendChild(renderJDOM(undefined, undefined, nextChildren[i]));
+                        placeholders.push([OP_APPEND, node, renderJDOM(undefined, undefined, nextChildren[i])]);
                         i ++;
                     }
                 } else {
@@ -324,9 +349,7 @@ const renderJDOM = (node, previous, next) => {
                         //  it from the DOM immediately might lead to race conditions.
                         //  instead, we add a placeholder and remove the placeholder
                         //  at the end.
-                        const tmp = tmpNode();
-                        node.replaceChild(tmp, nodeChildren[i]);
-                        placeholders.set(tmp, null);
+                        placeholders.push([OP_REMOVE, node, nodeChildren[i]]);
                         i++;
                     }
                 }
@@ -341,7 +364,7 @@ const renderJDOM = (node, previous, next) => {
     //> If we've reached the top of the render tree, it's time
     //  to flush replaced nodes to the DOM before the next frame.
     if (render_stack === 0) {
-        replacePlaceholders();
+        runDOMOperations();
     }
 
     return node;

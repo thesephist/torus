@@ -33,23 +33,21 @@ class Reader {
     constructor(content) {
         this.idx = 0;
         this.content = content;
+        this.len = content.length;
     }
 
     //> Returns the current character and moves the pointer one place farther.
     next() {
         let char = this.content[this.idx ++];
-        if (this.idx > this.content.length) {
-            this.idx = this.content.length;
+        if (char === undefined) {
+            this.idx = this.len;
         }
         return char;
     }
 
     //> Move back the pointer one place.
     backtrack() {
-        this.idx --;
-        if (this.idx < 0) {
-            this.idx = 0;
-        }
+        this.idx -- || 0;
     }
 
     //> Read up to a specified _contiguous_ substring,
@@ -70,7 +68,7 @@ class Reader {
     readToNextIdx(nextIdx) {
         const rest = this.content.substr(this.idx);
         if (nextIdx === -1) {
-            this.idx = this.content.length;
+            this.idx = this.len;
             return rest;
         } else {
             const part = rest.substr(0, nextIdx);

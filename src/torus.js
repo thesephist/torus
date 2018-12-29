@@ -80,22 +80,27 @@ const arrayNormalize = data => Array.isArray(data) ? data : [data];
 //  and invisible.
 const tmpNode = () => document.createComment('');
 
-//> `placeholders` is a global queue of node-level operations to be performed.
+//> `opQueue` is a global queue of node-level operations to be performed.
 //  These are calculated during the diff, but because operations touching the
 //  page DOM are expensive, we defer them until the end of a render pass
 //  and run them all at once, asynchronously. Each item in the queue is an array
 //  that starts with an opcode (one of the three below), and is followed
 //  by the list of arguments the operation takes. We render all operations in the queue
 //  to the DOM before the browser renders the next frame in one fell swoop.
-let placeholders = [];
+let opQueue = [];
 const OP_APPEND = 0; // append, parent, new
 const OP_REMOVE = 1; // remove, parent, old
 const OP_REPLACE = 2; // replace, old, new
+
+//> `runDOMOperations` works through the `opQueue` and performs each
+//  DOM operation in order they were queued. rDO is called when the reconciler
+//  (`renderJDOM`) reaches the bottom of a render stack (when it's done reconciling
+//  the diffs in a root-level JDOM node).
 function runDOMOperations() {
     const replacements = [];
 
-    for (let i = 0, len = placeholders.length; i < len; i ++) {
-        const next = placeholders[i];
+    for (let i = 0, len = opQueue.length; i < len; i ++) {
+        const next = opQueue[i];
         const op = next[0];
         if (op === OP_APPEND) {
             next[1].appendChild(next[2]);
@@ -115,7 +120,7 @@ function runDOMOperations() {
             replacements.push([parent, tmp, newNode]);
         }
     }
-    placeholders = [];
+    opQueue = [];
 
     for (let i = 0, len = replacements.length; i < len; i ++) {
         const nodes = replacements[i];
@@ -134,10 +139,10 @@ const renderJDOM = (node, previous, next) => {
 
     //> This queues up a node to be inserted into a new slot in the
     //  DOM tree. All queued replacements will flush to DOM at the end
-    //  of the render pass, from `placeholders`.
+    //  of the render pass, from `opQueue`.
     const replacePreviousNode = newNode => {
         if (node && node !== newNode) {
-            placeholders.push([OP_REPLACE, node, newNode]);
+            opQueue.push([OP_REPLACE, node, newNode]);
         }
         node = newNode;
     };
@@ -334,7 +339,7 @@ const renderJDOM = (node, previous, next) => {
                         renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
                     }
                     while (i < nextChildren.length) {
-                        placeholders.push([OP_APPEND, node, renderJDOM(undefined, undefined, nextChildren[i])]);
+                        opQueue.push([OP_APPEND, node, renderJDOM(undefined, undefined, nextChildren[i])]);
                         i ++;
                     }
                 } else {
@@ -349,7 +354,7 @@ const renderJDOM = (node, previous, next) => {
                         //  it from the DOM immediately might lead to race conditions.
                         //  instead, we add a placeholder and remove the placeholder
                         //  at the end.
-                        placeholders.push([OP_REMOVE, node, nodeChildren[i]]);
+                        opQueue.push([OP_REMOVE, node, nodeChildren[i]]);
                         i++;
                     }
                 }
@@ -390,7 +395,12 @@ class Component {
         //  before the ES-next private fields proposal becomes widely supported.)
         //  Frequently, rendering will require private values to be set correctly.
         this.init(...args);
-        this.render();
+        //> After we run `#init()`, we want to make sure that every constructed
+        //  component has a valid `#node` property. To be efficient, we only
+        //  render to set `#node` if it isn't already set yet.
+        if (this.node === undefined) {
+            this.render();
+        }
     }
 
     //> `Component.from()` allows us to transform a pure function that

@@ -4,6 +4,8 @@
 
 - [-] "Saved for later" stories list tab feature on the hn reader. URL should be `/saved`. Use localstorage, save an array of IDs.
     - [ ] No more comments truncated should only show on the top level comment thread, not sub-threads. This is weird in practical UI. Subthreads should show iff the trancated count is not 0.
+    - [ ] Open in new tab button in the story listing that's not expanded.
+    - [ ] Or set font size on the list, not the comment. Each comment indentation level otherwise gets smaller and smaller fonts on mobile.
 
 - [ ] Look again at event delegation, since it's a measurable performance hit to create handlers on every node vs. on every component.
 

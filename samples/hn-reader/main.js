@@ -40,7 +40,7 @@ const formatDate = unix => {
     const date = new Date(unix * 1000);
     const delta = (NOW - date) / 1000;
     if (delta < 60) {
-        return '&#60;1 min ago';
+        return '< 1 min ago';
     } else if (delta < 3600) {
         return `${~~(delta / 60)} min ago`;
     } else if (delta < 86400) {
@@ -624,7 +624,9 @@ class App extends StyledComponent {
     //> When views switch, it's nice to automatically scroll up to the top of the page
     //  to read the new stuff. This does that.
     resetScroll() {
-        document.scrollingElement.scrollTop = 0;
+        requestAnimationFrame(() => {
+            document.scrollingElement.scrollTop = 0;
+        });
     }
 
     compose() {

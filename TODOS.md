@@ -1,11 +1,15 @@
 # Torus To-dos
 
 - [-] "Saved for later" stories list tab feature on the hn reader. URL should be `/saved`. Use localstorage, save an array of IDs.
+    - [ ] No more comments truncated should only show on the top level comment thread, not sub-threads. This is weird in practical UI. Subthreads should show iff the trancated count is not 0.
+
+- [ ] Continuous build during development!
 
 - [ ] Concurrency
     - Yielding to the browser at the component level. Treat each Component#render or renderJDOM() as a separately, always-deferrable async event. This gets the interactivity / CPU time benefits of concurrent React.
     - React uses the defer() function to indicate to the renderer what updates aren't critical. We could try something similar, and have defer be default but indicate high priority updates?
     - On a related note, some way to defer rendering a subtree until contents have loaded / are ready would be great.
+        - This would be another great way to remove redundant renders, to get performance up.
     - We can split the render process of each component (each render() call ) into two parts: part 1, up to and including the `#compose()` call, and part 2, everything from when `#compose()` returns, to flushing all changes to the DOM and letting the browser render.
         - Let's make everything in part 2 asynchronous and collaboratively concurrent (through `requestIdleCallback`) by default, and part 1 opt-in asynchronous.
         - This makes sense within the larger scope of Torus's architecture. The data layer is meant to be imperative, which makes it hard to be async by default. But the presentation layer is declarative, which makes it easy to be async by default.

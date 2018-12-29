@@ -92,6 +92,15 @@ describe('jdom template tag', () => {
             {tag: 'div'}
         );
 
+        compare(
+            'general closing tags',
+            jdom`<div>Hi<ul></></>`,
+            {tag: 'div', children: [
+                'Hi',
+                {tag: 'ul'},
+            ]}
+        );
+
     });
 
     describe('attrs', () => {

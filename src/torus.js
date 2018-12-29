@@ -565,7 +565,16 @@ const Styled = Base => {
 //> Provide a default, `StyledComponent` class
 const StyledComponent = Styled(Component);
 
-//> Torus's generic List implementation, based on Stores
+//> Torus's generic List implementation, based on Stores.
+//  React and similar virtual-dom view libraries depend on [key-based
+//  reconciliation](https://reactjs.org/docs/reconciliation.html) during render
+//  to efficiently render children of long lists. Torus doesn't (yet) have a key-aware
+//  reconciler in the diffing algorithm, but `List`'s design obviates the need for keys.
+//  Rather than giving the renderer a flat virtual DOM tree to render, `List`
+//  instantiates each individual item component and hands them off to the renderer as full
+//  DOM Node elements, so each list item manages its own rendering, and the list component
+//  only worries about displaying the list wrapper and a flat list of children items.
+
 class List extends Component {
 
     get itemClass() {

@@ -13,6 +13,7 @@ const template = fs.readFileSync('./doc/template.html', 'utf8');
 const ANNOTATION_START = '//>';
 const ANNOTATION_CONTINUE = '//';
 const FILES_TO_ANNOTATE = {
+    'API Documentation': './samples/api.js',
     'torus.js': './src/torus.js',
     'jdom.js': './src/jdom.js',
     'Hacker News Reader': './samples/hn-reader/main.js',

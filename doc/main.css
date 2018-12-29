@@ -88,6 +88,9 @@ a {
     display: inline-block;
     margin-bottom: 18px;
 }
+p a {
+    margin-bottom: 0;
+}
 a:hover {
     opacity: 1;
 }

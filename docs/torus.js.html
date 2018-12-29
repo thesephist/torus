@@ -500,330 +500,331 @@
 <div class="line"><div class="doc"><p>Provide a default, <code>StyledComponent</code> class</p>
 </div><pre class="source javascript"><strong class="lineNumber">566</strong>const StyledComponent = Styled(Component);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">567</strong></pre></div>
-<div class="line"><div class="doc"><p>Torus&#39;s generic List implementation, based on Stores</p>
-</div><pre class="source javascript"><strong class="lineNumber">569</strong>class List extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">570</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">571</strong>    get itemClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">572</strong>        return Component; // default value, should be overridden</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">573</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">574</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">575</strong>    init(store) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">576</strong>        this.store = store;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">577</strong>        this.items = new Map();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">578</strong>        this.filterFn = null;</pre></div>
+<div class="line"><div class="doc"><p>Torus&#39;s generic List implementation, based on Stores. React and similar virtual-dom view libraries depend on <a href="https://reactjs.org/docs/reconciliation.html">key-based reconciliation</a> during render to efficiently render children of long lists. Torus doesn&#39;t (yet) have a key-aware reconciler in the diffing algorithm, but <code>List</code>&#39;s design obviates the need for keys. Rather than giving the renderer a flat virtual DOM tree to render, <code>List</code> instantiates each individual item component and hands them off to the renderer as full DOM Node elements, so each list item manages its own rendering, and the list component only worries about displaying the list wrapper and a flat list of children items.</p>
+</div><pre class="source javascript"><strong class="lineNumber">577</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">578</strong>class List extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">579</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">580</strong>        this.bind(this.store, () =&#62; this.itemsChanged());</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">581</strong>        this.itemsChanged();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">580</strong>    get itemClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">581</strong>        return Component; // default value, should be overridden</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">582</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">583</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">584</strong>    itemsChanged() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">584</strong>    init(store) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">585</strong>        this.store = store;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">586</strong>        this.items = new Map();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">587</strong>        this.filterFn = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">588</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">589</strong>        this.bind(this.store, () =&#62; this.itemsChanged());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">590</strong>        this.itemsChanged();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">591</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">592</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">593</strong>    itemsChanged() {</pre></div>
 <div class="line"><div class="doc"><p>For every record in the store, if it isn&#39;t already in <code>this.items</code>, add it and its view; if any were removed, also remove it from <code>this.items</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">588</strong>        const data = this.store.summarize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">589</strong>        for (const record of this.items.keys()) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">590</strong>            if (!data.includes(record)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">591</strong>                this.items.get(record).remove();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">592</strong>                this.items.delete(record);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">593</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">594</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">595</strong>        for (const record of data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">596</strong>            if (!this.items.has(record)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">597</strong>                this.items.set(record, new this.itemClass(record));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">598</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">599</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">600</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">601</strong>        let sorter = [...this.items.entries()];</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">597</strong>        const data = this.store.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">598</strong>        for (const record of this.items.keys()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">599</strong>            if (!data.includes(record)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">600</strong>                this.items.get(record).remove();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">601</strong>                this.items.delete(record);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">602</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">603</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">604</strong>        for (const record of data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">605</strong>            if (!this.items.has(record)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">606</strong>                this.items.set(record, new this.itemClass(record));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">607</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">608</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">609</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">610</strong>        let sorter = [...this.items.entries()];</pre></div>
 <div class="line"><div class="doc"><p>Sort by the provided filter function if there is one</p>
-</div><pre class="source javascript"><strong class="lineNumber">603</strong>        if (this.filterFn !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">604</strong>            sorter = sorter.filter(item =&#62; this.filterFn(item[0]));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">605</strong>        }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">612</strong>        if (this.filterFn !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">613</strong>            sorter = sorter.filter(item =&#62; this.filterFn(item[0]));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">614</strong>        }</pre></div>
 <div class="line"><div class="doc"><p>Sort the list the way the associated Store is sorted.</p>
-</div><pre class="source javascript"><strong class="lineNumber">607</strong>        sorter.sort((a, b) =&#62; data.indexOf(a[0]) - data.indexOf(b[0]));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">608</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">616</strong>        sorter.sort((a, b) =&#62; data.indexOf(a[0]) - data.indexOf(b[0]));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">617</strong></pre></div>
 <div class="line"><div class="doc"><p>Store the new items in a new (insertion-ordered) Map at this.items</p>
-</div><pre class="source javascript"><strong class="lineNumber">610</strong>        this.items = new Map(sorter);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">611</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">612</strong>        this.render();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">613</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">614</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">615</strong>    filter(filterFn) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">616</strong>        this.filterFn = filterFn;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">617</strong>        this.itemsChanged();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">618</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">619</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">620</strong>    unfilter() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">621</strong>        this.filterFn = null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">622</strong>        this.itemsChanged();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">623</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">624</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">619</strong>        this.items = new Map(sorter);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">620</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">621</strong>        this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">622</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">623</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">624</strong>    filter(filterFn) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">625</strong>        this.filterFn = filterFn;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">626</strong>        this.itemsChanged();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">627</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">628</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">629</strong>    unfilter() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">630</strong>        this.filterFn = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">631</strong>        this.itemsChanged();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">632</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">633</strong></pre></div>
 <div class="line"><div class="doc"><p><code>List#nodes</code> returns the HTML nodes for each of its item views, sorted in order. Designed to make writing <code>#compose()</code> easier.</p>
-</div><pre class="source javascript"><strong class="lineNumber">627</strong>    get nodes() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">628</strong>        return [...this.items.values()].map(item =&#62; item.node);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">629</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">630</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">631</strong>    remove() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">632</strong>        super.remove();</pre></div>
-<div class="line"><div class="doc"><p>When we remove a list, we also want to call <code>remove()</code> on each child components.</p>
-</div><pre class="source javascript"><strong class="lineNumber">635</strong>        for (const c of this.items.values()) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">636</strong>            c.remove();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">637</strong>        }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">636</strong>    get nodes() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">637</strong>        return [...this.items.values()].map(item =&#62; item.node);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">638</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">639</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">640</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">641</strong>        super.remove();</pre></div>
+<div class="line"><div class="doc"><p>When we remove a list, we also want to call <code>remove()</code> on each child components.</p>
+</div><pre class="source javascript"><strong class="lineNumber">644</strong>        for (const c of this.items.values()) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">645</strong>            c.remove();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">646</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">647</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">648</strong></pre></div>
 <div class="line"><div class="doc"><p>By default, just render the children views in a <ul/></p>
-</div><pre class="source javascript"><strong class="lineNumber">641</strong>    compose(data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">642</strong>        return {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">643</strong>            tag: 'ul',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">644</strong>            children: this.nodes,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">645</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">646</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">647</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">648</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">649</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">650</strong>    compose(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">651</strong>        return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">652</strong>            tag: 'ul',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">653</strong>            children: this.nodes,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">654</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">655</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">656</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">657</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">658</strong></pre></div>
 <div class="line"><div class="doc"><p>Higher-order component to create a list component for a given child item component.</p>
-</div><pre class="source javascript"><strong class="lineNumber">652</strong>const ListOf = itemClass =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">653</strong>    return class extends List {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">654</strong>        get itemClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">655</strong>            return itemClass;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">656</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">657</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">658</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">659</strong></pre></div>
-<div class="line"><div class="doc"><p>A base class for evented data stores. Not exposed to the public API, but all observables in Torus inherit from <code>Evented</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">662</strong>class Evented {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">663</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">664</strong>    constructor() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">665</strong>        this.eventTargets = new Set();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">661</strong>const ListOf = itemClass =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">662</strong>    return class extends List {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">663</strong>        get itemClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">664</strong>            return itemClass;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">665</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">666</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">667</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">668</strong>    summarize() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">669</strong>        throw new Error(`#summarize() not implemented in ${this.constructor.name}`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">670</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">671</strong></pre></div>
-<div class="line"><div class="doc"><p>Whenever something changes, we fire an event to all subscribed listeners, with a summary of its state.</p>
-</div><pre class="source javascript"><strong class="lineNumber">674</strong>    emitEvent() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">675</strong>        const summary = this.summarize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">676</strong>        for (const handler of this.eventTargets) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">677</strong>            handler(summary);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">678</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">667</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">668</strong></pre></div>
+<div class="line"><div class="doc"><p>A base class for evented data stores. Not exposed to the public API, but all observables in Torus inherit from <code>Evented</code>.</p>
+</div><pre class="source javascript"><strong class="lineNumber">671</strong>class Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">672</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">673</strong>    constructor() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">674</strong>        this.eventTargets = new Set();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">675</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">676</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">677</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">678</strong>        throw new Error(`#summarize() not implemented in ${this.constructor.name}`);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">679</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">680</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">681</strong>    addHandler(handler) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">682</strong>        this.eventTargets.add(handler);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">683</strong>        handler(this.summarize());</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">684</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">685</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">686</strong>    removeHandler(handler) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">687</strong>        this.eventTargets.delete(handler);</pre></div>
+<div class="line"><div class="doc"><p>Whenever something changes, we fire an event to all subscribed listeners, with a summary of its state.</p>
+</div><pre class="source javascript"><strong class="lineNumber">683</strong>    emitEvent() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">684</strong>        const summary = this.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">685</strong>        for (const handler of this.eventTargets) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">686</strong>            handler(summary);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">687</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">688</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">689</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">690</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">691</strong></pre></div>
-<div class="line"><div class="doc"><p><code>Record</code> is Torus&#39;s unit of individual data source, used for view models and Models from business logic.</p>
-</div><pre class="source javascript"><strong class="lineNumber">694</strong>class Record extends Evented {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">695</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">696</strong>    constructor(id, data = {}) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">697</strong>        super();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">690</strong>    addHandler(handler) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">691</strong>        this.eventTargets.add(handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">692</strong>        handler(this.summarize());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">693</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">694</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">695</strong>    removeHandler(handler) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">696</strong>        this.eventTargets.delete(handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">697</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">698</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">699</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">700</strong></pre></div>
+<div class="line"><div class="doc"><p><code>Record</code> is Torus&#39;s unit of individual data source, used for view models and Models from business logic.</p>
+</div><pre class="source javascript"><strong class="lineNumber">703</strong>class Record extends Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">704</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">705</strong>    constructor(id, data = {}) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">706</strong>        super();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">707</strong></pre></div>
 <div class="line"><div class="doc"><p>We can create a Record by either passing in just the properties, or an ID and a dictionary of props. We disambiguate here.</p>
-</div><pre class="source javascript"><strong class="lineNumber">701</strong>        if (typeof id === 'object' &#38;&#38; !Object.keys(data).length) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">702</strong>            data = id;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">703</strong>            id = null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">704</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">705</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">706</strong>        this.id = id;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">707</strong>        this.data = data;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">708</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">709</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">710</strong>        if (typeof id === 'object' &#38;&#38; !Object.keys(data).length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">711</strong>            data = id;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">712</strong>            id = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">713</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">714</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">715</strong>        this.id = id;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">716</strong>        this.data = data;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">717</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">718</strong></pre></div>
 <div class="line"><div class="doc"><p>Setter for properties</p>
-</div><pre class="source javascript"><strong class="lineNumber">711</strong>    update(data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">712</strong>        Object.assign(this.data, data);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">713</strong>        this.emitEvent();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">714</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">715</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">720</strong>    update(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">721</strong>        Object.assign(this.data, data);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">722</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">723</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">724</strong></pre></div>
 <div class="line"><div class="doc"><p>Getter</p>
-</div><pre class="source javascript"><strong class="lineNumber">717</strong>    get(name) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">718</strong>        return this.data[name];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">719</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">720</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">726</strong>    get(name) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">727</strong>        return this.data[name];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">728</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">729</strong></pre></div>
 <div class="line"><div class="doc"><p>We summarize a Record by returning a dictionary of all of its properties and the ID</p>
-</div><pre class="source javascript"><strong class="lineNumber">723</strong>    summarize() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">724</strong>        return Object.assign(</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">725</strong>            {},</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">726</strong>            this.data,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">727</strong>            {id: this.id}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">728</strong>        );</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">729</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">730</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">732</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">733</strong>        return Object.assign(</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">734</strong>            {},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">735</strong>            this.data,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">736</strong>            {id: this.id}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">737</strong>        );</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">738</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">739</strong></pre></div>
 <div class="line"><div class="doc"><p>The JSON-serialized version of a Record is the same as its summary, since it&#39;s a shallow data store with just plain properties.</p>
-</div><pre class="source javascript"><strong class="lineNumber">733</strong>    serialize() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">734</strong>        return this.summarize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">735</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">736</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">737</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">738</strong></pre></div>
-<div class="line"><div class="doc"><p>A list of Records, represents a collection or a table</p>
-</div><pre class="source javascript"><strong class="lineNumber">740</strong>class Store extends Evented {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">741</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">742</strong>    constructor(records = []) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">743</strong>        super();</pre></div>
-<div class="line"><div class="doc"><p>Reset the store&#39;s contents with the given records</p>
-</div><pre class="source javascript"><strong class="lineNumber">745</strong>        this.reset(records);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">746</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">742</strong>    serialize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">743</strong>        return this.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">744</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">745</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">746</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">747</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">748</strong>    get recordClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">749</strong>        return Record;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">750</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">751</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">752</strong>    get comparator() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">753</strong>        return null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">754</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">755</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">756</strong>    create(id, data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">757</strong>        this.add(new this.recordClass(id, data));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">758</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">759</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">760</strong>    add(record) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">761</strong>        this.records.add(record);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">762</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"><p>A list of Records, represents a collection or a table</p>
+</div><pre class="source javascript"><strong class="lineNumber">749</strong>class Store extends Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">750</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">751</strong>    constructor(records = []) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">752</strong>        super();</pre></div>
+<div class="line"><div class="doc"><p>Reset the store&#39;s contents with the given records</p>
+</div><pre class="source javascript"><strong class="lineNumber">754</strong>        this.reset(records);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">755</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">756</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">757</strong>    get recordClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">758</strong>        return Record;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">759</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">760</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">761</strong>    get comparator() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">762</strong>        return null;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">763</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">764</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">765</strong>    remove(record) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">766</strong>        this.records.delete(record);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">767</strong>        this.emitEvent();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">768</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">769</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">770</strong>    reset(records) {</pre></div>
-<div class="line"><div class="doc"><p>Internally, we represent the store as an unordered set. we only order by comparator when we summarize. This prevents us from having to perform sorting checks on every insert/update, and is efficient as long as we don&#39;t re-render excessively.</p>
-</div><pre class="source javascript"><strong class="lineNumber">775</strong>        this.records = new Set(records);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">765</strong>    create(id, data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">766</strong>        this.add(new this.recordClass(id, data));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">767</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">768</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">769</strong>    add(record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">770</strong>        this.records.add(record);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">771</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">772</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">773</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">774</strong>    remove(record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">775</strong>        this.records.delete(record);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">776</strong>        this.emitEvent();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">777</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">778</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">779</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">779</strong>    reset(records) {</pre></div>
+<div class="line"><div class="doc"><p>Internally, we represent the store as an unordered set. we only order by comparator when we summarize. This prevents us from having to perform sorting checks on every insert/update, and is efficient as long as we don&#39;t re-render excessively.</p>
+</div><pre class="source javascript"><strong class="lineNumber">784</strong>        this.records = new Set(records);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">785</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">786</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">787</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">788</strong>    summarize() {</pre></div>
 <div class="line"><div class="doc"><p>The summary of a store is defined functionally. We just sort the records in our store by the comparator (but we use a list of pairs of cached comparators and records to be fast.</p>
-</div><pre class="source javascript"><strong class="lineNumber">783</strong>        return [...this.records].map(record =&#62; [</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">784</strong>            this.comparator ? this.comparator(record) : null,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">785</strong>            record,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">786</strong>        ]).sort((a, b) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">787</strong>            if (a[0] &#60; b[0]) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">788</strong>                return -1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">789</strong>            } else if (a[0] &#62; b[0]) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">790</strong>                return 1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">791</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">792</strong>                return 0;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">793</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">794</strong>        }).map(o =&#62; o[1]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">795</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">796</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">792</strong>        return [...this.records].map(record =&#62; [</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">793</strong>            this.comparator ? this.comparator(record) : null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">794</strong>            record,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">795</strong>        ]).sort((a, b) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">796</strong>            if (a[0] &#60; b[0]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">797</strong>                return -1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">798</strong>            } else if (a[0] &#62; b[0]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">799</strong>                return 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">800</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">801</strong>                return 0;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong>        }).map(o =&#62; o[1]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">805</strong></pre></div>
 <div class="line"><div class="doc"><p>To serialize a store, we serialize each record and put them in a giant list.</p>
-</div><pre class="source javascript"><strong class="lineNumber">799</strong>    serialize() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">800</strong>        return this.summarize().map(record =&#62; record.serialize());</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">801</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">808</strong>    serialize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">809</strong>        return this.summarize().map(record =&#62; record.serialize());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">810</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong></pre></div>
 <div class="line"><div class="doc"><p>Higher-order component to create a Store for a given record class.</p>
-</div><pre class="source javascript"><strong class="lineNumber">807</strong>const StoreOf = recordClass =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">808</strong>    return class extends Store {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">809</strong>        get recordClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">810</strong>            return recordClass;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">814</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">816</strong>const StoreOf = recordClass =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">817</strong>    return class extends Store {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">818</strong>        get recordClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">819</strong>            return recordClass;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">821</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">822</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">823</strong></pre></div>
 <div class="line"><div class="doc"><p>Helper function for the router. It takes a route string that contains parameters like, <code>/path/:param1/path/:param2</code> and returns a regular expression to match that route and a list of params in that route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">819</strong>const routeStringToRegExp = route =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong>    let match;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">821</strong>    const paramNames = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">822</strong>    while (match !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">823</strong>        match = (/:\w+/).exec(route);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">824</strong>        if (match) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">825</strong>            const paramName = match[0];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">826</strong>            paramNames.push(paramName.substr(1));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">827</strong>            route = route.replace(paramName, '(.*)');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">828</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">829</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">830</strong>    return [new RegExp(route), paramNames];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">831</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">832</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">828</strong>const routeStringToRegExp = route =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">829</strong>    let match;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">830</strong>    const paramNames = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">831</strong>    while (match !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">832</strong>        match = (/:\w+/).exec(route);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">833</strong>        if (match) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">834</strong>            const paramName = match[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">835</strong>            paramNames.push(paramName.substr(1));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">836</strong>            route = route.replace(paramName, '(.*)');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">837</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">838</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">839</strong>    return [new RegExp(route), paramNames];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">840</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">841</strong></pre></div>
 <div class="line"><div class="doc"><p>Front-end router. A routing component can bind to updates from the Router instead of a Record, and re-render different subviews when the routes change.</p>
-</div><pre class="source javascript"><strong class="lineNumber">836</strong>class Router extends Evented {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">837</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">838</strong>    constructor(routes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">839</strong>        super();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">845</strong>class Router extends Evented {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">846</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">847</strong>    constructor(routes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">848</strong>        super();</pre></div>
 <div class="line"><div class="doc"><p>We parse the given dictionary of routes into three things: the name of the route, the route regular expression, and the list of params in that route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">843</strong>        this.routes = Object.entries(routes)</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">844</strong>            .map(([name, route]) =&#62; [name, ...routeStringToRegExp(route)]);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">852</strong>        this.routes = Object.entries(routes)</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">853</strong>            .map(([name, route]) =&#62; [name, ...routeStringToRegExp(route)]);</pre></div>
 <div class="line"><div class="doc"><p>Last matched route&#39;s information is cached here</p>
-</div><pre class="source javascript"><strong class="lineNumber">846</strong>        this.lastMatch = ['', null];</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">855</strong>        this.lastMatch = ['', null];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Whenever the browser pops the history state (i.e. when the user goes back with the back button or forward with the forward button), we need to route again.</p>
-</div><pre class="source javascript"><strong class="lineNumber">850</strong>        this._cb = () =&#62; this.route(location.pathname);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">851</strong>        window.addEventListener('popstate', this._cb);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">859</strong>        this._cb = () =&#62; this.route(location.pathname);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">860</strong>        window.addEventListener('popstate', this._cb);</pre></div>
 <div class="line"><div class="doc"><p>Route the current URL, if it&#39;s already a deep link to a path.</p>
-</div><pre class="source javascript"><strong class="lineNumber">853</strong>        this._cb();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">854</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">855</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">862</strong>        this._cb();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">863</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">864</strong></pre></div>
 <div class="line"><div class="doc"><p>The &quot;summary&quot; of this Evented (components can bind to this object) is the information about the last route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">858</strong>    summarize() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">859</strong>        return this.lastMatch;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">860</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">861</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">867</strong>    summarize() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">868</strong>        return this.lastMatch;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">869</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">870</strong></pre></div>
 <div class="line"><div class="doc"><p>Click events from links can call <code>this.go()</code> with the destination URL to trigger going to a new route without reloading the page.</p>
-</div><pre class="source javascript"><strong class="lineNumber">864</strong>    go(destination) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">865</strong>        history.pushState(null, document.title, destination);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">866</strong>        this.route(destination);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">867</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">868</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">873</strong>    go(destination) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">874</strong>        history.pushState(null, document.title, destination);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">875</strong>        this.route(destination);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">876</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">877</strong></pre></div>
 <div class="line"><div class="doc"><p>Main procedure to reconcile which of the defined route the current location path matches, and dispatch the right event. Routes are checked in order of declaration.</p>
-</div><pre class="source javascript"><strong class="lineNumber">872</strong>    route(path) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">881</strong>    route(path) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Match destination against the route regular expressions</p>
-</div><pre class="source javascript"><strong class="lineNumber">874</strong>        for (const [name, routeRe, paramNames] of this.routes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">875</strong>            const match = routeRe.exec(path);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">876</strong>            if (match !== null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">877</strong>                const result = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">878</strong>                const paramValues = match.slice(1);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">883</strong>        for (const [name, routeRe, paramNames] of this.routes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">884</strong>            const match = routeRe.exec(path);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">885</strong>            if (match !== null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">886</strong>                const result = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">887</strong>                const paramValues = match.slice(1);</pre></div>
 <div class="line"><div class="doc"><p>Given the matched values and parameter names, build a dictionary of params that components can use to re-render based on the route.</p>
-</div><pre class="source javascript"><strong class="lineNumber">882</strong>                paramNames.forEach((name, i) =&#62; result[name] = paramValues[i]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">883</strong>                this.lastMatch = [name, result];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">884</strong>                break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">885</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">886</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">887</strong>        this.emitEvent();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">888</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">889</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">891</strong>                paramNames.forEach((name, i) =&#62; result[name] = paramValues[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">892</strong>                this.lastMatch = [name, result];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">893</strong>                break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">894</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">895</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">896</strong>        this.emitEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">897</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">898</strong></pre></div>
 <div class="line"><div class="doc"><p>When we don&#39;t want the router to work anymore / stop listening / be gc&#39;d, we can call <code>#remove()</code> to do just that.</p>
-</div><pre class="source javascript"><strong class="lineNumber">892</strong>    remove() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">893</strong>        window.removeEventListener('popstate', this._cb);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">894</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">895</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">896</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">897</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">901</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">902</strong>        window.removeEventListener('popstate', this._cb);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">903</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">904</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">905</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">906</strong></pre></div>
 <div class="line"><div class="doc"><p>Torus exposes these public APIs</p>
-</div><pre class="source javascript"><strong class="lineNumber">899</strong>const exposedNames = {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">908</strong>const exposedNames = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p><code>renderJDOM</code> isn&#39;t designed to be a public API and the API might change, but it&#39;s exposed to make unit testing easier.</p>
-</div><pre class="source javascript"><strong class="lineNumber">902</strong>    renderJDOM,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">903</strong>    Component,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">904</strong>    Styled,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">905</strong>    StyledComponent,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">906</strong>    List,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">907</strong>    ListOf,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">908</strong>    Record,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">909</strong>    Store,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">910</strong>    StoreOf,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">911</strong>    Router,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">912</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">911</strong>    renderJDOM,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">912</strong>    Component,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">913</strong>    Styled,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">914</strong>    StyledComponent,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">915</strong>    List,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">916</strong>    ListOf,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">917</strong>    Record,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">918</strong>    Store,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">919</strong>    StoreOf,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">920</strong>    Router,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">921</strong>}</pre></div>
 <div class="line"><div class="doc"><p>If there is a global <code>window</code> object, bind API names to it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">914</strong>if (typeof window === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">915</strong>    for (const name in exposedNames) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">916</strong>        window[name] = exposedNames[name];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">917</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">918</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">923</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">924</strong>    for (const name in exposedNames) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">925</strong>        window[name] = exposedNames[name];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">926</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">927</strong>}</pre></div>
 <div class="line"><div class="doc"><p>Export public APIs CommonJS-style</p>
-</div><pre class="source javascript"><strong class="lineNumber">920</strong>if (typeof module === 'object' &#38;&#38; typeof module.exports === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">921</strong>    module.exports = exposedNames;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">922</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">923</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">929</strong>if (typeof module === 'object' &#38;&#38; typeof module.exports === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">930</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">931</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">932</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

@@ -54,8 +54,9 @@ const HTML_IDL_ATTRIBUTES = [
 let render_stack = 0;
 
 //> Shortcut utility function to check if a given name is
-//  bound to something that's an actual object (not just null)
-const isObject = o => typeof o === 'object' && o !== null;
+//  bound to something that's an actual object (not just null).
+//  We perform the `null` check first because that's faster.
+const isObject = obj => obj !== null && typeof obj === 'object';
 
 //> `normalizeJDOM` takes a JDOM object (dictionary) and modifies
 //  it in place so it has the default JDOM properties, and we don't
@@ -152,22 +153,11 @@ const renderJDOM = (node, previous, next) => {
 
     //> We only do diff operations if the previous and next items are not the same.
     if (previous !== next) {
-        //> If we need to render a literal DOM Node, just replace
-        //  the old node with the literal node.
-        if (next instanceof Node) {
-            // @begindebug
-            if (node === undefined) {
-                render_debug(`Add literal element <${next.tagName}>`);
-            } else {
-                render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
-            }
-            // @enddebug
-            replacePreviousNode(next);
         //> If we need to render a null (comment) node,
         //  create and insert a comment node. This might seem
         //  silly, but it keeps the DOM consistent between
         //  renders and makes diff simpler.
-        } else if (next === null) {
+        if (next === null) {
             // @begindebug
             if (node === undefined) {
                 render_debug('Add comment node');
@@ -187,10 +177,21 @@ const renderJDOM = (node, previous, next) => {
             }
             // @enddebug
             replacePreviousNode(document.createTextNode(next));
+        //> If we need to render a literal DOM Node, just replace
+        //  the old node with the literal node.
+        } else if (next.nodeType !== undefined) { // check if next instanceof Node
+            // @begindebug
+            if (node === undefined) {
+                render_debug(`Add literal element <${next.tagName}>`);
+            } else {
+                render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
+            }
+            // @enddebug
+            replacePreviousNode(next);
         //> If we're rendering an object literal, assume it's a serialized
         //  JDOM dictionary. This is the meat of the algorithm.
-        } else if (isObject(next)) {
-            if (!isObject(previous) || (previous instanceof Node)) {
+        } else { // next is a non-null object
+            if (!isObject(previous) || (previous && previous.nodeType !== undefined)) { // check if previous instanceof Node
                 //> If the previous JDOM doesn't exist or wasn't JDOM, we're adding a completely
                 //  new node into the DOM. Stub an empty `previous`.
                 previous = {
@@ -477,8 +478,7 @@ class Component {
         data = data || (this.record && this.record.summarize())
         const jdom = this.preprocess(this.compose(data), data);
         this.node = renderJDOM(this.node, this.jdom, jdom);
-        this.jdom = jdom;
-        return this.jdom;
+        return this.jdom = jdom;
     }
 
 }

@@ -61,361 +61,360 @@
 <div class="line"><div class="doc"><p>A global counter for how deep we are in our render tree. 0 indicates that we aren&#39;t in the middle of rendering.</p>
 </div><pre class="source javascript"><strong class="lineNumber">54</strong>let render_stack = 0;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">55</strong></pre></div>
-<div class="line"><div class="doc"><p>Shortcut utility function to check if a given name is bound to something that&#39;s an actual object (not just null)</p>
-</div><pre class="source javascript"><strong class="lineNumber">58</strong>const isObject = o =&#62; typeof o === 'object' &#38;&#38; o !== null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">59</strong></pre></div>
+<div class="line"><div class="doc"><p>Shortcut utility function to check if a given name is bound to something that&#39;s an actual object (not just null). We perform the <code>null</code> check first because that&#39;s faster.</p>
+</div><pre class="source javascript"><strong class="lineNumber">59</strong>const isObject = obj =&#62; obj !== null &#38;&#38; typeof obj === 'object';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">60</strong></pre></div>
 <div class="line"><div class="doc"><p><code>normalizeJDOM</code> takes a JDOM object (dictionary) and modifies it in place so it has the default JDOM properties, and we don&#39;t have to complicate our rendering code by checking for nulls with every key access into our serialized virtual DOM. Note that we don&#39;t check <code>isObject(jdom)</code> here. We assume only valid objects are passed in to &#39;normalize&#39;, which is true in our usage so far. <code>normalizeJDOM</code> is a hot path in rendering, so we need it as fast as it can be.</p>
-</div><pre class="source javascript"><strong class="lineNumber">68</strong>const normalizeJDOM = jdom =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">69</strong>    if (jdom.attrs === undefined) jdom.attrs = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">70</strong>    if (jdom.events === undefined) jdom.events = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">71</strong>    if (jdom.children === undefined) jdom.children = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">72</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">73</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">69</strong>const normalizeJDOM = jdom =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">70</strong>    if (jdom.attrs === undefined) jdom.attrs = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">71</strong>    if (jdom.events === undefined) jdom.events = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">72</strong>    if (jdom.children === undefined) jdom.children = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">73</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">74</strong></pre></div>
 <div class="line"><div class="doc"><p>Quick shorthand to normalize either 1. a single value or 2. an array of values into an array of values. This is useful because JDOM accepts either into things like <code>attrs.class</code> and <code>events.&lt;name&gt;</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">77</strong>const arrayNormalize = data =&#62; Array.isArray(data) ? data : [data];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">78</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">78</strong>const arrayNormalize = data =&#62; Array.isArray(data) ? data : [data];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">79</strong></pre></div>
 <div class="line"><div class="doc"><p>We use comment nodes as placeholder nodes because they&#39;re lightweight and invisible.</p>
-</div><pre class="source javascript"><strong class="lineNumber">81</strong>const tmpNode = () =&#62; document.createComment('');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">82</strong>const tmpNode = () =&#62; document.createComment('');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">83</strong></pre></div>
 <div class="line"><div class="doc"><p><code>opQueue</code> is a global queue of node-level operations to be performed. These are calculated during the diff, but because operations touching the page DOM are expensive, we defer them until the end of a render pass and run them all at once, asynchronously. Each item in the queue is an array that starts with an opcode (one of the three below), and is followed by the list of arguments the operation takes. We render all operations in the queue to the DOM before the browser renders the next frame in one fell swoop.</p>
-</div><pre class="source javascript"><strong class="lineNumber">90</strong>let opQueue = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">91</strong>const OP_APPEND = 0; // append, parent, new</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>const OP_REMOVE = 1; // remove, parent, old</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">93</strong>const OP_REPLACE = 2; // replace, old, new</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">94</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">91</strong>let opQueue = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>const OP_APPEND = 0; // append, parent, new</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">93</strong>const OP_REMOVE = 1; // remove, parent, old</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">94</strong>const OP_REPLACE = 2; // replace, old, new</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong></pre></div>
 <div class="line"><div class="doc"><p><code>runDOMOperations</code> works through the <code>opQueue</code> and performs each DOM operation in order they were queued. rDO is called when the reconciler (<code>renderJDOM</code>) reaches the bottom of a render stack (when it&#39;s done reconciling the diffs in a root-level JDOM node).</p>
-</div><pre class="source javascript"><strong class="lineNumber">99</strong>function runDOMOperations() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">100</strong>    const replacements = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong>    for (let i = 0, len = opQueue.length; i &#60; len; i ++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">103</strong>        const next = opQueue[i];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">104</strong>        const op = next[0];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">105</strong>        if (op === OP_APPEND) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">106</strong>            next[1].appendChild(next[2]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">107</strong>        } else if (op === OP_REMOVE) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">108</strong>            next[1].removeChild(next[2]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">109</strong>        } else { // op is implied to be OP_REPLACE</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">110</strong>            const oldNode = next[1];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">111</strong>            const newNode = next[2];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">112</strong>            const parent = oldNode.parentNode;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">100</strong>function runDOMOperations() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>    const replacements = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">103</strong>    for (let i = 0, len = opQueue.length; i &#60; len; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">104</strong>        const next = opQueue[i];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">105</strong>        const op = next[0];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">106</strong>        if (op === OP_APPEND) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">107</strong>            next[1].appendChild(next[2]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">108</strong>        } else if (op === OP_REMOVE) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">109</strong>            next[1].removeChild(next[2]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">110</strong>        } else { // op is implied to be OP_REPLACE</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">111</strong>            const oldNode = next[1];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">112</strong>            const newNode = next[2];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">113</strong>            const parent = oldNode.parentNode;</pre></div>
 <div class="line"><div class="doc"><p>We use a temporary node to run the replace operation then replace these temporary nodes later, because otherwise operations where nodes switch places in a list may break the DOM, since a node can&#39;t be inserted into the DOM in two places at once.</p>
-</div><pre class="source javascript"><strong class="lineNumber">118</strong>            const tmp = tmpNode();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">119</strong>            parent.replaceChild(tmp, oldNode);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong>            replacements.push([parent, tmp, newNode]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">122</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">123</strong>    opQueue = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">124</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong>    for (let i = 0, len = replacements.length; i &#60; len; i ++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>        const nodes = replacements[i];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>        // parent.replaceChild(newNode, placeholderNode);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>        nodes[0].replaceChild(nodes[2], nodes[1]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">129</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">130</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">131</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">119</strong>            const tmp = tmpNode();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong>            parent.replaceChild(tmp, oldNode);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong>            replacements.push([parent, tmp, newNode]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">122</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">123</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">124</strong>    opQueue = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>    for (let i = 0, len = replacements.length; i &#60; len; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>        const nodes = replacements[i];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>        // parent.replaceChild(newNode, placeholderNode);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">129</strong>        nodes[0].replaceChild(nodes[2], nodes[1]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">130</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">131</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">132</strong></pre></div>
 <div class="line"><div class="doc"><p>Torus&#39;s virtual DOM rendering algorithm that manages all diffing, updating, and efficient DOM access. <code>renderJDOM</code> takes <code>node</code>, the previous root node; <code>previous</code>, the previous JDOM; and <code>next</code>, the new JDOM; and returns the new root node (potentially different from the old root node.) Whenever a component is rendered, it calls <code>renderJDOM</code>. This rendering algorithm is recursive into child nodes.</p>
-</div><pre class="source javascript"><strong class="lineNumber">138</strong>const renderJDOM = (node, previous, next) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">139</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">139</strong>const renderJDOM = (node, previous, next) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">140</strong></pre></div>
 <div class="line"><div class="doc"><p>This queues up a node to be inserted into a new slot in the DOM tree. All queued replacements will flush to DOM at the end of the render pass, from <code>opQueue</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">143</strong>    const replacePreviousNode = newNode =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">144</strong>        if (node &#38;&#38; node !== newNode) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">145</strong>            opQueue.push([OP_REPLACE, node, newNode]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">146</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">147</strong>        node = newNode;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">148</strong>    };</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">149</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">144</strong>    const replacePreviousNode = newNode =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">145</strong>        if (node &#38;&#38; node !== newNode) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">146</strong>            opQueue.push([OP_REPLACE, node, newNode]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">147</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">148</strong>        node = newNode;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">149</strong>    };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">150</strong></pre></div>
 <div class="line"><div class="doc"><p>We&#39;re rendering a new node in the render tree. Increment counter.</p>
-</div><pre class="source javascript"><strong class="lineNumber">151</strong>    render_stack ++;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">152</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">152</strong>    render_stack ++;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">153</strong></pre></div>
 <div class="line"><div class="doc"><p>We only do diff operations if the previous and next items are not the same.</p>
-</div><pre class="source javascript"><strong class="lineNumber">154</strong>    if (previous !== next) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">155</strong>    if (previous !== next) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>If we need to render a literal DOM Node, just replace the old node with the literal node.</p>
-</div><pre class="source javascript"><strong class="lineNumber">157</strong>        if (next instanceof Node) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">158</strong>            // @begindebug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">159</strong>            if (node === undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">160</strong>                render_debug(`Add literal element &#60;${next.tagName}&#62;`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">161</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">162</strong>                render_debug(`Replace literal element &#60;${previous.tagName}&#62; with literal element &#60;${next.tagName}&#62;`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">163</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong>            // @enddebug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">165</strong>            replacePreviousNode(next);</pre></div>
 <div class="line"><div class="doc"><p>If we need to render a null (comment) node, create and insert a comment node. This might seem silly, but it keeps the DOM consistent between renders and makes diff simpler.</p>
-</div><pre class="source javascript"><strong class="lineNumber">170</strong>        } else if (next === null) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">171</strong>            // @begindebug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">172</strong>            if (node === undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">173</strong>                render_debug('Add comment node');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">174</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">175</strong>                render_debug(`Replace previous node &#60;${node.tagName}&#62; with comment node`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">176</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">177</strong>            // @enddebug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">178</strong>            replacePreviousNode(tmpNode());</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">160</strong>        if (next === null) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">161</strong>            // @begindebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">162</strong>            if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">163</strong>                render_debug('Add comment node');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">165</strong>                render_debug(`Replace previous node &#60;${node.tagName}&#62; with comment node`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">166</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">167</strong>            // @enddebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">168</strong>            replacePreviousNode(tmpNode());</pre></div>
 <div class="line"><div class="doc"><p>If we&#39;re rendering a string or raw number, convert it into a string and add a TextNode.</p>
-</div><pre class="source javascript"><strong class="lineNumber">181</strong>        } else if (typeof next === 'string' || typeof next === 'number') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">182</strong>            // @begindebug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">183</strong>            if (node === undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">184</strong>                render_debug(`Add text node "${next}"`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong>            } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong>                render_debug(`Replace previous node "${previous}" with text node "${next}"`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">187</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">188</strong>            // @enddebug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">189</strong>            replacePreviousNode(document.createTextNode(next));</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">171</strong>        } else if (typeof next === 'string' || typeof next === 'number') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">172</strong>            // @begindebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">173</strong>            if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">174</strong>                render_debug(`Add text node "${next}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">175</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">176</strong>                render_debug(`Replace previous node "${previous}" with text node "${next}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">177</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">178</strong>            // @enddebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">179</strong>            replacePreviousNode(document.createTextNode(next));</pre></div>
+<div class="line"><div class="doc"><p>If we need to render a literal DOM Node, just replace the old node with the literal node.</p>
+</div><pre class="source javascript"><strong class="lineNumber">182</strong>        } else if (next.nodeType !== undefined) { // check if next instanceof Node</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">183</strong>            // @begindebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">184</strong>            if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong>                render_debug(`Add literal element &#60;${next.tagName}&#62;`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong>            } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">187</strong>                render_debug(`Replace literal element &#60;${previous.tagName}&#62; with literal element &#60;${next.tagName}&#62;`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">188</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">189</strong>            // @enddebug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">190</strong>            replacePreviousNode(next);</pre></div>
 <div class="line"><div class="doc"><p>If we&#39;re rendering an object literal, assume it&#39;s a serialized JDOM dictionary. This is the meat of the algorithm.</p>
-</div><pre class="source javascript"><strong class="lineNumber">192</strong>        } else if (isObject(next)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">193</strong>            if (!isObject(previous) || (previous instanceof Node)) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">193</strong>        } else { // next is a non-null object</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">194</strong>            if (!isObject(previous) || (previous &#38;&#38; previous.nodeType !== undefined)) { // check if previous instanceof Node</pre></div>
 <div class="line"><div class="doc"><p>If the previous JDOM doesn&#39;t exist or wasn&#39;t JDOM, we&#39;re adding a completely new node into the DOM. Stub an empty <code>previous</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">196</strong>                previous = {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">197</strong>                    tag: null,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">198</strong>                };</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">199</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">200</strong>            normalizeJDOM(previous);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong>            normalizeJDOM(next);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">203</strong>            // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">204</strong>            render_debug(`Render pass for &#60;${next.tag.toLowerCase()}&#62;:`, true);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">205</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">197</strong>                previous = {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">198</strong>                    tag: null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">199</strong>                };</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">200</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong>            normalizeJDOM(previous);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong>            normalizeJDOM(next);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">203</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">204</strong>            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">205</strong>            render_debug(`Render pass for &#60;${next.tag.toLowerCase()}&#62;:`, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">206</strong></pre></div>
 <div class="line"><div class="doc"><p>If the tags differ, we assume the subtrees will be different as well and just start a completely new element. This is efficient in practice, reduces the time complexity of the algorithm, and an optimization shared with React&#39;s reconciler.</p>
-</div><pre class="source javascript"><strong class="lineNumber">210</strong>            if (previous.tag !== next.tag || !node) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">211</strong>                if (node === undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">212</strong>                    // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">213</strong>                    render_debug(`Add &#60;${next.tag}&#62;`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">214</strong>                } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">215</strong>                    // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">216</strong>                    render_debug(`Replace previous node &#60;${node.tagName}&#62; with &#60;${next.tag}`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">217</strong>                    // new root element, so "reset" previous</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">218</strong>                    previous = {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">219</strong>                    normalizeJDOM(previous);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">220</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">221</strong>                replacePreviousNode(document.createElement(next.tag));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">222</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">223</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">211</strong>            if (previous.tag !== next.tag || !node) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">212</strong>                if (node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">213</strong>                    // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">214</strong>                    render_debug(`Add &#60;${next.tag}&#62;`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">215</strong>                } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">216</strong>                    // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">217</strong>                    render_debug(`Replace previous node &#60;${node.tagName}&#62; with &#60;${next.tag}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">218</strong>                    // new root element, so "reset" previous</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">219</strong>                    previous = {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">220</strong>                    normalizeJDOM(previous);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">221</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">222</strong>                replacePreviousNode(document.createElement(next.tag));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">223</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">224</strong></pre></div>
 <div class="line"><div class="doc"><p>Compare and update attributes</p>
-</div><pre class="source javascript"><strong class="lineNumber">225</strong>            for (const attrName of Object.keys(next.attrs)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">226</strong>                switch (attrName) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>                    case 'class':</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">226</strong>            for (const attrName of Object.keys(next.attrs)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>                switch (attrName) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>                    case 'class':</pre></div>
 <div class="line"><div class="doc"><p>JDOM can pass classes as either a single string or an array of strings, so normalize it into an array.</p>
-</div><pre class="source javascript"><strong class="lineNumber">230</strong>                        const prevClass = arrayNormalize(previous.attrs.class || []);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">231</strong>                        const nextClass = arrayNormalize(next.attrs.class || []);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">232</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">233</strong>                        for (const className of nextClass) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                            // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>                            render_debug(`Add &#60;${next.tag}&#62; class "${className}"`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">236</strong>                            node.classList.add(className);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">237</strong>                        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">238</strong>                        for (const className of prevClass) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">239</strong>                            if (!nextClass.includes(className)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">240</strong>                                // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">241</strong>                                render_debug(`Remove &#60;${next.tag}&#62; class "${className}"`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">242</strong>                                node.classList.remove(className);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">243</strong>                            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">244</strong>                        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">245</strong>                        break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">246</strong>                    case 'style':</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">231</strong>                        const prevClass = arrayNormalize(previous.attrs.class || []);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">232</strong>                        const nextClass = arrayNormalize(next.attrs.class || []);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">233</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                        for (const className of nextClass) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>                            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">236</strong>                            render_debug(`Add &#60;${next.tag}&#62; class "${className}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">237</strong>                            node.classList.add(className);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">238</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">239</strong>                        for (const className of prevClass) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">240</strong>                            if (!nextClass.includes(className)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">241</strong>                                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">242</strong>                                render_debug(`Remove &#60;${next.tag}&#62; class "${className}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">243</strong>                                node.classList.remove(className);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">244</strong>                            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">245</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">246</strong>                        break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">247</strong>                    case 'style':</pre></div>
 <div class="line"><div class="doc"><p>JDOM takes style attributes as a dictionary rather than a string for API ergonomics, so we serialize it differently than other attributes.</p>
-</div><pre class="source javascript"><strong class="lineNumber">250</strong>                        const prevStyle = previous.attrs.style || {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">251</strong>                        const nextStyle = next.attrs.style || {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">252</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">253</strong>                        for (const styleKey of Object.keys(nextStyle)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">254</strong>                            if (nextStyle[styleKey] !== prevStyle[styleKey]) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">255</strong>                                // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">256</strong>                                render_debug(`Set &#60;${next.tag}&#62; style ${styleKey}: ${nextStyle[styleKey]}`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">257</strong>                                node.style[styleKey] = nextStyle[styleKey];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">258</strong>                            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">259</strong>                        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">260</strong>                        for (const styleKey of Object.keys(prevStyle)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">261</strong>                            if (nextStyle[styleKey] === undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">262</strong>                                // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">263</strong>                                render_debug(`Unsetting &#60;${next.tag}&#62; style ${styleKey}: ${prevStyle[styleKey]}`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">264</strong>                                node.style[styleKey] = '';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">265</strong>                            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">266</strong>                        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">267</strong>                        break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">268</strong>                    default:</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">251</strong>                        const prevStyle = previous.attrs.style || {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">252</strong>                        const nextStyle = next.attrs.style || {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">253</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">254</strong>                        for (const styleKey of Object.keys(nextStyle)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">255</strong>                            if (nextStyle[styleKey] !== prevStyle[styleKey]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">256</strong>                                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">257</strong>                                render_debug(`Set &#60;${next.tag}&#62; style ${styleKey}: ${nextStyle[styleKey]}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">258</strong>                                node.style[styleKey] = nextStyle[styleKey];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">259</strong>                            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">260</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">261</strong>                        for (const styleKey of Object.keys(prevStyle)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">262</strong>                            if (nextStyle[styleKey] === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">263</strong>                                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">264</strong>                                render_debug(`Unsetting &#60;${next.tag}&#62; style ${styleKey}: ${prevStyle[styleKey]}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">265</strong>                                node.style[styleKey] = '';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">266</strong>                            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">267</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">268</strong>                        break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">269</strong>                    default:</pre></div>
 <div class="line"><div class="doc"><p>If an attribute is an IDL attribute, we set it through JavaScript properties on the HTML element and not <code>setAttribute()</code>. This is necessary for properties like <code>value</code> and <code>indeterminate</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">273</strong>                        if (HTML_IDL_ATTRIBUTES.includes(attrName)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">274</strong>                            // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong>                            render_debug(`Set &#60;${next.tag}&#62; property ${attrName} = ${next.attrs[attrName]}`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong>                            node[attrName] = next.attrs[attrName];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>                        } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">278</strong>                            if (next.attrs[attrName] !== previous.attrs[attrName]) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">279</strong>                                // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">280</strong>                                render_debug(`Set &#60;${next.tag}&#62; attribute "${attrName}" to "${next.attrs[attrName]}"`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">281</strong>                                node.setAttribute(attrName, next.attrs[attrName]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">282</strong>                            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">283</strong>                        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">284</strong>                        break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">285</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">286</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">287</strong>            }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">274</strong>                        if (HTML_IDL_ATTRIBUTES.includes(attrName)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong>                            // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong>                            render_debug(`Set &#60;${next.tag}&#62; property ${attrName} = ${next.attrs[attrName]}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>                            node[attrName] = next.attrs[attrName];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">278</strong>                        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">279</strong>                            if (next.attrs[attrName] !== previous.attrs[attrName]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">280</strong>                                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">281</strong>                                render_debug(`Set &#60;${next.tag}&#62; attribute "${attrName}" to "${next.attrs[attrName]}"`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">282</strong>                                node.setAttribute(attrName, next.attrs[attrName]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">283</strong>                            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">284</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">285</strong>                        break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">286</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">287</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong>            }</pre></div>
 <div class="line"><div class="doc"><p>For any attributes that were removed in the new JDOM, also attempt to remove them from the DOM.</p>
-</div><pre class="source javascript"><strong class="lineNumber">290</strong>            for (const attrName of Object.keys(previous.attrs)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">291</strong>                if (next.attrs[attrName] === undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">292</strong>                    if (HTML_IDL_ATTRIBUTES.includes(attrName)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">293</strong>                        // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">294</strong>                        render_debug(`Remove &#60;${next.tag} property ${attrName}`);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">291</strong>            for (const attrName of Object.keys(previous.attrs)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">292</strong>                if (next.attrs[attrName] === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">293</strong>                    if (HTML_IDL_ATTRIBUTES.includes(attrName)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">294</strong>                        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">295</strong>                        render_debug(`Remove &#60;${next.tag} property ${attrName}`);</pre></div>
 <div class="line"><div class="doc"><p><code>null</code> seems to be the default for most IDL attrs, but even this isn&#39;t entirely consistent. This seems like something we should fix as issues come up, not preemptively search for a cross-browser solution.</p>
-</div><pre class="source javascript"><strong class="lineNumber">299</strong>                        node[attrName] = null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">300</strong>                    } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">301</strong>                        // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">302</strong>                        render_debug(`Remove &#60;${next.tag}&#62; attribute ${attrName}`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">303</strong>                        node.removeAttribute(attrName);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">304</strong>                    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">305</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">307</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">300</strong>                        node[attrName] = null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">301</strong>                    } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">302</strong>                        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">303</strong>                        render_debug(`Remove &#60;${next.tag}&#62; attribute ${attrName}`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">304</strong>                        node.removeAttribute(attrName);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">305</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">307</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">308</strong></pre></div>
 <div class="line"><div class="doc"><p>Compare event handlers</p>
-</div><pre class="source javascript"><strong class="lineNumber">309</strong>            const diffEvents = (whole, sub, cb) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">310</strong>                for (const eventName in whole) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong>                    const wholeEvents = arrayNormalize(whole[eventName] || []);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">312</strong>                    const subEvents = arrayNormalize(sub[eventName]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">313</strong>                    for (const handlerFn of wholeEvents) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">314</strong>                        if (!subEvents.includes(handlerFn)) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">315</strong>                            cb(eventName, handlerFn);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">316</strong>                        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">317</strong>                    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">318</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">319</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">320</strong>            diffEvents(next.events, previous.events, (eventName, handlerFn) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>                // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">322</strong>                render_debug(`Set new ${eventName} event listener on &#60;${next.tag}&#62;`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">323</strong>                node.addEventListener(eventName, handlerFn);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">324</strong>            });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">325</strong>            diffEvents(previous.events, next.events, (eventName, handlerFn) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">326</strong>                // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">327</strong>                render_debug(`Remove ${eventName} event listener on &#60;${next.tag}&#62;`);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">328</strong>                node.removeEventListener(eventName, handlerFn);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">329</strong>            });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">330</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">310</strong>            const diffEvents = (whole, sub, cb) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong>                for (const eventName in whole) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">312</strong>                    const wholeEvents = arrayNormalize(whole[eventName] || []);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">313</strong>                    const subEvents = arrayNormalize(sub[eventName]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">314</strong>                    for (const handlerFn of wholeEvents) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">315</strong>                        if (!subEvents.includes(handlerFn)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">316</strong>                            cb(eventName, handlerFn);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">317</strong>                        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">318</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">319</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">320</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>            diffEvents(next.events, previous.events, (eventName, handlerFn) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">322</strong>                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">323</strong>                render_debug(`Set new ${eventName} event listener on &#60;${next.tag}&#62;`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">324</strong>                node.addEventListener(eventName, handlerFn);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">325</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">326</strong>            diffEvents(previous.events, next.events, (eventName, handlerFn) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">327</strong>                // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">328</strong>                render_debug(`Remove ${eventName} event listener on &#60;${next.tag}&#62;`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">329</strong>                node.removeEventListener(eventName, handlerFn);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">330</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">331</strong></pre></div>
 <div class="line"><div class="doc"><p>Render children recursively</p>
-</div><pre class="source javascript"><strong class="lineNumber">332</strong>            const nodeChildren = node.childNodes;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">333</strong>            const prevChildren = previous.children;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">334</strong>            const nextChildren = next.children;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">335</strong>            if (nextChildren.length + prevChildren.length &#62; 0) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">336</strong>                if (prevChildren.length &#60; nextChildren.length) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">337</strong>                    let i;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">338</strong>                    for (i = 0; i &#60; prevChildren.length; i ++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">339</strong>                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">340</strong>                    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">341</strong>                    while (i &#60; nextChildren.length) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">342</strong>                        opQueue.push([OP_APPEND, node, renderJDOM(undefined, undefined, nextChildren[i])]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">343</strong>                        i ++;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">344</strong>                    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">345</strong>                } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">346</strong>                    let i;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">347</strong>                    for (i = 0; i &#60; nextChildren.length; i ++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">348</strong>                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">349</strong>                    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">350</strong>                    while (i &#60; prevChildren.length) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">351</strong>                        // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">352</strong>                        render_debug(`Remove child &#60;${nodeChildren[i].tagName}&#62;`);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">333</strong>            const nodeChildren = node.childNodes;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">334</strong>            const prevChildren = previous.children;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">335</strong>            const nextChildren = next.children;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">336</strong>            if (nextChildren.length + prevChildren.length &#62; 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">337</strong>                if (prevChildren.length &#60; nextChildren.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">338</strong>                    let i;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">339</strong>                    for (i = 0; i &#60; prevChildren.length; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">340</strong>                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">341</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">342</strong>                    while (i &#60; nextChildren.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">343</strong>                        opQueue.push([OP_APPEND, node, renderJDOM(undefined, undefined, nextChildren[i])]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">344</strong>                        i ++;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">345</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">346</strong>                } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">347</strong>                    let i;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">348</strong>                    for (i = 0; i &#60; nextChildren.length; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">349</strong>                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">350</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">351</strong>                    while (i &#60; prevChildren.length) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">352</strong>                        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">353</strong>                        render_debug(`Remove child &#60;${nodeChildren[i].tagName}&#62;`);</pre></div>
 <div class="line"><div class="doc"><p>If we need to remove a child element, removing it from the DOM immediately might lead to race conditions. instead, we add a placeholder and remove the placeholder at the end.</p>
-</div><pre class="source javascript"><strong class="lineNumber">357</strong>                        opQueue.push([OP_REMOVE, node, nodeChildren[i]]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">358</strong>                        i++;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">359</strong>                    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">360</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">361</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">362</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">363</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">364</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">358</strong>                        opQueue.push([OP_REMOVE, node, nodeChildren[i]]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">359</strong>                        i++;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">360</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">361</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">362</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">363</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">364</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">365</strong></pre></div>
 <div class="line"><div class="doc"><p>We&#39;re done rendering the current node, so decrement the render stack.</p>
-</div><pre class="source javascript"><strong class="lineNumber">367</strong>    render_stack --;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">368</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">368</strong>    render_stack --;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">369</strong></pre></div>
 <div class="line"><div class="doc"><p>If we&#39;ve reached the top of the render tree, it&#39;s time to flush replaced nodes to the DOM before the next frame.</p>
-</div><pre class="source javascript"><strong class="lineNumber">371</strong>    if (render_stack === 0) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">372</strong>        runDOMOperations();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">374</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">375</strong>    return node;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">376</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">377</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">372</strong>    if (render_stack === 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong>        runDOMOperations();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">374</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">375</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">376</strong>    return node;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">377</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">378</strong></pre></div>
 <div class="line"><div class="doc"><p>Shorthand function for the default, empty event object in <code>Component</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">379</strong>const emptyEvent = () =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">380</strong>    return {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">381</strong>        source: null,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">382</strong>        handler: () =&#62; {},</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">383</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">384</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">385</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">380</strong>const emptyEvent = () =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">381</strong>    return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">382</strong>        source: null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">383</strong>        handler: () =&#62; {},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">384</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">385</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">386</strong></pre></div>
 <div class="line"><div class="doc"><p>Torus&#39;s Component class</p>
-</div><pre class="source javascript"><strong class="lineNumber">387</strong>class Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">388</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">389</strong>    constructor(...args) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong>        this.jdom = undefined;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">391</strong>        this.node = undefined;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">392</strong>        this.event = emptyEvent();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">388</strong>class Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">389</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong>    constructor(...args) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">391</strong>        this.jdom = undefined;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">392</strong>        this.node = undefined;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>        this.event = emptyEvent();</pre></div>
 <div class="line"><div class="doc"><p>We call init() before render, because it&#39;s a common pattern to set and initialize &quot;private&quot; fields in <code>this.init()</code> (at least before the ES-next private fields proposal becomes widely supported.) Frequently, rendering will require private values to be set correctly.</p>
-</div><pre class="source javascript"><strong class="lineNumber">397</strong>        this.init(...args);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">398</strong>        this.init(...args);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>After we run <code>#init()</code>, we want to make sure that every constructed component has a valid <code>#node</code> property. To be efficient, we only render to set <code>#node</code> if it isn&#39;t already set yet.</p>
-</div><pre class="source javascript"><strong class="lineNumber">401</strong>        if (this.node === undefined) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">402</strong>            this.render();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">403</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">404</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">405</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">402</strong>        if (this.node === undefined) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">403</strong>            this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">404</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">405</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">406</strong></pre></div>
 <div class="line"><div class="doc"><p><code>Component.from()</code> allows us to transform a pure function that maps arguments to a JDOM tree, and promote it into a full-fledged <code>Component</code> class we can compose and use anywhere.</p>
-</div><pre class="source javascript"><strong class="lineNumber">409</strong>    static from(fn) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">410</strong>        return class FunctionComponent extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">411</strong>            init(...args) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">412</strong>                this.args = args;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">413</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>            compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>                return fn(...this.args);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">410</strong>    static from(fn) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">411</strong>        return class FunctionComponent extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">412</strong>            init(...args) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">413</strong>                this.args = args;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>            compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>                return fn(...this.args);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">420</strong></pre></div>
 <div class="line"><div class="doc"><p>The default <code>Component#init()</code> is guaranteed to always be a no-op method</p>
-</div><pre class="source javascript"><strong class="lineNumber">421</strong>    init() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">422</strong>        // should be overridden</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">424</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">422</strong>    init() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong>        // should be overridden</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">424</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">425</strong></pre></div>
 <div class="line"><div class="doc"><p>Components usually subscribe to events from a Record, either a view model or a model that maps to business logic. This is shorthand to access that.</p>
-</div><pre class="source javascript"><strong class="lineNumber">427</strong>    get record() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">428</strong>        return this.event.source;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">429</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">430</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">431</strong>    bind(source, handler) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">432</strong>        this.unbind();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">433</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">434</strong>        if (source instanceof Evented) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">435</strong>            this.event = {source, handler};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">436</strong>            source.addHandler(handler);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">437</strong>        } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">438</strong>            throw new Error('Event source to bind() to is not an instance of Evented');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">439</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">440</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">441</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">442</strong>    unbind() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">443</strong>        if (this.record) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">444</strong>            this.record.removeHandler(this.event.handler);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">445</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">446</strong>        this.event = emptyEvent();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">447</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">448</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">428</strong>    get record() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">429</strong>        return this.event.source;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">430</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">431</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">432</strong>    bind(source, handler) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">433</strong>        this.unbind();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">434</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">435</strong>        if (source instanceof Evented) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">436</strong>            this.event = {source, handler};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">437</strong>            source.addHandler(handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">438</strong>        } else {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">439</strong>            throw new Error('Event source to bind() to is not an instance of Evented');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">440</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">441</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">442</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">443</strong>    unbind() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">444</strong>        if (this.record) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">445</strong>            this.record.removeHandler(this.event.handler);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">446</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">447</strong>        this.event = emptyEvent();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">448</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">449</strong></pre></div>
 <div class="line"><div class="doc"><p>We use <code>#remove()</code> to prepare to remove the component from our application entirely. By default, it unsubscribes from all updates. However, the component is still in the render tree -- that&#39;s something for the user to decide when to hide.</p>
-</div><pre class="source javascript"><strong class="lineNumber">453</strong>    remove() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">454</strong>        this.unbind();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">455</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">456</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">454</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">455</strong>        this.unbind();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">456</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">457</strong></pre></div>
 <div class="line"><div class="doc"><p><code>#compose()</code> is our primary rendering API for components. By default, it renders an invisible comment node.</p>
-</div><pre class="source javascript"><strong class="lineNumber">459</strong>    compose(data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">460</strong>        return null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">461</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">462</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">460</strong>    compose(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">461</strong>        return null;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">462</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">463</strong></pre></div>
 <div class="line"><div class="doc"><p><code>#preprocess()</code> is an API on the component to allow us to extend <code>Component</code> to give it additional capabilities idiomatically. It consumes the result of <code>#compose()</code> and returns JDOM to be used to actually render the component. See <code>Styled()</code> for a usage example -- it fills similar use cases as React&#39;s render props or HOCs.</p>
-</div><pre class="source javascript"><strong class="lineNumber">467</strong>    preprocess(jdom, data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">468</strong>        return jdom;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">469</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">470</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">468</strong>    preprocess(jdom, data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">469</strong>        return jdom;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">470</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">471</strong></pre></div>
 <div class="line"><div class="doc"><p><code>#render()</code> is called to actually render the component again to the DOM, and Torus assumes that it&#39;s called rarely, only when the component absolutely must update. This obviates the need for something like React&#39;s <code>shouldComponentUpdate</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">474</strong>    render(data) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">475</strong>        // @debug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">476</strong>        render_debug(`Render Component: ${this.constructor.name}`, true);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">477</strong>        data = data || (this.record &#38;&#38; this.record.summarize())</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">478</strong>        const jdom = this.preprocess(this.compose(data), data);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">479</strong>        this.node = renderJDOM(this.node, this.jdom, jdom);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">480</strong>        this.jdom = jdom;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">481</strong>        return this.jdom;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">475</strong>    render(data) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">476</strong>        // @debug</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">477</strong>        render_debug(`Render Component: ${this.constructor.name}`, true);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">478</strong>        data = data || (this.record &#38;&#38; this.record.summarize())</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">479</strong>        const jdom = this.preprocess(this.compose(data), data);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">480</strong>        this.node = renderJDOM(this.node, this.jdom, jdom);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">481</strong>        return this.jdom = jdom;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">482</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">483</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">484</strong>}</pre></div>

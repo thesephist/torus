@@ -1,10 +1,7 @@
-//> JDOM treats strings and numbers as both string-like things (text nodes),
-//  so this is a shortcut for that check.
-const isStringLike = x => typeof x === 'string' || typeof x === 'number';
-
 //> Shortcut utility function to check if a given name is
 //  bound to something that's an actual object (not just null)
-const isObject = o => typeof o === 'object' && o !== null;
+//  We perform the `null` check first because it's faster.
+const isObject = obj => obj !== null && typeof obj === 'object';
 
 //> Clip the end of a given string by the length of a substring
 const clipStringEnd = (base, substr) => {
@@ -21,7 +18,7 @@ const decodeEntity = entity => {
 //  merge the two parts of a template tag's arguments.
 const interpolate = (tplParts, dynamicParts) => {
     let str = tplParts[0];
-    for (let i = 1; i <= dynamicParts.length; i ++) {
+    for (let i = 1, len = dynamicParts.length; i <= len; i ++) {
         str += dynamicParts[i - 1] + tplParts[i];
     }
     return str;
@@ -373,7 +370,7 @@ const JDOM_PLACEHOLDER_RE = /jdom_tmp_(?:func|obj)_\[(\d+)\]/;
 const JDOM_PLACEHOLDER_MIN_LENGTH = 16;
 
 //> Does a given string have a placeholder for the template values?
-const hasPlaceholder = str => typeof str == 'string' && str.includes('jdom_tmp_');
+const hasPlaceholder = str => typeof str === 'string' && str.includes('jdom_tmp_');
 
 //> **Utility functions for walking a JSON tree and filling in placeholders**
 //  The functions here that take mutable values (arrays, objects) will mutate the
@@ -384,8 +381,9 @@ const hasPlaceholder = str => typeof str == 'string' && str.includes('jdom_tmp_'
 //  are not cast to strings. Used to parse HTML children.
 const splitByPlaceholder = (str, dynamicParts) => {
     if (hasPlaceholder(str)) {
-        const [fullMatch, number] = JDOM_PLACEHOLDER_RE.exec(str);
-        const parts = str.split(fullMatch);
+        const match = JDOM_PLACEHOLDER_RE.exec(str);
+        const parts = str.split(match[0]);
+        const number = match[1];
         const processedBack = splitByPlaceholder(parts[1], dynamicParts);
 
         let result = [];
@@ -407,22 +405,24 @@ const splitByPlaceholder = (str, dynamicParts) => {
 const replaceChildrenToFlatArray = (children, dynamicParts) => {
     let newChildren = [];
     for (const childString of children) {
-        newChildren = newChildren.concat(splitByPlaceholder(childString, dynamicParts));
+        for (const child of splitByPlaceholder(childString, dynamicParts)) {
+            if (isObject(child)) {
+                replaceInObjectLiteral(child, dynamicParts);
+            }
+            newChildren.push(child);
+        }
     }
     const first = newChildren[0];
     const last = newChildren[newChildren.length - 1];
     if (typeof first === 'string' && !first.trim()) newChildren.shift();
     if (typeof last === 'string' && !last.trim()) newChildren.pop();
-    for (const child of newChildren) {
-        if (isObject(child)) {
-            replaceInObjectLiteral(child, dynamicParts);
-        }
-    }
     return newChildren;
 }
 
 //> Given a string, replace any placeholder values and return a new string.
 const replaceInString = (str, dynamicParts) => {
+    //> As an optimization, if the string is too short to contain placeholders,
+    //  just return early.
     if (str.length < JDOM_PLACEHOLDER_MIN_LENGTH) {
         return str;
     } else {
@@ -441,22 +441,23 @@ const replaceInString = (str, dynamicParts) => {
 
 //> Given an array literal, replace placeholders in it and its children, recursively.
 const replaceInArrayLiteral = (arr, dynamicParts) => {
-    arr.forEach((val, idx) => {
-        if (isStringLike(val)) {
-            arr[idx] = replaceInString(val.toString(), dynamicParts);
+    for (let i = 0, len = arr.length; i < len; i ++) {
+        const val = arr[i];
+        if (typeof val === 'string') {
+            arr[i] = replaceInString(val.toString(), dynamicParts);
         } else if (Array.isArray(val)) {
             replaceInArrayLiteral(val, dynamicParts);
         } else if (isObject(val)) {
             replaceInObjectLiteral(val, dynamicParts);
         }
-    });
+    }
 }
 
 //> Given an object, replace placeholders in it and its values.
 const replaceInObjectLiteral = (obj, dynamicParts) => {
     for (const prop of Object.keys(obj)) {
         const val = obj[prop];
-        if (isStringLike(val)) {
+        if (typeof val === 'string') {
             obj[prop] = replaceInString(val.toString(), dynamicParts);
         } else if (Array.isArray(val)) {
             if (prop === 'children') {
@@ -485,7 +486,7 @@ const jdom = (tplParts, ...dynamicParts) => {
                 //> Different kinds of template values are replaced by different
                 //  strings, since some of them need to be dealt with differently
                 //  during parse.
-                if (obj instanceof Function) {
+                if (typeof obj === 'function') {
                     //> Function values are treated as event listeners.
                     return `jdom_tmp_func_[${i}]`;
                 } else {
@@ -501,10 +502,11 @@ const jdom = (tplParts, ...dynamicParts) => {
             //> Put a function into the cache that translates an array of the dynamic parts of a template
             //  into the full JDOM for the template.
             JDOM_CACHE.set(cacheKey, dynamicParts => {
-                if (typeof result === 'string') {
+                const type = typeof result;
+                if (type === 'string') {
                     //> If the result of the template is just a string, replace stuff in the string
                     return replaceInString(result, dynamicParts);
-                } else if (typeof result === 'object') {
+                } else if (type === 'object') {
                     //> Recall that the template translating functions above mutate the object passed
                     //  in wherever possible. so we make a brand-new object to represent a new result.
                     const target = {};

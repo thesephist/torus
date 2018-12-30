@@ -9,15 +9,12 @@ const HTML_IDL_ATTRIBUTES = [
     'disabled',
 ];
 
-const arrayNormalize = data => data instanceof Array ? data : [data];
+const arrayNormalize = data => Array.isArray(data) ? data : [data];
 
 const normalizeJDOM = jdom => {
-    if (typeof jdom === 'object') {
-        if (!('tag' in jdom)) jdom.tag = 'div';
-        if (!('attrs' in jdom)) jdom.attrs = {};
-        if (!('events' in jdom)) jdom.events = {};
-        if (!('children' in jdom)) jdom.children = [];
-    }
+    if (!('attrs' in jdom)) jdom.attrs = {};
+    if (!('events' in jdom)) jdom.events = {};
+    if (!('children' in jdom)) jdom.children = [];
     return jdom;
 }
 

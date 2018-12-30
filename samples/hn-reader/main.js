@@ -625,7 +625,9 @@ class App extends StyledComponent {
     //  to read the new stuff. This does that.
     resetScroll() {
         requestAnimationFrame(() => {
-            document.scrollingElement.scrollTop = 0;
+            requestAnimationFrame(() => {
+                document.scrollingElement.scrollTop = 0;
+            });
         });
     }
 

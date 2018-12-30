@@ -223,8 +223,8 @@
 <div class="line"><div class="doc"><p>Stories stay collapsed in the list, and are expanded if they&#39;re viewed individually</p>
 </div><pre class="source javascript"><strong class="lineNumber">224</strong>    init(story, expanded = false) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">225</strong>        this.expanded = expanded;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">226</strong>        this.bind(story, data =&#62; this.render(data));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>        this.setActiveStory = this.setActiveStory.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">226</strong>        this.setActiveStory = this.setActiveStory.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>        this.bind(story, data =&#62; this.render(data));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">229</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">230</strong>    styles() {</pre></div>
@@ -411,14 +411,13 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>It&#39;s common for comment threads to never be expanded, so we optimize for the common case and don&#39;t even render the comment thread under this listing until expanded.</p>
 </div><pre class="source javascript"><strong class="lineNumber">418</strong>        this.kidsList = null;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong>        this.toggleFolded = this.toggleFolded.bind(this);</pre></div>
 <div class="line"><div class="doc"><p>Anytime the <code>kids</code> property on the parent comment changes, reload the nested children comments.</p>
-</div><pre class="source javascript"><strong class="lineNumber">421</strong>        this.bind(comment, data =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">422</strong>            this.comments.resetWith(data.kids || []);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong>            if (!this.folded) this.comments.fetch();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">424</strong>            this.render(data);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">425</strong>        });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">426</strong>        this.toggleFolded = this.toggleFolded.bind(this);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">422</strong>        this.bind(comment, data =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong>            this.comments.resetWith(data.kids || []);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">424</strong>            if (!this.folded) this.comments.fetch();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">425</strong>            this.render(data);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">426</strong>        });</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">427</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">428</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">429</strong>    styles() {</pre></div>

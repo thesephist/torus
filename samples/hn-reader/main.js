@@ -223,8 +223,8 @@ class StoryListing extends StyledComponent {
     //> Stories stay collapsed in the list, and are expanded if they're viewed individually
     init(story, expanded = false) {
         this.expanded = expanded;
-        this.bind(story, data => this.render(data));
         this.setActiveStory = this.setActiveStory.bind(this);
+        this.bind(story, data => this.render(data));
     }
 
     styles() {
@@ -416,6 +416,7 @@ class CommentListing extends StyledComponent {
         //  optimize for the common case and don't even render the
         //  comment thread under this listing until expanded.
         this.kidsList = null;
+        this.toggleFolded = this.toggleFolded.bind(this);
         //> Anytime the `kids` property on the parent comment changes,
         //  reload the nested children comments.
         this.bind(comment, data => {
@@ -423,7 +424,6 @@ class CommentListing extends StyledComponent {
             if (!this.folded) this.comments.fetch();
             this.render(data);
         });
-        this.toggleFolded = this.toggleFolded.bind(this);
     }
 
     styles() {

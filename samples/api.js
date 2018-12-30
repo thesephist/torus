@@ -599,7 +599,9 @@ class CakeProductListing extends Component {
     init(cakeProduct) {
         //> Bind this component to `cakeProduct`, so that when `cakeProduct`
         //  updates, this callback function is called with the summary of the record.
-        //  Usually, we'll want to re-render.
+        //  Usually, we'll want to re-render. Note that when we bind, it immediately
+        //  calls the callback (in this case, `this.render(props)`) once. That means
+        //  everything we need to run render should be defined before this bind call.
         this.bind(cakeProduct, props => {
             //> `compose()` will be called with `props`, the summary of the cake record.
             //  We don't always have to just re-render when the record updates.

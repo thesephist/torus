@@ -67,9 +67,9 @@ const isObject = obj => obj !== null && typeof obj === 'object';
 //  in our usage so far. `normalizeJDOM` is a hot path in rendering,
 //  so we need it as fast as it can be.
 const normalizeJDOM = jdom => {
-    if (jdom.attrs === undefined) jdom.attrs = {};
-    if (jdom.events === undefined) jdom.events = {};
-    if (jdom.children === undefined) jdom.children = [];
+    jdom.attrs = jdom.attrs || {};
+    jdom.events = jdom.events || {};
+    jdom.children = jdom.children || [];
 }
 
 //> Quick shorthand to normalize either 1. a single value or 2. an array

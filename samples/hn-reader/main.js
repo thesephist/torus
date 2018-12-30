@@ -2,11 +2,12 @@
 
 //> A few constants used through the app. The root URL for the
 //  Hacker News JSON API and the current time, for calculating relative datetimes.
-const API_ROOT = 'https://hacker-news.firebaseio.com/v0';
+const HN_API_ROOT = 'https://hacker-news.firebaseio.com/v0';
 const NOW = new Date();
 
 //> Used later in styles to keep colors consistent
 const BRAND_COLOR = '#1fada2';
+const LIGHT_BRAND_COLOR = '#a4abbb';
 
 //> An abstraction over the Hacker News JSON API. Given a short path, it
 //  expands it out and makes sure no requests are cached by the browser,
@@ -16,7 +17,7 @@ const BRAND_COLOR = '#1fada2';
 const CACHE = new Map();
 const hnFetch = async (apiPath, skipCache) => {
     if (!CACHE.has(apiPath) || skipCache) {
-        const result = await fetch(API_ROOT + apiPath + '.json', {
+        const result = await fetch(HN_API_ROOT + apiPath + '.json', {
             cache: 'no-cache',
         }).then(resp => resp.json());
         CACHE.set(apiPath, result)
@@ -24,6 +25,18 @@ const hnFetch = async (apiPath, skipCache) => {
     } else {
         return CACHE.get(apiPath);
     }
+}
+
+//> This app also uses my personal [screenshot service](https://github.com/thesephist/looking-glass)
+//  to deliver screenshot previews for HN story links. These are API details for that service.
+const LOOKING_GLASS_API_ROOT = 'https://glass.v37.co';
+const LOOKING_GLASS_TOKEN = 'lg_48461186351534';
+
+//> A function to map a site's URL to the URL for a screenshot of that site,
+//  using the Looking Glass service.
+const getLookingGlassScreenshotURL = siteURL => {
+    return `${LOOKING_GLASS_API_ROOT}/screenshot?token=${
+        LOOKING_GLASS_TOKEN}&url=${encodeURI(siteURL)}`;
 }
 
 //> Formats times into 24-hour format, which is what I personally prefer.
@@ -214,13 +227,24 @@ class StoryListing extends StyledComponent {
 
     styles() {
         return {
-            'display': 'flex',
-            'flex-direction': 'row',
-            'align-items': 'center',
-            'justify-content': 'flex-start',
+            'display': 'block',
             'margin-bottom': '24px',
-            'width': '100%',
             'cursor': 'pointer',
+            '.listing': {
+                'display': 'flex',
+                'flex-direction': 'row',
+                'align-items': 'center',
+                'justify-content': 'flex-start',
+                'width': '100%',
+                '&:hover .stats': {
+                    'background': BRAND_COLOR,
+                    'color': '#fff',
+                    'transform': 'translate(0, -4px)',
+                    '&::after': {
+                        'background': '#fff',
+                    },
+                },
+            },
             '.mono': {
                 'font-family': '"Monaco", "Menlo", monospace',
             },
@@ -266,14 +290,6 @@ class StoryListing extends StyledComponent {
                     'left': '6px',
                 },
             },
-            '&:hover .stats': {
-                'background': BRAND_COLOR,
-                'color': '#fff',
-                'transform': 'translate(0, -4px)',
-                '&::after': {
-                    'background': '#fff',
-                },
-            },
             '.score, .comments': {
                 'height': '32px',
                 'width': '100%',
@@ -283,6 +299,44 @@ class StoryListing extends StyledComponent {
                 'margin-left': '12px',
                 'flex-shrink': 1,
                 'overflow': 'hidden',
+            },
+            '.previewWrapper': {
+                'display': 'block',
+                'width': '100%',
+                'max-width': '500px',
+                'margin': '0 auto',
+            },
+            '.preview': {
+                'position': 'relative',
+                'margin': '18px auto 0 auto',
+                'width': '100%',
+                //> This is a trick to force a 4x3 aspect ratio
+                //  even when the image is not loaded yet.
+                'height': 0,
+                'padding-bottom': '75%',
+                //> This is a trick to emulate a border without
+                //  messing up box sizing -- shadow with a bigger size than the box.
+                'box-shadow': '0 0 0 3px ' + BRAND_COLOR,
+                'box-sizing': 'border-box',
+                'transition': 'opacity .2s',
+                '.loadingIndicator': {
+                    'position': 'absolute',
+                    'z-index': '-1',
+                    'top': '50%',
+                    'left': '50%',
+                    'transform': 'translate(-50%, -50%)',
+                    'font-size': '1.3em',
+                    'text-align': 'center',
+                    'width': '100%',
+                    'color': LIGHT_BRAND_COLOR,
+                },
+                'img': {
+                    'box-sizing': 'border-box',
+                    'width': '100%',
+                },
+                '&:hover': {
+                    'opacity': '.7',
+                },
             },
         }
     }
@@ -303,24 +357,36 @@ class StoryListing extends StyledComponent {
         const time = attrs.time || 0;
         const author = attrs.by || '...';
 
+        const preview = (this.expanded && url) ? (
+            jdom`<a class="previewWrapper" href="${url}" target="_blank" onclick="${stopProp}" noreferrer>
+                <div class="preview">
+                    <div class="loadingIndicator">loading link preview ...</div>
+                    <img alt="Screenshot of ${url}" src="${getLookingGlassScreenshotURL(url)}" />
+                </div>
+            </a>`
+        ) : '';
+
         return jdom`<li data-id=${attrs.id} onclick="${this.setActiveStory}">
-            <div class="stats mono" title="${score} upvotes, ${descendants} comments">
-                <div class="score">${score}</div>
-                <div class="comments">${descendants}</div>
-            </div>
-            <div class="synopsis">
-                <div class="title">${attrs.order ? attrs.order + '.' : ''} ${title}</div>
-                <div class="url ${(url || !this.expanded) ? 'mono' : 'content'}">
-                    ${url ? (
-                        jdom`<a href="${url}" target="_blank" onclick="${stopProp}" noreferrer>${url}</a>`
-                    ) : text}
+            <div class="listing">
+                <div class="stats mono" title="${score} upvotes, ${descendants} comments">
+                    <div class="score">${score}</div>
+                    <div class="comments">${descendants}</div>
                 </div>
-                <div class="meta">
-                    <span class="time">${formatDate(time)}</span>
-                    |
-                    <span class="author">${userLink(author)}</span>
+                <div class="synopsis">
+                    <div class="title">${attrs.order ? attrs.order + '.' : ''} ${title}</div>
+                    <div class="url ${(url || !this.expanded) ? 'mono' : 'content'}">
+                        ${url ? (
+                            jdom`<a href="${url}" target="_blank" onclick="${stopProp}" noreferrer>${url}</a>`
+                        ) : text}
+                    </div>
+                    <div class="meta">
+                        <span class="time">${formatDate(time)}</span>
+                        |
+                        <span class="author">${userLink(author)}</span>
+                    </div>
                 </div>
             </div>
+            ${preview}
         </li>`;
     }
 
@@ -566,7 +632,7 @@ class App extends StyledComponent {
             'a': {
                 'color': BRAND_COLOR,
                 '&:visited': {
-                    'color': '#a4abbb',
+                    'color': LIGHT_BRAND_COLOR,
                 },
             },
             //> This styles all buttons on the page

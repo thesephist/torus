@@ -11,6 +11,8 @@
 
 - [ ] Some way to defer rendering a subtree until contents have loaded / are ready would be great. This would be another great way to remove redundant renders, to get performance up.
 
+- [ ] JDOM -- warn that user should check for valid HTML, closing attrs tags and quotes, etc. when errors happen on invalid template.
+
 - [ ] Continuous build during development!
 
 ## Planned sample projects

@@ -329,42 +329,50 @@ const renderJDOM = (node, previous, next) => {
                 node.removeEventListener(eventName, handlerFn);
             });
 
-            //> Render children recursively
-            const nodeChildren = node.childNodes;
+            //> Render children recursively.
+            //  We memoize generated child nodes into this `previous._nodes` array
+            //  so we don't have to perform expensive, DOM-touching operations during reconciliation
+            //  to look up children of the current node.
+            const nodeChildren = previous._nodes || [];
             const prevChildren = previous.children;
             const nextChildren = next.children;
             const prevLength = prevChildren.length;
             const nextLength = nextChildren.length;
-            if (nextLength + prevLength > 0) {
+            const minLength = prevLength < nextLength ? prevLength : nextLength;
+            if (nextLength > 0 || prevLength > 0) {
+                //> "sync" the equal-sized portions of the two children lists.
+                let i;
+                for (i = 0; i < minLength; i ++) {
+                    const newChild = renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
+                    nodeChildren.splice(i, 1, newChild);
+                }
                 //> If the new JDOM has more children than the old JDOM, we need to
                 //  add the extra children.
                 if (prevLength < nextLength) {
-                    let i;
-                    for (i = 0; i < prevLength; i ++) {
-                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
-                    }
                     while (i < nextLength) {
-                        opQueue.push([OP_APPEND, node, renderJDOM(undefined, undefined, nextChildren[i])]);
+                        // @debug
+                        render_debug(`Add child ${nextChildren[i].tagName ? nextChildren[i].tagName : nextChildren[i]}`);
+                        const newChild = renderJDOM(undefined, undefined, nextChildren[i]);
+                        opQueue.push([OP_APPEND, node, newChild]);
+                        nodeChildren.splice(i, 0, newChild);
                         i ++;
                     }
                 //> If the new JDOM has less than or equal number of children to the old
                 //  JDOM, we'll remove any stragglers.
                 } else {
-                    let i;
-                    for (i = 0; i < nextLength; i ++) {
-                        renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
-                    }
                     while (i < prevLength) {
                         // @debug
-                        render_debug(`Remove child <${nodeChildren[i].tagName}>`);
+                        render_debug(`Remove child ${nextChildren[i].tagName ? nextChildren[i].tagName : nextChildren[i]}`);
                         //> If we need to remove a child element, removing
                         //  it from the DOM immediately might lead to race conditions.
                         //  instead, we add a placeholder and remove the placeholder
                         //  at the end.
-                        opQueue.push([OP_REMOVE, node, nodeChildren[i]]);
-                        i++;
+                        opQueue.push([OP_REMOVE, node, nodeChildren[i], i]);
+                        i ++;
                     }
+                    nodeChildren.splice(nextLength, prevLength - nextLength);
                 }
+                next._nodes = nodeChildren;
             }
         }
     }

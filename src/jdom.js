@@ -498,21 +498,22 @@ const jdom = (tplParts, ...dynamicParts) => {
             const reader = new Reader(interpolate(tplParts.map(part => part.replace(/\s+/g, ' ')), dpPlaceholders));
             //> Parse the template and take the first child, if there are more, as the element we care about.
             const result = parseTemplate(reader)[0];
+            const resultType = typeof result;
+            const resultString = JSON.stringify(result);
 
             //> Put a function into the cache that translates an array of the dynamic parts of a template
             //  into the full JDOM for the template.
             JDOM_CACHE.set(cacheKey, dynamicParts => {
-                const type = typeof result;
-                if (type === 'string') {
+                if (resultType === 'string') {
                     //> If the result of the template is just a string, replace stuff in the string
                     return replaceInString(result, dynamicParts);
-                } else if (type === 'object') {
+                } else if (resultType === 'object') {
                     //> Recall that the template translating functions above mutate the object passed
                     //  in wherever possible. so we make a brand-new object to represent a new result.
                     const target = {};
                     //> Since the non-dynamic parts of JDOM objects are by definition completely JSON
                     //  serializable, this is a good enough way to deep-copy the cached result of `parseTemplate()`.
-                    const template = JSON.parse(JSON.stringify((result)));
+                    const template = JSON.parse(resultString);
                     replaceInObjectLiteral(Object.assign(target, template), dynamicParts);
                     return target;
                 }

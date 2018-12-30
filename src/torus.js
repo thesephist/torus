@@ -7,6 +7,7 @@
 //> Flag to enable rich debugging during renders
 const DEBUG_RENDER = true;
 
+//> Repeat a string `count` times. Used to indent in `render_debug`.
 const repeat = (str, count) => {
     let s = '';
     while (count -- > 0) {
@@ -87,7 +88,7 @@ const tmpNode = () => document.createComment('');
 //  and run them all at once, asynchronously. Each item in the queue is an array
 //  that starts with an opcode (one of the three below), and is followed
 //  by the list of arguments the operation takes. We render all operations in the queue
-//  to the DOM before the browser renders the next frame in one fell swoop.
+//  to the DOM before the browser renders the next frame.
 let opQueue = [];
 const OP_APPEND = 0; // append, parent, new
 const OP_REMOVE = 1; // remove, parent, old
@@ -96,14 +97,26 @@ const OP_REPLACE = 2; // replace, old, new
 //> `runDOMOperations` works through the `opQueue` and performs each
 //  DOM operation in order they were queued. rDO is called when the reconciler
 //  (`renderJDOM`) reaches the bottom of a render stack (when it's done reconciling
-//  the diffs in a root-level JDOM node).
+//  the diffs in a root-level JDOM node of a component).
 function runDOMOperations() {
-    for (let i = 0, len = opQueue.length; i < len; i ++) {
+    //> This function is written to avoid any potential reconciliation conflicts.
+    //  There are two risks to mitigate: 1. attempting insert a node
+    //  that is already in the DOM, and 2. attempting remove a node that isn't
+    //  in the DOM. Both will result in inconsistent DOM state and break the renderer.
+    //  To avoid this, first, we remove all children and add placeholders where they
+    //  ought to be replaced. Then, in a second loop, we add any children that need
+    //  to be added and replace placeholders. Thus, no children will be inadvertently removed
+    //  and no wrong node will be removed.
+    const len = opQueue.length;
+    for (let i = 0; i < len; i ++) {
         const next = opQueue[i];
         const op = next[0];
         if (op === OP_REMOVE) {
+            //> Remove all children that should be
             next[1].removeChild(next[2]);
-        } else if (op === OP_REPLACE) { // op is implied to be OP_REPLACE
+        } else if (op === OP_REPLACE) {
+            //> For the ones queued to for being replaced,
+            //  put in a placeholder node, and queue that up instead.
             const oldNode = next[1];
             const tmp = tmpNode();
             const parent = oldNode.parentNode;
@@ -112,13 +125,15 @@ function runDOMOperations() {
             next[3] = parent;
         }
     }
-    for (let i = 0, len = opQueue.length; i < len; i ++) {
+    for (let i = 0; i < len; i ++) {
         const next = opQueue[i];
         const op = next[0];
         if (op === OP_APPEND) {
+            //> Add any node that need to be added
             next[1].appendChild(next[2]);
         } else if (op === OP_REPLACE) {
-            // parent.replaceChild(newNode, oldNode);
+            //> Replace placeholders with correct nodes. This is
+            // equivalent to `parent.replaceChild(newNode, oldNode)`
             next[3].replaceChild(next[2], next[1]);
         }
     }
@@ -143,12 +158,13 @@ const diffEvents = (whole, sub, cb) => {
 //  root node; `previous`, the previous JDOM; and `next`, the new JDOM;
 //  and returns the new root node (potentially different from the old
 //  root node.) Whenever a component is rendered, it calls `renderJDOM`. This
-//  rendering algorithm is recursive into child nodes.
+//  rendering algorithm is recursive into child nodes. Despite not touching
+//  the DOM, this is still one of the most expensive parts of rendering.
 const renderJDOM = (node, previous, next) => {
 
     //> This queues up a node to be inserted into a new slot in the
     //  DOM tree. All queued replacements will flush to DOM at the end
-    //  of the render pass, from `opQueue`.
+    //  of the render pass, from `runDOMOperations`.
     const replacePreviousNode = newNode => {
         if (node && node !== newNode) {
             opQueue.push([OP_REPLACE, node, newNode]);
@@ -238,10 +254,10 @@ const renderJDOM = (node, previous, next) => {
                         //  or an array of strings, so we need to check for either
                         //  of those cases.
                         const nextClass = next.attrs.class;
+                        //> Mutating `className` is faster than iterating through
+                        //  `classList` objects if there's only one batch operation
+                        //  for all class changes.
                         if (Array.isArray(nextClass)) {
-                            //> Mutating `className` is faster than iterating through
-                            //  `classList` objects if there's only one batch operation
-                            //  for all class changes.
                             // @debug
                             render_debug(`Update class names for <${next.tag}> to "${nextClass.join(' ')}"`);
                             node.className = nextClass.join(' ');
@@ -258,6 +274,9 @@ const renderJDOM = (node, previous, next) => {
                         const prevStyle = previous.attrs.style || {};
                         const nextStyle = next.attrs.style || {};
 
+                        //> When we iterate through the key/values of a flat object like this,
+                        //  you may be tempted to use `Object.entries()`. We use `Object.keys()` and lookups,
+                        //  which is less idiomatic, but fast. This results in a measurable performance bump.
                         for (const styleKey of Object.keys(nextStyle)) {
                             if (nextStyle[styleKey] !== prevStyle[styleKey]) {
                                 // @debug
@@ -324,18 +343,21 @@ const renderJDOM = (node, previous, next) => {
                 node.removeEventListener(eventName, handlerFn);
             });
 
-            //> Render children recursively.
+            //> Render children recursively. These loops are also well optimized, since
+            //  it's a hot patch of code at runtime.
             //  We memoize generated child nodes into this `previous._nodes` array
             //  so we don't have to perform expensive, DOM-touching operations during reconciliation
-            //  to look up children of the current node.
+            //  to look up children of the current node in the next render pass. `nodeChildren`
+            //  will be updated alongside enqueued DOM mutation operations.
             const nodeChildren = previous._nodes || [];
             const prevChildren = previous.children;
             const nextChildren = next.children;
+            //> Memoize length lookups.
             const prevLength = prevChildren.length;
             const nextLength = nextChildren.length;
             const minLength = prevLength < nextLength ? prevLength : nextLength;
             if (nextLength > 0 || prevLength > 0) {
-                //> "sync" the equal-sized portions of the two children lists.
+                //> "sync" the common sections of the two children lists.
                 let i;
                 for (i = 0; i < minLength; i ++) {
                     const newChild = renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
@@ -367,21 +389,29 @@ const renderJDOM = (node, previous, next) => {
                     }
                     nodeChildren.splice(nextLength, prevLength - nextLength);
                 }
+                //> Mount `nodeChildren` onto the up-to-date JDOM, so the next
+                //  render pass can reference it.
                 next._nodes = nodeChildren;
             }
         }
     }
 
     //> We're done rendering the current node,
-    //  so decrement the render stack.
+    //  so decrement the render stack counter.
     render_stack --;
 
     //> If we've reached the top of the render tree, it's time
     //  to flush replaced nodes to the DOM before the next frame.
     if (render_stack === 0) {
-        //> `runDOMOperations()` can be called asynchronously
-        //  for better responsiveness on larger component trees,
-        //  like React Fiber. But for now, we're keeping to synchronous calls.
+        //> `runDOMOperations()` can also be called completely asynchronously
+        //  with utilities like `requestIdleCallback`, _a la_ Concurrent React,
+        //  for better responsiveness on larger component trees. This requires
+        //  a modification to Torus's architecture, so that each set of `DOMOperations`
+        //  tasks in the `opQueue` from one component's render call are flushed to
+        //  the DOM before the next component's `DOMOperations` begins, for consistency.
+        //  This can be achieved with a nested queue layer on top of `opQueue`.
+        //  Here, we omit concurrency support today because it's not a great necessity
+        //  where Torus is used.
         runDOMOperations();
     }
 
@@ -511,7 +541,7 @@ let styledComponentSheet = null;
 //  that won't conflict with other classes on the page.
 const generateUniqueClassName = stylesObject => {
     // Modified from https://github.com/darkskyapp/string-hash/blob/master/index.js
-    const str = JSON.stringify(stylesObject).replace(/\s+/g, ' ');
+    const str = JSON.stringify(stylesObject);
     let i = str.length;
     let hash = 1989;
     while (i) {

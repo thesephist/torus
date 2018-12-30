@@ -98,7 +98,7 @@ const OP_REPLACE = 2; // replace, old, new
 //  (`renderJDOM`) reaches the bottom of a render stack (when it's done reconciling
 //  the diffs in a root-level JDOM node).
 function runDOMOperations() {
-    const replacements = [];
+    const swapQueue = [];
 
     for (let i = 0, len = opQueue.length; i < len; i ++) {
         const next = opQueue[i];
@@ -118,13 +118,13 @@ function runDOMOperations() {
             //  into the DOM in two places at once.
             const tmp = tmpNode();
             parent.replaceChild(tmp, oldNode);
-            replacements.push([parent, tmp, newNode]);
+            swapQueue.push([parent, tmp, newNode]);
         }
     }
     opQueue = [];
 
-    for (let i = 0, len = replacements.length; i < len; i ++) {
-        const nodes = replacements[i];
+    for (let i = 0, len = swapQueue.length; i < len; i ++) {
+        const nodes = swapQueue[i];
         // parent.replaceChild(newNode, placeholderNode);
         nodes[0].replaceChild(nodes[2], nodes[1]);
     }

@@ -85,7 +85,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong></pre></div>
 <div class="line"><div class="doc"><p><code>runDOMOperations</code> works through the <code>opQueue</code> and performs each DOM operation in order they were queued. rDO is called when the reconciler (<code>renderJDOM</code>) reaches the bottom of a render stack (when it&#39;s done reconciling the diffs in a root-level JDOM node).</p>
 </div><pre class="source javascript"><strong class="lineNumber">100</strong>function runDOMOperations() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>    const replacements = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>    const swapQueue = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">103</strong>    for (let i = 0, len = opQueue.length; i &#60; len; i ++) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">104</strong>        const next = opQueue[i];</pre></div>
@@ -101,13 +101,13 @@
 <div class="line"><div class="doc"><p>We use a temporary node to run the replace operation then replace these temporary nodes later, because otherwise operations where nodes switch places in a list may break the DOM, since a node can&#39;t be inserted into the DOM in two places at once.</p>
 </div><pre class="source javascript"><strong class="lineNumber">119</strong>            const tmp = tmpNode();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong>            parent.replaceChild(tmp, oldNode);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong>            replacements.push([parent, tmp, newNode]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong>            swapQueue.push([parent, tmp, newNode]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">122</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">123</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">124</strong>    opQueue = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>    for (let i = 0, len = replacements.length; i &#60; len; i ++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>        const nodes = replacements[i];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>    for (let i = 0, len = swapQueue.length; i &#60; len; i ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>        const nodes = swapQueue[i];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>        // parent.replaceChild(newNode, placeholderNode);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">129</strong>        nodes[0].replaceChild(nodes[2], nodes[1]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">130</strong>    }</pre></div>

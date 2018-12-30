@@ -522,7 +522,8 @@ const jdom = (tplParts, ...dynamicParts) => {
         //> Now that we have a translator function in the cache, call that to get a new template result.
         return JDOM_CACHE.get(cacheKey)(dynamicParts);
     } catch (e) {
-        console.error(`Error parsing template: ${interpolate(tplParts, dynamicParts)}\n${'stack' in e ? e.stack : e}`);
+        console.error(`Error parsing template.\nPlease check for any mismatched brackets, tags, and quotes.\n${
+            interpolate(tplParts, dynamicParts)}\n${e.stack || e}`);
         return '';
     }
 }

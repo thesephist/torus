@@ -2,10 +2,6 @@
 
 - [ ] Make README polished modeled after Preact's Github README. What badges do they use?
 
-- [ ] Error boundaries -- when something in render() call throws an uncaught error, catch it and render either the last render or a placeholder or something. Otherwise errors during render will mess up DOM (though not as badly as RAeact's renderer, which re-renders the whole app).
-
-- [ ] JDOM -- warn that user should check for valid HTML, closing attrs tags and quotes, etc. when errors happen on invalid template.
-
 - [ ] Continuous build during development!
 
 ## Planned sample projects

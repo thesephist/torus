@@ -477,7 +477,11 @@ class Component {
         render_debug(`Render Component: ${this.constructor.name}`, true);
         data = data || (this.record && this.record.summarize())
         const jdom = this.preprocess(this.compose(data), data);
-        this.node = renderJDOM(this.node, this.jdom, jdom);
+        try {
+            this.node = renderJDOM(this.node, this.jdom, jdom);
+        } catch (e) {
+            console.error('Error rendering updates', e);
+        }
         return this.jdom = jdom;
     }
 

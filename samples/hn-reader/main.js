@@ -357,7 +357,8 @@ class StoryListing extends StyledComponent {
         const time = attrs.time || 0;
         const author = attrs.by || '...';
 
-        const preview = (this.expanded && url) ? (
+        //> PDFs don't work with puppeteer previews, so we don't check PDFs for previews
+        const preview = (this.expanded && url && !url.endsWith('.pdf')) ? (
             jdom`<a class="previewWrapper" href="${url}" target="_blank" onclick="${stopProp}" noreferrer>
                 <div class="preview">
                     <div class="loadingIndicator">loading link preview ...</div>

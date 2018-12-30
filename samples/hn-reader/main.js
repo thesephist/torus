@@ -265,7 +265,7 @@ class StoryListing extends StyledComponent {
                 'color': '#777',
                 'font-size': '1em',
             },
-            '.stats': {
+            'a.stats': {
                 'height': '64px',
                 'width': '64px',
                 'flex-shrink': 0,
@@ -279,6 +279,9 @@ class StoryListing extends StyledComponent {
                 'background': '#eee',
                 'transition': 'background .2s, transform .2s',
                 'position': 'relative',
+                //> Overriding default <a> styles
+                'text-decoration': 'none',
+                'color': '#333',
                 '&::after': {
                     'content': '""',
                     'display': 'block',
@@ -341,10 +344,15 @@ class StoryListing extends StyledComponent {
         }
     }
 
+    getStoryPageURL() {
+        return `/story/${this.record.id}`;
+    }
+
     //> To read more about a story (read the comments), we tell the router
     //  to go to the path, so the main app view can manage the rest.
-    setActiveStory() {
-        router.go(`/story/${this.record.id}`);
+    setActiveStory(evt) {
+        evt && evt.preventDefault();
+        router.go(this.getStoryPageURL());
     }
 
     compose(attrs) {
@@ -369,10 +377,11 @@ class StoryListing extends StyledComponent {
 
         return jdom`<li data-id=${attrs.id} onclick="${this.setActiveStory}">
             <div class="listing">
-                <div class="stats mono" title="${score} upvotes, ${descendants} comments">
+                <a class="stats mono" title="${score} upvotes, ${descendants} comments"
+                    href="${this.getStoryPageURL()}" onclick="${this.setActiveStory}">
                     <div class="score">${score}</div>
                     <div class="comments">${descendants}</div>
-                </div>
+                </a>
                 <div class="synopsis">
                     <div class="title">${attrs.order ? attrs.order + '.' : ''} ${title}</div>
                     <div class="url ${(url || !this.expanded) ? 'mono' : 'content'}">
@@ -504,9 +513,12 @@ class CommentList extends Styled(ListOf(CommentListing)) {
     }
 
     compose() {
+        const nodes = this.nodes;
+        const truncatedMessage = (this.record.hiddenCount > 0 || nodes.length === 0)
+            ? `...${this.record.hiddenCount || 'no'} more comments` : '';
         return jdom`<ul>
-            ${this.nodes}
-            ...${this.record.hiddenCount || 'no'} more comments truncated
+            ${nodes}
+            ${truncatedMessage}
         </ul>`;
     }
 
@@ -540,7 +552,7 @@ class StoryList extends Styled(ListOf(StoryListing)) {
 
 //> A `StoryPage` is the page showing an individual story and any comments under it.
 //  It holds both a story listing view, as well as a comment list view.
-class StoryPage extends StyledComponent {
+class StoryPage extends Component {
 
     init(story, expanded = false) {
         //> Listing of the story this page is about, in expanded form

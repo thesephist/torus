@@ -410,7 +410,10 @@ class CommentListing extends StyledComponent {
         //> Comments can always nest other comments as children.
         //  So each comment view has a collection of children comments.
         this.comments = new CommentStore();
-        this.kidsList = new CommentList(this.comments);
+        //> It's common for comment threads to never be expanded, so we
+        //  optimize for the common case and don't even render the
+        //  comment thread under this listing until expanded.
+        this.kidsList = null;
         //> Anytime the `kids` property on the parent comment changes,
         //  reload the nested children comments.
         this.bind(comment, data => {
@@ -460,6 +463,9 @@ class CommentListing extends StyledComponent {
         evt.stopPropagation();
         this.folded = !this.folded;
         if (!this.folded && this.comments) this.comments.fetch();
+        if (!this.kidsList) {
+            this.kidsList = new CommentList(this.comments);
+        }
         this.render();
     }
 

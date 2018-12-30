@@ -416,12 +416,20 @@ class CommentListing extends StyledComponent {
         //  optimize for the common case and don't even render the
         //  comment thread under this listing until expanded.
         this.kidsList = null;
+        this.contentNode = null; // decoded HTML content, wrapped in a <span>
         this.toggleFolded = this.toggleFolded.bind(this);
         //> Anytime the `kids` property on the parent comment changes,
         //  reload the nested children comments.
         this.bind(comment, data => {
             this.comments.resetWith(data.kids || []);
             if (!this.folded) this.comments.fetch();
+            //> The "text" value is immutable in this app,
+            //  so the first time we get a non-null text value,
+            //  create a contentNode from it and cache it
+            //  so we don't need to keep parsing the HTML again.
+            if (!this.contentNode && data.text) {
+                this.contentNode = decodeHTML(data.text || '');
+            }
             this.render(data);
         });
     }
@@ -496,7 +504,7 @@ class CommentListing extends StyledComponent {
                 ${userLink(author)}
                 |
                 ${kids.length === 1 ? '1 reply' : kids.length + ' replies'}</div>
-            <div class="text">${decodeHTML(text)}</div>
+            <div class="text">${this.contentNode}</div>
             ${!this.folded ? (jdom`<div class="children">
                 ${this.kidsList.node}
             </div>`) : ''}

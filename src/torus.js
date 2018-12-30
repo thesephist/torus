@@ -98,36 +98,31 @@ const OP_REPLACE = 2; // replace, old, new
 //  (`renderJDOM`) reaches the bottom of a render stack (when it's done reconciling
 //  the diffs in a root-level JDOM node).
 function runDOMOperations() {
-    const swapQueue = [];
-
+    for (let i = 0, len = opQueue.length; i < len; i ++) {
+        const next = opQueue[i];
+        const op = next[0];
+        if (op === OP_REMOVE) {
+            next[1].removeChild(next[2]);
+        } else if (op === OP_REPLACE) { // op is implied to be OP_REPLACE
+            const oldNode = next[1];
+            const tmp = tmpNode();
+            const parent = oldNode.parentNode;
+            parent.replaceChild(tmp, oldNode);
+            next[1] = tmp;
+            next[3] = parent;
+        }
+    }
     for (let i = 0, len = opQueue.length; i < len; i ++) {
         const next = opQueue[i];
         const op = next[0];
         if (op === OP_APPEND) {
             next[1].appendChild(next[2]);
-        } else if (op === OP_REMOVE) {
-            next[1].removeChild(next[2]);
-        } else { // op is implied to be OP_REPLACE
-            const oldNode = next[1];
-            const newNode = next[2];
-            const parent = oldNode.parentNode;
-            //> We use a temporary node to run the replace operation
-            //  then replace these temporary nodes later,
-            //  because otherwise operations where nodes switch places
-            //  in a list may break the DOM, since a node can't be inserted
-            //  into the DOM in two places at once.
-            const tmp = tmpNode();
-            parent.replaceChild(tmp, oldNode);
-            swapQueue.push([parent, tmp, newNode]);
+        } else if (op === OP_REPLACE) {
+            // parent.replaceChild(newNode, oldNode);
+            next[3].replaceChild(next[2], next[1]);
         }
     }
     opQueue = [];
-
-    for (let i = 0, len = swapQueue.length; i < len; i ++) {
-        const nodes = swapQueue[i];
-        // parent.replaceChild(newNode, placeholderNode);
-        nodes[0].replaceChild(nodes[2], nodes[1]);
-    }
 }
 
 //> A function to compare event handlers in `renderJDOM`
@@ -367,7 +362,7 @@ const renderJDOM = (node, previous, next) => {
                         //  it from the DOM immediately might lead to race conditions.
                         //  instead, we add a placeholder and remove the placeholder
                         //  at the end.
-                        opQueue.push([OP_REMOVE, node, nodeChildren[i], i]);
+                        opQueue.push([OP_REMOVE, node, nodeChildren[i]]);
                         i ++;
                     }
                     nodeChildren.splice(nextLength, prevLength - nextLength);
@@ -384,6 +379,9 @@ const renderJDOM = (node, previous, next) => {
     //> If we've reached the top of the render tree, it's time
     //  to flush replaced nodes to the DOM before the next frame.
     if (render_stack === 0) {
+        //> `runDOMOperations()` can be called asynchronously
+        //  for better responsiveness on larger component trees,
+        //  like React Fiber. But for now, we're keeping to synchronous calls.
         runDOMOperations();
     }
 

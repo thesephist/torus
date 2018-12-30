@@ -2,6 +2,10 @@
 
 - [ ] Make README polished modeled after Preact's Github README. What badges do they use?
 
+- [ ] Async rendering epic
+    - Making rendering asynchronous -- rendering a single component's subtree one second after it's asked to render shouldn't break things, as long as renders stay in order. This should be the default rendering behavior.
+    - Rather than calling render imperatively, can we make `render()` mean `enqueueComponentForRender()`? This way, we don't have multiple redundant renders if state changes are triggered multiple times on a component and `render()` itself is called multiple times. Otherwise, we have redundant renders.
+
 - [ ] Continuous build during development!
 
 ## Planned sample projects

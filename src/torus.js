@@ -333,22 +333,28 @@ const renderJDOM = (node, previous, next) => {
             const nodeChildren = node.childNodes;
             const prevChildren = previous.children;
             const nextChildren = next.children;
-            if (nextChildren.length + prevChildren.length > 0) {
-                if (prevChildren.length < nextChildren.length) {
+            const prevLength = prevChildren.length;
+            const nextLength = nextChildren.length;
+            if (nextLength + prevLength > 0) {
+                //> If the new JDOM has more children than the old JDOM, we need to
+                //  add the extra children.
+                if (prevLength < nextLength) {
                     let i;
-                    for (i = 0; i < prevChildren.length; i ++) {
+                    for (i = 0; i < prevLength; i ++) {
                         renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
                     }
-                    while (i < nextChildren.length) {
+                    while (i < nextLength) {
                         opQueue.push([OP_APPEND, node, renderJDOM(undefined, undefined, nextChildren[i])]);
                         i ++;
                     }
+                //> If the new JDOM has less than or equal number of children to the old
+                //  JDOM, we'll remove any stragglers.
                 } else {
                     let i;
-                    for (i = 0; i < nextChildren.length; i ++) {
+                    for (i = 0; i < nextLength; i ++) {
                         renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
                     }
-                    while (i < prevChildren.length) {
+                    while (i < prevLength) {
                         // @debug
                         render_debug(`Remove child <${nodeChildren[i].tagName}>`);
                         //> If we need to remove a child element, removing

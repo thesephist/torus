@@ -130,6 +130,19 @@ function runDOMOperations() {
     }
 }
 
+//> A function to compare event handlers in `renderJDOM`
+const diffEvents = (whole, sub, cb) => {
+    for (const eventName of Object.keys(whole)) {
+        const wholeEvents = arrayNormalize(whole[eventName] || []);
+        const subEvents = arrayNormalize(sub[eventName]);
+        for (const handlerFn of wholeEvents) {
+            if (!subEvents.includes(handlerFn)) {
+                cb(eventName, handlerFn);
+            }
+        }
+    }
+}
+
 //> Torus's virtual DOM rendering algorithm that manages all diffing,
 //  updating, and efficient DOM access. `renderJDOM` takes `node`, the previous
 //  root node; `previous`, the previous JDOM; and `next`, the new JDOM;
@@ -305,18 +318,6 @@ const renderJDOM = (node, previous, next) => {
                 }
             }
 
-            //> Compare event handlers
-            const diffEvents = (whole, sub, cb) => {
-                for (const eventName in whole) {
-                    const wholeEvents = arrayNormalize(whole[eventName] || []);
-                    const subEvents = arrayNormalize(sub[eventName]);
-                    for (const handlerFn of wholeEvents) {
-                        if (!subEvents.includes(handlerFn)) {
-                            cb(eventName, handlerFn);
-                        }
-                    }
-                }
-            }
             diffEvents(next.events, previous.events, (eventName, handlerFn) => {
                 // @debug
                 render_debug(`Set new ${eventName} event listener on <${next.tag}>`);

@@ -174,9 +174,11 @@ class StoryStore extends StoreOf(Story) {
     }
 
     gotoPage(pageNumber) {
-        this.start = pageNumber;
-        this.reset();
-        this.fetch();
+        if (this.start !== pageNumber) {
+            this.start = pageNumber;
+            this.reset();
+            this.fetch();
+        }
     }
 
 }

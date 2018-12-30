@@ -227,21 +227,20 @@ const renderJDOM = (node, previous, next) => {
                 switch (attrName) {
                     case 'class':
                         //> JDOM can pass classes as either a single string
-                        //  or an array of strings, so normalize it into an array.
-                        const prevClass = arrayNormalize(previous.attrs.class || []);
-                        const nextClass = arrayNormalize(next.attrs.class || []);
-
-                        for (const className of nextClass) {
+                        //  or an array of strings, so we need to check for either
+                        //  of those cases.
+                        const nextClass = next.attrs.class;
+                        if (Array.isArray(nextClass)) {
+                            //> Mutating `className` is faster than iterating through
+                            //  `classList` objects if there's only one batch operation
+                            //  for all class changes.
                             // @debug
-                            render_debug(`Add <${next.tag}> class "${className}"`);
-                            node.classList.add(className);
-                        }
-                        for (const className of prevClass) {
-                            if (!nextClass.includes(className)) {
-                                // @debug
-                                render_debug(`Remove <${next.tag}> class "${className}"`);
-                                node.classList.remove(className);
-                            }
+                            render_debug(`Update class names for <${next.tag}> to "${nextClass.join(' ')}"`);
+                            node.className = nextClass.join(' ');
+                        } else {
+                            // @debug
+                            render_debug(`Update class name for <${next.tag}> to ${nextClass}`);
+                            node.className = nextClass;
                         }
                         break;
                     case 'style':

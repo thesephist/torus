@@ -46,6 +46,7 @@ class GraphPropsRecord extends Record {
             centerY: 0,
             zoom: 100, // for some reason a whole number causes graphs to disappear
             resolution: 5, // pixels per sample
+            detectAsymptotes: false,
         });
     }
 
@@ -111,6 +112,7 @@ class AppBar extends StyledComponent {
         this.zoomIn = this.zoomIn.bind(this);
         this.zoomOut = this.zoomOut.bind(this);
         this.toggleHighPerfMode = this.toggleHighPerfMode.bind(this);
+        this.toggleDetectAsymptotes = this.toggleDetectAsymptotes.bind(this);
 
         //> We want to reference graphProps with `this.records`, but
         //  when props on it updates, we don't really need to re-render.
@@ -122,7 +124,6 @@ class AppBar extends StyledComponent {
         const CONTROL_SIZE = 34;
         const CONTROL_MARGIN = 4;
         return {
-            'font-family': '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             'position': 'fixed',
             'top': '0',
             'left': '0',
@@ -212,7 +213,7 @@ class AppBar extends StyledComponent {
                     'width': '60px',
                 },
             },
-            '.highPerfCheck': {
+            '.toggleInput': {
                 'margin-right': '8px',
             },
             '.panel': {
@@ -306,6 +307,12 @@ class AppBar extends StyledComponent {
         });
     }
 
+    toggleDetectAsymptotes() {
+        this.record.update({
+            detectAsymptotes: !this.record.get('detectAsymptotes'),
+        });
+    }
+
     compose() {
         return jdom`<div class="appBar">
             <div class="panel graphSettings">
@@ -328,8 +335,12 @@ class AppBar extends StyledComponent {
                     </div>
                 </div>
                 <div class="inputGroup">
-                    <input class="highPerfCheck" id="higherPerfCheck" type="checkbox" onchange="${this.toggleHighPerfMode}" />
-                    <label for="higherPerfCheck">Draw smoother graphs (might be slower)</label>
+                    <input class="toggleInput" id="higherPerfCheck" type="checkbox" onchange="${this.toggleHighPerfMode}" />
+                    <label for="higherPerfCheck">More accurate graphs (might be slower)</label>
+                </div>
+                <div class="inputGroup">
+                    <input class="toggleInput" id="detectAsymptotes" type="checkbox" onchange="${this.toggleDetectAsymptotes}" />
+                    <label for="detectAsymptotes">Try to detect &#38; fix vertical asymptotes</label>
                 </div>
             </div>
             ${this.functionList.node}
@@ -397,6 +408,9 @@ class FunctionPanel extends StyledComponent {
                         'background': 'rgba(255, 255, 255, .9)',
                         'outline': 'none',
                     },
+                    '&::placeholder': {
+                        'color': '#aaa',
+                    }
                 },
             },
             '.buttonArea': {
@@ -449,7 +463,8 @@ class FunctionPanel extends StyledComponent {
         return jdom`<div class="panel functionPanel ${props.hidden ? 'hidden' : ''}">
             <div class="inputArea">
                 <div class="yPrefix">y =</div>
-                <input type="text" value="${props.text}" onblur="${this.updateFunctionText}" onkeyup="${this.keyUp}"/>
+                <input type="text" value="${props.text}" onblur="${this.updateFunctionText}"
+                    onkeyup="${this.keyUp}" placeholder="log(), sqrt(), sin/cos/tan() supported"/>
             </div>
             <div class="buttonArea">
                 <button onclick="${this.removeCallback}">Delete</button>
@@ -503,7 +518,7 @@ class FunctionGraph extends Component {
             const graphPropsSummary = this.graphProps.summarize();
 
             // get properties from graphProps
-            const { centerX, centerY, zoom, resolution } = graphPropsSummary;
+            const { centerX, centerY, zoom, resolution, detectAsymptotes } = graphPropsSummary;
             const centerXScreen = width / 2;
             const centerYScreen = height / 2;
             const minX = ~~(centerX - centerXScreen / zoom) - 1;
@@ -537,7 +552,7 @@ class FunctionGraph extends Component {
                     const diff = y - lastY;
                     const diffSign = y * lastY < 0;
                     lastY = y;
-                    if (diff * zoom > height && diffSign) {
+                    if (detectAsymptotes && Math.abs(diff * zoom) > height && diffSign) {
                         ctx.moveTo(xToCoord(x), yToCoord(clamp(y, minY, maxY)));
                     } else {
                         ctx.lineTo(xToCoord(x), yToCoord(clamp(y, minY, maxY)));
@@ -738,7 +753,7 @@ class Graph extends StyledComponent {
 
 }
 
-class App extends Component {
+class App extends StyledComponent {
 
     init() {
         //> Create our main collection of functions
@@ -756,12 +771,40 @@ class App extends Component {
         this.graph = new Graph(this.functionStore, this.graphProps);
     }
 
+    styles() {
+        return {
+            'font-family': '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+            'footer': {
+                'position': 'fixed',
+                'right': '0',
+                'bottom': '0',
+                'padding': '6px 8px',
+                'color': '#333',
+                'opacity': '.5',
+                'font-size': '14px',
+                'cursor': 'pointer',
+                'transition': 'opacity .2s',
+                'a': {
+                    'color': '#333',
+                },
+                '&:hover': {
+                    'opacity': '.8',
+                },
+            },
+        }
+    }
+
     compose() {
         return jdom`<main>
             <div class="overlay">
                 ${this.appBar.node}
             </div>
             ${this.graph.node}
+            <footer>
+                Built with
+                <a href="https://linus.zone/torus" target="_blank" rel="noopener">Torus</a>
+                by <a href="https://linus.zone/now" target="_blank" rel="noopener">Linus</a>
+            </footer>
         </main>`;
     }
 

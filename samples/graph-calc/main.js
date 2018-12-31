@@ -28,6 +28,10 @@ const randomColor = () => {
     return COLORS[colorIdx];
 }
 
+const clamp = (val, min, max) => {
+    return val > min ? (val < max ? val : max) : min;
+}
+
 //> View model that syncs display settings between the graph
 //  controls and the graph itself.
 class GraphPropsRecord extends Record {
@@ -40,7 +44,7 @@ class GraphPropsRecord extends Record {
         super({
             centerX: 0,
             centerY: 0,
-            zoom: 100.00001, // for some reason a whole number causes graphs to disappear
+            zoom: 100, // for some reason a whole number causes graphs to disappear
             resolution: 5, // pixels per sample
         });
     }
@@ -154,6 +158,7 @@ class AppBar extends StyledComponent {
                 'align-items': 'center',
                 'height': CONTROL_SIZE * 3 + CONTROL_MARGIN * 2 + 'px',
                 'button': {
+                    'background': '#fff',
                     'border-radius': '6px',
                     'border': '2px solid #aaa',
                     'font-size': '18px',
@@ -383,6 +388,7 @@ class FunctionPanel extends StyledComponent {
                 },
                 'input': {
                     'flex-grow': '1',
+                    'margin': 0,
                     'box-sizing': 'border-box',
                     'padding': '4px 6px',
                     'font-size': '16px',
@@ -502,6 +508,8 @@ class FunctionGraph extends Component {
             const centerYScreen = height / 2;
             const minX = ~~(centerX - centerXScreen / zoom) - 1;
             const maxX = ~~(centerX + centerXScreen / zoom) + 1;
+            const minY = ~~(centerY - centerYScreen / zoom) - 1;
+            const maxY = ~~(centerY + centerYScreen / zoom) + 1;
 
             const xToCoord = xValue => {
                 return centerXScreen + ((xValue - centerX) * zoom);
@@ -529,10 +537,10 @@ class FunctionGraph extends Component {
                     const diff = y - lastY;
                     const diffSign = y * lastY < 0;
                     lastY = y;
-                    if (diff * zoom / 5 > height && diffSign) {
-                        ctx.moveTo(xToCoord(x), yToCoord(y));
+                    if (diff * zoom > height && diffSign) {
+                        ctx.moveTo(xToCoord(x), yToCoord(clamp(y, minY, maxY)));
                     } else {
-                        ctx.lineTo(xToCoord(x), yToCoord(y));
+                        ctx.lineTo(xToCoord(x), yToCoord(clamp(y, minY, maxY)));
                     }
                 }
             }
@@ -685,8 +693,8 @@ class Graph extends StyledComponent {
         ctx.stroke();
 
         //> Draw the zero axes
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#333';
         ctx.beginPath();
         // y = 0
         ctx.moveTo(xToCoord(minX), yToCoord(0));
@@ -697,6 +705,20 @@ class Graph extends StyledComponent {
         ctx.stroke();
 
         ctx.lineWidth = 2;
+
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#555';
+        ctx.fillText('(0, 0)', xToCoord(0) + 5, yToCoord(0) + 16);
+        ctx.fillText('(1, 0)', xToCoord(1) + 5, yToCoord(0) + 16);
+        ctx.fillText('(0, 1)', xToCoord(0) + 5, yToCoord(1) + 16);
+        ctx.fillText('(10, 0)', xToCoord(10) + 5, yToCoord(0) + 16);
+        ctx.fillText('(0, 10)', xToCoord(0) + 5, yToCoord(10) + 16);
+        ctx.fillText('(-10, 0)', xToCoord(-10) + 5, yToCoord(0) + 16);
+        ctx.fillText('(0, -10)', xToCoord(0) + 5, yToCoord(-10) + 16);
+        ctx.fillText('(50, 0)', xToCoord(50) + 5, yToCoord(0) + 16);
+        ctx.fillText('(0, 50)', xToCoord(0) + 5, yToCoord(50) + 16);
+        ctx.fillText('(-50, 0)', xToCoord(-50) + 5, yToCoord(0) + 16);
+        ctx.fillText('(0, -50)', xToCoord(0) + 5, yToCoord(-50) + 16);
 
         for (const graph of this.functionGraphs.components) {
             graph.redraw();

@@ -1,13 +1,16 @@
 //> A 2D graphing calculator in Torus
 
 const COLORS = [
-    'blue',
-    'green',
-    'red',
-    'purple',
-    'brown',
+    '#e05252',
+    '#685ebb',
+    '#649c41',
+    '#ab589d',
+    '#d08b36',
+    '#209e9e',
+    '#726f84',
+    '#58384e',
 ];
-let colorIdx = 0;
+let colorIdx = -1;
 
 const NOTATION_SUBSTITUTES = {
             'abs': 'Math.abs',
@@ -37,9 +40,16 @@ class GraphPropsRecord extends Record {
         super({
             centerX: 0,
             centerY: 0,
-            zoom: 100,
-            resolution: 10, // pixels per sample
+            zoom: 100.00001, // for some reason a whole number causes graphs to disappear
+            resolution: 5, // pixels per sample
         });
+    }
+
+    update(dict) {
+        if (dict.zoom !== undefined) {
+            dict.zoom = dict.zoom < 10 ? 10 : dict.zoom;
+        }
+        super.update(dict);
     }
 
 }
@@ -89,14 +99,147 @@ class AppBar extends StyledComponent {
         this.functionList = new FunctionList(this.functionStore);
 
         this.addFunction = this.addFunction.bind(this);
+        this.resetGraphProps = this.resetGraphProps.bind(this);
+        this.moveUp = this.moveUp.bind(this);
+        this.moveDown = this.moveDown.bind(this);
+        this.moveLeft = this.moveLeft.bind(this);
+        this.moveRight = this.moveRight.bind(this);
+        this.zoomIn = this.zoomIn.bind(this);
+        this.zoomOut = this.zoomOut.bind(this);
+        this.toggleHighPerfMode = this.toggleHighPerfMode.bind(this);
+
+        //> We want to reference graphProps with `this.records`, but
+        //  when props on it updates, we don't really need to re-render.
+        //  So we don't, for performance reasons.
+        this.bind(graphProps, () => {});
     }
 
     styles() {
+        const CONTROL_SIZE = 34;
+        const CONTROL_MARGIN = 4;
         return {
             'font-family': '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-            'h1': {
-                'font-weight': 'normal',
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'width': '320px',
+            'display': 'flex',
+            'flex-direction': 'column',
+            'justify-content': 'flex=start',
+            'align-items': 'center',
+            'max-height': 'calc(100vh - 18px)',
+            'overflow-y': 'auto',
+            'padding': '18px', // so the shadows of each panel aren't clipped
+            'body.graph_dragging &': {
+                'pointer-events': 'none',
             },
+            '.graphSettings': {
+                'padding': '8px',
+            },
+            'label': {
+                'font-size': '14px',
+            },
+            '.title': {
+                'font-weight': 'bold',
+                'font-size': '20px',
+                'margin-bottom': '12px',
+            },
+            '.inputGroup': {
+                'margin-top': '12px',
+            },
+            '.controlGroup': {
+                'display': 'flex',
+                'flex-direction': 'row',
+                'justify-content': 'space-around',
+                'align-items': 'center',
+                'height': CONTROL_SIZE * 3 + CONTROL_MARGIN * 2 + 'px',
+                'button': {
+                    'border-radius': '6px',
+                    'border': '2px solid #aaa',
+                    'font-size': '18px',
+                    'text-align': 'center',
+                    'box-sizing': 'border-box',
+                    'height': CONTROL_SIZE + 'px',
+                    'width': CONTROL_SIZE + 'px',
+                    'padding': '0',
+                    'cursor': 'pointer',
+                    'transition': 'transform .2s',
+                    '&:hover': {
+                        'transform': 'scale(1.1)',
+                    },
+                },
+            },
+            '.panGroup': {
+                'height': CONTROL_SIZE * 3 + CONTROL_MARGIN * 2 + 'px',
+                'width': CONTROL_SIZE * 3 + CONTROL_MARGIN * 2 + 'px',
+                'position': 'relative',
+                'button': {
+                    'position': 'absolute',
+                    'display': 'block',
+                },
+                '.moveUpButton': {
+                    'top': 0,
+                    'left': CONTROL_SIZE + CONTROL_MARGIN + 'px',
+                },
+                '.moveDownButton': {
+                    'top': CONTROL_SIZE * 2 + CONTROL_MARGIN * 2 + 'px',
+                    'left': CONTROL_SIZE + CONTROL_MARGIN + 'px',
+                },
+                '.moveRightButton': {
+                    'top': CONTROL_SIZE + CONTROL_MARGIN + 'px',
+                    'left': CONTROL_SIZE * 2 + CONTROL_MARGIN * 2 + 'px',
+                },
+                '.moveLeftButton': {
+                    'top': CONTROL_SIZE + CONTROL_MARGIN + 'px',
+                    'left': '0px',
+                },
+            },
+            '.zoomGroup': {
+                'display': 'flex',
+                'flex-direction': 'column',
+                'align-items': 'center',
+                'justify-content': 'space-between',
+                'height': '100%',
+            },
+            '.resetGroup': {
+                'button': {
+                    'font-size': '14px',
+                    'width': '60px',
+                },
+            },
+            '.highPerfCheck': {
+                'margin-right': '8px',
+            },
+            '.panel': {
+                'flex-shrink': '0',
+                'width': '100%',
+                'margin-bottom': '18px',
+                'border-radius': '8px',
+                'overflow': 'hidden',
+                'box-shadow': '0 2px 8px -1px rgba(0, 0, 0, .3)',
+                'min-height': '36px',
+                'box-sizing': 'border-box',
+            },
+            '& .newFunctionPanel, & .graphSettings': {
+                'background': '#fff',
+            },
+            '.newFunctionPanel': {
+                'transition': 'transform .2s',
+                'button': {
+                    'height': '100%',
+                    'width': '100%',
+                    'font-size': '16px',
+                    'line-height': '36px',
+                    'text-align': 'left',
+                    'border': 0,
+                    'cursor': 'pointer',
+                    'background': 'transparent',
+                },
+                '&:hover': {
+                    'background': '#f8f8f8',
+                    'transform': 'translateY(2px)',
+                }
+            }
         }
     }
 
@@ -106,28 +249,86 @@ class AppBar extends StyledComponent {
         });
     }
 
+    resetGraphProps() {
+        this.record.update({
+            centerX: 0,
+            centerY: 0,
+            zoom: 100,
+        });
+    }
+
+    moveUp() {
+        this.record.update({
+            // scroll by 100px
+            centerY: this.record.get('centerY') + 100 / this.record.get('zoom'),
+        });
+    }
+
+    moveDown() {
+        this.record.update({
+            // scroll by 100px
+            centerY: this.record.get('centerY') - 100 / this.record.get('zoom'),
+        });
+    }
+
+    moveLeft() {
+        this.record.update({
+            centerX: this.record.get('centerX') - 100 / this.record.get('zoom'),
+        });
+    }
+
+    moveRight() {
+        this.record.update({
+            centerX: this.record.get('centerX') + 100 / this.record.get('zoom'),
+        });
+    }
+
+    zoomIn() {
+        this.record.update({
+            zoom: this.record.get('zoom') * 1.2,
+        });
+    }
+
+    zoomOut() {
+        this.record.update({
+            zoom: this.record.get('zoom') / 1.2,
+        });
+    }
+
+    toggleHighPerfMode() {
+        this.record.update({
+            resolution: this.record.get('resolution') == 5 ? 1 : 5,
+        });
+    }
+
     compose() {
         return jdom`<div class="appBar">
-            <div class="panel">
-                <h1>Torus Graphing Calculator</h1>
-                <button class="closeButton">Close</button>
-            </div>
             <div class="panel graphSettings">
-                <div class="inputGroup">
-                    <label>Center X</label>
-                    <input type="number" value="0" />
+                <div class="title">
+                    Graphing Calculator 📈
+                </div>
+                <div class="inputGroup controlGroup">
+                    <div class="panGroup">
+                        <button class="moveUpButton" onclick="${this.moveUp}">☝️</button>
+                        <button class="moveDownButton" onclick="${this.moveDown}">👇</button>
+                        <button class="moveLeftButton" onclick="${this.moveLeft}">👈</button>
+                        <button class="moveRightButton" onclick="${this.moveRight}">👉</button>
+                    </div>
+                    <div class="resetGroup">
+                        <button class="resetButton" onclick="${this.resetGraphProps}">Reset</button>
+                    </div>
+                    <div class="zoomGroup">
+                        <button class="zoomInButton" onclick="${this.zoomIn}">🔍</button>
+                        <button class="zoomOutButton" onclick="${this.zoomOut}">🔭</button>
+                    </div>
                 </div>
                 <div class="inputGroup">
-                    <label>Center Y</label>
-                    <input type="number" value="0" />
-                </div>
-                <div class="inputGroup">
-                    <label>Zoom</label>
-                    <input type="number" value="0" />
+                    <input class="highPerfCheck" id="higherPerfCheck" type="checkbox" onchange="${this.toggleHighPerfMode}" />
+                    <label for="higherPerfCheck">Draw smoother graphs (might be slower)</label>
                 </div>
             </div>
             ${this.functionList.node}
-            <div class="panel">
+            <div class="panel newFunctionPanel">
                 <button class="newFunctionButton" onclick="${this.addFunction}">
                     + New Function
                 </button>
@@ -145,8 +346,72 @@ class FunctionPanel extends StyledComponent {
         this.keyUp = this.keyUp.bind(this);
         this.updateFunctionText = this.updateFunctionText.bind(this);
         this.toggleHidden = this.toggleHidden.bind(this);
+        this.updateColor = this.updateColor.bind(this);
 
         this.bind(functionRecord, props => this.render(props));
+    }
+
+    styles(props) {
+        const HEIGHT = 72;
+        return {
+            'height': HEIGHT + 'px',
+            'background': props.color,
+            '&.hidden': {
+                'opacity': '.45',
+            },
+            '.caps': {
+                'text-transform': 'uppercase',
+            },
+            '& .inputArea, & .buttonArea': {
+                'height': '50%',
+                'display': 'flex',
+                'flex-direction': 'row',
+                'align-items': 'center',
+            },
+            '.inputArea': {
+                'justify-content': 'space-between',
+                '& .yPrefix, & input': {
+                    'display': 'block',
+                    'height': '100%',
+                },
+                '.yPrefix': {
+                    'background': 'rgba(255, 255, 255, 0.4)',
+                    'width': '40px',
+                    'text-align': 'center',
+                    'line-height': HEIGHT / 2 + 'px',
+                    'color': '#fff',
+                },
+                'input': {
+                    'flex-grow': '1',
+                    'box-sizing': 'border-box',
+                    'padding': '4px 6px',
+                    'font-size': '16px',
+                    'border': 0,
+                    '&:focus': {
+                        'background': 'rgba(255, 255, 255, .9)',
+                        'outline': 'none',
+                    },
+                },
+            },
+            '.buttonArea': {
+                'justify-content': 'flex-end',
+            },
+            'button': {
+                'margin-right': '8px',
+                'color': '#fff',
+                'height': '24px',
+                'line-height': '24px',
+                'background-color': 'rgba(255, 255, 255, 0.4)',
+                'font-size': '14px',
+                'border-radius': '4px',
+                'border': 0,
+                'cursor': 'pointer',
+                '&:hover': {
+                    'background': '#fff',
+                    'color': props.color,
+                },
+            },
+        }
     }
 
     keyUp(evt) {
@@ -168,23 +433,41 @@ class FunctionPanel extends StyledComponent {
         });
     }
 
+    updateColor() {
+        this.record.update({
+            color: randomColor(),
+        });
+    }
+
     compose(props) {
-        return jdom`<div class="panel">
+        return jdom`<div class="panel functionPanel ${props.hidden ? 'hidden' : ''}">
             <div class="inputArea">
                 <div class="yPrefix">y =</div>
                 <input type="text" value="${props.text}" onblur="${this.updateFunctionText}" onkeyup="${this.keyUp}"/>
             </div>
             <div class="buttonArea">
-                <button onclick="${this.removeCallback}">Close</button>
-                <button onclick="${this.toggleHidden}">${props.hidden ? 'Show' : 'Hide' }</button>
-                <button onclick="${this.updateFunctionText}">Update</button>
+                <button onclick="${this.removeCallback}">Delete</button>
+                <button onclick="${this.toggleHidden}">${props.hidden ? '🙈 Show' : '👀 Hide' }</button>
+                <button onclick="${this.updateColor}">🎲 Shuffle color</button>
             </div>
         </div>`;
     }
 
 }
 
-class FunctionList extends Styled(ListOf(FunctionPanel)) {}
+class FunctionList extends Styled(ListOf(FunctionPanel)) {
+
+    styles() {
+        return {
+            'width': '100%',
+        }
+    }
+
+    compose() {
+        return jdom`<div>${this.nodes}</div>`;
+    }
+
+}
 
 class FunctionGraph extends Component {
 
@@ -231,7 +514,7 @@ class FunctionGraph extends Component {
             const f = functionSummary.jsFunction;
 
             //> Re-draw this function
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.strokeStyle = functionSummary.color;
             ctx.beginPath();
             let lastY = 0;
@@ -239,12 +522,6 @@ class FunctionGraph extends Component {
             for (let x = minX; x < maxX; x += increment) {
                 //> Try to get a non-asymptotic value of y
                 let y = f(x);
-                if (isNaN(y)) {
-                    y = f(x + 0.00001);
-                } else if (isNaN(y)) {
-                    y = f(x - 0.00001);
-                }
-
                 //> Graph it.
                 if (!isNaN(y)) {
                     //> There's some complexity here to avoid drawing an incorrect line
@@ -252,7 +529,7 @@ class FunctionGraph extends Component {
                     const diff = y - lastY;
                     const diffSign = y * lastY < 0;
                     lastY = y;
-                    if (diff > height && diffSign) {
+                    if (diff * zoom / 5 > height && diffSign) {
                         ctx.moveTo(xToCoord(x), yToCoord(y));
                     } else {
                         ctx.lineTo(xToCoord(x), yToCoord(y));
@@ -283,7 +560,13 @@ class Graph extends StyledComponent {
 
         this.functionGraphs = new GraphCollection(functionStore, this.graphProps);
 
-        this.redraw = this.redraw.bind(this);
+        const boundReDraw = this.redraw.bind(this);
+        this.redraw = () => requestAnimationFrame(boundReDraw);
+        this.handleWheel = this.handleWheel.bind(this);
+        this.handleMousedown = this.handleMousedown.bind(this);
+        this.handleMouseup = this.handleMouseup.bind(this);
+        this.handleMousemove = this.handleMousemove.bind(this);
+
         window.addEventListener('resize', this.redraw);
         this.bind(this.graphProps, this.redraw);
     }
@@ -294,14 +577,65 @@ class Graph extends StyledComponent {
 
     styles() {
         return {
+            'position': 'fixed',
+            'z-index': '-1',
+            'top': '0',
+            'left': '0',
+            'right': '0',
+            'bottom': '0',
+            'cursor': 'grab',
+            '&:active': {
+                'cursor': 'grabbing',
+            },
             'canvas': {
-                'position': 'fixed',
-                'z-index': '-1',
+                'position': 'absolute',
                 'top': '0',
                 'left': '0',
                 'right': '0',
                 'bottom': '0',
             },
+        }
+    }
+
+    handleWheel(evt) {
+        const change = evt.deltaY;
+        const scaledChange = Math.max(change / 1000, -.3);
+        requestAnimationFrame(() => {
+            this.record.update({
+                zoom: this.record.get('zoom') * (1 + scaledChange),
+            });
+        });
+    }
+
+    handleMousedown(evt) {
+        this._dragging = true;
+        document.body.classList.add('graph_dragging');
+        this._lastClientX = evt.clientX;
+        this._lastClientY = evt.clientY;
+    }
+
+    handleMouseup(evt) {
+        this._dragging = false;
+        document.body.classList.remove('graph_dragging');
+    }
+
+    handleMousemove(evt) {
+        if (this._dragging) {
+            const clientX = evt.clientX;
+            const clientY = evt.clientY;
+            const deltaX = clientX - this._lastClientX;
+            const deltaY = clientY - this._lastClientY;
+
+            requestAnimationFrame(() => {
+                const props = this.record.summarize();
+                this.record.update({
+                    centerX: props.centerX - deltaX / props.zoom,
+                    centerY: props.centerY + deltaY / props.zoom,
+                });
+            });
+
+            this._lastClientX = clientX;
+            this._lastClientY = clientY;
         }
     }
 
@@ -370,7 +704,11 @@ class Graph extends StyledComponent {
     }
 
     compose() {
-        return jdom`<div id="graphContainer">
+        return jdom`<div id="graphContainer"
+            onwheel="${this.handleWheel}"
+            onmousedown="${this.handleMousedown}"
+            onmouseup="${this.handleMouseup}"
+            onmousemove="${this.handleMousemove}">
             ${this.canvas}
             ${this.functionGraphs.node}
         </div>`;
@@ -410,3 +748,4 @@ class App extends Component {
 //> Create an instance of the app and mount it to the page DOM.
 const app = new App();
 document.body.appendChild(app.node);
+document.body.style.backgroundColor = '#fbfbfb';

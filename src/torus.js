@@ -681,10 +681,11 @@ class List extends Component {
         return Component; // default value, should be overridden
     }
 
-    init(store) {
+    init(store, ...itemData) {
         this.store = store;
         this.items = new Map();
         this.filterFn = null;
+        this.itemData = itemData;
 
         this.bind(this.store, () => this.itemsChanged());
     }
@@ -708,7 +709,11 @@ class List extends Component {
                     //  the list's store. It's common in UIs for items to have a button
                     //  that removes the item from the list, so this callback is passed
                     //  to the item component constructor to facilitate that pattern.
-                    new this.itemClass(record, () => this.store.remove(record))
+                    new this.itemClass(
+                        record,
+                        () => this.store.remove(record),
+                        ...this.itemData
+                    )
                 );
             }
         }
@@ -737,10 +742,14 @@ class List extends Component {
         this.itemsChanged();
     }
 
+    get components() {
+        return [...this.items.values()];
+    }
+
     //> `List#nodes` returns the HTML nodes for each of its item
     //  views, sorted in order. Designed to make writing `#compose()` easier.
     get nodes() {
-        return [...this.items.values()].map(item => item.node);
+        return this.components.map(item => item.node);
     }
 
     remove() {

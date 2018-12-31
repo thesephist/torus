@@ -144,7 +144,10 @@ jdom`<span><${tagName}>${someNumber} is my favorite number.</></span>`;
 //> In Torus, we build user interfaces by composing and connecting reusable components
 //  together. A Torus component extends the base `Component` class, and has a `#compose()`
 //  method that returns the JDOM representation of the UI component's DOM. Torus uses this
-//  method to render the component.
+//  method to render the component. Because Torus renders components declaratively, we should
+//  avoid calling methods on the component (like mutating the local state) within `#compose()`.
+//  Mutating state during render may lead to race conditions or infinite loops, since state mutations
+//  are usually linked to more render calls.
 class MyFirstComponent extends Component {
 
     compose() {

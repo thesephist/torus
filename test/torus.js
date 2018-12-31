@@ -866,6 +866,29 @@ describe('List', () => {
         l.node.textContent.should.equal('');
     });
 
+    it('should pass along arguments 1, 2, 3... as arguments 2, 3, 4... to children', () => {
+        const one = [0];
+        const two = [0];
+        class MyList extends List {
+            get itemClass() {
+                return class extends Component {
+                    init(_record, _cb, one, two) {
+                        one[0] ++;
+                        two[0] ++;
+                    }
+                };
+            }
+        }
+        const s = new Store([
+            new Record({ label: 'first' }),
+            new Record({ label: 'second' }),
+            new Record({ label: 'third' }),
+        ]);
+        const l = new MyList(s, one, two);
+        one[0].should.equal(3);
+        two[0].should.equal(3);
+    });
+
     describe('#constructor', () => {
 
         it('should throw an error when not given a store', () => {
@@ -880,6 +903,28 @@ describe('List', () => {
         it('should be Component by default', () => {
             const l = new List(new Store());
             l.itemClass.should.equal(Component);
+        });
+
+    });
+
+    describe('#components', () => {
+
+        it('should be an ordered map of all its children components', () => {
+            class MyList extends List {
+                get itemClass() {
+                    return ItemComponent;
+                }
+            }
+            const s = new Store([
+                new Record({ label: 'first' }),
+                new Record({ label: 'second' }),
+                new Record({ label: 'third' }),
+            ]);
+            const l = new MyList(s);
+            const comps = l.components;
+            comps[0].record.get('label').should.equal('first');
+            comps[1].record.get('label').should.equal('second');
+            comps[2].record.get('label').should.equal('third');
         });
 
     });

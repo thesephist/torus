@@ -772,7 +772,7 @@ class Graph extends StyledComponent {
         ctx.font = '16px sans-serif';
         ctx.fillStyle = '#555';
         const markCoord = (x, y) => {
-            ctx.fillText(`(${x}, ${y})`, xToCoord(x) + 5, yToCoord + 18);
+            ctx.fillText(`(${x}, ${y})`, xToCoord(x) + 5, yToCoord(y) + 18);
         }
         markCoord(0, 0);
         markCoord(1, 0);

@@ -784,7 +784,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">772</strong>        ctx.font = '16px sans-serif';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">773</strong>        ctx.fillStyle = '#555';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">774</strong>        const markCoord = (x, y) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">775</strong>            ctx.fillText(`(${x}, ${y})`, xToCoord(x) + 5, yToCoord + 18);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">775</strong>            ctx.fillText(`(${x}, ${y})`, xToCoord(x) + 5, yToCoord(y) + 18);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">776</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">777</strong>        markCoord(0, 0);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">778</strong>        markCoord(1, 0);</pre></div>

@@ -13,14 +13,14 @@ const COLORS = [
 let colorIdx = -1;
 
 const NOTATION_SUBSTITUTES = {
-            'abs': 'Math.abs',
-            'sqrt': 'Math.sqrt',
-            'log': 'Math.log',
-            'tan': 'Math.tan',
-            'sin': 'Math.sin',
-            'cos': 'Math.cos',
-            '\\^': '**',
-            'PI': 'Math.PI',
+    'abs': 'Math.abs',
+    'sqrt': 'Math.sqrt',
+    'log': 'Math.log',
+    'tan': 'Math.tan',
+    'sin': 'Math.sin',
+    'cos': 'Math.cos',
+    '\\^': '**',
+    'PI': 'Math.PI',
 }
 
 const randomColor = () => {
@@ -55,6 +55,18 @@ class GraphPropsRecord extends Record {
             dict.zoom = dict.zoom < 10 ? 10 : dict.zoom;
         }
         super.update(dict);
+    }
+
+    toggleHighPerf() {
+        this.update({
+            resolution: this.get('resolution') == 5 ? 1 : 5,
+        });
+    }
+
+    toggleDetectAsymptotes() {
+        this.update({
+            detectAsymptotes: !this.get('detectAsymptotes'),
+        });
     }
 
 }
@@ -265,14 +277,12 @@ class AppBar extends StyledComponent {
 
     moveUp() {
         this.record.update({
-            // scroll by 100px
             centerY: this.record.get('centerY') + 100 / this.record.get('zoom'),
         });
     }
 
     moveDown() {
         this.record.update({
-            // scroll by 100px
             centerY: this.record.get('centerY') - 100 / this.record.get('zoom'),
         });
     }
@@ -302,15 +312,11 @@ class AppBar extends StyledComponent {
     }
 
     toggleHighPerfMode() {
-        this.record.update({
-            resolution: this.record.get('resolution') == 5 ? 1 : 5,
-        });
+        this.record.toggleHighPerf();
     }
 
     toggleDetectAsymptotes() {
-        this.record.update({
-            detectAsymptotes: !this.record.get('detectAsymptotes'),
-        });
+        this.record.toggleDetectAsymptotes();
     }
 
     compose() {
@@ -346,7 +352,7 @@ class AppBar extends StyledComponent {
             ${this.functionList.node}
             <div class="panel newFunctionPanel">
                 <button class="newFunctionButton" onclick="${this.addFunction}">
-                    + New Function
+                    + Add another function
                 </button>
             </div>
         </div>`;
@@ -411,7 +417,11 @@ class FunctionPanel extends StyledComponent {
                     },
                     '&::placeholder': {
                         'color': '#aaa',
-                    }
+                    },
+                    '&.invalid': {
+                        'box-shadow': 'inset 0 0 0 3px rgba(208, 83, 55, 0.6)',
+                        'background': '#eccfcf',
+                    },
                 },
             },
             '.buttonArea': {
@@ -465,7 +475,8 @@ class FunctionPanel extends StyledComponent {
             <div class="inputArea">
                 <div class="yPrefix">y =</div>
                 <input type="text" value="${props.text}" onblur="${this.updateFunctionText}"
-                    onkeyup="${this.keyUp}" placeholder="log(), sqrt(), abs(), trig supported"/>
+                    onkeyup="${this.keyUp}" placeholder="log(), sqrt(), abs(), trig supported"
+                    class="${props.invalid ? 'invalid' : ''}" />
             </div>
             <div class="buttonArea">
                 <button onclick="${this.removeCallback}">Delete</button>
@@ -625,7 +636,7 @@ class Graph extends StyledComponent {
     }
 
     handleWheel(evt) {
-        evt.preventDefault();
+        evt.preventDefault(); // prevent overscroll spring behavior on macOS
         const change = evt.deltaY;
         const scaledChange = Math.max(change / 1000, -.3);
         requestAnimationFrame(() => {
@@ -760,17 +771,20 @@ class Graph extends StyledComponent {
 
         ctx.font = '16px sans-serif';
         ctx.fillStyle = '#555';
-        ctx.fillText('(0, 0)', xToCoord(0) + 5, yToCoord(0) + 16);
-        ctx.fillText('(1, 0)', xToCoord(1) + 5, yToCoord(0) + 16);
-        ctx.fillText('(0, 1)', xToCoord(0) + 5, yToCoord(1) + 16);
-        ctx.fillText('(10, 0)', xToCoord(10) + 5, yToCoord(0) + 16);
-        ctx.fillText('(0, 10)', xToCoord(0) + 5, yToCoord(10) + 16);
-        ctx.fillText('(-10, 0)', xToCoord(-10) + 5, yToCoord(0) + 16);
-        ctx.fillText('(0, -10)', xToCoord(0) + 5, yToCoord(-10) + 16);
-        ctx.fillText('(50, 0)', xToCoord(50) + 5, yToCoord(0) + 16);
-        ctx.fillText('(0, 50)', xToCoord(0) + 5, yToCoord(50) + 16);
-        ctx.fillText('(-50, 0)', xToCoord(-50) + 5, yToCoord(0) + 16);
-        ctx.fillText('(0, -50)', xToCoord(0) + 5, yToCoord(-50) + 16);
+        const markCoord = (x, y) => {
+            ctx.fillText(`(${x}, ${y})`, xToCoord(x) + 5, yToCoord + 18);
+        }
+        markCoord(0, 0);
+        markCoord(1, 0);
+        markCoord(0, 1);
+        markCoord(10, 0);
+        markCoord(0, 10);
+        markCoord(-10, 0);
+        markCoord(0, -10);
+        markCoord(50, 0);
+        markCoord(0, 50);
+        markCoord(-50, 0);
+        markCoord(0, -50);
 
         for (const graph of this.functionGraphs.components) {
             graph.redraw();

@@ -400,6 +400,7 @@ class FunctionPanel extends StyledComponent {
                 'input': {
                     'flex-grow': '1',
                     'margin': 0,
+                    'border-radius': 0,
                     'box-sizing': 'border-box',
                     'padding': '4px 6px',
                     'font-size': '16px',
@@ -464,7 +465,7 @@ class FunctionPanel extends StyledComponent {
             <div class="inputArea">
                 <div class="yPrefix">y =</div>
                 <input type="text" value="${props.text}" onblur="${this.updateFunctionText}"
-                    onkeyup="${this.keyUp}" placeholder="log(), sqrt(), sin/cos/tan() supported"/>
+                    onkeyup="${this.keyUp}" placeholder="log(), sqrt(), abs(), trig supported"/>
             </div>
             <div class="buttonArea">
                 <button onclick="${this.removeCallback}">Delete</button>
@@ -589,6 +590,9 @@ class Graph extends StyledComponent {
         this.handleMousedown = this.handleMousedown.bind(this);
         this.handleMouseup = this.handleMouseup.bind(this);
         this.handleMousemove = this.handleMousemove.bind(this);
+        this.handleTouchstart = this.handleTouchstart.bind(this);
+        this.handleTouchend = this.handleTouchend.bind(this);
+        this.handleTouchmove = this.handleTouchmove.bind(this);
 
         window.addEventListener('resize', this.redraw);
         this.bind(this.graphProps, this.redraw);
@@ -621,6 +625,7 @@ class Graph extends StyledComponent {
     }
 
     handleWheel(evt) {
+        evt.preventDefault();
         const change = evt.deltaY;
         const scaledChange = Math.max(change / 1000, -.3);
         requestAnimationFrame(() => {
@@ -646,6 +651,38 @@ class Graph extends StyledComponent {
         if (this._dragging) {
             const clientX = evt.clientX;
             const clientY = evt.clientY;
+            const deltaX = clientX - this._lastClientX;
+            const deltaY = clientY - this._lastClientY;
+
+            requestAnimationFrame(() => {
+                const props = this.record.summarize();
+                this.record.update({
+                    centerX: props.centerX - deltaX / props.zoom,
+                    centerY: props.centerY + deltaY / props.zoom,
+                });
+            });
+
+            this._lastClientX = clientX;
+            this._lastClientY = clientY;
+        }
+    }
+
+    handleTouchstart(evt) {
+        this._touchDragging = true;
+        document.body.classList.add('graph_dragging');
+        this._lastClientX = evt.touches[0].clientX;
+        this._lastClientY = evt.touches[0].clientY;
+    }
+
+    handleTouchend(evt) {
+        this._touchDragging = false;
+        document.body.classList.remove('graph_dragging');
+    }
+
+    handleTouchmove(evt) {
+        if (this._touchDragging) {
+            const clientX = evt.touches[0].clientX;
+            const clientY = evt.touches[0].clientY;
             const deltaX = clientX - this._lastClientX;
             const deltaY = clientY - this._lastClientY;
 
@@ -745,7 +782,10 @@ class Graph extends StyledComponent {
             onwheel="${this.handleWheel}"
             onmousedown="${this.handleMousedown}"
             onmouseup="${this.handleMouseup}"
-            onmousemove="${this.handleMousemove}">
+            onmousemove="${this.handleMousemove}"
+            ontouchstart="${this.handleTouchstart}"
+            ontouchend="${this.handleTouchend}"
+            ontouchmove="${this.handleTouchmove}">
             ${this.canvas}
             ${this.functionGraphs.node}
         </div>`;

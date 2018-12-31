@@ -468,6 +468,11 @@ describe('jdom template tag', () => {
             }}</div>`
         );
 
+        noThrow(
+            'Mismatched quotes',
+            () => jdom`<img src="url ab c/>`
+        );
+
     });
 
 });

@@ -435,7 +435,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">447</strong>            arr[i] = replaceInString(val.toString(), dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">448</strong>        } else if (Array.isArray(val)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">449</strong>            replaceInArrayLiteral(val, dynamicParts);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">450</strong>        } else if (isObject(val)) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">450</strong>        } else { // it's an object otherwise</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">451</strong>            replaceInObjectLiteral(val, dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">452</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">453</strong>    }</pre></div>

@@ -447,7 +447,7 @@ const replaceInArrayLiteral = (arr, dynamicParts) => {
             arr[i] = replaceInString(val.toString(), dynamicParts);
         } else if (Array.isArray(val)) {
             replaceInArrayLiteral(val, dynamicParts);
-        } else if (isObject(val)) {
+        } else { // it's an object otherwise
             replaceInObjectLiteral(val, dynamicParts);
         }
     }

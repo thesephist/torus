@@ -169,6 +169,23 @@ describe('renderJDOM', () => {
                 parseFloat(node.style.opacity).should.equal(.35);
             });
 
+            it('should remove all styles if the styles object is removed in JDOM', () => {
+                const prev = {
+                    tag: 'button',
+                    attrs: {style: {
+                        opacity: '0.8',
+                    }},
+                }
+                const next = {
+                    tag: 'button',
+                }
+
+                let node = render(prev);
+                node.style.opacity.should.equal('0.8');
+                node = renderJDOM(node, prev, next);
+                node.style.opacity.should.not.equal('0.8');
+            });
+
         });
 
         describe('HTML attributes', () => {
@@ -374,6 +391,34 @@ describe('renderJDOM', () => {
 
             firstClickCount.should.equal(2);
             secondClickCount.should.equal(2);
+        });
+
+        it('should not fail when the next render has no events object', () => {
+            let firstClickCount = 0;
+            let secondClickCount = 0;
+
+            const firstFn = () => firstClickCount++;
+
+            const prev = {
+                tag: 'button',
+                events: {
+                    click: [
+                        firstFn,
+                        () => secondClickCount++,
+                    ],
+                },
+            }
+            const next = {
+                tag: 'button',
+            }
+
+            const node = render(prev);
+            node.click();
+            const node2 = renderJDOM(node, prev, next);
+            node2.click();
+
+            firstClickCount.should.equal(1);
+            secondClickCount.should.equal(1);
         });
 
         it('should remove listeners as changed in JDOM, given in arrays', () => {
@@ -695,7 +740,7 @@ describe('Styled', () => {
             }
         }
 
-        it('should render without customization', () => {
+        it('should render without throwing, without overriding styles()', () => {
             const Vanilla = Styled(class extends Component {
                 compose() {
                     return {tag: 'div'};
@@ -778,7 +823,7 @@ describe('List', () => {
 
     class ItemComponent extends Component {
         init(record) {
-            this.bind(record, () => this.render);
+            this.bind(record, this.render.bind(this));
         }
         compose(data) {
             return {
@@ -787,6 +832,39 @@ describe('List', () => {
             }
         }
     }
+
+    it('should allow items to remove themselves from the list', () => {
+        class MyList extends List {
+            get itemClass() {
+                return class extends Component {
+                    init(record, cb) {
+                        this.cb = cb;
+                        this.bind(record, this.render.bind(this));
+                    }
+                    compose() {
+                        return {
+                            tag: 'button',
+                            events: {
+                                click: () => {
+                                    this.cb();
+                                },
+                            },
+                        }
+                    }
+                };
+            }
+        }
+        const s = new Store([
+            new Record({ label: 'first' }),
+            new Record({ label: 'second' }),
+            new Record({ label: 'third' }),
+        ]);
+        const l = new MyList(s);
+        for (const button of l.node.querySelectorAll('button')) {
+            button.click();
+        }
+        l.node.textContent.should.equal('');
+    });
 
     describe('#constructor', () => {
 

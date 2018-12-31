@@ -143,8 +143,8 @@ function runDOMOperations() {
 //> A function to compare event handlers in `renderJDOM`
 const diffEvents = (whole, sub, cb) => {
     for (const eventName of Object.keys(whole)) {
-        const wholeEvents = arrayNormalize(whole[eventName] || []);
-        const subEvents = arrayNormalize(sub[eventName]);
+        const wholeEvents = arrayNormalize(whole[eventName]);
+        const subEvents = arrayNormalize(sub[eventName] || []);
         for (const handlerFn of wholeEvents) {
             if (!subEvents.includes(handlerFn)) {
                 cb(eventName, handlerFn);
@@ -272,7 +272,7 @@ const renderJDOM = (node, previous, next) => {
                         //  rather than a string for API ergonomics, so we serialize
                         //  it differently than other attributes.
                         const prevStyle = previous.attrs.style || {};
-                        const nextStyle = next.attrs.style || {};
+                        const nextStyle = next.attrs.style;
 
                         //> When we iterate through the key/values of a flat object like this,
                         //  you may be tempted to use `Object.entries()`. We use `Object.keys()` and lookups,
@@ -492,7 +492,7 @@ class Component {
             this.event = {source, handler};
             source.addHandler(handler);
         } else {
-            throw new Error('Event source to bind() to is not an instance of Evented');
+            throw new Error(`Tried to bind to ${source}, which is not an instance of Evented`);
         }
     }
 
@@ -680,7 +680,16 @@ class List extends Component {
         this.items = new Map();
         this.filterFn = null;
 
+        this._rmCallback = this._rmCallback.bind(this);
         this.bind(this.store, () => this.itemsChanged());
+    }
+
+    //> This is a callback that takes a record and removes it from
+    //  the list's store. It's common in UIs for items to have a button
+    //  that removes the item from the list, so this callback is passed
+    //  to the item component constructor to facilitate that pattern.
+    _rmCallback(record) {
+        this.store.remove(record);
         this.itemsChanged();
     }
 
@@ -697,7 +706,7 @@ class List extends Component {
         }
         for (const record of data) {
             if (!this.items.has(record)) {
-                this.items.set(record, new this.itemClass(record));
+                this.items.set(record, new this.itemClass(record, this._rmCallback));
             }
         }
 

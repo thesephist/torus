@@ -723,9 +723,13 @@ class CakeProductStore extends StoreOf(CakeProduct) {
 //  as a Torus list component.
 class WinnerListing extends Component {
 
-    init(winner) {
+    init(winner, removeCallback) {
         //> We can store the winner's properties here
         this.winner = winner;
+        //> When we want to remove this item from the list
+        //  (from a user event, for example), we can run this callback
+        //  passed from `List`.
+        this.removeCallback = removeCallback;
     }
 
     compose() {

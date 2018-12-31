@@ -206,9 +206,9 @@ const renderJDOM = (node, previous, next) => {
         } else if (next.nodeType !== undefined) { // check if next instanceof Node
             // @begindebug
             if (node === undefined) {
-                render_debug(`Add literal element <${next.tagName}>`);
+                render_debug(`Add literal element <${next.tagName.toLowerCase()}>`);
             } else {
-                render_debug(`Replace literal element <${previous.tagName}> with literal element <${next.tagName}>`);
+                render_debug(`Replace literal element <${previous.tagName.toLowerCase()}> with literal element <${next.tagName.toLowerCase()}>`);
             }
             // @enddebug
             replacePreviousNode(next);
@@ -226,7 +226,7 @@ const renderJDOM = (node, previous, next) => {
             normalizeJDOM(next);
 
             // @debug
-            render_debug(`Render pass for <${next.tag.toLowerCase()}>:`, true);
+            render_debug(`Render pass for <${next.tag}>:`, true);
 
             //> If the tags differ, we assume the subtrees will be different
             //  as well and just start a completely new element. This is efficient
@@ -367,8 +367,15 @@ const renderJDOM = (node, previous, next) => {
                 //  add the extra children.
                 if (prevLength < nextLength) {
                     while (i < nextLength) {
-                        // @debug
-                        render_debug(`Add child ${nextChildren[i].tagName ? nextChildren[i].tagName : nextChildren[i]}`);
+                        // @begindebug
+                        if (nextChildren[i].tagName) {
+                            render_debug(`Add child <${nextChildren[i].tagName.toLowerCase()}>`);
+                        } else if (nextChildren[i].tag) {
+                            render_debug(`Add child <${nextChildren[i].tag}>`);
+                        } else {
+                            render_debug(`Add child "${nextChildren[i]}"`);
+                        }
+                        // @enddebug
                         const newChild = renderJDOM(undefined, undefined, nextChildren[i]);
                         opQueue.push([OP_APPEND, node, newChild]);
                         nodeChildren.splice(i, 0, newChild);
@@ -378,8 +385,15 @@ const renderJDOM = (node, previous, next) => {
                 //  JDOM, we'll remove any stragglers.
                 } else {
                     while (i < prevLength) {
-                        // @debug
-                        render_debug(`Remove child ${nextChildren[i].tagName ? nextChildren[i].tagName : nextChildren[i]}`);
+                        // @begindebug
+                        if (nextChildren[i].tagName) {
+                            render_debug(`Remove child <${nextChildren[i].tagName.toLowerCase()}>`);
+                        } else if (nextChildren[i].tag) {
+                            render_debug(`Remove child <${nextChildren[i].tag}>`);
+                        } else {
+                            render_debug(`Remove child "${nextChildren[i]}"`);
+                        }
+                        // @enddebug
                         //> If we need to remove a child element, removing
                         //  it from the DOM immediately might lead to race conditions.
                         //  instead, we add a placeholder and remove the placeholder

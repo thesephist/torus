@@ -841,14 +841,13 @@ describe('List', () => {
                         this.cb = cb;
                         this.bind(record, this.render.bind(this));
                     }
-                    compose() {
+                    compose(props) {
                         return {
                             tag: 'button',
                             events: {
-                                click: () => {
-                                    this.cb();
-                                },
+                                click: this.cb,
                             },
+                            children: [props.label],
                         }
                     }
                 };
@@ -860,6 +859,7 @@ describe('List', () => {
             new Record({ label: 'third' }),
         ]);
         const l = new MyList(s);
+        l.node.textContent.should.equal('firstsecondthird');
         for (const button of l.node.querySelectorAll('button')) {
             button.click();
         }

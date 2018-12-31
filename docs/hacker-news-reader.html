@@ -221,7 +221,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">221</strong>class StoryListing extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">222</strong></pre></div>
 <div class="line"><div class="doc"><p>Stories stay collapsed in the list, and are expanded if they&#39;re viewed individually</p>
-</div><pre class="source javascript"><strong class="lineNumber">224</strong>    init(story, expanded = false) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">224</strong>    init(story, _removeCallback, expanded = false) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">225</strong>        this.expanded = expanded;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">226</strong>        this.setActiveStory = this.setActiveStory.bind(this);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>        this.bind(story, data =&#62; this.render(data));</pre></div>
@@ -556,7 +556,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">572</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">573</strong>    init(story, expanded = false) {</pre></div>
 <div class="line"><div class="doc"><p>Listing of the story this page is about, in expanded form</p>
-</div><pre class="source javascript"><strong class="lineNumber">575</strong>        this.listing = new StoryListing(story, expanded);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">575</strong>        this.listing = new StoryListing(story, null, expanded);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>A list of comments for this story</p>
 </div><pre class="source javascript"><strong class="lineNumber">577</strong>        this.comments = new CommentStore();</pre></div>

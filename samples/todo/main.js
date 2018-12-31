@@ -24,8 +24,10 @@ const tasks = new TaskStore([
 //> Component that represents a single todo item
 class TaskItem extends StyledComponent {
 
-    init(source) {
-        this.boundOnCheck = this.onCheck.bind(this);
+    init(source, removeCallback) {
+        this.removeCallback = removeCallback;
+        this.onCheck = this.onCheck.bind(this);
+        this.deleteClick = this.deleteClick.bind(this);
         //> We want the component to re-render when the todo item's properties
         //  change, so we bind the record's events to re-renders.
         this.bind(source, data => this.render(data));
@@ -42,9 +44,16 @@ class TaskItem extends StyledComponent {
             'display': 'flex',
             'flex-direction': 'row',
             'align-items': 'center',
-            'justify-content': 'left',
+            'justify-content': 'space-between',
             'margin-bottom': '1px',
             'cursor': 'pointer',
+            'padding': '0 12px',
+            '.description': {
+                'flex-grow': '1',
+                'height': '50px',
+                'line-height': '50px',
+                'padding-left': '6px',
+            },
         }
     }
 
@@ -56,10 +65,15 @@ class TaskItem extends StyledComponent {
         });
     }
 
+    deleteClick() {
+        this.removeCallback();
+    }
+
     compose(data) {
-        return jdom`<li onclick="${this.boundOnCheck}">
-            <input type="checkbox" checked="${data.completed}"/>
-            ${data.description}
+        return jdom`<li>
+            <input type="checkbox" checked="${data.completed}" onclick="${this.onCheck}"/>
+            <div class="description" onclick="${this.onCheck}">${data.description}</div>
+            <button class="removeButton" onclick="${this.deleteClick}">X</button>
         </li>`;
     }
 

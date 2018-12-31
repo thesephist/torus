@@ -258,12 +258,18 @@ const renderJDOM = (node, previous, next) => {
                         //  `classList` objects if there's only one batch operation
                         //  for all class changes.
                         if (Array.isArray(nextClass)) {
-                            // @debug
-                            render_debug(`Update class names for <${next.tag}> to "${nextClass.join(' ')}"`);
+                            // @begindebug
+                            if (node.className !== nextClass.join(' ')) {
+                                render_debug(`Update class names for <${next.tag}> to "${nextClass.join(' ')}"`);
+                            }
+                            // @enddebug
                             node.className = nextClass.join(' ');
                         } else {
-                            // @debug
-                            render_debug(`Update class name for <${next.tag}> to ${nextClass}`);
+                            // @begindebug
+                            if (node.className !== nextClass) {
+                                render_debug(`Update class name for <${next.tag}> to ${nextClass}`);
+                            }
+                            // @enddebug
                             node.className = nextClass;
                         }
                         break;
@@ -386,12 +392,12 @@ const renderJDOM = (node, previous, next) => {
                 } else {
                     while (i < prevLength) {
                         // @begindebug
-                        if (nextChildren[i].tagName) {
-                            render_debug(`Remove child <${nextChildren[i].tagName.toLowerCase()}>`);
-                        } else if (nextChildren[i].tag) {
-                            render_debug(`Remove child <${nextChildren[i].tag}>`);
+                        if (prevChildren[i].tagName) {
+                            render_debug(`Remove child <${prevChildren[i].tagName.toLowerCase()}>`);
+                        } else if (prevChildren[i].tag) {
+                            render_debug(`Remove child <${prevChildren[i].tag}>`);
                         } else {
-                            render_debug(`Remove child "${nextChildren[i]}"`);
+                            render_debug(`Remove child "${prevChildren[i]}"`);
                         }
                         // @enddebug
                         //> If we need to remove a child element, removing
@@ -680,17 +686,7 @@ class List extends Component {
         this.items = new Map();
         this.filterFn = null;
 
-        this._rmCallback = this._rmCallback.bind(this);
         this.bind(this.store, () => this.itemsChanged());
-    }
-
-    //> This is a callback that takes a record and removes it from
-    //  the list's store. It's common in UIs for items to have a button
-    //  that removes the item from the list, so this callback is passed
-    //  to the item component constructor to facilitate that pattern.
-    _rmCallback(record) {
-        this.store.remove(record);
-        this.itemsChanged();
     }
 
     itemsChanged() {
@@ -706,7 +702,14 @@ class List extends Component {
         }
         for (const record of data) {
             if (!this.items.has(record)) {
-                this.items.set(record, new this.itemClass(record, this._rmCallback));
+                this.items.set(
+                    record,
+                    //> We pass a callback that takes a record and removes it from
+                    //  the list's store. It's common in UIs for items to have a button
+                    //  that removes the item from the list, so this callback is passed
+                    //  to the item component constructor to facilitate that pattern.
+                    new this.itemClass(record, () => this.store.remove(record))
+                );
             }
         }
 

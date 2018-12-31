@@ -221,7 +221,7 @@ class CommentStore extends StoreOf(Comment) {
 class StoryListing extends StyledComponent {
 
     //> Stories stay collapsed in the list, and are expanded if they're viewed individually
-    init(story, expanded = false) {
+    init(story, _removeCallback, expanded = false) {
         this.expanded = expanded;
         this.setActiveStory = this.setActiveStory.bind(this);
         this.bind(story, data => this.render(data));
@@ -572,7 +572,7 @@ class StoryPage extends Component {
 
     init(story, expanded = false) {
         //> Listing of the story this page is about, in expanded form
-        this.listing = new StoryListing(story, expanded);
+        this.listing = new StoryListing(story, null, expanded);
         //> A list of comments for this story
         this.comments = new CommentStore();
         this.commentList = new CommentList(this.comments);

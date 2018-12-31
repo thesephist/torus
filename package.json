@@ -11,12 +11,13 @@
   "scripts": {
     "test": "karma start karma.dev.conf.js",
     "test:prod": "karma start karma.min.conf.js",
-    "build": "node build/build.js",
+    "build": "node build/build.js && cp dist/index.min.js samples/hn-reader/index.min.js && cp dist/index.min.js samples/graph-calc/index.min.js",
     "verify": "node build/build.js && karma start karma.min.conf.js",
     "clean": "rm -rvf dist/* coverage/* docs/",
     "docs": "node doc/generate.js",
     "postinstall": "node build/build.js",
-    "deploy:hn": "cp dist/index.min.js samples/hn-reader/ && surge -p samples/hn-reader/ --domain https://torushn.surge.sh"
+    "deploy:hn": "surge -p samples/hn-reader/ --domain https://torushn.surge.sh",
+    "deploy:graph": "surge -p samples/graph-calc/ --domain https://graphcalc.surge.sh"
   },
   "devDependencies": {
     "chai": "^4.2.0",

@@ -18,7 +18,7 @@
     "postinstall": "node build/build.js",
     "deploy:hn": "surge -p samples/hn-reader/ --domain https://torushn.surge.sh",
     "deploy:graph": "surge -p samples/graph-calc/ --domain https://graphcalc.surge.sh",
-    "deploy:marked": "surge -p samples/marked/ --domain https://marked.surge.sh"
+    "deploy:markus": "surge -p samples/markus/ --domain https://markus.surge.sh"
   },
   "devDependencies": {
     "chai": "^4.2.0",

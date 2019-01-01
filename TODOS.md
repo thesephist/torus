@@ -1,6 +1,6 @@
 # Torus To-dos
 
-- [ ] React's reactive state components are basically Torus components + a record attached by default to each component. Can we emulate that with a `ReactiveComponent` that comes with a record by default?
+- [-] The Torus-based slide framework (below)
 
 - [ ] Keep working on that bundle size -- Goal is 4.5kB, 4kB would be great.
 

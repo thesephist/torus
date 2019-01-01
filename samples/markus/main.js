@@ -566,6 +566,7 @@ class App extends StyledComponent {
                 },
                 'pre': {
                     'padding': '8px',
+                    'overflow-x': 'auto',
                 },
                 'code': {
                     'padding': '4px',

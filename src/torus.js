@@ -592,13 +592,16 @@ const rulesFromStylesObject = (selector, stylesObject) => {
             }
         } else {
             if (typeof val === 'object') {
-                //> SCSS-like syntax means we use '&' to nest declarations about
-                //  the parent selector.
-                if (prop.includes('&')) {
-                    const fullSelector = prop.replace(/&/g, selector);
-                    rules = rules.concat(rulesFromStylesObject(fullSelector, val));
-                } else {
-                    rules = rules.concat(rulesFromStylesObject(selector + ' ' + prop, val));
+                const commaSeparatedProps = prop.split(',');
+                for (const p of commaSeparatedProps) {
+                    //> SCSS-like syntax means we use '&' to nest declarations about
+                    //  the parent selector.
+                    if (p.includes('&')) {
+                        const fullSelector = p.replace(/&/g, selector);
+                        rules = rules.concat(rulesFromStylesObject(fullSelector, val));
+                    } else {
+                        rules = rules.concat(rulesFromStylesObject(selector + ' ' + p, val));
+                    }
                 }
             } else {
                 selfDeclarations += prop + ':' + val + ';';

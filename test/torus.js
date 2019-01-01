@@ -719,6 +719,9 @@ describe('Styled', () => {
                     'p': {
                         'font-weight': '700',
                     },
+                    'p, .double': {
+                        'padding-bottom': '6px',
+                    },
                 }
             }
 
@@ -734,6 +737,12 @@ describe('Styled', () => {
                         {
                             tag: 'p',
                             children: ['Hello'],
+                        },
+                        {
+                            tag: 'div',
+                            attrs: {
+                                class: 'double',
+                            },
                         },
                     ],
                 }
@@ -811,6 +820,13 @@ describe('Styled', () => {
                 s.node.focus();
                 const styles = getComputedStyle(s.node);
                 styles.color.should.equal('rgb(0, 0, 255)');
+            });
+
+            it('should nest comma-separated selectors correctly, by nesting each selector', () => {
+                const pStyles = getComputedStyle(s.node.querySelector('p'));
+                const doubleStyles = getComputedStyle(s.node.querySelector('.double'));
+                pStyles.paddingBottom.should.equal('6px');
+                doubleStyles.paddingBottom.should.equal('6px');
             });
 
         });

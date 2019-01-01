@@ -292,7 +292,7 @@ class AppBar extends StyledComponent {
                 'min-height': '36px',
                 'box-sizing': 'border-box',
             },
-            '& .newFunctionPanel, & .graphSettings': {
+            '.newFunctionPanel, .graphSettings': {
                 'background': '#fff',
             },
             '.newFunctionPanel': {
@@ -447,7 +447,7 @@ class FunctionPanel extends StyledComponent {
             '.caps': {
                 'text-transform': 'uppercase',
             },
-            '& .inputArea, & .buttonArea': {
+            '.inputArea, .buttonArea': {
                 'height': '50%',
                 'display': 'flex',
                 'flex-direction': 'row',
@@ -455,7 +455,7 @@ class FunctionPanel extends StyledComponent {
             },
             '.inputArea': {
                 'justify-content': 'space-between',
-                '& .yPrefix, & input': {
+                '.yPrefix, input': {
                     'display': 'block',
                     'height': '100%',
                 },

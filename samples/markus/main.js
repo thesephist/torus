@@ -2,6 +2,7 @@
 
 const READER_END = [];
 const RE_HEADER = /^(#{1,6})\s*(.*)/;
+const RE_IMAGE = /^%\s+(\S*)/;
 const RE_LIST_ITEM = /^(\s*)(\-|\d+\.)\s+(.*)/;
 
 const ITALIC_DELIMITER = '/';
@@ -121,7 +122,10 @@ const parseBody = (reader, tag, delimiter = '') => {
                 if (reader.ahead() === ' ') {
                     buf += char;
                 } else {
-                    children.push(parseBody(reader, 'code', CODE_DELIMITER));
+                    children.push({
+                        tag: 'code',
+                        children: [reader.until(CODE_DELIMITER)],
+                    });
                 }
                 break;
             case LINK_DELIMITER_LEFT:
@@ -160,7 +164,7 @@ const parseList = (lineReader) => {
     lineReader.backtrack();
 
     while ((line = lineReader.next()) !== READER_END) {
-        const [_, _indent, prefix] = RE_LIST_ITEM.exec(line) || [];
+        const [_, indent, prefix] = RE_LIST_ITEM.exec(line) || [];
         if (prefix) {
             const thisIndentLevel = line.indexOf(prefix);
             if (thisIndentLevel < indentLevel) {
@@ -227,6 +231,20 @@ const Markus = str => {
         } else if (line.startsWith('#')) {
             const [_, hashes, header] = RE_HEADER.exec(line);
             result.push(parseBody(new Reader(header), 'h' + hashes.length));
+        } else if (RE_IMAGE.exec(line)) {
+            const [_, imageURL] = RE_IMAGE.exec(line);
+            result.push({
+                tag: 'a',
+                children: [{
+                    tag: 'img',
+                    attrs: {
+                        src: imageURL,
+                        style: {
+                            maxWidth: '100%',
+                        },
+                    },
+                }],
+            });
         } else if (line === '- -') {
             result.push({tag: 'hr'});
         } else if (line === PRE_DELIMITER) {
@@ -260,6 +278,8 @@ function() {
 %%
 <img alt="An image" />
 %%
+/Linus's/ Image below:
+% https://www.ocf.berkeley.edu/~linuslee/pic.jpg
 - -
 Plain / text * sample, /italic / slant/, *bold * bold*, ~strikethrough~, \`code block\`, Link to <https:/google.com/>
 - list
@@ -275,6 +295,7 @@ More text, /like this/
 
     styles() {
         return {
+            'font-family': 'sans-serif',
             '.renderer': {
                 'display': 'flex',
                 'flex-direction': 'row',
@@ -297,7 +318,7 @@ More text, /like this/
 
     handleInput(evt) {
         this.inputValue = evt.target.value;
-        this.render();
+        requestAnimationFrame(() => this.render());
     }
 
     compose() {

@@ -631,7 +631,7 @@ class App extends StyledComponent {
                     ${Markus(this.inputValue)}
                 </div>
                 <div class="half markdown">
-                    <textarea value="${this.inputValue}" oninput="${this.handleInput}"
+                    <textarea autofocus value="${this.inputValue}" oninput="${this.handleInput}"
                         placeholder="Start writing ..." onkeydown="${this.handleKeydown}" />
                 </div>
             </div>

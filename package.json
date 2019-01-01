@@ -13,7 +13,7 @@
     "test:prod": "karma start karma.min.conf.js",
     "build": "node build/build.js && cp dist/index.min.js samples/hn-reader/index.min.js && cp dist/index.min.js samples/graph-calc/index.min.js",
     "verify": "node build/build.js && karma start karma.min.conf.js",
-    "clean": "rm -rvf dist/* coverage/* docs/",
+    "clean": "rm -rvf dist/* coverage/*",
     "docs": "node doc/generate.js",
     "postinstall": "node build/build.js",
     "deploy:hn": "surge -p samples/hn-reader/ --domain https://torushn.surge.sh",

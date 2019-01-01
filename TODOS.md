@@ -1,41 +1,44 @@
 # Torus To-dos
 
+- [ ] React's reactive state components are basically Torus components + a record attached by default to each component. Can we emulate that with a `ReactiveComponent` that comes with a record by default?
+
+- [ ] We need to work on the deploying and to-production story of Torus. Right now, Torus binds to the global (`window`) namespace and has debug statements all throughout. Those should be fixed in a production build. How can we make Torus simple to use as a drop-in script while remaining flexible enough to be bundled properly?
+
 - [ ] Make README polished modeled after Preact's Github README. What badges do they use?
 
-- [ ] Continuous build during development!
-
 ## Planned sample projects
-
-### Markus (markdown parser demo)
-
-Make Markus (the Markdown renderer) an example in the torus repository. This is what we'll use for Sigil and Ligature as well.
-
-```javascript
-class Markus extends Component {
-    updateMarkdown(string markdownContent) {
-        this.markdown = markdownContent;
-        this.render();
-    }
-
-    compose() {
-        return div([
-            // render markdown
-        ]);
-    }
-}
-```
-
-1. NO parsing inline links unless they’re markdown-style explicitly
-2. /italic/, *bold*, _underline_, and ~strikethrough~
-3. #-denominated headers, and no other headers
-4. —- for horizontal dividers (and nothing else)
-5. backticks for code blocks, both inline and multiline, like Markdown
-6. Blockquotes with > (including multilevel quotes)
-7. Number- and dash-enumerated lists
-8. Double newlines -> newlines
-
-This standard should permeate all polyx apps, including Sigil and Ligature2
 
 ### Prism (slide framework)
 
 A component library for quickly building rich, web-native slide presentations.
+
+```javascript
+const Slide1 = () => {
+    return TitleSlide(
+        Title('Virtual DOM in 900 Lines of JS'),
+        Subtitle(Image('./img/vdom.js'))
+    );
+}
+const Slide2 = () => {
+    return ContentSlide(
+        Title('The Framework Wars'),
+        VerticalSplit(
+            Body(
+                List(
+                    'React',
+                    'Vue',
+                    'Ember',
+                )
+            )
+            Image('./img/starwars.jpg')
+        )
+    );
+}
+```
+
+### Twirl (Trello-like project manager)
+
+- Drag and drop
+- Full-stack node application, Torus frontend. Testing sync / data fetching APIs with Torus.
+- Bundled with webpack
+- Torus versions checked into `./lib/`

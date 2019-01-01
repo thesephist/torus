@@ -162,7 +162,7 @@ class AppBar extends StyledComponent {
         this.graphProps = graphProps;
 
         //> We create a new list view to hold panels of function controls.
-        this.functionList = new FunctionList(this.functionStore);
+        this.functionList = new FunctionList(this.functionStore, functionStore);
 
         //> There are a bunch of methods here that we need to bind, so we can call them
         //  as event listeners in our render step.
@@ -421,12 +421,14 @@ class FunctionPanel extends StyledComponent {
     //> Since this is a `List` item, it's given two arguments, the first
     //  the record for this component, and the second a callback to remove
     //  the item from the list. We'll store the latter as a property.
-    init(functionRecord, removeCallback) {
+    init(functionRecord, removeCallback, functionStore) {
         this.removeCallback = removeCallback;
+        this.functionStore = functionStore;
 
         this.keyUp = this.keyUp.bind(this);
         this.updateFunctionText = this.updateFunctionText.bind(this);
         this.toggleHidden = this.toggleHidden.bind(this);
+        this.duplicate = this.duplicate.bind(this);
         this.updateColor = this.updateColor.bind(this);
 
         //> We want to re-render this component every time something about
@@ -489,7 +491,7 @@ class FunctionPanel extends StyledComponent {
                 'justify-content': 'flex-end',
             },
             'button': {
-                'margin-right': '8px',
+                'margin-right': '6px',
                 'color': '#fff',
                 'height': '24px',
                 'line-height': '24px',
@@ -528,6 +530,12 @@ class FunctionPanel extends StyledComponent {
         });
     }
 
+    duplicate() {
+        this.functionStore.create({
+            text: this.record.get('text'),
+        });
+    }
+
     updateColor() {
         this.record.update({
             color: randomColor(),
@@ -545,7 +553,8 @@ class FunctionPanel extends StyledComponent {
             <div class="buttonArea">
                 <button onclick="${this.removeCallback}">Delete</button>
                 <button onclick="${this.toggleHidden}">${props.hidden ? '🙈 Show' : '👀 Hide' }</button>
-                <button onclick="${this.updateColor}">🎲 Shuffle color</button>
+                <button onclick="${this.duplicate}">Duplicate</button>
+                <button onclick="${this.updateColor}">🎨 Color</button>
             </div>
         </div>`;
     }

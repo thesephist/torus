@@ -3,6 +3,7 @@
 const READER_END = [];
 const RE_HEADER = /^(#{1,6})\s*(.*)/;
 const RE_IMAGE = /^%\s+(\S*)/;
+const RE_QUOTE = /^(>+)\s*(.*)/;
 const RE_LIST_ITEM = /^(\s*)(\-|\d+\.)\s+(.*)/;
 
 const ITALIC_DELIMITER = '/';
@@ -14,6 +15,67 @@ const LINK_DELIMITER_RIGHT = '>';
 
 const PRE_DELIMITER = '``';
 const LITERAL_DELIMITER = '%%';
+
+const BODY_TEXT_TRANSFORMS = new Map([
+    // RegExp: replacement
+    [/\-\-/g, '—'],
+    [/(\?\!|\!\?)/g, '‽'],
+    [/\$\$/g, '💵'],
+    [/:\)/g, '🙂'],
+    [/<3/g, '❤️'],
+    [/:wave:/g, '👋'],
+]);
+
+const INPUT_PLACEHOLDER = `# Write some markdown!
+
+## Hash signs mark /headers/.
+
+Here's some text, with /italics/, *bold*, ~strikethrough~, and \`monospace\` styles. We can also *~/combine/~* these things for */\`more emphasis\`/*.
+
+Let's include some links. Here's one to <https://google.com/>.
+
+> Quotes.
+>> Nested quotes, like this...
+>> ... even across lines.
+
+We can include lists ...
+
+- First
+- Second
+    - Third, which is indented
+    - Fourth
+
+We can also number lists, and mix both styles.
+
+1. Cal Bears
+2. Purdue Boilermakers
+3. every other school
+    - ???
+4. Stanford... trees?
+
+
+We can include code blocks.
+
+\`\`
+#include <stdio.h>
+
+int main() {
+    printf("Two backticks denote a code block");
+
+    return 0;
+}
+\`\`
+
+To include images, prefix the URL with a percent sign:
+
+% https://www.ocf.berkeley.edu/~linuslee/pic.jpg
+
+That's it! Happy markdowning :)
+
+If you're curious about how this app works, you can check out the entire, annotated source code at <https://thesephist.github.io/torus/markdown-parser-demo>, where you'll find annotated JavaScript source files behind this and a few other apps.
+
+This renderer was built with Torus, a UI framework for the web written by Linus, for his personal suite of productivity apps. You can find more information about Torus at <https://github.com/thesephist/torus/>, and you can find Linus at <https://linus.zone/now/>.
+`;
 
 class Reader {
 
@@ -66,6 +128,9 @@ const parseBody = (reader, tag, delimiter = '') => {
     const children = [];
     let buf = '';
     const commitBuf = () => {
+        for (const re of BODY_TEXT_TRANSFORMS.keys()) {
+            buf = buf.replace(re, BODY_TEXT_TRANSFORMS.get(re));
+        }
         children.push(buf);
         buf = '';
     }
@@ -94,34 +159,34 @@ const parseBody = (reader, tag, delimiter = '') => {
                     children: children,
                 }
             case ITALIC_DELIMITER:
-                commitBuf();
                 if (reader.ahead() === ' ') {
                     buf += char;
                 } else {
+                    commitBuf();
                     children.push(parseBody(reader, 'em', ITALIC_DELIMITER));
                 }
                 break;
             case BOLD_DELIMITER:
-                commitBuf();
                 if (reader.ahead() === ' ') {
                     buf += char;
                 } else {
+                    commitBuf();
                     children.push(parseBody(reader, 'strong', BOLD_DELIMITER));
                 }
                 break;
             case STRIKE_DELIMITER:
-                commitBuf();
                 if (reader.ahead() === ' ') {
                     buf += char;
                 } else {
+                    commitBuf();
                     children.push(parseBody(reader, 'strike', STRIKE_DELIMITER));
                 }
                 break;
             case CODE_DELIMITER:
-                commitBuf();
                 if (reader.ahead() === ' ') {
                     buf += char;
                 } else {
+                    commitBuf();
                     children.push({
                         tag: 'code',
                         children: [reader.until(CODE_DELIMITER)],
@@ -129,10 +194,10 @@ const parseBody = (reader, tag, delimiter = '') => {
                 }
                 break;
             case LINK_DELIMITER_LEFT:
-                commitBuf();
                 if (reader.ahead() === ' ') {
                     buf += char;
                 } else {
+                    commitBuf();
                     const url = reader.until(LINK_DELIMITER_RIGHT);
                     children.push({
                         tag: 'a',
@@ -194,6 +259,44 @@ const parseList = (lineReader) => {
     }
 }
 
+const parseQuote = (lineReader) => {
+    const children = [];
+
+    let line = lineReader.next();
+    const [_, nestCount] = RE_QUOTE.exec(line);
+    const nestLevel = nestCount.length;
+    lineReader.backtrack();
+
+    while ((line = lineReader.next()) !== READER_END) {
+        const [_, nestCount, quoteText] = RE_QUOTE.exec(line) || [];
+        if (quoteText !== undefined) {
+            const thisNestLevel = nestCount.length;
+            if (thisNestLevel < nestLevel) {
+                lineReader.backtrack();
+                return {
+                    tag: 'q',
+                    children: children,
+                }
+            } else if (thisNestLevel === nestLevel) {
+                children.push(parseBody(new Reader(quoteText), 'p'));
+            } else { // thisNestLevel > nestLevel
+                lineReader.backtrack();
+                children.push(parseQuote(lineReader));
+            }
+        } else {
+            lineReader.backtrack();
+            return {
+                tag: 'q',
+                children: children,
+            }
+        }
+    }
+    return {
+        tag: 'q',
+        children: children,
+    }
+}
+
 const Markus = str => {
 
     const lineReader = new LineReader(str.split('\n'));
@@ -249,6 +352,9 @@ const Markus = str => {
                     },
                 }],
             });
+        } else if (RE_QUOTE.exec(line)) {
+            lineReader.backtrack();
+            result.push(parseQuote(lineReader));
         } else if (line === '- -') {
             result.push({tag: 'hr'});
         } else if (line === PRE_DELIMITER) {
@@ -257,43 +363,21 @@ const Markus = str => {
             inLiteralBlock = true;
         } else if (RE_LIST_ITEM.exec(line)) {
             lineReader.backtrack();
-            result.push(parseList(lineReader, 0));
+            result.push(parseList(lineReader));
         } else {
             result.push(parseBody(new Reader(line), 'p'));
         }
     }
 
-    return jdom`<div class="render">${result}</div>`;
+    return jdom`<div class="render" style="padding-bottom:75vh">${result}</div>`;
 }
 
 class App extends StyledComponent {
 
     init() {
-        this.inputValue = `# header
-## Subheader
-### Subsubheader
-\`\`
-longer code block
-function() {
-    log('hi');
-}
-\`\`
-%%
-<img alt="An image" />
-%%
-/Linus's/ Image below:
-% https://www.ocf.berkeley.edu/~linuslee/pic.jpg
-- -
-Plain / text * sample, /italic / slant/, *bold * bold*, ~strikethrough~, \`code block\`, Link to <https:/google.com/>
-- list
-- list
-    - sublist item 2
-More text, /like this/
-1. Test
-2. Test more
-    2. Test again`;
-
+        this.inputValue = INPUT_PLACEHOLDER;
         this.handleInput = this.handleInput.bind(this);
+        this.handleKeydown = this.handleKeydown.bind(this);
     }
 
     styles() {
@@ -348,6 +432,7 @@ More text, /like this/
                 'font-size': '14px',
                 'outline': 'none',
                 'color': '#999',
+                'line-height': '1.5em',
                 '&:focus': {
                     'color': '#000',
                 },
@@ -376,6 +461,14 @@ More text, /like this/
                     'line-height': '1.5em',
                     'border-radius': '6px',
                 },
+                'q': {
+                    '&::before, &::after': {
+                        'content': '""',
+                    },
+                    'display': 'block',
+                    'border-left': '3px solid #777',
+                    'padding-left': '6px',
+                },
             },
         }
     }
@@ -383,6 +476,20 @@ More text, /like this/
     handleInput(evt) {
         this.inputValue = evt.target.value;
         requestAnimationFrame(() => this.render());
+    }
+
+    handleKeydown(evt) {
+        if (evt.keyCode === 9) { // Tab key
+            evt.preventDefault();
+            const idx = evt.target.selectionStart;
+            if (idx) {
+                const front = this.inputValue.substr(0, idx);
+                const back = this.inputValue.substr(idx);
+                this.inputValue = front + '    ' + back;
+                this.render();
+                evt.target.setSelectionRange(idx + 4, idx + 4);
+            }
+        }
     }
 
     compose() {
@@ -394,7 +501,7 @@ More text, /like this/
                 </div>
                 <div class="half markdown">
                     <textarea value="${this.inputValue}" oninput="${this.handleInput}"
-                        placeholder="Start writing ..." />
+                        placeholder="Start writing ..." onkeydown="${this.handleKeydown}" />
                 </div>
             </div>
         </main>`;

@@ -235,13 +235,17 @@ const Markus = str => {
             const [_, imageURL] = RE_IMAGE.exec(line);
             result.push({
                 tag: 'a',
+                attrs: {
+                    href: imageURL || '#',
+                    rel: 'noopener',
+                    target: '_blank',
+                    style: {cursor: 'pointer'},
+                },
                 children: [{
                     tag: 'img',
                     attrs: {
                         src: imageURL,
-                        style: {
-                            maxWidth: '100%',
-                        },
+                        style: {maxWidth: '100%'},
                     },
                 }],
             });
@@ -259,14 +263,13 @@ const Markus = str => {
         }
     }
 
-    return jdom`<div>${result}</div>`;
+    return jdom`<div class="render">${result}</div>`;
 }
 
 class App extends StyledComponent {
 
     init() {
-        this.inputValue = `
-# header
+        this.inputValue = `# header
 ## Subheader
 ### Subsubheader
 \`\`
@@ -295,23 +298,84 @@ More text, /like this/
 
     styles() {
         return {
+            'box-sizing': 'border-box',
             'font-family': 'sans-serif',
-            '.renderer': {
+            'display': 'flex',
+            'flex-direction': 'column',
+            'justify-content': 'space-between',
+            'align-items': 'flex-start',
+            'height': '100vh',
+            'width': '100%',
+            'overflow': 'hidden',
+            '.title': {
+                'margin': '20px 18px 0 18px',
+                'font-weight': 'normal',
+                'color': '#888',
+                '.dark': {
+                    'color': '#000',
+                },
+            },
+            '.renderContainer': {
                 'display': 'flex',
                 'flex-direction': 'row',
                 'justify-content': 'space-between',
                 'align-items': 'flex-start',
+                'height': 'calc(100% - 60px)',
+                'width': '100%',
+                'padding': '16px',
+                'box-sizing': 'border-box',
             },
-            '.markdown': {
-                'width': '50%',
+            '.half': {
+                'width': 'calc(50% - 8px)',
+                'height': '100%',
+                'box-sizing': 'border-box',
             },
-            '.result': {
-                'width': '50%',
+            '.render, textarea': {
+                'box-sizing': 'border-box',
+                'border': 0,
+                'box-shadow': '0 3px 8px -1px rgba(0, 0, 0, .3)',
+                'padding': '12px',
+                'border-radius': '6px',
+                'background': '#fff',
+                'height': '100%',
+                '-webkit-overflow-scrolling': 'touch',
+                'overflow-y': 'auto',
             },
             'textarea': {
+                'font-family': '"Fira Code", "Menlo", "Monaco", monospace',
                 'width': '100%',
-                'height': '300px',
-                'box-sizing': 'border-box',
+                'resize': 'none',
+                'font-size': '14px',
+                'outline': 'none',
+                'color': '#999',
+                '&:focus': {
+                    'color': '#000',
+                },
+            },
+            '.result': {
+                'height': '100%',
+            },
+            '.render': {
+                //> Styles for things that are rendered by the markdown
+                'p': {
+                    'line-height': '1.5em',
+                },
+                'li': {
+                    'margin-bottom': '6px',
+                },
+                'pre': {
+                    'padding': '8px',
+                },
+                'code': {
+                    'padding': '4px',
+                    'margin': '0 2px',
+                },
+                'pre, code': {
+                    'font-family': '"Menlo", "Monaco", monospace',
+                    'background': '#eee',
+                    'line-height': '1.5em',
+                    'border-radius': '6px',
+                },
             },
         }
     }
@@ -323,13 +387,14 @@ More text, /like this/
 
     compose() {
         return jdom`<main>
-            <h1>Markus</h1>
-            <div class="renderer">
-                <div class="markdown">
-                    <textarea value="${this.inputValue}" oninput="${this.handleInput}" />
-                </div>
-                <div class="result">
+            <h1 class="title"><span class="dark">Markus</span>, a live markdown renderer</h1>
+            <div class="renderContainer">
+                <div class="half result">
                     ${Markus(this.inputValue)}
+                </div>
+                <div class="half markdown">
+                    <textarea value="${this.inputValue}" oninput="${this.handleInput}"
+                        placeholder="Start writing ..." />
                 </div>
             </div>
         </main>`;
@@ -340,3 +405,5 @@ More text, /like this/
 //> Create an instance of the app and mount it to the page DOM.
 const app = new App();
 document.body.appendChild(app.node);
+document.body.style.backgroundColor = '#f8f8f8';
+document.body.style.margin = '0';

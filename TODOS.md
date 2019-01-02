@@ -2,7 +2,7 @@
 
 - [-] `/samples/slides/` demo
 
-- [ ] Publish 0.2.0 release on Github.
+- [-] Publish 0.2.1 release on Github.
     - NEW APIs / breaking changes
         - remove callback and passed arguments in lists
         - Names exported under Torus global
@@ -15,8 +15,6 @@
     - Typescript type definitions
     - Proper node import / bundling support
     - Bundle size work -- still 4.6kB!
-
-- [ ] Make README polished modeled after Preact's Github README. What badges do they use?
 
 - [ ] Build a JS based fuzzer tool and use it to fuzz jdom -- might be a separate repo project. -- look at examples existing.
 

@@ -1,34 +1,32 @@
-# Torus
+# Torus (`torus-dom`)
 
 ![npm torus-dom](https://badge.fury.io/js/torus-dom.svg)
 ![bundle size](https://img.shields.io/bundlephobia/minzip/torus-dom.svg)
 ![TypeScript types](https://img.shields.io/npm/types/torus-dom.svg)
 
-Minimal JS Model-View UI framework focused on being tiny, efficient, and free of dependencies.
+Torus is an event-driven model-view UI framework for the web, focused on being **tiny, efficient, and free of dependencies**.
 
-You can find the [documentation for Torus here](https://thesephist.github.io/torus/api-documentation.html).
+You can find the 📄 **[full documentation for Torus here, on Github pages](https://thesephist.github.io/torus/api-documentation.html)**.
 
-Torus also has an annotated, easy to read version of the entire (pretty concise) codebase, at its [Github Pages](https://thesephist.github.io/torus/). Check it out if you want to learn more about how the frameworks is designed, and how virtual DOM and templating works!
+Torus also has an annotated, easy to read version of the entire (pretty concise) codebase, also on [Github Pages](https://thesephist.github.io/torus/). Check it out if you want to learn more about how the frameworks is designed, and how the virtual DOM and templating works!
 
 ## Features
 
-### Tiny without compromises
+### 👌 Tiny without compromises
 
 Torus has no production dependencies, requires no build step to take advantage of all of its features, and weighs in at under 5kB gzipped including the templating engine, renderer, component and event system, and CSS-in-JS wrapper. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
 
-### Fast and responsive by default
+### 🏃‍️ Fast and responsive by default
 
 Torus isn't designed to be the fastest virtual DOM library (there are great alternatives like `inferno`), but performance and responsiveness are among the primary goals of the project. While remaining tiny, Torus tries to be as fast and responsive as possible, _especially_ in rendering. Combined with the small bundle size, this makes Torus great for building web applications for anywhere, on any device.
 
-### Portable across the web platform
+### 💻 Portable across the web platform
 
-Torus's architecture encapsulates all of the rendering and updating logic within the component itself, so it's safe to take `Component#node` and treat it as a simple pointer to the root DOM element of the component. You can move it around the page, take it in and out of the document, embed it in React or Vue components, and otherwise use it anywhere a vanilla DOM element can be used. This allows you to include Torus components and apps in lots of other frontends.
+Torus's architecture encapsulates all of the rendering and updating logic within the component itself, so it's safe to take `Component#node` and treat it as a simple pointer to the root DOM element of the component. You can move it around the page, take it in and out of the document, embed it in React or Vue components or even web components, and otherwise use it anywhere a traditional DOM element can be used. This allows you to include Torus components and apps in a variety of frontend architectures.
 
 Combined with the small size of Torus, this makes it reasonable to ship torus with only one or a few components for a larger project that includes elements from other frameworks, if you don't want to or can't ship an entire Torus application.
 
-**Note**: Sometimes, like when the tag of the root element changes, `Component#node` can change as Torus needs to replace one element fully with a new element. For this reason, always use `#node` referenced from the component object, rather than caching the actual element `#node` points to at one point in time.
-
-### Internationalization
+### 🌍 Internationalization and extensibility
 
 Torus doesn't concern itself with internationalization, but as developers, we can use the APIs available to us make internationalization possible inside our Torus components. Torus exposes much of the rendering process and the virtual DOM to you, the developer, and importantly allows us create a `preprocessor` that can take in JDOM, and modify it before it reaches the renderer, so we can make modifications to the DOM that the renderer sees with our own code. This makes Torus highly extensible and ideal for i18n. In fact, the component preprocessor API is what makes Torus's `Styled()` components possible. (`Styled()` adds a new class name to the JDOM before the component is rendered.)
 
@@ -112,7 +110,7 @@ npm build
 yarn build
 ```
 
-This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`.
+This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`. Running `npm/yarn clean` will delete any such build artifacts, as well as any generated coverage reports.
 
 ### Generating documentation from comments
 

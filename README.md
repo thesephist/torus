@@ -12,9 +12,13 @@ Torus also has an annotated, easy to read version of the entire (pretty concise)
 
 ## Features
 
-### Small and lightweight
+### Tiny without compromises
 
-Torus has no production dependencies, requires no build step to take advantage of all of its features, and weighs in at under 5kB gzipped including the templating engine, renderer, component system, and CSS-in-JS wrapper. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
+Torus has no production dependencies, requires no build step to take advantage of all of its features, and weighs in at under 5kB gzipped including the templating engine, renderer, component and event system, and CSS-in-JS wrapper. This makes it simple to adopt and ship, for anything from rendering a single component on the page to building full-scale applications.
+
+### Fast and responsive by default
+
+Torus isn't designed to be the fastest virtual DOM library (there are great alternatives like `inferno`), but performance and responsiveness are among the primary goals of the project. While remaining tiny, Torus tries to be as fast and responsive as possible, _especially_ in rendering. Combined with the tiny bundle size, this makes Torus great for building software for anywhere, on any device.
 
 ### Portable across the web platform
 
@@ -26,13 +30,41 @@ Combined with the small size of Torus, this makes it reasonable to ship torus wi
 
 ### Internationalization
 
-Torus doesn't concern itself with internationalization, but as developers, we can use the APIs available to us make internationalization possible inside our Torus components. Torus exposes much of the rendering process and the DOM, and importantly allows you us create a `preprocessor` that can take in JDOM, and modify it before it reaches the renderer, so we can make modifications to the DOM that the renderer sees with our own code. This makes Torus highly extensible and ideal for i18n. In fact, the component preprocessor API is what makes `Styled()` possible.
+Torus doesn't concern itself with internationalization, but as developers, we can use the APIs available to us make internationalization possible inside our Torus components. Torus exposes much of the rendering process and the virtual DOM to you, the developer, and importantly allows us create a `preprocessor` that can take in JDOM, and modify it before it reaches the renderer, so we can make modifications to the DOM that the renderer sees with our own code. This makes Torus highly extensible and ideal for i18n. In fact, the component preprocessor API is what makes Torus's `Styled()` components possible. (`Styled()` adds a new class name to the JDOM before the component is rendered.)
 
->// TODO
+For example, we might make an `I18nComponent`, which can act as a base component class for an internationalized project, like this.
 
-### Accessibility
+```javascript
+class I18nComponent extends Component {
 
->// TODO
+    // The default preprocess method just returns the jdom as-is. We can override it
+    //  to modify the JDOM given by component's `#compose()` method before it reaches the
+    //  virtual DOM renderer.
+    preprocess(jdom, _data) {
+        // Here, we might recursively traverse the JDOM tree of children
+        //  and call some custom `translate()` function on each string child
+        //  and any displayed props like `placeholder` and `title`.
+        //  As a trivial example, if we only cared about text nodes on the page,
+        //  we could write...
+        const translate = jdom => {
+            if (typeof jdom === 'string') {
+                // translate text nodes
+                return yourImplementationOfTranslateString(jdom);
+            } else if (Array.isArray(jdom.children)) {
+                // it's an object-form JDOM, so recursively translate children
+                jdom.children = jdom.children.map(yourImplementationOfTranslateString);
+                return jdom;
+            }
+            return jdom;
+        }
+
+        // In production, we'd also want to translate some user-visible properties,
+        //  so we may also detect and translate attrs like `title` and `placeholder`.
+        return translate(jdom);
+    }
+
+}
+```
 
 ## Influences
 
@@ -58,15 +90,13 @@ yarn add torus-dom
 import { Component, Record, Store } from 'torus-dom';
 ```
 
-Note that, used this way, Torus will print all debug statements. To use Torus without debug statements, build a version of Torus (section below), and import a development or production build with debug disabled into your project.
-
 Alternatively, you can also just import Torus with:
 
 ```html
 <script src="/path/to/your/torus.js"></script>
 ```
 
-Torus will export all of its default globals to `window`, so they're accessible as global names to your scripts. This isn't recommended, but great for experimenting.
+Torus will export all of its default globals to `window.Torus`, so they're accessible as global names to your scripts. This isn't recommended in production apps, but great for experimenting.
 
 ## Contributing
 

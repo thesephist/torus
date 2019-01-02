@@ -1,44 +1,14 @@
 # Torus To-dos
 
-- [-] The Torus-based slide framework (below)
+- [-] Make README polished modeled after Preact's Github README. What badges do they use?
 
-- [ ] Keep working on that bundle size -- Goal is 4.5kB, 4kB would be great.
+- [-] `/samples/slides/` demo
+
+- [ ] Build a JS based fuzzer tool and use it to fuzz jdom -- might be a separate repo project. -- look at examples existing.
 
 - [ ] We need to work on the deploying and to-production story of Torus. Right now, Torus binds to the global (`window`) namespace and has debug statements all throughout. Those should be fixed in a production build. How can we make Torus simple to use as a drop-in script while remaining flexible enough to be bundled properly?
 
-- [ ] Make README polished modeled after Preact's Github README. What badges do they use?
-
-## Planned sample projects
-
-### Prism (slide framework)
-
-A component library for quickly building rich, web-native slide presentations.
-
-```javascript
-const Slide1 = () => {
-    return TitleSlide(
-        Title('Virtual DOM in 900 Lines of JS'),
-        Subtitle(Image('./img/vdom.js'))
-    );
-}
-const Slide2 = () => {
-    return ContentSlide(
-        Title('The Framework Wars'),
-        VerticalSplit(
-            Body(
-                List(
-                    'React',
-                    'Vue',
-                    'Ember',
-                )
-            )
-            Image('./img/starwars.jpg')
-        )
-    );
-}
-```
-
-### Twirl (Trello-like project manager)
+## Demo: Twirl (Trello-like project manager)
 
 - Drag and drop
 - Full-stack node application, Torus frontend. Testing sync / data fetching APIs with Torus.

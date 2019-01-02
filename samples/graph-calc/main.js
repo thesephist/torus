@@ -494,7 +494,7 @@ class FunctionPanel extends StyledComponent {
                 'margin-right': '6px',
                 'color': '#fff',
                 'height': '24px',
-                'line-height': '24px',
+                'line-height': '22px',
                 'background-color': 'rgba(255, 255, 255, 0.4)',
                 'font-size': '14px',
                 'border-radius': '4px',

@@ -1,4 +1,4 @@
-# Torus To-dos
+# Roadmap
 
 - [-] `/samples/slides/` demo
 
@@ -17,7 +17,6 @@
     - Bundle size work -- still 4.6kB!
 
 - [ ] Make README polished modeled after Preact's Github README. What badges do they use?
-    - Update to include the new bundling style / import / usage from NPM.
 
 - [ ] Build a JS based fuzzer tool and use it to fuzz jdom -- might be a separate repo project. -- look at examples existing.
 

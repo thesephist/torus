@@ -18,7 +18,7 @@ Torus has no production dependencies, requires no build step to take advantage o
 
 ### Fast and responsive by default
 
-Torus isn't designed to be the fastest virtual DOM library (there are great alternatives like `inferno`), but performance and responsiveness are among the primary goals of the project. While remaining tiny, Torus tries to be as fast and responsive as possible, _especially_ in rendering. Combined with the tiny bundle size, this makes Torus great for building software for anywhere, on any device.
+Torus isn't designed to be the fastest virtual DOM library (there are great alternatives like `inferno`), but performance and responsiveness are among the primary goals of the project. While remaining tiny, Torus tries to be as fast and responsive as possible, _especially_ in rendering. Combined with the small bundle size, this makes Torus great for building web applications for anywhere, on any device.
 
 ### Portable across the web platform
 

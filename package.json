@@ -20,6 +20,10 @@
     "deploy:graph": "surge -p samples/graph-calc/ --domain https://graphcalc.surge.sh",
     "deploy:markus": "surge -p samples/markus/ --domain https://markuswriter.surge.sh"
   },
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "webpack": "^4.27.1"
+  },
   "devDependencies": {
     "chai": "^4.2.0",
     "istanbul": "^0.4.5",
@@ -30,8 +34,6 @@
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
     "marked": "^0.5.2",
-    "mkdirp": "^0.5.1",
-    "mocha": "^5.1.1",
-    "webpack": "^4.27.1"
+    "mocha": "^5.1.1"
   }
 }

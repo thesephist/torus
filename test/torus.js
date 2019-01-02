@@ -27,6 +27,24 @@ describe('renderJDOM', () => {
 
     });
 
+    it('handles changes from one node type to another gracefully, without failing', () => {
+        const first = document.createElement('div');
+        const second = 'Some Text';
+        const node = render(first);
+        const node2 = renderJDOM(node, first, second);
+        node.should.equal(first);
+        node2.textContent.should.equal(second);
+    });
+
+    it('efficiently updates the content (nodeValue) of a TextNode', () => {
+        const first = 'first text';
+        const second = 'second text';
+        const node = render(first);
+        const node2 = renderJDOM(node, first, second);
+        expect(node).to.equal(node2);
+        node.textContent.should.equal(second);
+    });
+
     describe('Element attributes', () => {
 
         it('id', () => {

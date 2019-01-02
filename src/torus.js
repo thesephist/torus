@@ -79,6 +79,8 @@ let opQueue = [];
 const OP_APPEND = 0; // append, parent, new
 const OP_REMOVE = 1; // remove, parent, old
 const OP_REPLACE = 2; // replace, old, new
+//> This is a stubbed `parentNode`. See below in `runDOMOperations` for why this exists.
+const STUB_PARENT = {replaceChild: () => {}};
 
 //> `runDOMOperations` works through the `opQueue` and performs each
 //  DOM operation in order they were queued. rDO is called when the reconciler
@@ -106,9 +108,18 @@ function runDOMOperations() {
             const oldNode = next[1];
             const tmp = tmpNode();
             const parent = oldNode.parentNode;
-            parent.replaceChild(tmp, oldNode);
-            next[1] = tmp;
-            next[3] = parent;
+            //> Sometimes, the given node will be a standalone node
+            //  (like the root of an unmounted component) and will have no `parentNode`.
+            //  In these rare cases, it's best for performance to just set the parent to a stub
+            //  with a no-op `replaceChild`. Trying to check for edge cases later each time is a
+            //  performance penalty, since this is a very rare case.
+            if (parent !== null) {
+                parent.replaceChild(tmp, oldNode);
+                next[1] = tmp;
+                next[3] = parent;
+            } else {
+                next[3] = STUB_PARENT;
+            }
         }
     }
     for (let i = 0; i < len; i ++) {

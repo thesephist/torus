@@ -382,7 +382,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>        } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong>            result.push(dynamicParts[number]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">395</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong>        if (processedBack !== '') result = result.concat(processedBack);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong>        if (processedBack.length !== 0) result = result.concat(processedBack);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">397</strong>        return result;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">398</strong>    } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">399</strong>        return str ? [str] : [];</pre></div>

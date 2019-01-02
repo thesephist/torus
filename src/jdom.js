@@ -393,7 +393,7 @@ const splitByPlaceholder = (str, dynamicParts) => {
         } else {
             result.push(dynamicParts[number]);
         }
-        if (processedBack !== '') result = result.concat(processedBack);
+        if (processedBack.length !== 0) result = result.concat(processedBack);
         return result;
     } else {
         return str ? [str] : [];

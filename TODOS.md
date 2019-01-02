@@ -1,12 +1,14 @@
 # Torus To-dos
 
-- [-] Make README polished modeled after Preact's Github README. What badges do they use?
-
 - [-] `/samples/slides/` demo
 
-- [ ] Build a JS based fuzzer tool and use it to fuzz jdom -- might be a separate repo project. -- look at examples existing.
+- [-] We need to work on the deploying and to-production story of Torus. Right now, Torus binds to the global (`window`) namespace and has debug statements all throughout.
+    - Torus should expose a single `Torus` global that wraps the individual components Fix this in all samples and tests.
 
-- [ ] We need to work on the deploying and to-production story of Torus. Right now, Torus binds to the global (`window`) namespace and has debug statements all throughout. Those should be fixed in a production build. How can we make Torus simple to use as a drop-in script while remaining flexible enough to be bundled properly?
+- [ ] Make README polished modeled after Preact's Github README. What badges do they use?
+    - Update to include the new bundling style / import / usage from NPM.
+
+- [ ] Build a JS based fuzzer tool and use it to fuzz jdom -- might be a separate repo project. -- look at examples existing.
 
 ## Demo: Twirl (Trello-like project manager)
 

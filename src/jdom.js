@@ -530,14 +530,11 @@ const jdom = (tplParts, ...dynamicParts) => {
 }
 
 //> We only expose one public API: `jdom`
-const exposedNames = {
-    jdom,
-}
 if (typeof window === 'object') {
-    for (const name in exposedNames) {
-        window[name] = exposedNames[name];
-    }
+    window.jdom = jdom;
 }
-if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = exposedNames;
+if (typeof module === 'object' && module.exports) {
+    module.exports = {
+        jdom: jdom,
+    };
 }

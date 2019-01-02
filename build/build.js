@@ -69,7 +69,7 @@ const webpackConfigs = {
         },
     },
     index: {
-        entry: './src/entry.js',
+        entry: './src/index.js',
         mode: 'production',
         output: {
             path: path.resolve('./dist/'),

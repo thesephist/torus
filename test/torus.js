@@ -1,3 +1,8 @@
+// Bootstrap the required globals from Torus
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 describe('renderJDOM', () => {
 
     const render = jdom => renderJDOM(undefined, undefined, jdom);

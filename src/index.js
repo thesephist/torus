@@ -9,7 +9,7 @@ const {
     Store,
     StoreOf,
     Router,
-} = require('./torus.js');
+} = require('../dist/torus.no-debug.js');
 
 const {
     jdom,

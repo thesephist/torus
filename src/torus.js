@@ -1042,11 +1042,9 @@ const exposedNames = {
 }
 //> If there is a global `window` object, bind API names to it.
 if (typeof window === 'object') {
-    for (const name of Object.keys(exposedNames)) {
-        window[name] = exposedNames[name];
-    }
+    window.Torus = exposedNames;
 }
 //> Export public APIs CommonJS-style
-if (typeof module === 'object' && typeof module.exports === 'object') {
+if (typeof module === 'object' && module.exports) {
     module.exports = exposedNames;
 }

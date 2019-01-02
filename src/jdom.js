@@ -232,7 +232,7 @@ const parseOpeningTagContents = content => {
                 events[key.substr(2)] = [val];
             } else {
                 if (key === 'class') {
-                    if (val) {
+                    if (val !== '') {
                         attrs[key] = val.split(' ');
                     }
                 } else if (key === 'style') {
@@ -284,7 +284,7 @@ const parseTemplate = reader => {
     //> Commit currently reading element to the result list, and reset the current element
     const commit = () => {
         //> If the text node we're about to commit is just whitespace, don't bother
-        if (inTextNode && !currentElement.trim()) {
+        if (inTextNode && currentElement.trim() === '') {
             // pass
         } else if (currentElement) {
             result.push(currentElement);
@@ -387,13 +387,13 @@ const splitByPlaceholder = (str, dynamicParts) => {
         const processedBack = splitByPlaceholder(parts[1], dynamicParts);
 
         let result = [];
-        if (parts[0]) result.push(parts[0]);
+        if (parts[0] !== '') result.push(parts[0]);
         if (Array.isArray(dynamicParts[number])) {
             result = result.concat(dynamicParts[number]);
         } else {
             result.push(dynamicParts[number]);
         }
-        if (processedBack.length) result = result.concat(processedBack);
+        if (processedBack !== '') result = result.concat(processedBack);
         return result;
     } else {
         return str ? [str] : [];
@@ -414,8 +414,8 @@ const replaceChildrenToFlatArray = (children, dynamicParts) => {
     }
     const first = newChildren[0];
     const last = newChildren[newChildren.length - 1];
-    if (typeof first === 'string' && !first.trim()) newChildren.shift();
-    if (typeof last === 'string' && !last.trim()) newChildren.pop();
+    if (typeof first === 'string' && first.trim() === '') newChildren.shift();
+    if (typeof last === 'string' && last.trim() === '') newChildren.pop();
     return newChildren;
 }
 

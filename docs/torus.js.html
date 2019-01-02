@@ -56,9 +56,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong></pre></div>
 <div class="line"><div class="doc"><p><code>normalizeJDOM</code> takes a JDOM object (dictionary) and modifies it in place so it has the default JDOM properties, and we don&#39;t have to complicate our rendering code by checking for nulls with every key access into our serialized virtual DOM. Note that we don&#39;t check <code>isObject(jdom)</code> here. We assume only valid objects are passed in to &#39;normalize&#39;, which is true in our usage so far. <code>normalizeJDOM</code> is a hot path in rendering, so we need it as fast as it can be.</p>
 </div><pre class="source javascript"><strong class="lineNumber">56</strong>const normalizeJDOM = jdom =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">57</strong>    jdom.attrs = jdom.attrs || {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">58</strong>    jdom.events = jdom.events || {};</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">59</strong>    jdom.children = jdom.children || [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">57</strong>    jdom.attrs = jdom.attrs !== undefined ? jdom.attrs : {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">58</strong>    jdom.events = jdom.events !== undefined ? jdom.events : {};</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">59</strong>    jdom.children = jdom.children !== undefined ? jdom.children : [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">60</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">61</strong></pre></div>
 <div class="line"><div class="doc"><p>Quick shorthand to normalize either 1. a single value or 2. an array of values into an array of values. This is useful because JDOM accepts either into things like <code>attrs.class</code> and <code>events.&lt;name&gt;</code>.</p>

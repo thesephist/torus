@@ -236,7 +236,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">232</strong>                events[key.substr(2)] = [val];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">233</strong>            } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                if (key === 'class') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>                    if (val) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>                    if (val !== '') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">236</strong>                        attrs[key] = val.split(' ');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">237</strong>                    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">238</strong>                } else if (key === 'style') {</pre></div>
@@ -290,7 +290,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">285</strong>    const commit = () =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>If the text node we&#39;re about to commit is just whitespace, don&#39;t bother</p>
-</div><pre class="source javascript"><strong class="lineNumber">287</strong>        if (inTextNode &#38;&#38; !currentElement.trim()) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">287</strong>        if (inTextNode &#38;&#38; currentElement.trim() === '') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong>            // pass</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">289</strong>        } else if (currentElement) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">290</strong>            result.push(currentElement);</pre></div>
@@ -376,13 +376,13 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">387</strong>        const processedBack = splitByPlaceholder(parts[1], dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">388</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">389</strong>        let result = [];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong>        if (parts[0]) result.push(parts[0]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong>        if (parts[0] !== '') result.push(parts[0]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">391</strong>        if (Array.isArray(dynamicParts[number])) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">392</strong>            result = result.concat(dynamicParts[number]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>        } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong>            result.push(dynamicParts[number]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">395</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong>        if (processedBack.length) result = result.concat(processedBack);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong>        if (processedBack !== '') result = result.concat(processedBack);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">397</strong>        return result;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">398</strong>    } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">399</strong>        return str ? [str] : [];</pre></div>
@@ -402,8 +402,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>    const first = newChildren[0];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>    const last = newChildren[newChildren.length - 1];</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>    if (typeof first === 'string' &#38;&#38; !first.trim()) newChildren.shift();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>    if (typeof last === 'string' &#38;&#38; !last.trim()) newChildren.pop();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>    if (typeof first === 'string' &#38;&#38; first.trim() === '') newChildren.shift();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>    if (typeof last === 'string' &#38;&#38; last.trim() === '') newChildren.pop();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong>    return newChildren;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">420</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">421</strong></pre></div>

@@ -301,7 +301,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">295</strong></pre></div>
 <div class="line"><div class="doc"><p>Shortcut to handle/commit string tokens properly, which we do more than once below.</p>
 </div><pre class="source javascript"><strong class="lineNumber">297</strong>    const handleString = next =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">298</strong>        if (!inTextNode) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">298</strong>        if (inTextNode === false) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">299</strong>            commit();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">300</strong>            inTextNode = true;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">301</strong>            currentElement = '';</pre></div>
@@ -415,10 +415,10 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">427</strong>        return str;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">428</strong>    } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">429</strong>        let match = JDOM_PLACEHOLDER_RE.exec(str);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">430</strong>        if (match &#38;&#38; str.trim() === match[0]) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">430</strong>        if (match !== null &#38;&#38; str.trim() === match[0]) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">431</strong>            return dynamicParts[match[1]];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">432</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">433</strong>        while (match) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">433</strong>        while (match !== null) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">434</strong>            let parts = str.split(match[0]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">435</strong>            str = parts[0] + dynamicParts[match[1]] + parts[1];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">436</strong>            match = JDOM_PLACEHOLDER_RE.exec(str);</pre></div>

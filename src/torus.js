@@ -36,20 +36,6 @@ const render_debug = (msg, header = false) => {
 }
 // @enddebug
 
-//> IDL attributes are attributes that are reflected in `HTMLElement`
-//  objects' JavaScript properties. They're often boolean flags, so
-//  they're easier to set (and sometimes only possible to set) in JS
-//  as opposed to using `HTMLElement.setAttribute()`.
-const HTML_IDL_ATTRIBUTES = [
-    'type',
-    'value',
-    'selected',
-    'indeterminate',
-    'tabIndex',
-    'checked',
-    'disabled',
-];
-
 //> A global counter for how deep we are in our render tree.
 //  0 indicates that we aren't in the middle of rendering.
 let render_stack = 0;
@@ -200,10 +186,16 @@ const renderJDOM = (node, previous, next) => {
                 render_debug(`Replace previous node "${previous}" with text node "${next}"`);
             }
             // @enddebug
-            replacePreviousNode(document.createTextNode(next));
+            //> If the previous node was also a text node, just replace the `.nodeValue`, which is
+            //  very fast. Otherwise, create a new `TextNode`.
+            if (typeof previous === 'string' || typeof previous === 'number') {
+                node.nodeValue = next;
+            } else {
+                replacePreviousNode(document.createTextNode(next));
+            }
         //> If we need to render a literal DOM Node, just replace
         //  the old node with the literal node.
-        } else if (next.nodeType !== undefined) { // check if next instanceof Node
+        } else if (next.appendChild !== undefined) { // check if next instanceof Node; fastest way is checking for presence of a non-getter property
             // @begindebug
             if (node === undefined) {
                 render_debug(`Add literal element <${next.tagName.toLowerCase()}>`);
@@ -215,7 +207,7 @@ const renderJDOM = (node, previous, next) => {
         //> If we're rendering an object literal, assume it's a serialized
         //  JDOM dictionary. This is the meat of the algorithm.
         } else { // next is a non-null object
-            if (!isObject(previous) || (previous && previous.nodeType !== undefined)) { // check if previous instanceof Node
+            if (!isObject(previous) || (previous && previous.appendChild !== undefined)) { // check if previous instanceof Node; fastest way is checking for presence of a non-getter property
                 //> If the previous JDOM doesn't exist or wasn't JDOM, we're adding a completely
                 //  new node into the DOM. Stub an empty `previous`.
                 previous = {
@@ -303,7 +295,7 @@ const renderJDOM = (node, previous, next) => {
                         //  through JavaScript properties on the HTML element
                         //  and not `setAttribute()`. This is necessary for
                         //  properties like `value` and `indeterminate`.
-                        if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
+                        if (attrName in node) {
                             // @debug
                             render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
                             node[attrName] = next.attrs[attrName];
@@ -322,7 +314,7 @@ const renderJDOM = (node, previous, next) => {
             //  also attempt to remove them from the DOM.
             for (const attrName of Object.keys(previous.attrs)) {
                 if (next.attrs[attrName] === undefined) {
-                    if (HTML_IDL_ATTRIBUTES.includes(attrName)) {
+                    if (attrName in node) {
                         // @debug
                         render_debug(`Remove <${next.tag} property ${attrName}`);
                         //> `null` seems to be the default for most IDL attrs,

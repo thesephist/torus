@@ -295,7 +295,7 @@ const parseTemplate = reader => {
 
     //> Shortcut to handle/commit string tokens properly, which we do more than once below.
     const handleString = next => {
-        if (!inTextNode) {
+        if (inTextNode === false) {
             commit();
             inTextNode = true;
             currentElement = '';
@@ -427,10 +427,10 @@ const replaceInString = (str, dynamicParts) => {
         return str;
     } else {
         let match = JDOM_PLACEHOLDER_RE.exec(str);
-        if (match && str.trim() === match[0]) {
+        if (match !== null && str.trim() === match[0]) {
             return dynamicParts[match[1]];
         }
-        while (match) {
+        while (match !== null) {
             let parts = str.split(match[0]);
             str = parts[0] + dynamicParts[match[1]] + parts[1];
             match = JDOM_PLACEHOLDER_RE.exec(str);

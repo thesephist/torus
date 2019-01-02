@@ -1,4 +1,26 @@
 //> This is an example-driven documentation for Torus's entire API surface.
+//  If you want to know more about Torus as an open-source project, or what it is,
+//  check out the [Github repository](https://github.com/thesephist/torus).
+
+//> ## Using Torus with your project
+
+//> If you're in the browser with a `<script src="/path/to/your/torus.js">` tag,
+//  Torus exposes its entire API through these two globals.
+Torus; // contains everything except `jdom`, including `Torus.Component`, etc.
+jdom; // contains the `jdom` template tag
+
+//> .. so you can create a component, for example, like this.
+//  We'll omit the `Torus.` prefix for the rest of this documentation, for
+//  sake of brevity.
+class MyComponent extends Torus.Component {
+    /* ... */
+}
+
+//> If you're bundling within NodeJS, the `torus-dom` package contains
+//  all the exported names. You can use ES2015 imports...
+import { Component, Record, Store, jdom } from 'torus-dom';
+//> ... or CommonJS require.
+const { Component, Record, Store, jdom } = require('torus-dom');
 
 //> ## JDOM
 

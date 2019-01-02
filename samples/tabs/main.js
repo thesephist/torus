@@ -3,6 +3,11 @@
 //  but should probably be moved to a Record under the App instance
 //  in practice for simplicity.
 
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 //> This is a single tab page. Because we want tab contents to be long-lived,
 //  we define it as a function, but make a class component out of it with `Component.from()`
 //  This makes a class component that can be constructed with the arguments `number`, `content`,

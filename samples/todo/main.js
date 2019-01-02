@@ -1,6 +1,11 @@
 //> The todo sample project shows how the view and model
 //  layers of Torus interact in a simple case.
 
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 //> `Task` is our model for a single todo item. We just extend
 //  `Record` since we don't need it to have any special functionality.
 class Task extends Record {}

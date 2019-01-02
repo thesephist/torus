@@ -1,5 +1,10 @@
 //> Slides framework demo
 
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 //> ## Slide components
 
 const Title = (content = 'Title') => {

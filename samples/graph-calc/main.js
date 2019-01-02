@@ -1,5 +1,10 @@
 //> A 2D graphing calculator built with Torus
 
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 //> A swatch of colors with enough contrast to be used for graphs and
 //  graph panels in the overlay sidebar.
 const COLORS = [

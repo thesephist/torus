@@ -4,6 +4,11 @@
 //  notes and todo apps soon), but it also works well as a live
 //  editor by itself.
 
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 //> Like `jdom.js`, this is a unique object that identifies
 //  that a reader has reached the last character/line to read. Used
 //  for parsing strings.

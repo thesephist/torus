@@ -1,5 +1,10 @@
-// The Toggle demo is a sample project using just the UI
+//> The Toggle demo is a sample project using just the UI
 //  rendering APIs of Torus.
+
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
 
 class Toggle extends Component {
 

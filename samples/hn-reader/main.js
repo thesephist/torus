@@ -1,5 +1,10 @@
 //> Hacker News reader in Torus!
 
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 //> A few constants used through the app. The root URL for the
 //  Hacker News JSON API and the current time, for calculating relative datetimes.
 const HN_API_ROOT = 'https://hacker-news.firebaseio.com/v0';

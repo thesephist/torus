@@ -3,6 +3,11 @@
 //  More complex or shared state should be stored in Records, and views
 //  should listen to events on the view state Records.
 
+//> Bootstrap the required globals from Torus, since we're not bundling
+for (const exportedName in Torus) {
+    window[exportedName] = Torus[exportedName];
+}
+
 //> Input component for the searchbar!
 class SearchInput extends StyledComponent {
 

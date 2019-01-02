@@ -1,6 +1,6 @@
 {
   "name": "torus-dom",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Minimal JS UI framework focused on being lightweight and free of dependencies",
   "repository": "git@github.com:thesephist/torus.git",
   "author": "Linus Lee <linus@thesephist.com>",

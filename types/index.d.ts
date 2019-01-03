@@ -125,7 +125,7 @@ declare module 'torus-dom' {
 
     }
 
-    function jdom(templateParts: TemplateStringsArray): JDOM
+    function jdom(templateParts: TemplateStringsArray, ...templateArguments: any[]): JDOM
 
 }
 

@@ -16,7 +16,7 @@
     "verify": "node build/build.js && karma start karma.min.conf.js && bundlesize",
     "clean": "rm -rvf dist/* coverage/*",
     "docs": "node doc/generate.js",
-    "prepublish": "node build/build.js",
+    "prepublishOnly": "node build/build.js",
     "deploy:hn": "surge -p samples/hn-reader/ --domain https://torushn.surge.sh",
     "deploy:graph": "surge -p samples/graph-calc/ --domain https://graphcalc.surge.sh",
     "deploy:markus": "surge -p samples/markus/ --domain https://markuswriter.surge.sh"

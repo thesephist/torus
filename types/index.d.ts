@@ -1,6 +1,6 @@
 declare module 'torus-dom' {
 
-    type Summary = JSON | Array<any>
+    type Summary = object | Array<any>
 
     interface JDOMElement {
         tag: string,
@@ -13,7 +13,7 @@ declare module 'torus-dom' {
 
     class Component {
 
-        public record: Evented | null
+        public record: Record | null
 
         public node: Node
 
@@ -39,23 +39,23 @@ declare module 'torus-dom' {
 
     class StyledComponent extends Component {
 
-        styles(data?: Summary): JSON
+        styles(data?: Summary): object
 
     }
 
-    function Styled(Base: Component): StyledComponent
+    function Styled(Base: typeof Component): typeof StyledComponent
 
-    class List extends Component {
+    class List<T extends Component> extends Component {
 
-        public itemClass: Component
+        public itemClass: T
 
-        public nodes: Node[]
+        public readonly nodes: Node[]
 
-        constructor(store: Store, ...args: any[])
+        constructor(store: Store<any>, ...args: any[])
 
         itemsChanged(): void
 
-        filter(filterFn: (record: Evented) => any): void
+        filter(filterFn: (record: Record) => any): void
 
         unfilter(): void
 
@@ -79,37 +79,39 @@ declare module 'torus-dom' {
 
     class Record extends Evented {
 
-        constructor(id: any, data?: JSON)
-        constructor(data?: JSON)
+        constructor(id: any, data?: object)
+        constructor(data?: object)
 
-        update(data: JSON): void
+        update(data: object): void
 
         get(name: string): any
 
-        summarize(): JSON
+        summarize(): object
 
-        serialize(): JSON
+        serialize(): object
 
     }
 
-    class Store extends Evented {
+    class Store<T extends Record> extends Evented {
 
-        public recordClass: Record
+        public recordClass: T
 
-        public comparator: (record: Record) => any
+        public readonly comparator: (record: T) => any
 
-        constructor(records?: Record[])
+        public readonly records: Set<T>
 
-        create(id: any, data?: JSON): void
-        create(data?: JSON): void
+        constructor(records?: T[])
 
-        add(record: Record): void
+        create(id: any, data?: object): void
+        create(data?: object): void
 
-        remove(record: Record): void
+        add(record: T): void
 
-        summarize(): Array<JSON>
+        remove(record: T): void
 
-        serialize(): Array<JSON>
+        summarize(): Array<object>
+
+        serialize(): Array<object>
 
     }
 

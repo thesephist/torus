@@ -4,10 +4,12 @@
 
 //> ## Using Torus with your project
 
-//> If you're in the browser with a `<script src="/path/to/your/torus.js">` tag,
-//  Torus exposes its entire API through these two globals.
-Torus; // contains everything except `jdom`, including `Torus.Component`, etc.
-jdom; // contains the `jdom` template tag
+//> If you're in the browser, you can import Torus with a script tag.
+<script src="https://unpkg.com/torus-dom/dist/index.min.js"></script>
+
+//> Imported like this, Torus exposes its entire API through these two globals.
+window.Torus; // contains everything except `jdom`, including `Torus.Component`, etc.
+window.jdom; // contains the `jdom` template tag
 
 //> .. so you can create a component, for example, like this.
 //  We'll omit the `Torus.` prefix for the rest of this documentation, for

@@ -92,7 +92,7 @@ import { Component, Record, Store } from 'torus-dom';
 Alternatively, you can also just import Torus with:
 
 ```html
-<script src="/path/to/your/torus.js"></script>
+<script src="https://unpkg.com/torus-dom/dist/index.min.js"></script>
 ```
 
 Torus will export all of its default globals to `window.Torus`, so they're accessible as global names to your scripts. This isn't recommended in production apps, but great for experimenting.

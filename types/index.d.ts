@@ -17,11 +17,11 @@ declare module 'torus-dom' {
 
         public node: Node
 
-        constructor()
+        constructor(...args: any[])
 
         static from(fn: () => JDOM): Component
 
-        init(): void
+        init(...args: any[]): void
 
         bind(source: Evented, handler: Function): void
 
@@ -51,6 +51,8 @@ declare module 'torus-dom' {
 
         public nodes: Node[]
 
+        constructor(store: Store, ...args: any[])
+
         itemsChanged(): void
 
         filter(filterFn: (record: Evented) => any): void
@@ -59,7 +61,7 @@ declare module 'torus-dom' {
 
     }
 
-    function ListOf(itemClass: typeof Component): List
+    function ListOf(itemClass: typeof Component): typeof List
 
     class Evented {
 
@@ -96,7 +98,7 @@ declare module 'torus-dom' {
 
         public comparator: (record: Record) => any
 
-        constructor(records: Record[])
+        constructor(records?: Record[])
 
         create(id: any, data?: JSON): void
         create(data?: JSON): void
@@ -111,7 +113,7 @@ declare module 'torus-dom' {
 
     }
 
-    function StoreOf(recordClass: typeof Record): Store
+    function StoreOf(recordClass: typeof Record): typeof Store
 
     class Router extends Evented {
 
@@ -128,4 +130,3 @@ declare module 'torus-dom' {
     function jdom(templateParts: TemplateStringsArray, ...templateArguments: any[]): JDOM
 
 }
-

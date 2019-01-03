@@ -11,20 +11,24 @@
   "scripts": {
     "test": "karma start karma.dev.conf.js",
     "test:prod": "karma start karma.min.conf.js",
+    "test:size": "bundlesize",
     "build": "node build/build.js && cp dist/index.min.js samples/hn-reader/index.min.js && cp dist/index.min.js samples/graph-calc/index.min.js && cp dist/index.min.js samples/markus/index.min.js",
-    "verify": "node build/build.js && karma start karma.min.conf.js",
+    "verify": "node build/build.js && karma start karma.min.conf.js && bundlesize",
     "clean": "rm -rvf dist/* coverage/*",
     "docs": "node doc/generate.js",
-    "postinstall": "node build/build.js",
+    "prepublish": "node build/build.js",
     "deploy:hn": "surge -p samples/hn-reader/ --domain https://torushn.surge.sh",
     "deploy:graph": "surge -p samples/graph-calc/ --domain https://graphcalc.surge.sh",
     "deploy:markus": "surge -p samples/markus/ --domain https://markuswriter.surge.sh"
   },
-  "dependencies": {
-    "mkdirp": "^0.5.1",
-    "webpack": "^4.27.1"
-  },
+  "files": [
+    "src",
+    "dist",
+    "renderers",
+    "types"
+  ],
   "devDependencies": {
+    "bundlesize": "^0.17.0",
     "chai": "^4.2.0",
     "istanbul": "^0.4.5",
     "karma": "^2.0.2",
@@ -34,6 +38,22 @@
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
     "marked": "^0.5.2",
-    "mocha": "^5.1.1"
-  }
+    "mkdirp": "^0.5.1",
+    "mocha": "^5.1.1",
+    "webpack": "^4.27.1"
+  },
+  "keywords": [
+    "vdom",
+    "virtual",
+    "torus",
+    "components",
+    "router",
+    "styled"
+  ],
+  "bundlesize": [
+    {
+      "path": "./dist/*.min.js",
+      "threshold": "4.7kB"
+    }
+  ]
 }

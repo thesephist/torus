@@ -1,0 +1,22 @@
+body {
+    font-family: 'San Francisco', 'Helvetica', 'Arial', sans-serif;
+    color: #333;
+}
+
+h1 {
+    font-size: 52px;
+    font-weight: 400;
+}
+
+h2 {
+    font-size: 36px;
+    color: #999;
+    font-weight: 400;
+}
+
+p,
+li,
+ul {
+    font-size: 32px;
+    line-height: 1.5em;
+}

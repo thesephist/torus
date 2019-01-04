@@ -19,6 +19,7 @@ const FILES_TO_ANNOTATE = {
     'Hacker News Reader': './samples/hn-reader/main.js',
     'Graphing Calculator demo': './samples/graph-calc/main.js',
     'Markdown Parser demo': './samples/markus/main.js',
+    'Slide deck demo': './samples/slides/main.js',
     'Todo demo': './samples/todo/main.js',
     'Tabbed UI demo': './samples/tabs/main.js',
     'Search UI demo': './samples/searchbar/main.js',

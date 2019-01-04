@@ -1,4 +1,4 @@
-// These bits are from torus.js
+// Whitelist for common HTML reflected properties
 const HTML_IDL_ATTRIBUTES = [
     'type',
     'value',
@@ -12,20 +12,33 @@ const HTML_IDL_ATTRIBUTES = [
 const arrayNormalize = data => Array.isArray(data) ? data : [data];
 
 const normalizeJDOM = jdom => {
-    if (!('attrs' in jdom)) jdom.attrs = {};
-    if (!('events' in jdom)) jdom.events = {};
-    if (!('children' in jdom)) jdom.children = [];
-    return jdom;
+    jdom.attrs = jdom.attrs !== undefined ? jdom.attrs : {};
+    jdom.events = jdom.events !== undefined ? jdom.events : {};
+    jdom.children = jdom.children !== undefined ? jdom.children : [];
 }
 
-// This string renderer is a drop-in replacement for renderJDOM
+const camelToKebab = camelStr => {
+    const A_CODEPOINT = 65;
+    const Z_CODEPOINT = 65 + 25;
+    let result = '';
+    for (let i = 0, len = camelStr.length; i < len; i ++) {
+        const codePoint = camelStr.codePointAt(i);
+        if (codePoint >= A_CODEPOINT && codePoint <= Z_CODEPOINT) {
+            result += '-' + String.fromCodePoint(codePoint - 32);
+        } else {
+            result += camelStr[i];
+        }
+    }
+    return result;
+}
+
+//> This string renderer is a drop-in replacement for renderJDOM
 //  in torus.js, if we want Torus components to render to an HTML
 //  string in a server-side-rendering context.
-// But while it is API compatible with renderJDOM and capable of
+//  But while it is API compatible with renderJDOM and capable of
 //  rendering full JDOM, the design of Torus itself isn't optimized
 //  for use outside of the browser (Torus depends on DOM APIs).
 //  As a result, SSR is still a story in progress for Torus.
-
 const stringRenderJDOM = (_node, _previous, next) => {
 
     let node = '';
@@ -49,7 +62,7 @@ const stringRenderJDOM = (_node, _previous, next) => {
                     break;
                 case 'style':
                     for (const [styleKey, styleValue] of next.attrs.style) {
-                        styles.push(styleKey + ' ' + styleValue);
+                        styles.push(camelToKebab(styleKey) + ':' + styleValue);
                     }
                     break;
                 default:

@@ -542,6 +542,12 @@ class Component {
         render_debug(`Render Component: ${this.constructor.name}`, true);
         data = data || (this.record && this.record.summarize())
         const jdom = this.preprocess(this.compose(data), data);
+        if (jdom === undefined) {
+            //> If the developer accidentally forgets to return the JDOM value from
+            //  compose, instead of leading to a cryptic DOM API error, show a more
+            //  friendly warning.
+            throw new Error(this.constructor.name + '.compose() didn\'t return anything');
+        }
         try {
             this.node = renderJDOM(this.node, this.jdom, jdom);
         } catch (e) {

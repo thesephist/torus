@@ -681,6 +681,16 @@ describe('Component', () => {
             c.render().should.equal(c.jdom);
         });
 
+        it('should throw when #compose() does not return valid JDOM', () => {
+            class BrokenComponent extends Component {
+                compose() { }
+            }
+            expect(() => {
+                const c = new BrokenComponent()
+            }).to.throw(Error);
+        });
+
+
     });
 
     describe('#remove', () => {

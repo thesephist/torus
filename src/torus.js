@@ -522,7 +522,7 @@ class Component {
 
     //> `#compose()` is our primary rendering API for components. By default, it renders
     //  an invisible comment node.
-    compose(data) {
+    compose() {
         return null;
     }
 
@@ -530,7 +530,7 @@ class Component {
     //  it additional capabilities idiomatically. It consumes the result of `#compose()` and
     //  returns JDOM to be used to actually render the component. See `Styled()` for a
     //  usage example -- it fills similar use cases as React's render props or HOCs.
-    preprocess(jdom, data) {
+    preprocess(jdom) {
         return jdom;
     }
 
@@ -659,7 +659,7 @@ const Styled = Base => {
     return class extends Base {
         //> In a styled component, the `#styles()` method is passed in
         //  the same data as `#compose()`, and returns a JSON of nested CSS.
-        styles(data) {
+        styles() {
             return {};
         }
 
@@ -774,7 +774,7 @@ class List extends Component {
     }
 
     //> By default, just render the children views in a <ul/>
-    compose(data) {
+    compose() {
         return {
             tag: 'ul',
             children: this.nodes,
@@ -858,9 +858,8 @@ class Record extends Evented {
     //  all of its properties and the ID
     summarize() {
         return Object.assign(
-            {},
-            this.data,
-            {id: this.id}
+            {id: this.id},
+            this.data
         );
     }
 

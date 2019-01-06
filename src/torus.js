@@ -218,36 +218,37 @@ const renderJDOM = (node, previous, next) => {
         //> If we're rendering an object literal, assume it's a serialized
         //  JDOM dictionary. This is the meat of the algorithm.
         } else { // next is a non-null object
-            if (!isObject(previous) || (previous && previous.appendChild !== undefined)) { // check if previous instanceof Node; fastest way is checking for presence of a non-getter property
+            // @debug
+            render_debug(`Render pass for <${next.tag}>:`, true);
+
+            if (
+                node === undefined
+                || !isObject(previous)
+                //> Check if previous instanceof Node; fastest way is checking for presence of a
+                //  non-getter property, like `appendChild`.
+                || (previous && previous.appendChild !== undefined)
+                //> If the tags differ, we assume the subtrees will be different
+                //  as well and just start a completely new element. This is efficient
+                //  in practice, reduces the time complexity of the algorithm, and
+                //  an optimization shared with React's reconciler.
+                || previous.tag !== next.tag
+            ) {
                 //> If the previous JDOM doesn't exist or wasn't JDOM, we're adding a completely
                 //  new node into the DOM. Stub an empty `previous`.
                 previous = {
                     tag: null,
                 };
+                replacePreviousNode(document.createElement(next.tag));
+                // @begindebug
+                if (node === undefined) {
+                    render_debug(`Add <${next.tag}>`);
+                } else {
+                    render_debug(`Replace previous node <${node.tagName}> with <${next.tag}>`);
+                }
+                // @enddebug
             }
             normalizeJDOM(previous);
             normalizeJDOM(next);
-
-            // @debug
-            render_debug(`Render pass for <${next.tag}>:`, true);
-
-            //> If the tags differ, we assume the subtrees will be different
-            //  as well and just start a completely new element. This is efficient
-            //  in practice, reduces the time complexity of the algorithm, and
-            //  an optimization shared with React's reconciler.
-            if (previous.tag !== next.tag || !node) {
-                if (node === undefined) {
-                    // @debug
-                    render_debug(`Add <${next.tag}>`);
-                } else {
-                    // @debug
-                    render_debug(`Replace previous node <${node.tagName}> with <${next.tag}`);
-                    // new root element, so "reset" previous
-                    previous = {};
-                    normalizeJDOM(previous);
-                }
-                replacePreviousNode(document.createElement(next.tag));
-            }
 
             //> Compare and update attributes
             for (const attrName of Object.keys(next.attrs)) {

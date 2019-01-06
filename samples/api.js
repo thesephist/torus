@@ -676,8 +676,8 @@ cakes.serialize(); // [{ /* cake1 props */ }, { /* cake2 props */ }]
 
 //> We can also add to stores later...
 const cakes2 = new Store(); // empty
-cakes2.add(cake1);
-cakes2.add(cake2);
+cakes2.add(cake1); // returns cake1
+cakes2.add(cake2); // returns cake2
 cakes2.records.size; // 2
 //> ... and remove them.
 cakes2.remove(cake1);
@@ -718,10 +718,11 @@ class CakeProductStore extends Store {
 //  it can do two more things.
 const cakes = new CakeProductStore([cake1, cake2]);
 //> First, it can create new cakes from its properties
-cakes.create(3, {
+const fruitCake = cakes.create(3, {
     name: 'Tropical Fruit',
     price: 16.49,
 });
+// fruitCake is the newly created cake Record
 cakes.records.size; // 3
 //> Second, it can also sort them by the comparator when providing a summary
 cakes.summarize(); // [cake2, cake1, cake3], sorted by 'name'

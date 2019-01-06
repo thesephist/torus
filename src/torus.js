@@ -369,8 +369,9 @@ const renderJDOM = (node, previous, next) => {
                 //> "sync" the common sections of the two children lists.
                 let i;
                 for (i = 0; i < minLength; i ++) {
-                    const newChild = renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
-                    nodeChildren.splice(i, 1, newChild);
+                    if (prevChildren[i] !== nextChildren[i]) {
+                        nodeChildren[i] = renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
+                    }
                 }
                 //> If the new JDOM has more children than the old JDOM, we need to
                 //  add the extra children.

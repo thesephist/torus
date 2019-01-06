@@ -1272,6 +1272,14 @@ describe('Store', () => {
             eventEmitted.should.be.true;
         });
 
+        it('should return the created record', () => {
+            const s = new MyStore();
+            const returnValue = s.create('some_id', {some: 'data'});
+            expect(returnValue).to.be.an.instanceof(Record);
+            returnValue.id.should.equal('some_id');
+            returnValue.get('some').should.equal('data');
+        });
+
     });
 
     describe('#add', () => {
@@ -1290,6 +1298,13 @@ describe('Store', () => {
             s.add(new MyRecord({some: 'data'}));
 
             eventEmitted.should.be.true;
+        });
+
+        it('should return the added record', () => {
+            const s = new MyStore();
+            const r = new MyRecord({some: 'data'});
+            const returnValue = s.add(r);
+            expect(returnValue).to.equal(r);
         });
 
     });
@@ -1311,6 +1326,13 @@ describe('Store', () => {
             s.remove(r);
 
             eventEmitted.should.be.true;
+        });
+
+        it('should return the removed record', () => {
+            const r = new MyRecord({some: 'data'});
+            const s = new MyStore([r]);
+            const returnValue = s.remove(r);
+            expect(returnValue).to.equal(r);
         });
 
     });

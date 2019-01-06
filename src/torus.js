@@ -890,17 +890,19 @@ class Store extends Evented {
     }
 
     create(id, data) {
-        this.add(new this.recordClass(id, data));
+        return this.add(new this.recordClass(id, data));
     }
 
     add(record) {
         this.records.add(record);
         this.emitEvent();
+        return record;
     }
 
     remove(record) {
         this.records.delete(record);
         this.emitEvent();
+        return record;
     }
 
     reset(records) {

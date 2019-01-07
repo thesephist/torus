@@ -826,7 +826,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">965</strong>        if (match) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">966</strong>            const paramName = match[0];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">967</strong>            paramNames.push(paramName.substr(1));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">968</strong>            route = route.replace(paramName, '(.*)');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">968</strong>            route = route.replace(paramName, '(.+)');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">969</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">970</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">971</strong>    return [new RegExp(route), paramNames];</pre></div>

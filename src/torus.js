@@ -965,7 +965,7 @@ const routeStringToRegExp = route => {
         if (match) {
             const paramName = match[0];
             paramNames.push(paramName.substr(1));
-            route = route.replace(paramName, '(.*)');
+            route = route.replace(paramName, '(.+)');
         }
     }
     return [new RegExp(route), paramNames];

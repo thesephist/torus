@@ -42,27 +42,29 @@ class Reader {
         return char;
     }
 
-    //> Move back the pointer one place.
+    //> Move the pointer back one place, undoing the last character read.
+    //  In practice, we never backtrack from index 0 -- we only use backtrack
+    //  to "un-read" a character we've read. So we don't check for negative cases here.
     backtrack() {
-        this.idx -- || 0;
+        this.idx --;
     }
 
     //> Read up to a specified _contiguous_ substring,
     //  but not including the substring.
     readUpto(substr) {
         const nextIdx = this.content.substr(this.idx).indexOf(substr);
-        return this.readToNextIdx(nextIdx);
+        return this.toNext(nextIdx);
     }
 
     //> Read up to and including a _contiguous_ substring, or read until
     //  the end of the template.
     readUntil(substr) {
         const nextIdx = this.content.substr(this.idx).indexOf(substr) + substr.length;
-        return this.readToNextIdx(nextIdx);
+        return this.toNext(nextIdx);
     }
 
     //> Abstraction used for both `readUpto` and `readdUntil` above.
-    readToNextIdx(nextIdx) {
+    toNext(nextIdx) {
         const rest = this.content.substr(this.idx);
         if (nextIdx === -1) {
             this.idx = this.len;
@@ -426,16 +428,16 @@ const replaceInString = (str, dynamicParts) => {
     if (str.length < JDOM_PLACEHOLDER_MIN_LENGTH) {
         return str;
     } else {
-        let match = JDOM_PLACEHOLDER_RE.exec(str);
-        if (match !== null && str.trim() === match[0]) {
+        const match = JDOM_PLACEHOLDER_RE.exec(str);
+        if (match === null) {
+            return str;
+        } else if (str.trim() === match[0]) {
             return dynamicParts[match[1]];
-        }
-        while (match !== null) {
+        } else {
             let parts = str.split(match[0]);
-            str = parts[0] + dynamicParts[match[1]] + parts[1];
-            match = JDOM_PLACEHOLDER_RE.exec(str);
+            return (parts[0] + dynamicParts[match[1]]
+                + replaceInString(parts[1], dynamicParts));
         }
-        return str;
     }
 }
 
@@ -523,8 +525,10 @@ const jdom = (tplParts, ...dynamicParts) => {
         //> Now that we have a translator function in the cache, call that to get a new template result.
         return JDOM_CACHE.get(cacheKey)(dynamicParts);
     } catch (e) {
+        /* istanbul ignore next: haven't found error cases that trigger this, but exists just in case */
         console.error(`Error parsing template.\nPlease check for any mismatched brackets, tags, and quotes.\n${
             interpolate(tplParts, dynamicParts)}\n${e.stack || e}`);
+        /* istanbul ignore next: see above */
         return '';
     }
 }

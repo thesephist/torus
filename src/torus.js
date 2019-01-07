@@ -553,6 +553,7 @@ class Component {
         try {
             this.node = renderJDOM(this.node, this.jdom, jdom);
         } catch (e) {
+            /* istanbul ignore next: haven't found a reproducible error case that triggers this */
             console.error('Error rendering updates', e);
         }
         return this.jdom = jdom;
@@ -803,9 +804,10 @@ class Evented {
         this.eventTargets = new Set();
     }
 
-    summarize() {
-        throw new Error(`#summarize() not implemented in ${this.constructor.name}`);
-    }
+    //> Base, empty implementation of `#summarize()` which is overridden in all subclasses.
+    //  In subclasses, this returns the "summary" of the current state of the
+    //  event emitter as an object/array.
+    summarize() {}
 
     //> Whenever something changes, we fire an event to all subscribed
     //  listeners, with a summary of its state.

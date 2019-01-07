@@ -40,6 +40,13 @@ describe('jdom template tag', () => {
         'torus'
     );
 
+    // Test exists because we take a shortcut path for de-templating short strings <16chars-ish
+    compare(
+        'long text node',
+        jdom`This is a very long text node, which probably only appears in very long template strings`,
+        'This is a very long text node, which probably only appears in very long template strings'
+    );
+
     compare(
         'comment',
         jdom`<!--- some comment that should be ignored -->`,
@@ -444,6 +451,11 @@ describe('jdom template tag', () => {
         noThrow(
             'quotes in attributes',
             () => jdom`<img src=source"url />`
+        );
+
+        noThrow(
+            'quoted attribute labels',
+            () => jdom`<img src="source_url" "testdata" />`
         );
 
         noThrow(

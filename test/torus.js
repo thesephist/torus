@@ -50,6 +50,14 @@ describe('renderJDOM', () => {
         node.textContent.should.equal(second);
     });
 
+    it('returns the given element if given a literal element', () => {
+        const prev = document.createElement('input');
+        const next = prev;
+        const node = render(prev);
+        const node2 = renderJDOM(node, prev, next);
+        expect(node).to.equal(node2);
+    });
+
     describe('Element attributes', () => {
 
         it('id', () => {

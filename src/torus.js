@@ -892,20 +892,35 @@ class Store extends Evented {
         return null;
     }
 
+    //> Create and return a new instance of the store's record from
+    //  the given data.
     create(id, data) {
         return this.add(new this.recordClass(id, data));
     }
 
+    //> Add a given record to this store, also called by `#create()`.
     add(record) {
         this.records.add(record);
         this.emitEvent();
         return record;
     }
 
+    //> Remove a given record from the store.
     remove(record) {
         this.records.delete(record);
         this.emitEvent();
         return record;
+    }
+
+    //> Try to find a record with the given ID in the store,
+    //  and return it. Returns null if not found.
+    find(id) {
+        for (const record of this.records) {
+            if (record.id === id) {
+                return record;
+            }
+        }
+        return null;
     }
 
     reset(records) {

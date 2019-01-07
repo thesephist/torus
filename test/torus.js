@@ -1346,6 +1346,49 @@ describe('Store', () => {
 
     });
 
+    describe('#find', () => {
+
+        it('should return the record with a given ID from the store', () => {
+            const s = new MyStore();
+            s.create('a', {
+                label: 5,
+            });
+            s.create('b', {
+                label: 6,
+            });
+            s.create('c', {
+                label: 10,
+            });
+            expect(s.find('b').summarize()).to.deep.equal({label: 6, id: 'b'});
+        });
+
+        it('should return null if none are found with a matching ID', () => {
+            const s = new MyStore();
+            s.create('a', {
+                label: 5,
+            });
+            s.create('b', {
+                label: 6,
+            });
+            expect(s.find('c')).to.be.null;
+        });
+
+        it('should not break on duplicate IDs', () => {
+            const s = new MyStore();
+            s.create('a', {
+                label: 5,
+            });
+            s.create('a', {
+                label: 6,
+            });
+            s.create('b', {
+                label: 10,
+            });
+            expect(s.find('a').summarize()).to.have.property('id').equal('a');
+        });
+
+    });
+
     describe('#reset', () => {
 
         it('should reset the contents of the store with the new given ones', () => {

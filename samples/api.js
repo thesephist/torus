@@ -683,6 +683,11 @@ cakes2.records.size; // 2
 cakes2.remove(cake1);
 cakes2.summarize(); // [cake2]
 
+//> We can find records in a store by ID, using `Store#find()`
+cakes2.find(2); // returns cake2, which has id: 2
+//> ... it'll return `null` if the store doesn't contain a match
+cakes2.find(100); // null
+
 //> If we want to refresh the contents of the store
 //  with a new set of cakes, we can use `#reset()`.
 //  This will also emit an event to any components listening.

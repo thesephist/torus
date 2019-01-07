@@ -32,14 +32,14 @@ const camelToKebab = camelStr => {
     return result;
 }
 
-//> This string renderer is a drop-in replacement for renderJDOM
+//> This string renderer is a drop-in replacement for render
 //  in torus.js, if we want Torus components to render to an HTML
 //  string in a server-side-rendering context.
-//  But while it is API compatible with renderJDOM and capable of
+//  But while it is API compatible with render and capable of
 //  rendering full JDOM, the design of Torus itself isn't optimized
 //  for use outside of the browser (Torus depends on DOM APIs).
 //  As a result, SSR is still a story in progress for Torus.
-const stringRenderJDOM = (_node, _previous, next) => {
+const renderToString = (_node, _previous, next) => {
 
     let node = '';
 
@@ -88,4 +88,4 @@ const stringRenderJDOM = (_node, _previous, next) => {
     return node.replace(/\s+/g, ' ');
 }
 
-module.exports = stringRenderJDOM;
+module.exports = renderToString;

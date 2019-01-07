@@ -3,9 +3,10 @@ for (const exportedName in Torus) {
     window[exportedName] = Torus[exportedName];
 }
 
-describe('renderJDOM', () => {
+describe('render', () => {
 
-    const render = jdom => renderJDOM(undefined, undefined, jdom);
+    // Shortcut to call `render` with just the next JDOM argument
+    const renderNext = jdom => render(undefined, undefined, jdom);
 
     describe('Tags', () => {
 
@@ -21,7 +22,7 @@ describe('renderJDOM', () => {
                 'ul', 'ol', 'li',
             ];
             for (const tagName of supportedTags) {
-                const node = render({
+                const node = renderNext({
                     tag: tagName,
                 });
                 // tag names are case insensitive
@@ -35,8 +36,8 @@ describe('renderJDOM', () => {
     it('handles changes from one node type to another gracefully, without failing', () => {
         const first = document.createElement('div');
         const second = 'Some Text';
-        const node = render(first);
-        const node2 = renderJDOM(node, first, second);
+        const node = renderNext(first);
+        const node2 = render(node, first, second);
         node.should.equal(first);
         node2.textContent.should.equal(second);
     });
@@ -44,8 +45,8 @@ describe('renderJDOM', () => {
     it('efficiently updates the content (nodeValue) of a TextNode', () => {
         const first = 'first text';
         const second = 'second text';
-        const node = render(first);
-        const node2 = renderJDOM(node, first, second);
+        const node = renderNext(first);
+        const node2 = render(node, first, second);
         expect(node).to.equal(node2);
         node.textContent.should.equal(second);
     });
@@ -53,15 +54,15 @@ describe('renderJDOM', () => {
     it('returns the given element if given a literal element', () => {
         const prev = document.createElement('input');
         const next = prev;
-        const node = render(prev);
-        const node2 = renderJDOM(node, prev, next);
+        const node = renderNext(prev);
+        const node2 = render(node, prev, next);
         expect(node).to.equal(node2);
     });
 
     describe('Element attributes', () => {
 
         it('id', () => {
-            const node = render({
+            const node = renderNext({
                 tag: 'div',
                 attrs: {id: 'some_id_string'},
             });
@@ -72,7 +73,7 @@ describe('renderJDOM', () => {
         describe('class', () => {
 
             it('should add a new class provided as a string', () => {
-                const node = render({
+                const node = renderNext({
                     tag: 'img',
                     attrs: {class: 'myImg'},
                 });
@@ -81,7 +82,7 @@ describe('renderJDOM', () => {
             });
 
             it('should add new classes provided as lists', () => {
-                const node = render({
+                const node = renderNext({
                     tag: 'img',
                     attrs: {class: ['firstClass', 'second_class']},
                 });
@@ -100,8 +101,8 @@ describe('renderJDOM', () => {
                     attrs: {class: 'secondClass'},
                 }
 
-                let node = render(prev);
-                node = renderJDOM(node, prev, next);
+                let node = renderNext(prev);
+                node = render(node, prev, next);
                 node.classList.contains('firstClass').should.be.false;
                 node.classList.contains('secondClass').should.be.true;
             });
@@ -116,8 +117,8 @@ describe('renderJDOM', () => {
                     attrs: {class: ['firstClass', 'third-class']},
                 }
 
-                let node = render(prev);
-                node = renderJDOM(node, prev, next);
+                let node = renderNext(prev);
+                node = render(node, prev, next);
                 node.classList.contains('firstClass').should.be.true;
                 node.classList.contains('second_class').should.be.false;
                 node.classList.contains('third-class').should.be.true;
@@ -132,8 +133,8 @@ describe('renderJDOM', () => {
                     tag: 'img',
                 }
 
-                let node = render(prev);
-                node = renderJDOM(node, prev, next);
+                let node = renderNext(prev);
+                node = render(node, prev, next);
                 node.classList.contains('firstClass').should.be.false;
                 node.classList.contains('second_class').should.be.false;
             });
@@ -143,7 +144,7 @@ describe('renderJDOM', () => {
         describe('style', () => {
 
             it('should apply new styles', () => {
-                const node = render({
+                const node = renderNext({
                     tag: 'h1',
                     attrs: {style: {
                         fontSize: '12px',
@@ -173,9 +174,9 @@ describe('renderJDOM', () => {
                     }},
                 }
 
-                let node = render(prev);
+                let node = renderNext(prev);
                 node.style.height.should.equal('100px');
-                node = renderJDOM(node, prev, next);
+                node = render(node, prev, next);
                 node.style.height.should.equal('');
                 node.style.width.should.equal('50px');
             });
@@ -194,9 +195,9 @@ describe('renderJDOM', () => {
                     }},
                 }
 
-                let node = render(prev);
+                let node = renderNext(prev);
                 parseFloat(node.style.opacity).should.equal(.8);
-                node = renderJDOM(node, prev, next);
+                node = render(node, prev, next);
                 parseFloat(node.style.opacity).should.equal(.35);
             });
 
@@ -211,9 +212,9 @@ describe('renderJDOM', () => {
                     tag: 'button',
                 }
 
-                let node = render(prev);
+                let node = renderNext(prev);
                 node.style.opacity.should.equal('0.8');
-                node = renderJDOM(node, prev, next);
+                node = render(node, prev, next);
                 node.style.opacity.should.not.equal('0.8');
             });
 
@@ -222,7 +223,7 @@ describe('renderJDOM', () => {
         describe('HTML attributes', () => {
 
             it('should add new attributes', () => {
-                const node = render({
+                const node = renderNext({
                     tag: 'input',
                     attrs: {
                         type: 'text',
@@ -253,16 +254,16 @@ describe('renderJDOM', () => {
                     },
                 }
 
-                const node = render(prev);
+                const node = renderNext(prev);
                 node.getAttribute('data-magic').should.equal('magic');
                 node.getAttribute('data-foo').should.equal('bar');
-                const node2 = renderJDOM(node, prev, next);
+                const node2 = render(node, prev, next);
                 expect(node.getAttribute('checked')).to.be.null;
                 node.getAttribute('data-foo').should.equal('baz');
             });
 
             it('should reflect IDL properties as DOM properties', () => {
-                const node = render({
+                const node = renderNext({
                     tag: 'input',
                     attrs: {
                         type: 'text',
@@ -293,11 +294,11 @@ describe('renderJDOM', () => {
                     tag: 'input',
                 }
 
-                const node = render(prev);
+                const node = renderNext(prev);
                 node.checked.should.be.true;
-                const node2 = renderJDOM(node, prev, next);
+                const node2 = render(node, prev, next);
                 node2.checked.should.be.false;
-                const node3 = renderJDOM(node2, next, next2);
+                const node3 = render(node2, next, next2);
                 node3.type.should.not.equal('checkbox');
             });
 
@@ -309,7 +310,7 @@ describe('renderJDOM', () => {
 
         it('Literal elements', () => {
             const literalElement = document.createElement('span');
-            const node = render({
+            const node = renderNext({
                 tag: 'div',
                 children: [literalElement],
             });
@@ -319,7 +320,7 @@ describe('renderJDOM', () => {
         });
 
         it('(Empty) comment nodes', () => {
-            const node = render({
+            const node = renderNext({
                 tag: 'div',
                 children: [null],
             });
@@ -329,7 +330,7 @@ describe('renderJDOM', () => {
         });
 
         it('Text nodes from strings', () => {
-            const node = render({
+            const node = renderNext({
                 tag: 'div',
                 children: ['some text content'],
             });
@@ -339,7 +340,7 @@ describe('renderJDOM', () => {
         });
 
         it('Text nodes from number literals', () => {
-            const node = render({
+            const node = renderNext({
                 tag: 'div',
                 children: [39.5],
             });
@@ -349,7 +350,7 @@ describe('renderJDOM', () => {
         });
 
         it('JDOM tags', () => {
-            const node = render({
+            const node = renderNext({
                 tag: 'div',
                 children: [{
                     tag: 'span',
@@ -367,7 +368,7 @@ describe('renderJDOM', () => {
         it('should attach new listeners', () => {
             let clickCalled = false;
 
-            const node = render({
+            const node = renderNext({
                 tag: 'button',
                 events: {
                     click: () => clickCalled = true,
@@ -394,9 +395,9 @@ describe('renderJDOM', () => {
                 },
             }
 
-            const node = render(prev);
+            const node = renderNext(prev);
             node.click();
-            const node2 = renderJDOM(node, prev, next);
+            const node2 = render(node, prev, next);
             node2.click();
 
             firstClickCount.should.equal(1);
@@ -407,7 +408,7 @@ describe('renderJDOM', () => {
             let firstClickCount = 0;
             let secondClickCount = 0;
 
-            const node = render({
+            const node = renderNext({
                 tag: 'button',
                 events: {
                     click: [
@@ -443,9 +444,9 @@ describe('renderJDOM', () => {
                 tag: 'button',
             }
 
-            const node = render(prev);
+            const node = renderNext(prev);
             node.click();
-            const node2 = renderJDOM(node, prev, next);
+            const node2 = render(node, prev, next);
             node2.click();
 
             firstClickCount.should.equal(1);
@@ -478,9 +479,9 @@ describe('renderJDOM', () => {
                 },
             }
 
-            const node = render(prev);
+            const node = renderNext(prev);
             node.click();
-            const node2 = renderJDOM(node, prev, next);
+            const node2 = render(node, prev, next);
             node2.click();
 
             firstClickCount.should.equal(2);
@@ -501,11 +502,11 @@ describe('renderJDOM', () => {
             children: ['Span text'],
         }
 
-        const childNode = render(prev);
+        const childNode = renderNext(prev);
         const parentNode = document.createElement('div');
         parentNode.appendChild(childNode);
         parentNode.textContent.trim().should.equal('Button text');
-        renderJDOM(childNode, prev, next);
+        render(childNode, prev, next);
         parentNode.textContent.trim().should.equal('Span text');
     });
 
@@ -529,9 +530,9 @@ describe('renderJDOM', () => {
             children: [third, first, fourth, second],
         }
 
-        const node = render(prev);
+        const node = renderNext(prev);
         node.textContent.should.equal('firstsecondthird');
-        const node2 = renderJDOM(node, prev, next);
+        const node2 = render(node, prev, next);
         node2.textContent.should.equal('thirdfirstfourthsecond');
     });
 
@@ -555,9 +556,9 @@ describe('renderJDOM', () => {
             children: [third, first, second],
         }
 
-        const node = render(prev);
+        const node = renderNext(prev);
         node.textContent.should.equal('firstsecondthirdfourth');
-        const node2 = renderJDOM(node, prev, next);
+        const node2 = render(node, prev, next);
         node2.textContent.should.equal('thirdfirstsecond');
     });
 

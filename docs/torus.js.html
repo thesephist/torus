@@ -75,7 +75,7 @@
 <div class="line"><div class="doc"><p>This is a stubbed <code>parentNode</code>. See below in <code>runDOMOperations</code> for why this exists.</p>
 </div><pre class="source javascript"><strong class="lineNumber">83</strong>const STUB_PARENT = {replaceChild: () =&#62; {}};</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">84</strong></pre></div>
-<div class="line"><div class="doc"><p><code>runDOMOperations</code> works through the <code>opQueue</code> and performs each DOM operation in order they were queued. rDO is called when the reconciler (<code>renderJDOM</code>) reaches the bottom of a render stack (when it&#39;s done reconciling the diffs in a root-level JDOM node of a component).</p>
+<div class="line"><div class="doc"><p><code>runDOMOperations</code> works through the <code>opQueue</code> and performs each DOM operation in order they were queued. rDO is called when the reconciler (<code>render</code>) reaches the bottom of a render stack (when it&#39;s done reconciling the diffs in a root-level JDOM node of a component).</p>
 </div><pre class="source javascript"><strong class="lineNumber">89</strong>function runDOMOperations() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>This function is written to avoid any potential reconciliation conflicts. There are two risks to mitigate: 1. attempting insert a node that is already in the DOM, and 2. attempting remove a node that isn&#39;t in the DOM. Both will result in inconsistent DOM state and break the renderer. To avoid this, first, we remove all children and add placeholders where they ought to be replaced. Then, in a second loop, we add any children that need to be added and replace placeholders. Thus, no children will be inadvertently removed and no wrong node will be removed.</p>
@@ -115,7 +115,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">137</strong>    opQueue = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">138</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">139</strong></pre></div>
-<div class="line"><div class="doc"><p>A function to compare event handlers in <code>renderJDOM</code></p>
+<div class="line"><div class="doc"><p>A function to compare event handlers in <code>render</code></p>
 </div><pre class="source javascript"><strong class="lineNumber">141</strong>const diffEvents = (whole, sub, cb) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">142</strong>    for (const eventName of Object.keys(whole)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">143</strong>        const wholeEvents = arrayNormalize(whole[eventName]);</pre></div>
@@ -128,8 +128,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">150</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">151</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">152</strong></pre></div>
-<div class="line"><div class="doc"><p>Torus&#39;s virtual DOM rendering algorithm that manages all diffing, updating, and efficient DOM access. <code>renderJDOM</code> takes <code>node</code>, the previous root node; <code>previous</code>, the previous JDOM; and <code>next</code>, the new JDOM; and returns the new root node (potentially different from the old root node.) Whenever a component is rendered, it calls <code>renderJDOM</code>. This rendering algorithm is recursive into child nodes. Despite not touching the DOM, this is still one of the most expensive parts of rendering.</p>
-</div><pre class="source javascript"><strong class="lineNumber">160</strong>const renderJDOM = (node, previous, next) =&#62; {</pre></div>
+<div class="line"><div class="doc"><p>Torus&#39;s virtual DOM rendering algorithm that manages all diffing, updating, and efficient DOM access. <code>render</code> takes <code>node</code>, the previous root node; <code>previous</code>, the previous JDOM; and <code>next</code>, the new JDOM; and returns the new root node (potentially different from the old root node.) Whenever a component is rendered, it calls <code>render</code>. This rendering algorithm is recursive into child nodes. Despite not touching the DOM, this is still one of the most expensive parts of rendering.</p>
+</div><pre class="source javascript"><strong class="lineNumber">160</strong>const render = (node, previous, next) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">161</strong></pre></div>
 <div class="line"><div class="doc"><p>This queues up a node to be inserted into a new slot in the DOM tree. All queued replacements will flush to DOM at the end of the render pass, from <code>runDOMOperations</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">165</strong>    const replacePreviousNode = newNode =&#62; {</pre></div>
@@ -312,7 +312,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">371</strong>                let i;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">372</strong>                for (i = 0; i &#60; minLength; i ++) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong>                    if (prevChildren[i] !== nextChildren[i]) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">374</strong>                        nodeChildren[i] = renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">374</strong>                        nodeChildren[i] = render(nodeChildren[i], prevChildren[i], nextChildren[i]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">375</strong>                    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">376</strong>                }</pre></div>
 <div class="line"><div class="doc"><p>If the new JDOM has more children than the old JDOM, we need to add the extra children.</p>
@@ -327,7 +327,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">387</strong>                            render_debug(`Add child "${nextChildren[i]}"`);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">388</strong>                        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">389</strong>                        // @enddebug</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong>                        const newChild = renderJDOM(undefined, undefined, nextChildren[i]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong>                        const newChild = render(undefined, undefined, nextChildren[i]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">391</strong>                        opQueue.push([OP_APPEND, node, newChild]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">392</strong>                        nodeChildren.splice(i, 0, newChild);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>                        i ++;</pre></div>
@@ -459,7 +459,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">551</strong>            throw new Error(this.constructor.name + '.compose() didn\'t return anything');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">552</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">553</strong>        try {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">554</strong>            this.node = renderJDOM(this.node, this.jdom, jdom);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">554</strong>            this.node = render(this.node, this.jdom, jdom);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">555</strong>        } catch (e) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">556</strong>            /* istanbul ignore next: haven't found a reproducible error case that triggers this */</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">557</strong>            console.error('Error rendering updates', e);</pre></div>
@@ -889,8 +889,8 @@
 <div class="line"><div class="doc"><p>Torus exposes these public APIs</p>
 </div><pre class="source javascript"><strong class="lineNumber">1040</strong>const exposedNames = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p><code>renderJDOM</code> isn&#39;t designed to be a public API and the API might change, but it&#39;s exposed to make unit testing easier.</p>
-</div><pre class="source javascript"><strong class="lineNumber">1043</strong>    renderJDOM,</pre></div>
+<div class="line"><div class="doc"><p><code>render</code> isn&#39;t designed to be a public API and the API might change, but it&#39;s exposed to make unit testing easier.</p>
+</div><pre class="source javascript"><strong class="lineNumber">1043</strong>    render,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1044</strong>    Component,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1045</strong>    Styled,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1046</strong>    StyledComponent,</pre></div>

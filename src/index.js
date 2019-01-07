@@ -1,5 +1,5 @@
 const {
-    renderJDOM,
+    render,
     Component,
     Styled,
     StyledComponent,
@@ -16,7 +16,7 @@ const {
 } = require('./jdom.js');
 
 module.exports = {
-    renderJDOM,
+    render,
     Component,
     Styled,
     StyledComponent,
@@ -28,3 +28,4 @@ module.exports = {
     Router,
     jdom,
 }
+

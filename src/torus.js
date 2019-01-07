@@ -84,7 +84,7 @@ const STUB_PARENT = {replaceChild: () => {}};
 
 //> `runDOMOperations` works through the `opQueue` and performs each
 //  DOM operation in order they were queued. rDO is called when the reconciler
-//  (`renderJDOM`) reaches the bottom of a render stack (when it's done reconciling
+//  (`render`) reaches the bottom of a render stack (when it's done reconciling
 //  the diffs in a root-level JDOM node of a component).
 function runDOMOperations() {
     //> This function is written to avoid any potential reconciliation conflicts.
@@ -137,7 +137,7 @@ function runDOMOperations() {
     opQueue = [];
 }
 
-//> A function to compare event handlers in `renderJDOM`
+//> A function to compare event handlers in `render`
 const diffEvents = (whole, sub, cb) => {
     for (const eventName of Object.keys(whole)) {
         const wholeEvents = arrayNormalize(whole[eventName]);
@@ -151,13 +151,13 @@ const diffEvents = (whole, sub, cb) => {
 }
 
 //> Torus's virtual DOM rendering algorithm that manages all diffing,
-//  updating, and efficient DOM access. `renderJDOM` takes `node`, the previous
+//  updating, and efficient DOM access. `render` takes `node`, the previous
 //  root node; `previous`, the previous JDOM; and `next`, the new JDOM;
 //  and returns the new root node (potentially different from the old
-//  root node.) Whenever a component is rendered, it calls `renderJDOM`. This
+//  root node.) Whenever a component is rendered, it calls `render`. This
 //  rendering algorithm is recursive into child nodes. Despite not touching
 //  the DOM, this is still one of the most expensive parts of rendering.
-const renderJDOM = (node, previous, next) => {
+const render = (node, previous, next) => {
 
     //> This queues up a node to be inserted into a new slot in the
     //  DOM tree. All queued replacements will flush to DOM at the end
@@ -371,7 +371,7 @@ const renderJDOM = (node, previous, next) => {
                 let i;
                 for (i = 0; i < minLength; i ++) {
                     if (prevChildren[i] !== nextChildren[i]) {
-                        nodeChildren[i] = renderJDOM(nodeChildren[i], prevChildren[i], nextChildren[i]);
+                        nodeChildren[i] = render(nodeChildren[i], prevChildren[i], nextChildren[i]);
                     }
                 }
                 //> If the new JDOM has more children than the old JDOM, we need to
@@ -387,7 +387,7 @@ const renderJDOM = (node, previous, next) => {
                             render_debug(`Add child "${nextChildren[i]}"`);
                         }
                         // @enddebug
-                        const newChild = renderJDOM(undefined, undefined, nextChildren[i]);
+                        const newChild = render(undefined, undefined, nextChildren[i]);
                         opQueue.push([OP_APPEND, node, newChild]);
                         nodeChildren.splice(i, 0, newChild);
                         i ++;
@@ -551,7 +551,7 @@ class Component {
             throw new Error(this.constructor.name + '.compose() didn\'t return anything');
         }
         try {
-            this.node = renderJDOM(this.node, this.jdom, jdom);
+            this.node = render(this.node, this.jdom, jdom);
         } catch (e) {
             /* istanbul ignore next: haven't found a reproducible error case that triggers this */
             console.error('Error rendering updates', e);
@@ -1038,9 +1038,9 @@ class Router extends Evented {
 
 //> Torus exposes these public APIs
 const exposedNames = {
-    //> `renderJDOM` isn't designed to be a public API and the API
+    //> `render` isn't designed to be a public API and the API
     //  might change, but it's exposed to make unit testing easier.
-    renderJDOM,
+    render,
     Component,
     Styled,
     StyledComponent,

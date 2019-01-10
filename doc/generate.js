@@ -35,7 +35,7 @@ const linesToRows = lines => {
     const linePairs = [];
     let docLine = '';
 
-    let inDocComment = false;
+    let inAnnotationBlock = false;
     const pushPair = (codeLine, lineNumber) => {
         if (docLine) {
             const lastLine = linePairs[linePairs.length - 1];
@@ -59,16 +59,16 @@ const linesToRows = lines => {
 
     lines.split('\n').forEach((line, idx) => {
         if (line.trim().startsWith(ANNOTATION_START)) {
-            inDocComment = true;
+            inAnnotationBlock = true;
             pushComment(line);
         } else if (line.trim().startsWith(ANNOTATION_CONTINUE)) {
-            if (inDocComment) {
+            if (inAnnotationBlock) {
                 pushComment(line)
             } else {
                 pushPair(line, idx + 1);
             }
         } else {
-            if (inDocComment) inDocComment = false;
+            if (inAnnotationBlock) inAnnotationBlock = false;
             pushPair(line, idx + 1);
         }
     });
@@ -97,7 +97,7 @@ const buildIndex = indexPage => {
 
             const annotatedPage = buildAnnotatedPage(name, linesToRows(content));
             fs.writeFile(path.join('./docs/', fileName), annotatedPage, 'utf8', err => {
-                if (err) errorFn(err);
+                if (err) errFn(err);
             });
         });
 
@@ -114,3 +114,4 @@ fs.writeFile('./docs/index.html', buildIndex(index), 'utf8', (err) => {
 fs.writeFile('./docs/main.css', css, 'utf8', (err) => {
     if (err) console.error('Error writing main.css', err);
 });
+

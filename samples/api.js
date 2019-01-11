@@ -463,7 +463,7 @@ class MyForm extends Component {
     //> **Option B**
     submit() {
         //> Because the root element of this component is
-        //  the <form/>, this.node corresponds to the form element.
+        //  the `<form/>`, this.node corresponds to the form element.
         this.node.submit();
     }
 
@@ -811,7 +811,7 @@ winners.fetch(); // fetch new data, so the list updates
 //  component class set to the class we give it.
 const WinnerList = ListOf(WinnerListing); // same as class WinnerList extends ...
 
-//> By default, `List` will render the children into a <ul></ul>.
+//> By default, `List` will render the children into a `<ul></ul>`.
 //  But we'll usually want to customize that. To do so, we can just override
 //  `List#compose()` with our custom behavior. The `List#nodes` property
 //  always evaluates to a sorted array of the children nodes, so we can

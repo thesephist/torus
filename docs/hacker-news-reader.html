@@ -286,7 +286,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">286</strong>                'background': '#eee',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">287</strong>                'transition': 'background .2s, transform .2s',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong>                'position': 'relative',</pre></div>
-<div class="line"><div class="doc"><p>Overriding default <a> styles</p>
+<div class="line"><div class="doc"><p>Overriding default <code>&lt;a&gt;</code> styles</p>
 </div><pre class="source javascript"><strong class="lineNumber">290</strong>                'text-decoration': 'none',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">291</strong>                'color': '#333',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">292</strong>                '&#38;::after': {</pre></div>
@@ -515,7 +515,8 @@
 <div class="line"><div class="doc"><p>List of comments, both at the top level and nested under other comments</p>
 </div><pre class="source javascript"><strong class="lineNumber">527</strong>class CommentList extends Styled(ListOf(CommentListing)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">528</strong></pre></div>
-<div class="line"><div class="doc"><ul> elements automatically come with a default left padding we don't want.</div><pre class="source javascript"><strong class="lineNumber">530</strong>    styles() {</pre></div>
+<div class="line"><div class="doc"><p>&#60;ul&#62; elements automatically come with a default left padding we don&#39;t want.</p>
+</div><pre class="source javascript"><strong class="lineNumber">530</strong>    styles() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">531</strong>        return {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">532</strong>            'padding-left': 0,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">533</strong>        }</pre></div>
@@ -533,7 +534,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">545</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">546</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">547</strong></pre></div>
-<div class="line"><div class="doc"><p>List of stories that appears on the main/home page. Most of the main page styles are handled in <code>App</code>, so we just use this component to clear margins on the <ul>.</p>
+<div class="line"><div class="doc"><p>List of stories that appears on the main/home page. Most of the main page styles are handled in <code>App</code>, so we just use this component to clear margins on the <code>&lt;ul&gt;</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">551</strong>class StoryList extends Styled(ListOf(StoryListing)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">552</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">553</strong>    styles() {</pre></div>

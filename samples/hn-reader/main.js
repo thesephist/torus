@@ -286,7 +286,7 @@ class StoryListing extends StyledComponent {
                 'background': '#eee',
                 'transition': 'background .2s, transform .2s',
                 'position': 'relative',
-                //> Overriding default <a> styles
+                //> Overriding default `<a>` styles
                 'text-decoration': 'none',
                 'color': '#333',
                 '&::after': {
@@ -547,7 +547,7 @@ class CommentList extends Styled(ListOf(CommentListing)) {
 
 //> List of stories that appears on the main/home page. Most of the
 //  main page styles are handled in `App`, so we just use this component
-// to clear margins on the <ul>.
+// to clear margins on the `<ul>`.
 class StoryList extends Styled(ListOf(StoryListing)) {
 
     styles() {

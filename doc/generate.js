@@ -27,8 +27,13 @@ const FILES_TO_ANNOTATE = {
 
 const encodeHTML = code => {
     return code.replace(/[\u00A0-\u9999<>\&]/gim, i => {
-        return '&#' + i.charCodeAt(0) + ';';
-    })
+        return '&#' + i.codePointAt(0) + ';';
+    });
+}
+
+const markedOptions = {
+    sanitize: true,
+    sanitizer: encodeHTML,
 }
 
 const linesToRows = lines => {
@@ -42,7 +47,7 @@ const linesToRows = lines => {
             if (lastLine && lastLine[0]) {
                 linePairs.push(['', '', '']);
             }
-            linePairs.push([docLine, encodeHTML(codeLine), lineNumber]);
+            linePairs.push([marked(docLine, markedOptions), encodeHTML(codeLine), lineNumber]);
         } else {
             linePairs.push(['', encodeHTML(codeLine), lineNumber]);
         }
@@ -79,8 +84,10 @@ const linesToRows = lines => {
 const buildAnnotatedPage = (title, linePairs) => {
     const lines = linePairs.map(([doc, source, lineNumber]) => {
         return `<div class="line"><div class="doc">${
-            marked(doc)
-        }</div><pre class="source javascript"><strong class="lineNumber">${lineNumber}</strong>${source}</pre></div>`;
+            doc
+        }</div><pre class="source javascript"><strong class="lineNumber">${
+            lineNumber
+        }</strong>${source}</pre></div>`;
     }).join('\n');
 
     return template

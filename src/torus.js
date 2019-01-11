@@ -776,7 +776,7 @@ class List extends Component {
         }
     }
 
-    //> By default, just render the children views in a <ul/>
+    //> By default, just render the children views in a `<ul/>`
     compose() {
         return {
             tag: 'ul',

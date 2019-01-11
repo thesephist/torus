@@ -394,7 +394,7 @@
 <div class="line"><div class="doc"><p><strong>Option B</strong></p>
 </div><pre class="source javascript"><strong class="lineNumber">464</strong>    submit() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Because the root element of this component is the <form/>, this.node corresponds to the form element.</p>
+<div class="line"><div class="doc"><p>Because the root element of this component is the <code>&lt;form/&gt;</code>, this.node corresponds to the form element.</p>
 </div><pre class="source javascript"><strong class="lineNumber">467</strong>        this.node.submit();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">468</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">469</strong></pre></div>
@@ -695,7 +695,7 @@
 <div class="line"><div class="doc"><p>Torus also has a composable, higher-order component called <code>ListOf</code> that allows us to write the above like this instead. This creates and returns a <code>List</code> component with the item component class set to the class we give it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">812</strong>const WinnerList = ListOf(WinnerListing); // same as class WinnerList extends ...</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong></pre></div>
-<div class="line"><div class="doc"><p>By default, <code>List</code> will render the children into a <ul></ul>. But we&#39;ll usually want to customize that. To do so, we can just override <code>List#compose()</code> with our custom behavior. The <code>List#nodes</code> property always evaluates to a sorted array of the children nodes, so we can use that in our compose method.</p>
+<div class="line"><div class="doc"><p>By default, <code>List</code> will render the children into a <code>&lt;ul&gt;&lt;/ul&gt;</code>. But we&#39;ll usually want to customize that. To do so, we can just override <code>List#compose()</code> with our custom behavior. The <code>List#nodes</code> property always evaluates to a sorted array of the children nodes, so we can use that in our compose method.</p>
 </div><pre class="source javascript"><strong class="lineNumber">819</strong>class WinnerList extends ListOf(WinnerListing) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">821</strong>    compose() {</pre></div>

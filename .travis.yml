@@ -1,0 +1,10 @@
+language: node_js
+env:
+  - NODE_ENV=development
+  - NODE_ENV=production
+
+addons:
+  chrome: stable # headless chrome testing
+
+before_script:
+  - yarn build

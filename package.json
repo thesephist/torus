@@ -9,8 +9,8 @@
   "types": "types/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "test": "NODE_ENV=development karma start karma.conf.js",
-    "test:prod": "NODE_ENV=production karma start karma.conf.js",
+    "test": "NODE_TEST_ENV=development karma start karma.conf.js",
+    "test:prod": "NODE_TEST_ENV=production karma start karma.conf.js",
     "test:size": "bundlesize",
     "build": "node build/build.js && cp dist/index.min.js samples/hn-reader/index.min.js && cp dist/index.min.js samples/graph-calc/index.min.js && cp dist/index.min.js samples/markus/index.min.js",
     "verify": "node build/build.js && karma start karma.conf.js && bundlesize",

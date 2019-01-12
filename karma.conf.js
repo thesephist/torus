@@ -1,4 +1,4 @@
-const IS_PROD = process.env.NODE_ENV === 'production';
+const IS_PROD = process.env.NODE_TEST_ENV === 'production';
 
 let karmaFiles;
 if (IS_PROD) {

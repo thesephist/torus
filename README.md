@@ -2,6 +2,7 @@
 
 [![npm torus-dom](https://img.shields.io/npm/v/torus-dom.svg)](http://npm.im/torus-dom)
 [![TypeScript types](https://img.shields.io/npm/types/torus-dom.svg)](https://github.com/thesephist/torus/tree/master/types)
+[![Build Status](https://travis-ci.com/thesephist/torus.svg?branch=master)](https://travis-ci.com/thesephist/torus)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/torus-dom/dist/index.min.js?compression=gzip)](https://unpkg.com/torus-dom/dist/index.min.js)
 [![install size](https://packagephobia.now.sh/badge?p=torus-dom)](https://packagephobia.now.sh/result?p=torus-dom)
 

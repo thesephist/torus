@@ -758,13 +758,19 @@ class List extends Component {
     }
 
     get components() {
-        return [...this.items.values()];
+        return [...this];
     }
 
     //> `List#nodes` returns the HTML nodes for each of its item
     //  views, sorted in order. Designed to make writing `#compose()` easier.
     get nodes() {
         return this.components.map(item => item.node);
+    }
+
+    //> This iterator is called when JavaScript requests an iterator from a list,
+    //  e.g. when `for (const _ of someList)` is run.
+    [Symbol.iterator]() {
+        return this.items.values();
     }
 
     remove() {
@@ -910,6 +916,12 @@ class Store extends Evented {
         this.records.delete(record);
         this.emitEvent();
         return record;
+    }
+
+    //> This iterator is called when JavaScript requests an iterator from a store,
+    //  like when `for (const _ of someStore)` is run.
+    [Symbol.iterator]() {
+        return this.records.values();
     }
 
     //> Try to find a record with the given ID in the store,

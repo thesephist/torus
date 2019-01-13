@@ -669,6 +669,12 @@ const cakes = new Store([cake1, cake2]);
 cakes.records; // Set({ cake1, cake2 }), a Set
 cakes.records.size; // 2
 cakes.summarize(); // [cake1, cake2], an Array
+//> We can also iterate over a store, like an array or set. This means we can spread ...
+const cakesArray = [...cakes];
+//> ...and we can `for...of` loop over stores. These, like `.records`, are not _necessarily_ ordered.
+for (const cake of cakes) {
+    do_something_with_cake(cake);
+}
 //> Like records, `Store#serialize()` returns a JSON representation of its contents.
 //  For stores, this means it's an array that contains the serialized JSON form of each
 //  of its records, sorted by the comparator (below).
@@ -810,6 +816,12 @@ winners.fetch(); // fetch new data, so the list updates
 //  This creates and returns a `List` component with the item
 //  component class set to the class we give it.
 const WinnerList = ListOf(WinnerListing); // same as class WinnerList extends ...
+
+//> Like stores, we can iterate over `List` instances to get an _unfiltered,_ _ordered_
+//  sequence of components inside the list. This means we can e.g. `for...of` loop over the list's components.
+for (const winnerListing of winnerList) {
+    do_something_with_each_item_view(winnerListing);
+}
 
 //> By default, `List` will render the children into a `<ul></ul>`.
 //  But we'll usually want to customize that. To do so, we can just override

@@ -987,6 +987,31 @@ describe('List', () => {
 
     });
 
+    describe('#Symbol.iterator', () => {
+
+        it('should return an iterator over all its children components', () => {
+            class MyList extends List {
+                get itemClass() {
+                    return ItemComponent;
+                }
+            }
+            const s = new Store([
+                new Record({ label: 'first' }),
+                new Record({ label: 'second' }),
+                new Record({ label: 'third' }),
+            ]);
+            const l = new MyList(s);
+            comps = [];
+            for (const comp of l) {
+                comps.push(comp);
+            }
+            comps[0].record.get('label').should.equal('first');
+            comps[1].record.get('label').should.equal('second');
+            comps[2].record.get('label').should.equal('third');
+        });
+
+    });
+
     describe('#filter / #unfilter', () => {
 
         class MyList extends List {
@@ -1239,6 +1264,23 @@ describe('Store', () => {
                 new MyRecord({label: 4}),
             ]);
             s.records.should.be.an.instanceof(Set);
+            s.records.size.should.equal(4);
+        });
+
+    });
+
+    describe('#Symbol.iterator', () => {
+
+        it('should return an iterator over the store\'s records, in arbitrary order', () => {
+            const s = new MyStore([
+                new MyRecord({label: 1}),
+                new MyRecord({label: 2}),
+                new MyRecord({label: 3}),
+                new MyRecord({label: 4}),
+            ]);
+            for (const r of s) {
+                r.should.be.an.instanceof(MyRecord);
+            }
         });
 
     });

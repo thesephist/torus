@@ -76,6 +76,10 @@ Torus also borrows from [Backbone](http://backbonejs.org) in its data models des
 
 Lastly, Torus's `jdom` template tag was inspired by [htm](https://github.com/developit/htm) and [lit-html](https://github.com/Polymer/lit-html), both template tags to process HTML markup into virtual DOM.
 
+## Compatibility
+
+Torus uses Symbols, Maps, and Sets, so is compatible with the latest versions of all major browsers except Internet Explorer 11. On older browsers that don't support e.g. Array spread operators, you may need to transpile the library to ES5 using a tool like Babel.
+
 ## Installation and usage
 
 You can install Torus from NPM as `torus-dom`. Torus is still considered _beta_, and not to a 1.0 release yet. I believe the API is stable now and most of the major bugs have been squashed, but no guarantees until 1.0.

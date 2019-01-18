@@ -799,6 +799,7 @@ class Graph extends StyledComponent {
     //  and now, and pan the graph by that amount, again throttled by
     //  `requestAnimationFrame()` to be efficient about when we redraw.
     handleMousemove(evt) {
+        evt.preventDefault();
         if (this._dragging) {
             const clientX = evt.clientX;
             const clientY = evt.clientY;
@@ -833,6 +834,7 @@ class Graph extends StyledComponent {
     }
 
     handleTouchmove(evt) {
+        evt.preventDefault();
         if (this._touchDragging) {
             const clientX = evt.touches[0].clientX;
             const clientY = evt.touches[0].clientY;

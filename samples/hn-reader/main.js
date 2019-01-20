@@ -109,10 +109,12 @@ class Item extends Record {
      */
     fetch() {
         if (!this.loaded) {
-            hnFetch(`/item/${this.id}`).then(data => {
+            return hnFetch(`/item/${this.id}`).then(data => {
                 const { id, ...attrs } = data;
                 this.update(attrs);
             });
+        } else {
+            return Promise.resolve();
         }
     }
 
@@ -150,7 +152,7 @@ class StoryStore extends StoreOf(Story) {
     //> Fetch all the new top stories from the API and reset the collection
     //  with those new stories.
     fetch() {
-        hnFetch('/' + this.slug).then(stories => {
+        return hnFetch('/' + this.slug).then(stories => {
             const storyRecords = stories.slice(
                 this.start * this.limit,
                 (this.start + 1) * this.limit
@@ -637,13 +639,18 @@ class App extends StyledComponent {
                     //  story itself manually.
                     if (!story) {
                         story = new Story(+params.storyID);
-                        story.fetch();
+                        story.fetch().then(() => {
+                            document.title = `${story.get('title')} | Torus Hacker News`;
+                        });
+                    } else {
+                        document.title = `${story.get('title')} | Torus Hacker News`;
                     }
                     this.setActiveStory(story);
                     break;
                 default:
                     //> The default route is just the main page, `'/'`.
                     this.setActiveStory(null);
+                    document.title = 'Torus Hacker News';
                     break;
             }
         });

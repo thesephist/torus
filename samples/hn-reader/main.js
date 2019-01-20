@@ -140,15 +140,6 @@ class StoryStore extends StoreOf(Story) {
         this.start = 0;
     }
 
-    //> Get an already-loaded story from the store by ID so we don't have to
-    //  re-fetch a brand new story later.
-    getById(storyID) {
-        for (const story of this.records) {
-            if (story.id === storyID) return story;
-        }
-        return null;
-    }
-
     //> Fetch all the new top stories from the API and reset the collection
     //  with those new stories.
     fetch() {
@@ -632,7 +623,7 @@ class App extends StyledComponent {
         this.bind(router, ([name, params]) => {
             switch (name) {
                 case 'story':
-                    let story = this.stories.getById(+params.storyID);
+                    let story = this.stories.find(+params.storyID);
                     //> Story sometimes doesn't exist in our collection,
                     //  if we're going directly to a story link from another page.
                     //  In this case, we want to just fetch information about the

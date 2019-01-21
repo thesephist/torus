@@ -150,665 +150,677 @@
 </div><pre class="source javascript"><strong class="lineNumber">163</strong>const tagName = isEven(someNumber) ? 'em' : 'strong';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong>jdom`&#60;span&#62;&#60;${tagName}&#62;${someNumber} is my favorite number.&#60;/&#62;&#60;/span&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">165</strong></pre></div>
-<div class="line"><div class="doc"><h2 id="component">Component</h2>
+<div class="line"><div class="doc"><p><strong>An important note on security</strong></p>
 </div><pre class="source javascript"><strong class="lineNumber">167</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>In Torus, we build user interfaces by composing and connecting reusable components together. A Torus component extends the base <code>Component</code> class, and has a <code>#compose()</code> method that returns the JDOM representation of the UI component&#39;s DOM. Torus uses this method to render the component. Because Torus renders components declaratively, we should avoid calling methods on the component (like mutating the local state) within <code>#compose()</code>. Mutating state during render may lead to race conditions or infinite loops, since state mutations are usually linked to more render calls.</p>
-</div><pre class="source javascript"><strong class="lineNumber">175</strong>class MyFirstComponent extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">176</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">177</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">178</strong>        return {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">179</strong>            tag: 'h1',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">180</strong>            children: ['Hello, World!'],</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">181</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">182</strong>    }</pre></div>
+<div class="line"><div class="doc"><p>Inline <code>&lt;script&gt;</code> tags are well known to be a source of many tricky security issues, and are generally best avoided unless it&#39;s the only way to solve your problem at hand. Inline scripts are especially problematic in templating code like <code>jdom</code> because it&#39;s easy to write templates and accidentally forget to escape user input when rendering it into DOM.</p>
+</div><pre class="source javascript"><strong class="lineNumber">172</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
+<div class="line"><div class="doc"><p>To help alleviate the potential security risks here, <strong>no user-provided input (no variable passed into <code>jdom</code> templates inside curly braces) will <em>ever</em> be parsed into HTML</strong> by the template processor. This prevents potential cross-site scripting issues or premature <code>&lt;script&gt;</code> tag terminations, for example, but it means that you&#39;ll have to wrap any template string in <code>jdom</code> tags, even if it&#39;s inside another <code>jdom</code> tagged template.</p>
+</div><pre class="source javascript"><strong class="lineNumber">178</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
+<div class="line"><div class="doc"><p>On a related note, if you <em>must</em> use an inline <code>&lt;script&gt;</code> in a template, <code>jdom</code> allows this (for now). However, you&#39;ll want to escape the entire contents of the script tag, by wrapping the full contents of the tag in curlybraces, to avoid security pitfalls.</p>
+</div><pre class="source javascript"><strong class="lineNumber">182</strong>jdom`&#60;script&#62;${'console.log("This is highly discouraged, for security reasons.")'}&#60;/script&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">183</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">184</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong></pre></div>
-<div class="line"><div class="doc"><p>... of course, we can simplify this by relying on the <code>jdom</code> template tag</p>
-</div><pre class="source javascript"><strong class="lineNumber">187</strong>class MySecondComponent extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">188</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">189</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">190</strong>        return jdom`&#60;h1&#62;Hello, World!&#60;/h1&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">191</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">192</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">193</strong>}</pre></div>
+<div class="line"><div class="doc"><h2 id="component">Component</h2>
+</div><pre class="source javascript"><strong class="lineNumber">185</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
+<div class="line"><div class="doc"><p>In Torus, we build user interfaces by composing and connecting reusable components together. A Torus component extends the base <code>Component</code> class, and has a <code>#compose()</code> method that returns the JDOM representation of the UI component&#39;s DOM. Torus uses this method to render the component. Because Torus renders components declaratively, we should avoid calling methods on the component (like mutating the local state) within <code>#compose()</code>. Mutating state during render may lead to race conditions or infinite loops, since state mutations are usually linked to more render calls.</p>
+</div><pre class="source javascript"><strong class="lineNumber">193</strong>class MyFirstComponent extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">194</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">195</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">196</strong>        return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">197</strong>            tag: 'h1',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">198</strong>            children: ['Hello, World!'],</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">199</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">200</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">203</strong></pre></div>
+<div class="line"><div class="doc"><p>... of course, we can simplify this by relying on the <code>jdom</code> template tag</p>
+</div><pre class="source javascript"><strong class="lineNumber">205</strong>class MySecondComponent extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">206</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">207</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">208</strong>        return jdom`&#60;h1&#62;Hello, World!&#60;/h1&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">209</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">210</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">211</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">212</strong></pre></div>
 <div class="line"><div class="doc"><p>Now that we&#39;ve defined a component, we can render that component to our page. Each component has a <code>#node</code> property, which always represents the root DOM node of that component. To add our component to the page, we can just create a new instance of our component and add its node to the document.</p>
-</div><pre class="source javascript"><strong class="lineNumber">199</strong>const first = new MyFirstComponent();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">217</strong>const first = new MyFirstComponent();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>We use the native <code>appendChild()</code> API to add our node to the page.</p>
-</div><pre class="source javascript"><strong class="lineNumber">201</strong>document.body.appendChild(first.node);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">219</strong>document.body.appendChild(first.node);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">220</strong></pre></div>
 <div class="line"><div class="doc"><p>All components have a <code>#render()</code> method that&#39;s provided by Torus. The render method is owned by Torus, and we rarely need to override it, because we tell torus what to render with <code>#compose()</code>. But if we want to tell torus to re-compose and re-render our component, we can do so by calling <code>Component#render()</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">207</strong>const second = new MySecondComponent(); // rendered once, by default, on initialization</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">208</strong>second.render(); // rendered a second time</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">209</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">225</strong>const second = new MySecondComponent(); // rendered once, by default, on initialization</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">226</strong>second.render(); // rendered a second time</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong></pre></div>
 <div class="line"><div class="doc"><p>Torus intelligently only mutates the DOM on the page if anything has changed, so renders are quick and efficient (but not free -- we should still only call render when we have something new to display).</p>
-</div><pre class="source javascript"><strong class="lineNumber">213</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">231</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Sometimes, we need to create components with different properties each time. We define the initial state of our component in an <code>#init()</code> method, which is called with the arguments passed in when we construct an instance of our component. The init method is also a good place to bind methods and listen to event targets.</p>
-</div><pre class="source javascript"><strong class="lineNumber">218</strong>class Tweet extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">219</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">236</strong>class Tweet extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">237</strong></pre></div>
 <div class="line"><div class="doc"><p>This is called from the parent class&#39;s constructor. Why is it called <code>init()</code> and not <code>constructor()</code>, you might ask? There are a few reasons why I made this call. Primarily, this ensured that components always had a valid and correct <code>#node</code> property by allowing Torus to render all components in the constructor. This allows for the component system to have a generally more ergonomic API. We can read and override <code>Component#super()</code> if we want to extend Torus&#39;s functionality.</p>
-</div><pre class="source javascript"><strong class="lineNumber">227</strong>    init(author, content) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>        this.author = author;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">229</strong>        this.content = content;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">245</strong>    init(author, content) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">246</strong>        this.author = author;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">247</strong>        this.content = content;</pre></div>
 <div class="line"><div class="doc"><p>For some reason, if we want this component to update every time the window is resized, we can do add kinds of listeners here.</p>
-</div><pre class="source javascript"><strong class="lineNumber">232</strong>        this.render = this.render.bind(this);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">233</strong>        window.addEventListener('resize', this.render);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong></pre></div>
-<div class="line"><div class="doc"><p>Since we bound a listener in <code>init()</code>, we need to make sure we clean up after ourselves.</p>
-</div><pre class="source javascript"><strong class="lineNumber">238</strong>    remove() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">239</strong>        window.removeEventListener('resize', this.render);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">240</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">241</strong></pre></div>
-<div class="line"><div class="doc"><p>We can access the instance and class variables within our JDOM template, because it&#39;s just a JavaScript method.</p>
-</div><pre class="source javascript"><strong class="lineNumber">244</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">245</strong>        return jdom`&#60;div class="tweet"&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">246</strong>            &#60;div&#62;${this.content}&#60;/div&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">247</strong>            &#60;cite&#62;${this.author}&#60;/cite&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">248</strong>            &#60;p&#62;The window size is now ${window.innerWidth}&#60;/p&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">249</strong>        &#60;/div&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">250</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">251</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">252</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">250</strong>        this.render = this.render.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">251</strong>        window.addEventListener('resize', this.render);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">252</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">253</strong></pre></div>
+<div class="line"><div class="doc"><p>Since we bound a listener in <code>init()</code>, we need to make sure we clean up after ourselves.</p>
+</div><pre class="source javascript"><strong class="lineNumber">256</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">257</strong>        window.removeEventListener('resize', this.render);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">258</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">259</strong></pre></div>
+<div class="line"><div class="doc"><p>We can access the instance and class variables within our JDOM template, because it&#39;s just a JavaScript method.</p>
+</div><pre class="source javascript"><strong class="lineNumber">262</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">263</strong>        return jdom`&#60;div class="tweet"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">264</strong>            &#60;div&#62;${this.content}&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">265</strong>            &#60;cite&#62;${this.author}&#60;/cite&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">266</strong>            &#60;p&#62;The window size is now ${window.innerWidth}&#60;/p&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">267</strong>        &#60;/div&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">268</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">269</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">270</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">271</strong></pre></div>
 <div class="line"><div class="doc"><p>We can have components with event listeners and other methods that we use to respond to events</p>
-</div><pre class="source javascript"><strong class="lineNumber">256</strong>class FancyInput extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">257</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">258</strong>    init() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">259</strong>        this.onFocus = this.onFocus.bind(this);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">260</strong>        this.onBLur = this.onBLur.bind(this);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">261</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">262</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">263</strong>    onFocus() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">264</strong>        console.log('Focused input');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">265</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">266</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">267</strong>    onBlur() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">268</strong>        console.log('Blurred input');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">269</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">270</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">271</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">272</strong>        return jdom`&#60;input type=text</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">273</strong>            onfocus=${this.onFocus}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">274</strong>            onblur=${this.onBlur} /&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">278</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">274</strong>class FancyInput extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong>    init() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>        this.onFocus = this.onFocus.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">278</strong>        this.onBLur = this.onBLur.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">279</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">280</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">281</strong>    onFocus() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">282</strong>        console.log('Focused input');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">283</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">284</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">285</strong>    onBlur() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">286</strong>        console.log('Blurred input');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">287</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">289</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">290</strong>        return jdom`&#60;input type=text</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">291</strong>            onfocus=${this.onFocus}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">292</strong>            onblur=${this.onBlur} /&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">293</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">294</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">295</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">296</strong></pre></div>
 <div class="line"><div class="doc"><p>If we need to fetch data within a component, here&#39;s one way to do so, by re-rendering when new data arrives. Let&#39;s say we want a component that displays a list of the top 10 winners in some competition, using a JSON API.</p>
-</div><pre class="source javascript"><strong class="lineNumber">282</strong>class RankingsList extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">283</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">300</strong>class RankingsList extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">301</strong></pre></div>
 <div class="line"><div class="doc"><p>Let&#39;s say we want this component to display top 10 places by default</p>
-</div><pre class="source javascript"><strong class="lineNumber">285</strong>    init(limit = 10) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">286</strong>        this.limit = limit;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">287</strong>        this.rankings = [];</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">303</strong>    init(limit = 10) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">304</strong>        this.limit = limit;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">305</strong>        this.rankings = [];</pre></div>
 <div class="line"><div class="doc"><p>We don&#39;t always want to fetch when we create a view, but just for today, let&#39;s say we&#39;ll fetch for new data when this view first appears.</p>
-</div><pre class="source javascript"><strong class="lineNumber">290</strong>        this.fetch();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">291</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">292</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">293</strong>    async fetch() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">294</strong>        const data = fetch('/api/v2/rankings?limit=10').then(r = r.json());</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">308</strong>        this.fetch();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">309</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">310</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong>    async fetch() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">312</strong>        const data = fetch('/api/v2/rankings?limit=10').then(r = r.json());</pre></div>
 <div class="line"><div class="doc"><p>Only take the first <code>this.limit</code> results</p>
-</div><pre class="source javascript"><strong class="lineNumber">296</strong>        this.rankings = data.slice(0, this.limit);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">314</strong>        this.rankings = data.slice(0, this.limit);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Since data&#39;s changed, we&#39;ll re-render the view</p>
-</div><pre class="source javascript"><strong class="lineNumber">298</strong>        this.render();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">299</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">300</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">301</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">302</strong>        return jdom`&#60;ol&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">303</strong>            ${this.rankings.map(winner =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">316</strong>        this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">317</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">318</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">319</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">320</strong>        return jdom`&#60;ol&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>            ${this.rankings.map(winner =&#62; {</pre></div>
 <div class="line"><div class="doc"><p>We can nest a template within a template to render a very simple list like this. For more complex lists, we&#39;ll want to use a <code>List</code> component, like the one below, where each item gets its own component.</p>
-</div><pre class="source javascript"><strong class="lineNumber">308</strong>                return jdom`&#60;li&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">309</strong>                    ${winner.name}, from ${winner.city}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">310</strong>                &#60;/li&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong>            })}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">312</strong>        &#60;/ol&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">313</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">314</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">315</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">316</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">326</strong>                return jdom`&#60;li&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">327</strong>                    ${winner.name}, from ${winner.city}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">328</strong>                &#60;/li&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">329</strong>            })}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">330</strong>        &#60;/ol&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">331</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">332</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">333</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">334</strong></pre></div>
 <div class="line"><div class="doc"><p>One notable difference between Torus&#39;s and React&#39;s component API, which this somewhat resembles, is that Torus components are much more self-managing. Torus components are long-lived and have state, and so have no lifecycle methods, but instead call <code>#render</code> imperatively whenever the component&#39;s DOM tree needs to update (when local state changes or a data source emits an event). This manual render-call replaces React&#39;s <code>shouldComponentUpdate</code> in a sense, and means that render functions are <em>never</em> run unless a re-render is explicitly requested as the result of a state change, even if the component in question is a child of a parent that re-renders frequently.</p>
-</div><pre class="source javascript"><strong class="lineNumber">325</strong>class AppWithSidebar extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">326</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">327</strong>    init() {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">343</strong>class AppWithSidebar extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">344</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">345</strong>    init() {</pre></div>
 <div class="line"><div class="doc"><p>As a downside of that tradeoff, we need to keep track of children components ourselves...</p>
-</div><pre class="source javascript"><strong class="lineNumber">330</strong>        this.sidebar = new Sidebar();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">331</strong>        this.main = new MainPanel();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">332</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">333</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">334</strong>    remove() {</pre></div>
-<div class="line"><div class="doc"><p>... but most of that just means instantiating and removing children views inside parent views, like this.</p>
-</div><pre class="source javascript"><strong class="lineNumber">337</strong>        this.sidebar.remove();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">338</strong>        this.main.remove();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">339</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">340</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">341</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"><p>Because we can embed HTML nodes inside <code>jdom</code> templates, we can include our children components in the parent component&#39;s DOM tree easily, like this.</p>
-</div><pre class="source javascript"><strong class="lineNumber">344</strong>        return jdom`&#60;div class="root"&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">345</strong>            ${this.sidebar.node}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">346</strong>            ${this.main.node}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">347</strong>        &#60;/div&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">348</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">349</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">350</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">348</strong>        this.sidebar = new Sidebar();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">349</strong>        this.main = new MainPanel();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">350</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">351</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">352</strong>    remove() {</pre></div>
+<div class="line"><div class="doc"><p>... but most of that just means instantiating and removing children views inside parent views, like this.</p>
+</div><pre class="source javascript"><strong class="lineNumber">355</strong>        this.sidebar.remove();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">356</strong>        this.main.remove();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">357</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">358</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">359</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"><p>Because we can embed HTML nodes inside <code>jdom</code> templates, we can include our children components in the parent component&#39;s DOM tree easily, like this.</p>
+</div><pre class="source javascript"><strong class="lineNumber">362</strong>        return jdom`&#60;div class="root"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">363</strong>            ${this.sidebar.node}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">364</strong>            ${this.main.node}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">365</strong>        &#60;/div&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">366</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">367</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">368</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">369</strong></pre></div>
 <div class="line"><div class="doc"><h3 id="component-from-and-functional-components"><code>Component.from()</code> and functional components</h3>
-</div><pre class="source javascript"><strong class="lineNumber">353</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">371</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Often, we want to create a new Component class whose rendered result only depends on its initial input. These might be small UI widgets in a design system like buttons and dialogs, for example. In these cases where we don&#39;t need a component to keep local state, listen for events, or create side effects, we can describe the component&#39;s view with a pure function.</p>
-</div><pre class="source javascript"><strong class="lineNumber">358</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">376</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Here&#39;s an example of a purely functional component. It returns a JDOM representation.</p>
-</div><pre class="source javascript"><strong class="lineNumber">360</strong>const FancyButton = buttonText =&#62; jdom`&#60;button class="fancy"&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">361</strong>    ${buttonText}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">362</strong>&#60;/button&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">363</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">378</strong>const FancyButton = buttonText =&#62; jdom`&#60;button class="fancy"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">379</strong>    ${buttonText}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">380</strong>&#60;/button&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">381</strong></pre></div>
 <div class="line"><div class="doc"><p>Because these kinds of function &quot;components&quot; will return valid JDOM, we can compose them into any other <code>Component#compose()</code> method. Remember, <code>FancyButton</code> is just a JavaScript function! This allows for easy abstraction and code reuse within small parts of our rendering logic. Here, we can just pass the return value of <code>FancyButton()</code> off to another template.</p>
-</div><pre class="source javascript"><strong class="lineNumber">368</strong>class FancyForm extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">369</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">370</strong>        return `&#60;form&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">371</strong>            &#60;h1&#62;Super fancy form!&#60;/h1&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">372</strong>            &#60;input name="full_name"/&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong>            ${FancyButton('Submit!')}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">374</strong>        &#60;/form&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">375</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">376</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">377</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">386</strong>class FancyForm extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">387</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">388</strong>        return `&#60;form&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">389</strong>            &#60;h1&#62;Super fancy form!&#60;/h1&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong>            &#60;input name="full_name"/&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">391</strong>            ${FancyButton('Submit!')}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">392</strong>        &#60;/form&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">395</strong></pre></div>
 <div class="line"><div class="doc"><p>But what if we want to compose our <code>FancyButton</code> with <code>Styled()</code> or use it in more complex views? We can upgrade the function component <code>FancyButton</code> to a full-fledged Torus class component with <code>Component.from()</code>. These two ways of defining <code>FancyButton</code> are equivalent. Here, <code>ClassyButton</code> emits exactly the same DOM as <code>FancyButton</code> when rendered, but it&#39;s gained additional capabilities accessible to a class component in Torus, like persistence across renders of the parent component and better composability with <code>Styled()</code> and <code>ListOf()</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">384</strong>const ClassyButton = Component.from(FancyButton);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">402</strong>const ClassyButton = Component.from(FancyButton);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>This takes a purely functional component and returns a class component whose constructor takes the same arguments (<code>buttonText</code> in this case) and renders to the given JDOM.</p>
-</div><pre class="source javascript"><strong class="lineNumber">387</strong>const ClassyButton = Component.from(buttonText =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">388</strong>    return jdom`&#60;button class="fancy"&#62;${buttonText}&#60;/button&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">389</strong>});</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">390</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">405</strong>const ClassyButton = Component.from(buttonText =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">406</strong>    return jdom`&#60;button class="fancy"&#62;${buttonText}&#60;/button&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">407</strong>});</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">408</strong></pre></div>
 <div class="line"><div class="doc"><p>We can use these upgraded components this way, by creating an instance of it and accessing its <code>#node</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">393</strong>class FancyForm extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong>    init() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">395</strong>        this.button = new ClassyButton('Submit!');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">397</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">398</strong>        return `&#60;form&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">399</strong>            &#60;h1&#62;Super fancy form!&#60;/h1&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">400</strong>            &#60;input name="full_name"/&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">401</strong>            ${this.button.node}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">402</strong>        &#60;/form&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">403</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">404</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">405</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">411</strong>class FancyForm extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">412</strong>    init() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">413</strong>        this.button = new ClassyButton('Submit!');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>        return `&#60;form&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>            &#60;h1&#62;Super fancy form!&#60;/h1&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>            &#60;input name="full_name"/&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong>            ${this.button.node}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">420</strong>        &#60;/form&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">421</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">422</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong></pre></div>
 <div class="line"><div class="doc"><h2 id="advanced-topics-in-components">Advanced topics in components</h2>
-</div><pre class="source javascript"><strong class="lineNumber">407</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">425</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><h3 id="component-lifecycles">Component lifecycles</h3>
-</div><pre class="source javascript"><strong class="lineNumber">409</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">427</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Because Torus components are designed to be long-lived, it&#39;s useful to think about the &quot;life cycle&quot; of a component, and what methods are called on it by Torus from its creation to its destruction. Currently, it&#39;s a short list.</p>
-</div><pre class="source javascript"><strong class="lineNumber">413</strong>const comp = new Component();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>// 1. Create new component</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>comp.init()</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>// 2. Render triggered (can happen through `#bind(...)` binding the component</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>//      to state updates, or through manual triggers from local state changes)</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">418</strong>comp.render();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">419</strong>    comp.compose(); // called by render()</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">420</strong>// 3. Remove component (cleanly destroy component to be garbage collected)</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">421</strong>comp.remove();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">422</strong>    comp.unbind(); // called by remove()</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">431</strong>const comp = new Component();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">432</strong>// 1. Create new component</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">433</strong>comp.init()</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">434</strong>// 2. Render triggered (can happen through `#bind(...)` binding the component</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">435</strong>//      to state updates, or through manual triggers from local state changes)</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">436</strong>comp.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">437</strong>    comp.compose(); // called by render()</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">438</strong>// 3. Remove component (cleanly destroy component to be garbage collected)</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">439</strong>comp.remove();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">440</strong>    comp.unbind(); // called by remove()</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">441</strong></pre></div>
 <div class="line"><div class="doc"><p><strong>Note</strong>: It&#39;s generally a good idea to call <code>Component#remove()</code> when the component no longer becomes needed, like when a model tied to it is destroyed or the user switches to a completely different view. But because Torus components are lightweight, there&#39;s no need to use it as a memory management mechanism or to trigger garbage collection. Torus components, unlike React components, are designed to be long-lived and last through a full session or page lifecycle.</p>
-</div><pre class="source javascript"><strong class="lineNumber">429</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">447</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><h3 id="accessing-stateful-htmlelement-methods">Accessing stateful HTMLElement methods</h3>
-</div><pre class="source javascript"><strong class="lineNumber">431</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">449</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Torus tries to define UI components as declaratively as possible, but the rest of the web, and crucially the DOM, expose stateful APIS, like <code>VideoElement.play()</code> and <code>FormElement.submit()</code>. React&#39;s approach to resolving this conflict is <a href="https://reactjs.org/docs/refs-and-the-dom.html">refs</a>, which are declaratively defined bindings to HTML elements that are later created by React&#39;s renderer. Torus&#39;s Component API is lower-level, and tries to expose the underlying DOM more transparently. Because we can embed literal DOM nodes within what <code>Component#compose()</code> returns, we can do this instead:</p>
-</div><pre class="source javascript"><strong class="lineNumber">438</strong>class MyVideoPlayer extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">439</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">456</strong>class MyVideoPlayer extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">457</strong></pre></div>
 <div class="line"><div class="doc"><p><strong>Option A</strong></p>
-</div><pre class="source javascript"><strong class="lineNumber">441</strong>    init() {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">459</strong>    init() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Create a new element when the component is created, and keep track of it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">444</strong>        this.videoEl = document.createElement('video');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">445</strong>        this.videoEl.src = '/videos/abc';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">446</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">447</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">448</strong>    play() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">449</strong>        this.videoEl.play();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">450</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">451</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">452</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"><p>We can compose a literal element within the root element</p>
-</div><pre class="source javascript"><strong class="lineNumber">454</strong>        return jdom`&#60;div id="player"&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">455</strong>            ${this.videoEl}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">456</strong>        &#60;/div&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">457</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">458</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">459</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">460</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">461</strong>class MyForm extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">462</strong></pre></div>
-<div class="line"><div class="doc"><p><strong>Option B</strong></p>
-</div><pre class="source javascript"><strong class="lineNumber">464</strong>    submit() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Because the root element of this component is the <code>&lt;form/&gt;</code>, this.node corresponds to the form element.</p>
-</div><pre class="source javascript"><strong class="lineNumber">467</strong>        this.node.submit();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">462</strong>        this.videoEl = document.createElement('video');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">463</strong>        this.videoEl.src = '/videos/abc';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">464</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">465</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">466</strong>    play() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">467</strong>        this.videoEl.play();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">468</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">469</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">470</strong>    getFirstInput() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">470</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"><p>We can compose a literal element within the root element</p>
+</div><pre class="source javascript"><strong class="lineNumber">472</strong>        return jdom`&#60;div id="player"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">473</strong>            ${this.videoEl}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">474</strong>        &#60;/div&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">475</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">476</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">477</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">478</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">479</strong>class MyForm extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">480</strong></pre></div>
+<div class="line"><div class="doc"><p><strong>Option B</strong></p>
+</div><pre class="source javascript"><strong class="lineNumber">482</strong>    submit() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
+<div class="line"><div class="doc"><p>Because the root element of this component is the <code>&lt;form/&gt;</code>, this.node corresponds to the form element.</p>
+</div><pre class="source javascript"><strong class="lineNumber">485</strong>        this.node.submit();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">486</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">487</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">488</strong>    getFirstInput() {</pre></div>
 <div class="line"><div class="doc"><p>This isn&#39;t ideal. I don&#39;t think this will be a commonly required pattern.</p>
-</div><pre class="source javascript"><strong class="lineNumber">473</strong>        return this.node.querySelector('input');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">474</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">475</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">476</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">477</strong>        return jdom`&#60;form&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">478</strong>            &#60;input type="text"/&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">479</strong>        &#60;/form&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">480</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">481</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">482</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">483</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">491</strong>        return this.node.querySelector('input');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">492</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">493</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">494</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">495</strong>        return jdom`&#60;form&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">496</strong>            &#60;input type="text"/&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">497</strong>        &#60;/form&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">498</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">499</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">500</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">501</strong></pre></div>
 <div class="line"><div class="doc"><p>Torus might get a higher-level API later to do something like this, maybe closer to React refs, but this is the current API design while larger Torus-based applications are built and patterns are better established.</p>
-</div><pre class="source javascript"><strong class="lineNumber">485</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">503</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><h3 id="styled-components-and-component-preprocess-">Styled components and <code>Component#preprocess()</code></h3>
-</div><pre class="source javascript"><strong class="lineNumber">487</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">505</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Although you can use Torus perfectly without using CSS in JS, if you like declaring your view styles in your component code, as I do, Torus has an efficient and well-integrated solution, called styled components (not to be confused with React&#39;s <code>styled-components</code>, which has a similar idea but wildly different API).</p>
-</div><pre class="source javascript"><strong class="lineNumber">493</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">511</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>You can create a styled Torus component by calling <code>Styled()</code> on a normal component</p>
-</div><pre class="source javascript"><strong class="lineNumber">495</strong>class NormalButton extends Component { /*...*/ }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">496</strong>const StyledButton = Styled(NormalButton);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">497</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">513</strong>class NormalButton extends Component { /*...*/ }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">514</strong>const StyledButton = Styled(NormalButton);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">515</strong></pre></div>
 <div class="line"><div class="doc"><p>But Torus already comes with <code>StyledComponent</code>, which is just <code>Styled(Component)</code>. You should extend <code>StyledComponent</code> for new components, and only use the <code>Styled()</code> wrapper if you don&#39;t have access to the original component&#39;s code, such as when styling the default <code>List</code> implementation (below).</p>
-</div><pre class="source javascript"><strong class="lineNumber">502</strong>const StyledComponent = Styled(Component); // literally what's in Torus's source code</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">503</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">520</strong>const StyledComponent = Styled(Component); // literally what's in Torus's source code</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">521</strong></pre></div>
 <div class="line"><div class="doc"><p>Here&#39;s a sample of the ways you can define styles this way.</p>
-</div><pre class="source javascript"><strong class="lineNumber">505</strong>class FancyList extends StyledComponent {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">506</strong></pre></div>
-<div class="line"><div class="doc"><p>We define all of our styles in a <code>styled()</code> method, which returns a JSON that resembles normal CSS, but with nesting and automagical media query resolution, as well as downward scoping of CSS rules to this component. That means that when we style <code>button</code> in this component, it won&#39;t ever conflict with other <code>button</code> elements anywhere else on the page.</p>
-</div><pre class="source javascript"><strong class="lineNumber">512</strong>    styles() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">513</strong>        return {</pre></div>
-<div class="line"><div class="doc"><p>Normal CSS properties are applied to the root node</p>
-</div><pre class="source javascript"><strong class="lineNumber">515</strong>            'font-size': '18px',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">516</strong>            'background': 'rgba(0, 0, 0, 0.4)',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">517</strong></pre></div>
-<div class="line"><div class="doc"><p>Keyframes and media queries will be scoped globally, just like in CSS</p>
-</div><pre class="source javascript"><strong class="lineNumber">520</strong>            '@keyframes some-name': {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">521</strong>                'from': {'opacity': 0},</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">522</strong>                'to': {'opacity': 1},</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">523</strong>            },</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">523</strong>class FancyList extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">524</strong></pre></div>
+<div class="line"><div class="doc"><p>We define all of our styles in a <code>styled()</code> method, which returns a JSON that resembles normal CSS, but with nesting and automagical media query resolution, as well as downward scoping of CSS rules to this component. That means that when we style <code>button</code> in this component, it won&#39;t ever conflict with other <code>button</code> elements anywhere else on the page.</p>
+</div><pre class="source javascript"><strong class="lineNumber">530</strong>    styles() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">531</strong>        return {</pre></div>
+<div class="line"><div class="doc"><p>Normal CSS properties are applied to the root node</p>
+</div><pre class="source javascript"><strong class="lineNumber">533</strong>            'font-size': '18px',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">534</strong>            'background': 'rgba(0, 0, 0, 0.4)',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">535</strong></pre></div>
+<div class="line"><div class="doc"><p>Keyframes and media queries will be scoped globally, just like in CSS</p>
+</div><pre class="source javascript"><strong class="lineNumber">538</strong>            '@keyframes some-name': {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">539</strong>                'from': {'opacity': 0},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">540</strong>                'to': {'opacity': 1},</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">541</strong>            },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">542</strong></pre></div>
 <div class="line"><div class="doc"><p>Note that we don&#39;t select the element again inside @media -- that&#39;s done for us by styled components.</p>
-</div><pre class="source javascript"><strong class="lineNumber">527</strong>            '@media (min-width: 0px)': {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">528</strong>                'border-color': 'rgb(0, 1, 2)',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">529</strong>                'p': {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">530</strong>                    'font-style': 'italic',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">531</strong>                },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">532</strong>            },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">533</strong></pre></div>
-<div class="line"><div class="doc"><p>We can use SCSS-like syntax for hierarchy. &#39;&amp;&#39; are replaced by the parent selector.</p>
-</div><pre class="source javascript"><strong class="lineNumber">536</strong>            '&#38;.invalid': { // FancyList.invalid</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">537</strong>                'color': 'red',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">538</strong>            },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">539</strong>            '&#38;::after': { // FancyList::after</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">540</strong>                'content': '""',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">541</strong>                'display': 'block',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">542</strong>            },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">543</strong>            'p': { // FancyList p</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">544</strong>                'font-weight': 'bold',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">545</strong>                'em': { // FancyList p em</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">546</strong>                    'color': 'blue',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">547</strong>                }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">548</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">549</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">550</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">545</strong>            '@media (min-width: 0px)': {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">546</strong>                'border-color': 'rgb(0, 1, 2)',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">547</strong>                'p': {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">548</strong>                    'font-style': 'italic',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">549</strong>                },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">550</strong>            },</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">551</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">552</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">553</strong></pre></div>
+<div class="line"><div class="doc"><p>We can use SCSS-like syntax for hierarchy. &#39;&amp;&#39; are replaced by the parent selector.</p>
+</div><pre class="source javascript"><strong class="lineNumber">554</strong>            '&#38;.invalid': { // FancyList.invalid</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">555</strong>                'color': 'red',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">556</strong>            },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">557</strong>            '&#38;::after': { // FancyList::after</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">558</strong>                'content': '""',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">559</strong>                'display': 'block',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">560</strong>            },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">561</strong>            'p': { // FancyList p</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">562</strong>                'font-weight': 'bold',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">563</strong>                'em': { // FancyList p em</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">564</strong>                    'color': 'blue',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">565</strong>                }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">566</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">567</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">568</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">569</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">570</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">571</strong></pre></div>
 <div class="line"><div class="doc"><h2 id="data-models">Data models</h2>
-</div><pre class="source javascript"><strong class="lineNumber">555</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">573</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><h3 id="record">Record</h3>
-</div><pre class="source javascript"><strong class="lineNumber">557</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">575</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p><code>Record</code> is how Torus represents a unit of mutable state, whether that&#39;s global app state, some user state, or a model fetched from the server. Let&#39;s say we want to make a page for a cake shop. We can have a record represent a cake customers can buy.</p>
-</div><pre class="source javascript"><strong class="lineNumber">561</strong>class CakeProduct extends Record {}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">562</strong></pre></div>
-<div class="line"><div class="doc"><p>To create an instance of a cake...</p>
-</div><pre class="source javascript"><strong class="lineNumber">564</strong>const cake1 = new CakeProduct({</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">565</strong>    // can you tell I know nothing about cakes?</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">566</strong>    name: 'Strawberry Cake',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">567</strong>    bread: 'wheat',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">568</strong>    icing: 'strawberry',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">569</strong>    price_usd: 15.99,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">570</strong>});</pre></div>
-<div class="line"><div class="doc"><p>We can also instantiate a record with a unique ID...</p>
-</div><pre class="source javascript"><strong class="lineNumber">572</strong>const cake2 = new CakeProduct(2, {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">573</strong>    name: 'Chocolate Mountain',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">574</strong>    bread: 'chocolate',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">575</strong>    icing: 'whipped',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">576</strong>    price_usd: 13.99</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">577</strong>});</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">578</strong>cake1.id; // null</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">579</strong>cake2.id; // 2</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">579</strong>class CakeProduct extends Record {}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">580</strong></pre></div>
+<div class="line"><div class="doc"><p>To create an instance of a cake...</p>
+</div><pre class="source javascript"><strong class="lineNumber">582</strong>const cake1 = new CakeProduct({</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">583</strong>    // can you tell I know nothing about cakes?</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">584</strong>    name: 'Strawberry Cake',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">585</strong>    bread: 'wheat',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">586</strong>    icing: 'strawberry',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">587</strong>    price_usd: 15.99,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">588</strong>});</pre></div>
+<div class="line"><div class="doc"><p>We can also instantiate a record with a unique ID...</p>
+</div><pre class="source javascript"><strong class="lineNumber">590</strong>const cake2 = new CakeProduct(2, {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">591</strong>    name: 'Chocolate Mountain',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">592</strong>    bread: 'chocolate',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">593</strong>    icing: 'whipped',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">594</strong>    price_usd: 13.99</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">595</strong>});</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">596</strong>cake1.id; // null</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">597</strong>cake2.id; // 2</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">598</strong></pre></div>
 <div class="line"><div class="doc"><p>To get a property back from a record, use the <code>#get()</code> method</p>
-</div><pre class="source javascript"><strong class="lineNumber">582</strong>cake1.get('name');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">583</strong>// 'Strawberry Cake'</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">584</strong>cake2.get('price_usd');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">585</strong>// 13.99</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">586</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">600</strong>cake1.get('name');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">601</strong>// 'Strawberry Cake'</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">602</strong>cake2.get('price_usd');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">603</strong>// 13.99</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">604</strong></pre></div>
 <div class="line"><div class="doc"><p>To update something about the record, call &#39;#update()` with a dictionary of the new properties.</p>
-</div><pre class="source javascript"><strong class="lineNumber">589</strong>cake2.update({</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">590</strong>    name: 'Chocolate Volcano',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">591</strong>    price_usd: 12.99,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">592</strong>});</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">593</strong>cake2.get('price_usd');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">594</strong>// 12.99</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">595</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">607</strong>cake2.update({</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">608</strong>    name: 'Chocolate Volcano',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">609</strong>    price_usd: 12.99,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">610</strong>});</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">611</strong>cake2.get('price_usd');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">612</strong>// 12.99</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">613</strong></pre></div>
 <div class="line"><div class="doc"><p><code>Record#summarize()</code> returns a &quot;summary&quot; of the state of the record, which is a dictionary of all of its properties, plus its id, even if it&#39;s null.</p>
-</div><pre class="source javascript"><strong class="lineNumber">598</strong>cake1.serialize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">599</strong>/*</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">600</strong>    {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">601</strong>        id: null,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">602</strong>        name: 'Strawberry Cake',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">603</strong>        bread: 'wheat',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">604</strong>        icing: 'strawberry',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">605</strong>        price_usd: 15.99,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">606</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">607</strong>*/</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">608</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">616</strong>cake1.serialize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">617</strong>/*</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">618</strong>    {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">619</strong>        id: null,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">620</strong>        name: 'Strawberry Cake',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">621</strong>        bread: 'wheat',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">622</strong>        icing: 'strawberry',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">623</strong>        price_usd: 15.99,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">624</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">625</strong>*/</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">626</strong></pre></div>
 <div class="line"><div class="doc"><p><code>Record#serialize()</code> will return a JSON-serialized version of the state of the record. Normally, this is the same as the summary, but we can override this behavior as appropriate.</p>
-</div><pre class="source javascript"><strong class="lineNumber">611</strong>cake2.summarize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">612</strong>/*</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">613</strong>    {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">614</strong>        id: 2,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">615</strong>        name: 'Chocolate Mountain',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">616</strong>        bread: 'chocolate',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">617</strong>        icing: 'whipped',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">618</strong>        price_usd: 13.99</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">619</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">620</strong>*/</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">621</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">629</strong>cake2.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">630</strong>/*</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">631</strong>    {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">632</strong>        id: 2,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">633</strong>        name: 'Chocolate Mountain',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">634</strong>        bread: 'chocolate',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">635</strong>        icing: 'whipped',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">636</strong>        price_usd: 13.99</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">637</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">638</strong>*/</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">639</strong></pre></div>
 <div class="line"><div class="doc"><p>We can have components whose state is bound to a record&#39;s state, so when the record updates its properties, the component can respond appropriately. We do this with <code>Component#bind()</code></p>
-</div><pre class="source javascript"><strong class="lineNumber">624</strong>class CakeProductListing extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">625</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">626</strong>    init(cakeProduct) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">642</strong>class CakeProductListing extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">643</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">644</strong>    init(cakeProduct) {</pre></div>
 <div class="line"><div class="doc"><p>Bind this component to <code>cakeProduct</code>, so that when <code>cakeProduct</code> updates, this callback function is called with the summary of the record. Usually, we&#39;ll want to re-render. Note that when we bind, it immediately calls the callback (in this case, <code>this.render(props)</code>) once. That means everything we need to run render should be defined before this bind call.</p>
-</div><pre class="source javascript"><strong class="lineNumber">632</strong>        this.bind(cakeProduct, props =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">650</strong>        this.bind(cakeProduct, props =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p><code>compose()</code> will be called with <code>props</code>, the summary of the cake record. We don&#39;t always have to just re-render when the record updates. we can also do other things in this callback. But rendering is most common.</p>
-</div><pre class="source javascript"><strong class="lineNumber">636</strong>            this.render(props);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">637</strong>        });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">638</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">639</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">654</strong>            this.render(props);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">655</strong>        });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">656</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">657</strong></pre></div>
 <div class="line"><div class="doc"><p>We can have the component stop listening to a record, by calling <code>#unbind()</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">641</strong>    stopUpdating() { // probably wouldn't write something like this normally</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">642</strong>        this.unbind();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">643</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">644</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">659</strong>    stopUpdating() { // probably wouldn't write something like this normally</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">660</strong>        this.unbind();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">661</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">662</strong></pre></div>
 <div class="line"><div class="doc"><p>When we bind a component to a new record, it stops listening to the old one automatically.</p>
-</div><pre class="source javascript"><strong class="lineNumber">646</strong>    switchCake(newCake)  {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">647</strong>        // implicit `this.unbind()`</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">648</strong>        this.bind(newCake, props =&#62; this.render(props));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">649</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">650</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">651</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">652</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">653</strong>const listing = new CakeProductListing(cake1);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">664</strong>    switchCake(newCake)  {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">665</strong>        // implicit `this.unbind()`</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">666</strong>        this.bind(newCake, props =&#62; this.render(props));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">667</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">668</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">669</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">670</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">671</strong>const listing = new CakeProductListing(cake1);</pre></div>
 <div class="line"><div class="doc"><p>We can access the record that a component is bound to, with the <code>record</code> property</p>
-</div><pre class="source javascript"><strong class="lineNumber">655</strong>listing.record === cake1; // true</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">656</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">673</strong>listing.record === cake1; // true</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">674</strong></pre></div>
 <div class="line"><div class="doc"><h3 id="store">Store</h3>
-</div><pre class="source javascript"><strong class="lineNumber">658</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">676</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>A store represents a (potentially) ordered collection of records. Used in conjunction with lists below, stores are a good way of organizing records into list-like structures. Components can bind to stores just like they can bind to records.</p>
-</div><pre class="source javascript"><strong class="lineNumber">662</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">680</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>We can create a store by giving it an array of records.</p>
-</div><pre class="source javascript"><strong class="lineNumber">664</strong>const cakes = new Store([cake1, cake2]);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">682</strong>const cakes = new Store([cake1, cake2]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p><code>Store#records</code> points to a <code>Set</code> instance with all the records in the collection. If you want to check the size of a store, use <code>#records.size</code>. But if you want to access the records in a store, <code>Store#summarize()</code> is a better interface, since it can be pre-sorted based on a comparator.</p>
-</div><pre class="source javascript"><strong class="lineNumber">669</strong>cakes.records; // Set({ cake1, cake2 }), a Set</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">670</strong>cakes.records.size; // 2</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">671</strong>cakes.summarize(); // [cake1, cake2], an Array</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">687</strong>cakes.records; // Set({ cake1, cake2 }), a Set</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">688</strong>cakes.records.size; // 2</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">689</strong>cakes.summarize(); // [cake1, cake2], an Array</pre></div>
 <div class="line"><div class="doc"><p>We can also iterate over a store, like an array or set. This means we can spread ...</p>
-</div><pre class="source javascript"><strong class="lineNumber">673</strong>const cakesArray = [...cakes];</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">691</strong>const cakesArray = [...cakes];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>...and we can <code>for...of</code> loop over stores. These, like <code>.records</code>, are not <em>necessarily</em> ordered.</p>
-</div><pre class="source javascript"><strong class="lineNumber">675</strong>for (const cake of cakes) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">676</strong>    do_something_with_cake(cake);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">677</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">693</strong>for (const cake of cakes) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">694</strong>    do_something_with_cake(cake);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">695</strong>}</pre></div>
 <div class="line"><div class="doc"><p>Like records, <code>Store#serialize()</code> returns a JSON representation of its contents. For stores, this means it&#39;s an array that contains the serialized JSON form of each of its records, sorted by the comparator (below).</p>
-</div><pre class="source javascript"><strong class="lineNumber">681</strong>cakes.serialize(); // [{ /* cake1 props */ }, { /* cake2 props */ }]</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">682</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">699</strong>cakes.serialize(); // [{ /* cake1 props */ }, { /* cake2 props */ }]</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">700</strong></pre></div>
 <div class="line"><div class="doc"><p>We can also add to stores later...</p>
-</div><pre class="source javascript"><strong class="lineNumber">684</strong>const cakes2 = new Store(); // empty</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">685</strong>cakes2.add(cake1); // returns cake1</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">686</strong>cakes2.add(cake2); // returns cake2</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">687</strong>cakes2.records.size; // 2</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">702</strong>const cakes2 = new Store(); // empty</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">703</strong>cakes2.add(cake1); // returns cake1</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">704</strong>cakes2.add(cake2); // returns cake2</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">705</strong>cakes2.records.size; // 2</pre></div>
 <div class="line"><div class="doc"><p>... and remove them.</p>
-</div><pre class="source javascript"><strong class="lineNumber">689</strong>cakes2.remove(cake1);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">690</strong>cakes2.summarize(); // [cake2]</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">691</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">707</strong>cakes2.remove(cake1);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">708</strong>cakes2.summarize(); // [cake2]</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">709</strong></pre></div>
 <div class="line"><div class="doc"><p>We can find records in a store by ID, using <code>Store#find()</code></p>
-</div><pre class="source javascript"><strong class="lineNumber">693</strong>cakes2.find(2); // returns cake2, which has id: 2</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">711</strong>cakes2.find(2); // returns cake2, which has id: 2</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>... it&#39;ll return <code>null</code> if the store doesn&#39;t contain a match</p>
-</div><pre class="source javascript"><strong class="lineNumber">695</strong>cakes2.find(100); // null</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">696</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">713</strong>cakes2.find(100); // null</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">714</strong></pre></div>
 <div class="line"><div class="doc"><p>If we want to refresh the contents of the store with a new set of cakes, we can use <code>#reset()</code>. This will also emit an event to any components listening.</p>
-</div><pre class="source javascript"><strong class="lineNumber">700</strong>cakeA = new CakeProduct(/*...*/);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">701</strong>cakeB = new CakeProduct(/*...*/);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">702</strong>cakes2.reset([cakeA, cakeB]);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">703</strong>cakes2.summarize(); // [cakeA, cakeB]</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">704</strong></pre></div>
-<div class="line"><div class="doc"><p>In practice, we&#39;ll want to define a custom store that knows how to sort the collection in some order, and what record the collection contains. We can extend <code>Store</code> to do this.</p>
-</div><pre class="source javascript"><strong class="lineNumber">708</strong>class CakeProductStore extends Store {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">709</strong></pre></div>
-<div class="line"><div class="doc"><p>The <code>recordClass</code> getter tells the Store what this store contains.</p>
-</div><pre class="source javascript"><strong class="lineNumber">712</strong>    get recordClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">713</strong>        return CakeProduct;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">714</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">715</strong></pre></div>
-<div class="line"><div class="doc"><p>The <code>comparator</code> getter returns a function that maps a record to the property it should be sorted <em>by</em>. So if we wanted to sort cakes by their names, we&#39;d write:</p>
-</div><pre class="source javascript"><strong class="lineNumber">719</strong>    get comparator() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">720</strong>        return cake =&#62; cake.get('name');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">721</strong>    }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">718</strong>cakeA = new CakeProduct(/*...*/);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">719</strong>cakeB = new CakeProduct(/*...*/);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">720</strong>cakes2.reset([cakeA, cakeB]);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">721</strong>cakes2.summarize(); // [cakeA, cakeB]</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">722</strong></pre></div>
-<div class="line"><div class="doc"><p>If you&#39;re looking for more advanced sorting behavior, you&#39;re welcome to override <code>Store#summarize()</code> in your subclass based on Torus&#39;s implementation.</p>
-</div><pre class="source javascript"><strong class="lineNumber">725</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">726</strong>}</pre></div>
+<div class="line"><div class="doc"><p>In practice, we&#39;ll want to define a custom store that knows how to sort the collection in some order, and what record the collection contains. We can extend <code>Store</code> to do this.</p>
+</div><pre class="source javascript"><strong class="lineNumber">726</strong>class CakeProductStore extends Store {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">727</strong></pre></div>
+<div class="line"><div class="doc"><p>The <code>recordClass</code> getter tells the Store what this store contains.</p>
+</div><pre class="source javascript"><strong class="lineNumber">730</strong>    get recordClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">731</strong>        return CakeProduct;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">732</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">733</strong></pre></div>
+<div class="line"><div class="doc"><p>The <code>comparator</code> getter returns a function that maps a record to the property it should be sorted <em>by</em>. So if we wanted to sort cakes by their names, we&#39;d write:</p>
+</div><pre class="source javascript"><strong class="lineNumber">737</strong>    get comparator() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">738</strong>        return cake =&#62; cake.get('name');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">739</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">740</strong></pre></div>
+<div class="line"><div class="doc"><p>If you&#39;re looking for more advanced sorting behavior, you&#39;re welcome to override <code>Store#summarize()</code> in your subclass based on Torus&#39;s implementation.</p>
+</div><pre class="source javascript"><strong class="lineNumber">743</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">744</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">745</strong></pre></div>
 <div class="line"><div class="doc"><p>Since our store now knows what it contains and how to sort it, it can do two more things.</p>
-</div><pre class="source javascript"><strong class="lineNumber">730</strong>const cakes = new CakeProductStore([cake1, cake2]);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">748</strong>const cakes = new CakeProductStore([cake1, cake2]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>First, it can create new cakes from its properties</p>
-</div><pre class="source javascript"><strong class="lineNumber">732</strong>const fruitCake = cakes.create(3, {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">733</strong>    name: 'Tropical Fruit',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">734</strong>    price: 16.49,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">735</strong>});</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">736</strong>// fruitCake is the newly created cake Record</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">737</strong>cakes.records.size; // 3</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">750</strong>const fruitCake = cakes.create(3, {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">751</strong>    name: 'Tropical Fruit',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">752</strong>    price: 16.49,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">753</strong>});</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">754</strong>// fruitCake is the newly created cake Record</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">755</strong>cakes.records.size; // 3</pre></div>
 <div class="line"><div class="doc"><p>Second, it can also sort them by the comparator when providing a summary</p>
-</div><pre class="source javascript"><strong class="lineNumber">739</strong>cakes.summarize(); // [cake2, cake1, cake3], sorted by 'name'</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">740</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">757</strong>cakes.summarize(); // [cake2, cake1, cake3], sorted by 'name'</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">758</strong></pre></div>
 <div class="line"><div class="doc"><p>Rather than overriding <code>get recordClass()</code> each time you subclass <code>Store</code>, Torus provides a <code>StoreOf()</code> shorthand, so you can write the above like this.</p>
-</div><pre class="source javascript"><strong class="lineNumber">743</strong>class CakeProductStore extends StoreOf(CakeProduct) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">744</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">745</strong>    get comparator() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">746</strong>        return cake =&#62; cake.get('name');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">747</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">748</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">749</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">750</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">761</strong>class CakeProductStore extends StoreOf(CakeProduct) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">762</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">763</strong>    get comparator() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">764</strong>        return cake =&#62; cake.get('name');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">765</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">766</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">767</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">768</strong></pre></div>
 <div class="line"><div class="doc"><h2 id="list">List</h2>
-</div><pre class="source javascript"><strong class="lineNumber">752</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">770</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>80% of user interface development is about building lists, and the best UI platforms like iOS and (as of recently) Android come with great list view primitives like <code>UICollectionView</code> on iOS or <code>RecyclerView</code> on Android. The web doesn&#39;t, but Torus comes with a basic list view implementation that works well with Torus components for small lists, up to hundreds of items. (I might build a more performance-focused collection view later.)</p>
-</div><pre class="source javascript"><strong class="lineNumber">759</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">777</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>To define our own list component, we first create a component for each item in the list. Let&#39;s say we want to reimplement the <code>RankingsList</code> above as a Torus list component.</p>
-</div><pre class="source javascript"><strong class="lineNumber">763</strong>class WinnerListing extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">764</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">765</strong>    init(winner, removeCallback) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">781</strong>class WinnerListing extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">782</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">783</strong>    init(winner, removeCallback) {</pre></div>
 <div class="line"><div class="doc"><p>We can store the winner&#39;s properties here</p>
-</div><pre class="source javascript"><strong class="lineNumber">767</strong>        this.winner = winner;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">785</strong>        this.winner = winner;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>When we want to remove this item from the list (from a user event, for example), we can run this callback passed from <code>List</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">771</strong>        this.removeCallback = removeCallback;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">772</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">773</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">774</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">775</strong>        return jdom`&#60;li&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">776</strong>            ${this.winner.name}, from ${this.winner.city}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">777</strong>        &#60;/li&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">778</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">779</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">780</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">789</strong>        this.removeCallback = removeCallback;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">790</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">791</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">792</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">793</strong>        return jdom`&#60;li&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">794</strong>            ${this.winner.name}, from ${this.winner.city}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">795</strong>        &#60;/li&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">796</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">797</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">798</strong>}</pre></div>
 <div class="line"><div class="doc"><p>We also need to define a Store for our winners, so we can have something the list can sync its contents with. Let&#39;s also give it a <code>fetch()</code> method.</p>
-</div><pre class="source javascript"><strong class="lineNumber">783</strong>class WinnerRecord extends Record {}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">784</strong>class WinnerStore extends StoreOf(WinnerRecord) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">785</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">786</strong>    async fetch() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">787</strong>        const data = fetch('/api/v2/rankings').then(r =&#62; r.json());</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">788</strong>        const rankings = data.slice(0, this.limit);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">801</strong>class WinnerRecord extends Record {}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong>class WinnerStore extends StoreOf(WinnerRecord) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong>    async fetch() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">805</strong>        const data = fetch('/api/v2/rankings').then(r =&#62; r.json());</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">806</strong>        const rankings = data.slice(0, this.limit);</pre></div>
 <div class="line"><div class="doc"><p>When new data comes back, reset the collection with the new list of winners.</p>
-</div><pre class="source javascript"><strong class="lineNumber">791</strong>        this.reset(rankings.map(winner =&#62; new this.recordClass(winner)));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">792</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">793</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">794</strong>};</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">809</strong>        this.reset(rankings.map(winner =&#62; new this.recordClass(winner)));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">810</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>};</pre></div>
 <div class="line"><div class="doc"><p>Our list component extends <code>List</code>, which already implements creating and managing our <code>WinnerListing</code> views from a Store it&#39;s given on creation. Note that <code>List</code> is not styled by default. You can extend the styled version of the list component by extending from <code>Styled(List)</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">799</strong>class WinnerList extends List {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">800</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">801</strong>    get itemClass() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong>        return WinnerListing;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">805</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">817</strong>class WinnerList extends List {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">818</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">819</strong>    get itemClass() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong>        return WinnerListing;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">821</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">822</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">823</strong>}</pre></div>
 <div class="line"><div class="doc"><p>Create a new store for winners</p>
-</div><pre class="source javascript"><strong class="lineNumber">807</strong>const winners = new WinnerStore();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">825</strong>const winners = new WinnerStore();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Create a new list view based on the store. This list will now stay in sync with the store&#39;s data until it&#39;s removed.</p>
-</div><pre class="source javascript"><strong class="lineNumber">810</strong>const winnerList = new WinnerList(winners);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong>winners.fetch(); // fetch new data, so the list updates</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>                 // when we get it back from the server</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">828</strong>const winnerList = new WinnerList(winners);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">829</strong>winners.fetch(); // fetch new data, so the list updates</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">830</strong>                 // when we get it back from the server</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">831</strong></pre></div>
 <div class="line"><div class="doc"><p>Torus also has a composable, higher-order component called <code>ListOf</code> that allows us to write the above like this instead. This creates and returns a <code>List</code> component with the item component class set to the class we give it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">818</strong>const WinnerList = ListOf(WinnerListing); // same as class WinnerList extends ...</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">819</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">836</strong>const WinnerList = ListOf(WinnerListing); // same as class WinnerList extends ...</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">837</strong></pre></div>
 <div class="line"><div class="doc"><p>Like stores, we can iterate over <code>List</code> instances to get an <em>unfiltered,</em> <em>ordered</em> sequence of components inside the list. This means we can e.g. <code>for...of</code> loop over the list&#39;s components.</p>
-</div><pre class="source javascript"><strong class="lineNumber">822</strong>for (const winnerListing of winnerList) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">823</strong>    do_something_with_each_item_view(winnerListing);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">824</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">825</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">840</strong>for (const winnerListing of winnerList) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">841</strong>    do_something_with_each_item_view(winnerListing);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">842</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">843</strong></pre></div>
 <div class="line"><div class="doc"><p>By default, <code>List</code> will render the children into a <code>&lt;ul&gt;&lt;/ul&gt;</code>. But we&#39;ll usually want to customize that. To do so, we can just override <code>List#compose()</code> with our custom behavior. The <code>List#nodes</code> property always evaluates to a sorted array of the children nodes, so we can use that in our compose method.</p>
-</div><pre class="source javascript"><strong class="lineNumber">831</strong>class WinnerList extends ListOf(WinnerListing) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">832</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">833</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">834</strong>        // We want the list to have a header, and a wrapper element.</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">835</strong>        return jdom`&#60;div class="winner-list"&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">836</strong>            &#60;h1&#62;Winners!&#60;/h1&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">837</strong>            &#60;ul&#62;${this.nodes}&#60;/ul&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">838</strong>        &#60;/div&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">839</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">840</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">841</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">842</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">849</strong>class WinnerList extends ListOf(WinnerListing) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">850</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">851</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">852</strong>        // We want the list to have a header, and a wrapper element.</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">853</strong>        return jdom`&#60;div class="winner-list"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">854</strong>            &#60;h1&#62;Winners!&#60;/h1&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">855</strong>            &#60;ul&#62;${this.nodes}&#60;/ul&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">856</strong>        &#60;/div&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">857</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">858</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">859</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">860</strong></pre></div>
 <div class="line"><div class="doc"><p>We can set and remove a filter function that Torus lists will run on each record before rendering that record&#39;s listing in the view. Each time we change the filter, the list will automatically re-render. This is useful for searching through or filtering lists rendered with <code>List</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">847</strong>class MovieView extends Component { /*...*/ }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">848</strong>const movieList = new (ListOf(MovieView))(movies);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">849</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">865</strong>class MovieView extends Component { /*...*/ }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">866</strong>const movieList = new (ListOf(MovieView))(movies);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">867</strong></pre></div>
 <div class="line"><div class="doc"><p>Let&#39;s only show movies that start with &#39;A&#39; or &#39;a&#39;</p>
-</div><pre class="source javascript"><strong class="lineNumber">851</strong>movieList.filter(movie =&#62; movie.get('name').toLowerCase()[0] === 'a');</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">869</strong>movieList.filter(movie =&#62; movie.get('name').toLowerCase()[0] === 'a');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Let&#39;s switch the filter to movies that are rated above 80% this _unsets the last filter_, and sets a new filter.</p>
-</div><pre class="source javascript"><strong class="lineNumber">854</strong>movieList.filter(movie =&#62; movie.get('rating') &#62; 80);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">872</strong>movieList.filter(movie =&#62; movie.get('rating') &#62; 80);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Show all the movies again</p>
-</div><pre class="source javascript"><strong class="lineNumber">856</strong>movieList.unfilter();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">857</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">874</strong>movieList.unfilter();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">875</strong></pre></div>
 <div class="line"><div class="doc"><h2 id="router">Router</h2>
-</div><pre class="source javascript"><strong class="lineNumber">859</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">877</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Torus comes with a Router that implements basic client-side routing and works well with Torus components. To use <code>Router</code> on your page, just create an instance of it with your routes</p>
-</div><pre class="source javascript"><strong class="lineNumber">863</strong>const router = new Router({</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">881</strong>const router = new Router({</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>We pass in a JSON dictionary of routes when we create a new router. it&#39;ll automatically start listening to page navigations.</p>
-</div><pre class="source javascript"><strong class="lineNumber">866</strong>    tabPage: '/tab/:tabID/page/:pageNumber',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">867</strong>    tab: '/tab/:tabID',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">868</strong>    about: '/about',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">869</strong>    contact: '/contact',</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">884</strong>    tabPage: '/tab/:tabID/page/:pageNumber',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">885</strong>    tab: '/tab/:tabID',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">886</strong>    about: '/about',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">887</strong>    contact: '/contact',</pre></div>
 <div class="line"><div class="doc"><p><code>Router</code> matches routes top-down, so always put your more general routes later.</p>
-</div><pre class="source javascript"><strong class="lineNumber">871</strong>    default: '/',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">872</strong>});</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">873</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">889</strong>    default: '/',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">890</strong>});</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">891</strong></pre></div>
 <div class="line"><div class="doc"><p>When we later create our top-level app view (or whatever view is in charge of routing) we can listen to events from the router and re-render accordingly.</p>
-</div><pre class="source javascript"><strong class="lineNumber">876</strong>class App extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">877</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">878</strong>    init(router) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">894</strong>class App extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">895</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">896</strong>    init(router) {</pre></div>
 <div class="line"><div class="doc"><p>We bind to a router just like we&#39;d bind to a record or store. the event summary will contain two values in an array: the name of the route, as defined in the router, and the route parameters, like <code>:tabID</code>.</p>
-</div><pre class="source javascript"><strong class="lineNumber">882</strong>        this.bind(router, ([name, params]) =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">900</strong>        this.bind(router, ([name, params]) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>You can write your routing logic however you like, but I personally found switch cases based on the name of the route to be a good pattern.</p>
-</div><pre class="source javascript"><strong class="lineNumber">886</strong>            switch (name) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">887</strong>                case 'tabPage':</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">888</strong>                    this.activeTab = params.tabID;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">889</strong>                    this.activePage = params.pageNumber;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">890</strong>                    // render the tab and page</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">891</strong>                    break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">892</strong>                case 'tab':</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">893</strong>                    this.activeTab = params.tabID;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">894</strong>                    // render the tab</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">895</strong>                    break;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">896</strong>                // ...</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">897</strong>                default:</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">898</strong>                    // render the default page</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">899</strong>            }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">900</strong>        });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">901</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">902</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">903</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">904</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">904</strong>            switch (name) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">905</strong>                case 'tabPage':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">906</strong>                    this.activeTab = params.tabID;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">907</strong>                    this.activePage = params.pageNumber;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">908</strong>                    // render the tab and page</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">909</strong>                    break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">910</strong>                case 'tab':</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">911</strong>                    this.activeTab = params.tabID;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">912</strong>                    // render the tab</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">913</strong>                    break;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">914</strong>                // ...</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">915</strong>                default:</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">916</strong>                    // render the default page</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">917</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">918</strong>        });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">919</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">920</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">921</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">922</strong></pre></div>
 <div class="line"><div class="doc"><p>When we creat the app later, we can pass it our page router</p>
-</div><pre class="source javascript"><strong class="lineNumber">906</strong>const app = new App(router);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">907</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">924</strong>const app = new App(router);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">925</strong></pre></div>
 <div class="line"><div class="doc"><p>The router has a method, <code>#go()</code>, that we can call to navigate to a new route. For example, if we want some method to redirect the page to tab &#39;shop&#39;, page 3, we can just call...</p>
-</div><pre class="source javascript"><strong class="lineNumber">911</strong>router.go('/tab/shop/page/3');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">912</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">929</strong>router.go('/tab/shop/page/3');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">930</strong></pre></div>
 <div class="line"><div class="doc"><p>We can also write a component that abstracts this away from us</p>
-</div><pre class="source javascript"><strong class="lineNumber">914</strong>const RoutedLink = (route, children) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">915</strong>    return jdom`&#60;a onclick="${() =&#62; router.go(route)}"&#62;${children}&#60;/a&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">916</strong>};</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">932</strong>const RoutedLink = (route, children) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">933</strong>    return jdom`&#60;a onclick="${() =&#62; router.go(route)}"&#62;${children}&#60;/a&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">934</strong>};</pre></div>
 <div class="line"><div class="doc"><p>... so we can write later in a nav bar, something like this.</p>
-</div><pre class="source javascript"><strong class="lineNumber">918</strong>class NavBar extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">919</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">920</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">921</strong>        return jdom`&#60;nav&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">922</strong>            ${[</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">923</strong>                RoutedLink('/', 'Home'),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">924</strong>                RoutedLink('/about', 'About Us'),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">925</strong>                RoutedLink('/contact', 'Contact')</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">926</strong>            ]}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">927</strong>        &#60;/nav&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">928</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">929</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">930</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">931</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">936</strong>class NavBar extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">937</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">938</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">939</strong>        return jdom`&#60;nav&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">940</strong>            ${[</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">941</strong>                RoutedLink('/', 'Home'),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">942</strong>                RoutedLink('/about', 'About Us'),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">943</strong>                RoutedLink('/contact', 'Contact')</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">944</strong>            ]}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">945</strong>        &#60;/nav&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">946</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">947</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">948</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">949</strong></pre></div>
 <div class="line"><div class="doc"><h2 id="conclusions">Conclusions</h2>
-</div><pre class="source javascript"><strong class="lineNumber">933</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">951</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>That&#39;s it! That&#39;s all of Torus&#39;s API. It&#39;s pretty small. Torus tries to be simple, lightweight, and extensible, so rather than being opinionated about how to do common things, it provides a set of powerful extensible APIs on top of a simple component and data model system.</p>
-</div><pre class="source javascript"><strong class="lineNumber">938</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">956</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>I hope you found this page useful, and I hope Torus helps you build something awesome. If you have any questions or come across bugs, please find me on Github or Twitter at @thesephist :) Thanks for checking out Torus!</p>
-</div><pre class="source javascript"><strong class="lineNumber">942</strong>torus.build('🚀');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">943</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">960</strong>torus.build('🚀');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">961</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

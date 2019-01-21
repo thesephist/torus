@@ -163,6 +163,24 @@ jdom`<input type=text value=default-value />`;
 const tagName = isEven(someNumber) ? 'em' : 'strong';
 jdom`<span><${tagName}>${someNumber} is my favorite number.</></span>`;
 
+//> **An important note on security**
+
+//> Inline `<script>` tags are well known to be a source of many tricky security issues,
+//  and are generally best avoided unless it's the only way to solve your problem at hand.
+//  Inline scripts are especially problematic in templating code like `jdom` because it's easy
+//  to write templates and accidentally forget to escape user input when rendering it into DOM.
+
+//> To help alleviate the potential security risks here, **no user-provided input (no variable
+//  passed into `jdom` templates inside curly braces) will _ever_ be parsed into HTML** by the
+//  template processor. This prevents potential cross-site scripting issues or premature `<script>`
+//  tag terminations, for example, but it means that you'll have to wrap any template string in
+//  `jdom` tags, even if it's inside another `jdom` tagged template.
+
+//> On a related note, if you _must_ use an inline `<script>` in a template, `jdom` allows this
+//  (for now). However, you'll want to escape the entire contents of the script tag, by wrapping
+//  the full contents of the tag in curly braces, to avoid security pitfalls around escaping code.
+jdom`<script>${'console.log("This is highly discouraged, for security reasons.")'}</script>`;
+
 //> ## Component
 
 //> In Torus, we build user interfaces by composing and connecting reusable components

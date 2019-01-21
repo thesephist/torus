@@ -410,6 +410,22 @@ describe('jdom template tag', () => {
             ]}
         );
 
+        compare(
+            'HTML markup injected into JDOM template parameters should be escaped, not parsed as JS or HTML (security risk)',
+            jdom`<div>${'<h1>Hi</h1>'}</div>`,
+            {tag: 'div', children: [
+                '<h1>Hi</h1>',
+            ]},
+        );
+
+        compare(
+            'JS code injected into JDOM template parameters should be escaped, not parsed as JS or HTML (security risk)',
+            jdom`<script>${'</script>console.log("alert")'}</script>`,
+            {tag: 'script', children: [
+                '</script>console.log("alert")'
+            ]},
+        );
+
     });
 
     describe('Graceful failure', () => {
@@ -483,6 +499,11 @@ describe('jdom template tag', () => {
         noThrow(
             'Mismatched quotes',
             () => jdom`<img src="url ab c/>`
+        );
+
+        noThrow(
+            'Script tag that closes itself inside its contents',
+            () => jdom`<script>console.log('</script>');</script>`
         );
 
     });

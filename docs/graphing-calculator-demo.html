@@ -749,225 +749,227 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">796</strong></pre></div>
 <div class="line"><div class="doc"><p>... and in between, anytime there&#39;s mouse movement over the graph, we compute how much distance changed between the initial click down and now, and pan the graph by that amount, again throttled by <code>requestAnimationFrame()</code> to be efficient about when we redraw.</p>
 </div><pre class="source javascript"><strong class="lineNumber">801</strong>    handleMousemove(evt) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong>        if (this._dragging) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong>            const clientX = evt.clientX;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong>            const clientY = evt.clientY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">805</strong>            const deltaX = clientX - this._lastClientX;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">806</strong>            const deltaY = clientY - this._lastClientY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">807</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">808</strong>            requestAnimationFrame(() =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">809</strong>                const props = this.record.summarize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">810</strong>                this.record.update({</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong>                    centerX: props.centerX - deltaX / props.zoom,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>                    centerY: props.centerY + deltaY / props.zoom,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong>                });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">814</strong>            });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">815</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">816</strong>            this._lastClientX = clientX;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">817</strong>            this._lastClientY = clientY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">818</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">819</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">802</strong>        evt.preventDefault();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong>        if (this._dragging) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong>            const clientX = evt.clientX;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">805</strong>            const clientY = evt.clientY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">806</strong>            const deltaX = clientX - this._lastClientX;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">807</strong>            const deltaY = clientY - this._lastClientY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">808</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">809</strong>            requestAnimationFrame(() =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">810</strong>                const props = this.record.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">811</strong>                this.record.update({</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">812</strong>                    centerX: props.centerX - deltaX / props.zoom,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">813</strong>                    centerY: props.centerY + deltaY / props.zoom,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">814</strong>                });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">815</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">816</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">817</strong>            this._lastClientX = clientX;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">818</strong>            this._lastClientY = clientY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">819</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">820</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">821</strong></pre></div>
 <div class="line"><div class="doc"><p>The next three functions are the same as the drag-and-drop code above, but for touch events on things like Windows laptops and iPad.</p>
-</div><pre class="source javascript"><strong class="lineNumber">823</strong>    handleTouchstart(evt) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">824</strong>        this._touchDragging = true;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">825</strong>        document.body.classList.add('graph_dragging');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">826</strong>        this._lastClientX = evt.touches[0].clientX;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">827</strong>        this._lastClientY = evt.touches[0].clientY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">828</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">829</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">830</strong>    handleTouchend(evt) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">831</strong>        this._touchDragging = false;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">832</strong>        document.body.classList.remove('graph_dragging');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">833</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">834</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">835</strong>    handleTouchmove(evt) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">836</strong>        if (this._touchDragging) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">837</strong>            const clientX = evt.touches[0].clientX;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">838</strong>            const clientY = evt.touches[0].clientY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">839</strong>            const deltaX = clientX - this._lastClientX;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">840</strong>            const deltaY = clientY - this._lastClientY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">841</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">842</strong>            requestAnimationFrame(() =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">843</strong>                const props = this.record.summarize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">844</strong>                this.record.update({</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">845</strong>                    centerX: props.centerX - deltaX / props.zoom,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">846</strong>                    centerY: props.centerY + deltaY / props.zoom,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">847</strong>                });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">848</strong>            });</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">849</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">850</strong>            this._lastClientX = clientX;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">851</strong>            this._lastClientY = clientY;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">852</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">853</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">854</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">824</strong>    handleTouchstart(evt) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">825</strong>        this._touchDragging = true;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">826</strong>        document.body.classList.add('graph_dragging');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">827</strong>        this._lastClientX = evt.touches[0].clientX;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">828</strong>        this._lastClientY = evt.touches[0].clientY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">829</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">830</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">831</strong>    handleTouchend(evt) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">832</strong>        this._touchDragging = false;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">833</strong>        document.body.classList.remove('graph_dragging');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">834</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">835</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">836</strong>    handleTouchmove(evt) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">837</strong>        evt.preventDefault();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">838</strong>        if (this._touchDragging) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">839</strong>            const clientX = evt.touches[0].clientX;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">840</strong>            const clientY = evt.touches[0].clientY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">841</strong>            const deltaX = clientX - this._lastClientX;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">842</strong>            const deltaY = clientY - this._lastClientY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">843</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">844</strong>            requestAnimationFrame(() =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">845</strong>                const props = this.record.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">846</strong>                this.record.update({</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">847</strong>                    centerX: props.centerX - deltaX / props.zoom,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">848</strong>                    centerY: props.centerY + deltaY / props.zoom,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">849</strong>                });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">850</strong>            });</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">851</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">852</strong>            this._lastClientX = clientX;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">853</strong>            this._lastClientY = clientY;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">854</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">855</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">856</strong></pre></div>
 <div class="line"><div class="doc"><p>Re-draw the entire graph, including all the grid lines and coordinate numbers.</p>
-</div><pre class="source javascript"><strong class="lineNumber">856</strong>    redraw() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">857</strong>        const graphPropsSummary = this.graphProps.summarize();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">858</strong>        const width = this.canvas.width = window.innerWidth;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">859</strong>        const height = this.canvas.height = window.innerHeight;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">860</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">858</strong>    redraw() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">859</strong>        const graphPropsSummary = this.graphProps.summarize();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">860</strong>        const width = this.canvas.width = window.innerWidth;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">861</strong>        const height = this.canvas.height = window.innerHeight;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">862</strong></pre></div>
 <div class="line"><div class="doc"><p>Shorthand so I don&#39;t have to keep typing <code>this.context</code></p>
-</div><pre class="source javascript"><strong class="lineNumber">862</strong>        const ctx = this.context;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">863</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">864</strong>        const ctx = this.context;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">865</strong></pre></div>
 <div class="line"><div class="doc"><p>Clear canvas</p>
-</div><pre class="source javascript"><strong class="lineNumber">865</strong>        ctx.clearRect(0, 0, width, height);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">866</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">867</strong>        ctx.clearRect(0, 0, width, height);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">868</strong></pre></div>
 <div class="line"><div class="doc"><p>Destructure properties that matter from the graph settings</p>
-</div><pre class="source javascript"><strong class="lineNumber">868</strong>        const {centerX, centerY, zoom } = graphPropsSummary;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">869</strong>        const centerXScreen = width / 2;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">870</strong>        const centerYScreen = height / 2;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">871</strong>        const minX = ~~(centerX - centerXScreen / zoom) - 1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">872</strong>        const maxX = ~~(centerX + centerXScreen / zoom) + 1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">873</strong>        const minY = ~~(centerY - centerYScreen / zoom) - 1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">874</strong>        const maxY = ~~(centerY + centerYScreen / zoom) + 1;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">875</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">870</strong>        const {centerX, centerY, zoom } = graphPropsSummary;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">871</strong>        const centerXScreen = width / 2;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">872</strong>        const centerYScreen = height / 2;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">873</strong>        const minX = ~~(centerX - centerXScreen / zoom) - 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">874</strong>        const maxX = ~~(centerX + centerXScreen / zoom) + 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">875</strong>        const minY = ~~(centerY - centerYScreen / zoom) - 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">876</strong>        const maxY = ~~(centerY + centerYScreen / zoom) + 1;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">877</strong></pre></div>
 <div class="line"><div class="doc"><p>Much of this is same as above, in <code>FunctionGraph</code>&#39;s rendering code.</p>
-</div><pre class="source javascript"><strong class="lineNumber">877</strong>        const xToCoord = xValue =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">878</strong>            return centerXScreen + ((xValue - centerX) * zoom);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">879</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">880</strong>        const yToCoord = yValue =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">881</strong>            return centerYScreen - ((yValue - centerY) * zoom);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">882</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">883</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">879</strong>        const xToCoord = xValue =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">880</strong>            return centerXScreen + ((xValue - centerX) * zoom);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">881</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">882</strong>        const yToCoord = yValue =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">883</strong>            return centerYScreen - ((yValue - centerY) * zoom);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">884</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">885</strong></pre></div>
 <div class="line"><div class="doc"><p>Draw the horizontal grid lines</p>
-</div><pre class="source javascript"><strong class="lineNumber">885</strong>        ctx.strokeStyle = '#aaa'; // dark grey</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">886</strong>        ctx.beginPath();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">887</strong>        for (let y = minY; y &#60; maxY; y ++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">888</strong>            ctx.moveTo(xToCoord(minX), yToCoord(y));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">889</strong>            ctx.lineTo(xToCoord(maxX), yToCoord(y));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">890</strong>        }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">887</strong>        ctx.strokeStyle = '#aaa'; // dark grey</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">888</strong>        ctx.beginPath();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">889</strong>        for (let y = minY; y &#60; maxY; y ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">890</strong>            ctx.moveTo(xToCoord(minX), yToCoord(y));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">891</strong>            ctx.lineTo(xToCoord(maxX), yToCoord(y));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">892</strong>        }</pre></div>
 <div class="line"><div class="doc"><p>Draw the vertical grid lines</p>
-</div><pre class="source javascript"><strong class="lineNumber">892</strong>        for (let x = minX; x &#60; maxX; x ++) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">893</strong>            ctx.moveTo(xToCoord(x), yToCoord(minY));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">894</strong>            ctx.lineTo(xToCoord(x), yToCoord(maxY));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">895</strong>        }</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">894</strong>        for (let x = minX; x &#60; maxX; x ++) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">895</strong>            ctx.moveTo(xToCoord(x), yToCoord(minY));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">896</strong>            ctx.lineTo(xToCoord(x), yToCoord(maxY));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">897</strong>        }</pre></div>
 <div class="line"><div class="doc"><p>Commit the lines to the canvas</p>
-</div><pre class="source javascript"><strong class="lineNumber">897</strong>        ctx.stroke();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">898</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">899</strong>        ctx.stroke();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">900</strong></pre></div>
 <div class="line"><div class="doc"><p>Draw the zero axes, a bit bolder and thicker than the others.</p>
-</div><pre class="source javascript"><strong class="lineNumber">900</strong>        ctx.lineWidth = 3;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">901</strong>        ctx.strokeStyle = '#333';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">902</strong>        ctx.beginPath();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">902</strong>        ctx.lineWidth = 3;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">903</strong>        ctx.strokeStyle = '#333';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">904</strong>        ctx.beginPath();</pre></div>
 <div class="line"><div class="doc"><p>The y = 0 line</p>
-</div><pre class="source javascript"><strong class="lineNumber">904</strong>        ctx.moveTo(xToCoord(minX), yToCoord(0));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">905</strong>        ctx.lineTo(xToCoord(maxX), yToCoord(0));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">906</strong>        // The x = 0 line</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">907</strong>        ctx.moveTo(xToCoord(0), yToCoord(minY));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">908</strong>        ctx.lineTo(xToCoord(0), yToCoord(maxY));</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">909</strong>        ctx.stroke();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">910</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">911</strong>        ctx.lineWidth = 2;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">906</strong>        ctx.moveTo(xToCoord(minX), yToCoord(0));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">907</strong>        ctx.lineTo(xToCoord(maxX), yToCoord(0));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">908</strong>        // The x = 0 line</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">909</strong>        ctx.moveTo(xToCoord(0), yToCoord(minY));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">910</strong>        ctx.lineTo(xToCoord(0), yToCoord(maxY));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">911</strong>        ctx.stroke();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">912</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">913</strong>        ctx.lineWidth = 2;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">914</strong></pre></div>
 <div class="line"><div class="doc"><p>We mark some key coordinates on the graph to orient the user.</p>
-</div><pre class="source javascript"><strong class="lineNumber">914</strong>        ctx.font = '16px sans-serif';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">915</strong>        ctx.fillStyle = '#555';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">916</strong>        const markCoord = (x, y) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">917</strong>            ctx.fillText(`(${x}, ${y})`, xToCoord(x) + 5, yToCoord(y) + 18);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">918</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">919</strong>        markCoord(0, 0);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">920</strong>        markCoord(1, 0);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">921</strong>        markCoord(0, 1);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">922</strong>        markCoord(10, 0);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">923</strong>        markCoord(0, 10);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">924</strong>        markCoord(-10, 0);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">925</strong>        markCoord(0, -10);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">926</strong>        markCoord(50, 0);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">927</strong>        markCoord(0, 50);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">928</strong>        markCoord(-50, 0);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">929</strong>        markCoord(0, -50);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">930</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">916</strong>        ctx.font = '16px sans-serif';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">917</strong>        ctx.fillStyle = '#555';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">918</strong>        const markCoord = (x, y) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">919</strong>            ctx.fillText(`(${x}, ${y})`, xToCoord(x) + 5, yToCoord(y) + 18);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">920</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">921</strong>        markCoord(0, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">922</strong>        markCoord(1, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">923</strong>        markCoord(0, 1);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">924</strong>        markCoord(10, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">925</strong>        markCoord(0, 10);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">926</strong>        markCoord(-10, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">927</strong>        markCoord(0, -10);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">928</strong>        markCoord(50, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">929</strong>        markCoord(0, 50);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">930</strong>        markCoord(-50, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">931</strong>        markCoord(0, -50);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">932</strong></pre></div>
 <div class="line"><div class="doc"><p>Since this redraw method is called when the window is resized, for example, we want to tell each graph to also re-render.</p>
-</div><pre class="source javascript"><strong class="lineNumber">933</strong>        for (const graph of this.functionGraphs.components) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">934</strong>            graph.redraw();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">935</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">936</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">937</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">938</strong>    compose() {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">935</strong>        for (const graph of this.functionGraphs.components) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">936</strong>            graph.redraw();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">937</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">938</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">939</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">940</strong>    compose() {</pre></div>
 <div class="line"><div class="doc"><p>Bind all the drag-and-drop listeners to the parent container of all the canvas (graph) elements.</p>
-</div><pre class="source javascript"><strong class="lineNumber">941</strong>        return jdom`&#60;div id="graphContainer"</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">942</strong>            onwheel="${this.handleWheel}"</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">943</strong>            onmousedown="${this.handleMousedown}"</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">944</strong>            onmouseup="${this.handleMouseup}"</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">945</strong>            onmousemove="${this.handleMousemove}"</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">946</strong>            ontouchstart="${this.handleTouchstart}"</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">947</strong>            ontouchend="${this.handleTouchend}"</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">948</strong>            ontouchmove="${this.handleTouchmove}"&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">949</strong>            ${this.canvas}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">950</strong>            ${this.functionGraphs.node}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">951</strong>        &#60;/div&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">952</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">953</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">954</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">943</strong>        return jdom`&#60;div id="graphContainer"</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">944</strong>            onwheel="${this.handleWheel}"</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">945</strong>            onmousedown="${this.handleMousedown}"</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">946</strong>            onmouseup="${this.handleMouseup}"</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">947</strong>            onmousemove="${this.handleMousemove}"</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">948</strong>            ontouchstart="${this.handleTouchstart}"</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">949</strong>            ontouchend="${this.handleTouchend}"</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">950</strong>            ontouchmove="${this.handleTouchmove}"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">951</strong>            ${this.canvas}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">952</strong>            ${this.functionGraphs.node}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">953</strong>        &#60;/div&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">954</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">955</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">956</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">957</strong></pre></div>
 <div class="line"><div class="doc"><p>The app&#39;s root component, also holds all global data.</p>
-</div><pre class="source javascript"><strong class="lineNumber">957</strong>class App extends StyledComponent {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">958</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">959</strong>    init() {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">959</strong>class App extends StyledComponent {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">960</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">961</strong>    init() {</pre></div>
 <div class="line"><div class="doc"><p>Create our main collection of functions</p>
-</div><pre class="source javascript"><strong class="lineNumber">961</strong>        this.functionStore = new FunctionStore([</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">963</strong>        this.functionStore = new FunctionStore([</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Default, example functions</p>
-</div><pre class="source javascript"><strong class="lineNumber">963</strong>            new FunctionRecord({ text: 'x + 1' }),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">964</strong>            new FunctionRecord({ text: 'x * x' }),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">965</strong>            new FunctionRecord({ text: 'sqrt(x)' }),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">966</strong>            new FunctionRecord({ text: '1 / x' }),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">967</strong>            new FunctionRecord({ text: '2.71828 ^ x * sin(5 * x) / 20' }),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">968</strong>        ]);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">965</strong>            new FunctionRecord({ text: 'x + 1' }),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">966</strong>            new FunctionRecord({ text: 'x * x' }),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">967</strong>            new FunctionRecord({ text: 'sqrt(x)' }),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">968</strong>            new FunctionRecord({ text: '1 / x' }),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">969</strong>            new FunctionRecord({ text: '2.71828 ^ x * sin(5 * x) / 20' }),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">970</strong>        ]);</pre></div>
 <div class="line"><div class="doc"><p>Create a record to keep graph settings, and sync updates across the UI.</p>
-</div><pre class="source javascript"><strong class="lineNumber">971</strong>        this.graphProps = new GraphPropsRecord();</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">973</strong>        this.graphProps = new GraphPropsRecord();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Create nested components: the sidebar overlay, and the graph</p>
-</div><pre class="source javascript"><strong class="lineNumber">973</strong>        this.appBar = new AppBar(this.functionStore, this.graphProps);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">974</strong>        this.graph = new Graph(this.functionStore, this.graphProps);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">975</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">976</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">977</strong>    styles() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">978</strong>        return {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">979</strong>            'font-family': '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">980</strong>            'footer': {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">981</strong>                'position': 'fixed',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">982</strong>                'right': '0',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">983</strong>                'bottom': '0',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">984</strong>                'padding': '6px 8px',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">985</strong>                'color': '#333',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">986</strong>                'opacity': '.5',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">987</strong>                'font-size': '14px',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">988</strong>                'cursor': 'pointer',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">989</strong>                'transition': 'opacity .2s',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">990</strong>                'a': {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">991</strong>                    'color': '#333',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">992</strong>                },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">993</strong>                '&#38;:hover': {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">994</strong>                    'opacity': '.8',</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">995</strong>                },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">996</strong>            },</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">997</strong>        }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">998</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">999</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">975</strong>        this.appBar = new AppBar(this.functionStore, this.graphProps);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">976</strong>        this.graph = new Graph(this.functionStore, this.graphProps);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">977</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">978</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">979</strong>    styles() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">980</strong>        return {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">981</strong>            'font-family': '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">982</strong>            'footer': {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">983</strong>                'position': 'fixed',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">984</strong>                'right': '0',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">985</strong>                'bottom': '0',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">986</strong>                'padding': '6px 8px',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">987</strong>                'color': '#333',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">988</strong>                'opacity': '.5',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">989</strong>                'font-size': '14px',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">990</strong>                'cursor': 'pointer',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">991</strong>                'transition': 'opacity .2s',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">992</strong>                'a': {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">993</strong>                    'color': '#333',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">994</strong>                },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">995</strong>                '&#38;:hover': {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">996</strong>                    'opacity': '.8',</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">997</strong>                },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">998</strong>            },</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">999</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1000</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1001</strong></pre></div>
 <div class="line"><div class="doc"><p>The app itself is pretty simple: the overlay in an overlay container, and the graph below it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">1002</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1003</strong>        return jdom`&#60;main&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1004</strong>            &#60;div class="overlay"&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1005</strong>                ${this.appBar.node}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1006</strong>            &#60;/div&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1007</strong>            ${this.graph.node}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1008</strong>            &#60;footer&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1009</strong>                Built with</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1010</strong>                &#60;a href="https://linus.zone/torus" target="_blank" rel="noopener"&#62;Torus&#60;/a&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1011</strong>                by &#60;a href="https://linus.zone/now" target="_blank" rel="noopener"&#62;Linus&#60;/a&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1012</strong>            &#60;/footer&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1013</strong>        &#60;/main&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1014</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1015</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1016</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">1004</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1005</strong>        return jdom`&#60;main&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1006</strong>            &#60;div class="overlay"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1007</strong>                ${this.appBar.node}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1008</strong>            &#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1009</strong>            ${this.graph.node}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1010</strong>            &#60;footer&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1011</strong>                Built with</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1012</strong>                &#60;a href="https://linus.zone/torus" target="_blank" rel="noopener"&#62;Torus&#60;/a&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1013</strong>                by &#60;a href="https://linus.zone/now" target="_blank" rel="noopener"&#62;Linus&#60;/a&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1014</strong>            &#60;/footer&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1015</strong>        &#60;/main&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1016</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1017</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1018</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1019</strong></pre></div>
 <div class="line"><div class="doc"><p>Create an instance of the app and mount it to the page DOM.</p>
-</div><pre class="source javascript"><strong class="lineNumber">1019</strong>const app = new App();</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1020</strong>document.body.appendChild(app.node);</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">1021</strong>const app = new App();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1022</strong>document.body.appendChild(app.node);</pre></div>
 <div class="line"><div class="doc"><p>I like it when the page background isn&#39;t completely white. This is an off-white shade of very light grey;</p>
-</div><pre class="source javascript"><strong class="lineNumber">1023</strong>document.body.style.backgroundColor = '#fbfbfb';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1024</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">1025</strong>document.body.style.backgroundColor = '#fbfbfb';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1026</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

@@ -456,6 +456,11 @@ class CommentListing extends StyledComponent {
                 'margin-top': '12px',
                 'margin-left': '12px',
             },
+            'code': {
+                'display': 'block',
+                'overflow': 'auto',
+                'max-width': '100%',
+            },
             '@media (max-width: 600px)': {
                 '.text': {
                     'font-size': '.95em',

@@ -22,8 +22,8 @@ class TaskStore extends StoreOf(Task) {
 //> We create an instance of the task collection for our list,
 //  and initialize it with two items.
 const tasks = new TaskStore([
-    new Task(1, {description: 'Do this', completed: false,}),
-    new Task(2, {description: 'Do that', completed: false,}),
+    new Task(1, {description: 'Do this', completed: false}),
+    new Task(2, {description: 'Do that', completed: false}),
 ]);
 
 //> Component that represents a single todo item
@@ -114,7 +114,7 @@ class TaskInput extends StyledComponent {
     }
 
     //> If the add button is clicked, try to add a task
-    onAddClick(evt) {
+    onAddClick() {
         this._addTask();
     }
 

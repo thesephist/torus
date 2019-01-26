@@ -151,3 +151,15 @@ yarn test:prod
 ```
 
 This **won't generate a coverage report**, but will run the tests against a minified, production build at `dist/torus.min.js` to verify no compilation bugs occurred.
+
+### Linting
+
+Torus lints with ESLint, using a custom configuration (my personal style, which hopefully isn't too distasteful). To run the linter, run
+
+```sh
+npm run lint
+# or
+yarn lint
+```
+
+or consider using an editor plugin!

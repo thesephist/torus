@@ -54,7 +54,11 @@ const randomColor = () => {
 //  visible area, we clamp the y-values to the window's width and height areas
 //  so they're reasonably close to the visible area and browsers display large values correctly.
 const clamp = (val, min, max) => {
-    return val > min ? (val < max ? val : max) : min;
+    if (val > min) {
+        return val < max ? val : max;
+    } else {
+        return min;
+    }
 }
 
 //> View model that syncs display settings between the graph
@@ -98,7 +102,7 @@ class GraphPropsRecord extends Record {
     //  or just render every 5 pixels like normal.
     toggleHighPerf() {
         this.update({
-            resolution: this.get('resolution') == 5 ? 1 : 5,
+            resolution: this.get('resolution') === 5 ? 1 : 5,
         });
     }
 
@@ -225,7 +229,7 @@ class AppBar extends StyledComponent {
                 'flex-direction': 'row',
                 'justify-content': 'space-around',
                 'align-items': 'center',
-                'height': CONTROL_SIZE * 3 + CONTROL_MARGIN * 2 + 'px',
+                'height': (CONTROL_SIZE * 3) + (CONTROL_MARGIN * 2) + 'px',
                 'button': {
                     'background': '#fff',
                     'border-radius': '6px',
@@ -247,8 +251,8 @@ class AppBar extends StyledComponent {
             //  buttons (for moving around the graph) in a cross shape
             //  using absolute position coordinates.
             '.panGroup': {
-                'height': CONTROL_SIZE * 3 + CONTROL_MARGIN * 2 + 'px',
-                'width': CONTROL_SIZE * 3 + CONTROL_MARGIN * 2 + 'px',
+                'height': (CONTROL_SIZE * 3) + (CONTROL_MARGIN * 2) + 'px',
+                'width': (CONTROL_SIZE * 3) + (CONTROL_MARGIN * 2) + 'px',
                 'position': 'relative',
                 'button': {
                     'position': 'absolute',
@@ -259,12 +263,12 @@ class AppBar extends StyledComponent {
                     'left': CONTROL_SIZE + CONTROL_MARGIN + 'px',
                 },
                 '.moveDownButton': {
-                    'top': CONTROL_SIZE * 2 + CONTROL_MARGIN * 2 + 'px',
+                    'top': (CONTROL_SIZE * 2) + (CONTROL_MARGIN * 2) + 'px',
                     'left': CONTROL_SIZE + CONTROL_MARGIN + 'px',
                 },
                 '.moveRightButton': {
                     'top': CONTROL_SIZE + CONTROL_MARGIN + 'px',
-                    'left': CONTROL_SIZE * 2 + CONTROL_MARGIN * 2 + 'px',
+                    'left': (CONTROL_SIZE * 2) + (CONTROL_MARGIN * 2) + 'px',
                 },
                 '.moveLeftButton': {
                     'top': CONTROL_SIZE + CONTROL_MARGIN + 'px',
@@ -315,8 +319,8 @@ class AppBar extends StyledComponent {
                 '&:hover': {
                     'background': '#f8f8f8',
                     'transform': 'translateY(2px)',
-                }
-            }
+                },
+            },
         }
     }
 
@@ -337,25 +341,25 @@ class AppBar extends StyledComponent {
 
     moveUp() {
         this.record.update({
-            centerY: this.record.get('centerY') + 100 / this.record.get('zoom'),
+            centerY: this.record.get('centerY') + (100 / this.record.get('zoom')),
         });
     }
 
     moveDown() {
         this.record.update({
-            centerY: this.record.get('centerY') - 100 / this.record.get('zoom'),
+            centerY: this.record.get('centerY') - (100 / this.record.get('zoom')),
         });
     }
 
     moveLeft() {
         this.record.update({
-            centerX: this.record.get('centerX') - 100 / this.record.get('zoom'),
+            centerX: this.record.get('centerX') - (100 / this.record.get('zoom')),
         });
     }
 
     moveRight() {
         this.record.update({
-            centerX: this.record.get('centerX') + 100 / this.record.get('zoom'),
+            centerX: this.record.get('centerX') + (100 / this.record.get('zoom')),
         });
     }
 
@@ -468,7 +472,7 @@ class FunctionPanel extends StyledComponent {
                     'background': 'rgba(255, 255, 255, 0.4)',
                     'width': '40px',
                     'text-align': 'center',
-                    'line-height': HEIGHT / 2 + 'px',
+                    'line-height': (HEIGHT / 2) + 'px',
                     'color': '#fff',
                 },
                 'input': {
@@ -557,7 +561,7 @@ class FunctionPanel extends StyledComponent {
             </div>
             <div class="buttonArea">
                 <button onclick="${this.removeCallback}">Delete</button>
-                <button onclick="${this.toggleHidden}">${props.hidden ? '🙈 Show' : '👀 Hide' }</button>
+                <button onclick="${this.toggleHidden}">${props.hidden ? '🙈 Show' : '👀 Hide'}</button>
                 <button onclick="${this.duplicate}">Duplicate</button>
                 <button onclick="${this.updateColor}">🎨 Color</button>
             </div>
@@ -619,22 +623,22 @@ class FunctionGraph extends Component {
 
         const functionSummary = this.record.summarize();
         //> If the function is hidden, we don't need to do anything after
-        /// clearing the canvas.
+        //  clearing the canvas.
         if (functionSummary.hidden) {
             return;
         } else {
             const graphPropsSummary = this.graphProps.summarize();
 
             //> Destructure properties from graphProps
-            const { centerX, centerY, zoom, resolution, detectAsymptotes } = graphPropsSummary;
+            const {centerX, centerY, zoom, resolution, detectAsymptotes} = graphPropsSummary;
             const centerXScreen = width / 2;
             const centerYScreen = height / 2;
             //> These values represent min/max values _on the graph_, and help us
             //  determine which x- and y-values we need to worry about computing.
-            const minX = ~~(centerX - centerXScreen / zoom) - 1;
-            const maxX = ~~(centerX + centerXScreen / zoom) + 1;
-            const minY = ~~(centerY - centerYScreen / zoom) - 1;
-            const maxY = ~~(centerY + centerYScreen / zoom) + 1;
+            const minX = ~~(centerX - (centerXScreen / zoom)) - 1;
+            const maxX = ~~(centerX + (centerXScreen / zoom)) + 1;
+            const minY = ~~(centerY - (centerYScreen / zoom)) - 1;
+            const maxY = ~~(centerY + (centerYScreen / zoom)) + 1;
 
             //> Pair of short functions that map x/y values to their
             //  position on the canvas.
@@ -659,7 +663,7 @@ class FunctionGraph extends Component {
             const increment = resolution / zoom;
             for (let x = minX; x < maxX; x += increment) {
                 //> Try to get a non-asymptotic value of y
-                let y = f(x);
+                const y = f(x);
                 //> Graph it.
                 if (!isNaN(y)) {
                     //> There's some complexity here to avoid drawing an incorrect line
@@ -789,7 +793,7 @@ class Graph extends StyledComponent {
     }
 
     //> ... and set the flag to false when we stop ...
-    handleMouseup(evt) {
+    handleMouseup() {
         this._dragging = false;
         document.body.classList.remove('graph_dragging');
     }
@@ -809,8 +813,8 @@ class Graph extends StyledComponent {
             requestAnimationFrame(() => {
                 const props = this.record.summarize();
                 this.record.update({
-                    centerX: props.centerX - deltaX / props.zoom,
-                    centerY: props.centerY + deltaY / props.zoom,
+                    centerX: props.centerX - (deltaX / props.zoom),
+                    centerY: props.centerY + (deltaY / props.zoom),
                 });
             });
 
@@ -828,7 +832,7 @@ class Graph extends StyledComponent {
         this._lastClientY = evt.touches[0].clientY;
     }
 
-    handleTouchend(evt) {
+    handleTouchend() {
         this._touchDragging = false;
         document.body.classList.remove('graph_dragging');
     }
@@ -844,8 +848,8 @@ class Graph extends StyledComponent {
             requestAnimationFrame(() => {
                 const props = this.record.summarize();
                 this.record.update({
-                    centerX: props.centerX - deltaX / props.zoom,
-                    centerY: props.centerY + deltaY / props.zoom,
+                    centerX: props.centerX - (deltaX / props.zoom),
+                    centerY: props.centerY + (deltaY / props.zoom),
                 });
             });
 
@@ -867,13 +871,13 @@ class Graph extends StyledComponent {
         ctx.clearRect(0, 0, width, height);
 
         //> Destructure properties that matter from the graph settings
-        const {centerX, centerY, zoom } = graphPropsSummary;
+        const {centerX, centerY, zoom} = graphPropsSummary;
         const centerXScreen = width / 2;
         const centerYScreen = height / 2;
-        const minX = ~~(centerX - centerXScreen / zoom) - 1;
-        const maxX = ~~(centerX + centerXScreen / zoom) + 1;
-        const minY = ~~(centerY - centerYScreen / zoom) - 1;
-        const maxY = ~~(centerY + centerYScreen / zoom) + 1;
+        const minX = ~~(centerX - (centerXScreen / zoom)) - 1;
+        const maxX = ~~(centerX + (centerXScreen / zoom)) + 1;
+        const minY = ~~(centerY - (centerYScreen / zoom)) - 1;
+        const maxY = ~~(centerY + (centerYScreen / zoom)) + 1;
 
         //> Much of this is same as above, in `FunctionGraph`'s rendering code.
         const xToCoord = xValue => {
@@ -962,11 +966,11 @@ class App extends StyledComponent {
         //> Create our main collection of functions
         this.functionStore = new FunctionStore([
             //> Default, example functions
-            new FunctionRecord({ text: 'x + 1' }),
-            new FunctionRecord({ text: 'x * x' }),
-            new FunctionRecord({ text: 'sqrt(x)' }),
-            new FunctionRecord({ text: '1 / x' }),
-            new FunctionRecord({ text: '2.71828 ^ x * sin(5 * x) / 20' }),
+            new FunctionRecord({text: 'x + 1'}),
+            new FunctionRecord({text: 'x * x'}),
+            new FunctionRecord({text: 'sqrt(x)'}),
+            new FunctionRecord({text: '1 / x'}),
+            new FunctionRecord({text: '2.71828 ^ x * sin(5 * x) / 20'}),
         ]);
         //> Create a record to keep graph settings, and sync updates
         //  across the UI.

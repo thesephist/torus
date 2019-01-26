@@ -252,76 +252,70 @@ const render = (node, previous, next) => {
 
             //> Compare and update attributes
             for (const attrName of Object.keys(next.attrs)) {
-                switch (attrName) {
-                    case 'class':
-                        //> JDOM can pass classes as either a single string
-                        //  or an array of strings, so we need to check for either
-                        //  of those cases.
-                        const nextClass = next.attrs.class;
-                        //> Mutating `className` is faster than iterating through
-                        //  `classList` objects if there's only one batch operation
-                        //  for all class changes.
-                        if (Array.isArray(nextClass)) {
-                            // @begindebug
-                            if (node.className !== nextClass.join(' ')) {
-                                render_debug(`Update class names for <${next.tag}> to "${nextClass.join(' ')}"`);
-                            }
-                            // @enddebug
-                            node.className = nextClass.join(' ');
-                        } else {
-                            // @begindebug
-                            if (node.className !== nextClass) {
-                                render_debug(`Update class name for <${next.tag}> to ${nextClass}`);
-                            }
-                            // @enddebug
-                            node.className = nextClass;
+                if (attrName === 'class') {
+                    //> JDOM can pass classes as either a single string
+                    //  or an array of strings, so we need to check for either
+                    //  of those cases.
+                    const nextClass = next.attrs.class;
+                    //> Mutating `className` is faster than iterating through
+                    //  `classList` objects if there's only one batch operation
+                    //  for all class changes.
+                    if (Array.isArray(nextClass)) {
+                        // @begindebug
+                        if (node.className !== nextClass.join(' ')) {
+                            render_debug(`Update class names for <${next.tag}> to "${nextClass.join(' ')}"`);
                         }
-                        break;
-                    case 'style':
-                        //> JDOM takes style attributes as a dictionary
-                        //  rather than a string for API ergonomics, so we serialize
-                        //  it differently than other attributes.
-                        const prevStyle = previous.attrs.style || {};
-                        const nextStyle = next.attrs.style;
+                        // @enddebug
+                        node.className = nextClass.join(' ');
+                    } else {
+                        // @begindebug
+                        if (node.className !== nextClass) {
+                            render_debug(`Update class name for <${next.tag}> to ${nextClass}`);
+                        }
+                        // @enddebug
+                        node.className = nextClass;
+                    }
+                } else if (attrName === 'style') {
+                    //> JDOM takes style attributes as a dictionary
+                    //  rather than a string for API ergonomics, so we serialize
+                    //  it differently than other attributes.
+                    const prevStyle = previous.attrs.style || {};
+                    const nextStyle = next.attrs.style;
 
-                        //> When we iterate through the key/values of a flat object like this,
-                        //  you may be tempted to use `Object.entries()`. We use `Object.keys()` and lookups,
-                        //  which is less idiomatic, but fast. This results in a measurable performance bump.
-                        for (const styleKey of Object.keys(nextStyle)) {
-                            if (nextStyle[styleKey] !== prevStyle[styleKey]) {
-                                // @debug
-                                render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
-                                node.style[styleKey] = nextStyle[styleKey];
-                            }
-                        }
-                        for (const styleKey of Object.keys(prevStyle)) {
-                            if (nextStyle[styleKey] === undefined) {
-                                // @debug
-                                render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
-                                node.style[styleKey] = '';
-                            }
-                        }
-                        break;
-                    default:
-                        //> If an attribute is an IDL attribute, we set it
-                        //  through JavaScript properties on the HTML element
-                        //  and not `setAttribute()`. This is necessary for
-                        //  properties like `value` and `indeterminate`.
-                        if (attrName in node) {
+                    //> When we iterate through the key/values of a flat object like this,
+                    //  you may be tempted to use `Object.entries()`. We use `Object.keys()` and lookups,
+                    //  which is less idiomatic, but fast. This results in a measurable performance bump.
+                    for (const styleKey of Object.keys(nextStyle)) {
+                        if (nextStyle[styleKey] !== prevStyle[styleKey]) {
                             // @debug
-                            render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
-                            node[attrName] = next.attrs[attrName];
-                        } else {
-                            if (next.attrs[attrName] !== previous.attrs[attrName]) {
-                                // @debug
-                                render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
-                                node.setAttribute(attrName, next.attrs[attrName]);
-                            }
+                            render_debug(`Set <${next.tag}> style ${styleKey}: ${nextStyle[styleKey]}`);
+                            node.style[styleKey] = nextStyle[styleKey];
                         }
-                        break;
+                    }
+                    for (const styleKey of Object.keys(prevStyle)) {
+                        if (nextStyle[styleKey] === undefined) {
+                            // @debug
+                            render_debug(`Unsetting <${next.tag}> style ${styleKey}: ${prevStyle[styleKey]}`);
+                            node.style[styleKey] = '';
+                        }
+                    }
+                //> If an attribute is an IDL attribute, we set it
+                //  through JavaScript properties on the HTML element
+                //  and not `setAttribute()`. This is necessary for
+                //  properties like `value` and `indeterminate`.
+                } else if (attrName in node) {
+                    // @debug
+                    render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
+                    node[attrName] = next.attrs[attrName];
+                } else {
+                    if (next.attrs[attrName] !== previous.attrs[attrName]) {
+                        // @debug
+                        render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
+                        node.setAttribute(attrName, next.attrs[attrName]);
+                    }
                 }
-
             }
+
             //> For any attributes that were removed in the new JDOM,
             //  also attempt to remove them from the DOM.
             for (const attrName of Object.keys(previous.attrs)) {
@@ -577,7 +571,7 @@ const generateUniqueClassName = stylesObject => {
     let i = str.length;
     let hash = 1989;
     while (i) {
-        hash = (hash * 13) ^ str.charCodeAt(--i);
+        hash = (hash * 13) ^ str.charCodeAt(-- i);
     }
     return '_torus' + (hash >>> 0);
 }
@@ -630,7 +624,7 @@ const rulesFromStylesObject = (selector, stylesObject) => {
 //> Function called once to initialize a stylesheet for Torus
 //  to use on every subsequent style render.
 const initSheet = () => {
-    styleElement = document.createElement('style');
+    const styleElement = document.createElement('style');
     styleElement.setAttribute('data-torus', '');
     document.head.appendChild(styleElement);
     styledComponentSheet = styleElement.sheet;

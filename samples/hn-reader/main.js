@@ -53,7 +53,9 @@ const formatTime = date => {
 //> A date formatter that does relative dates in English for the last
 //  2 days.
 const formatDate = unix => {
-    if (!unix) return 'some time ago';
+    if (!unix) {
+        return 'some time ago';
+    }
 
     const date = new Date(unix * 1000);
     const delta = (NOW - date) / 1000;
@@ -110,7 +112,7 @@ class Item extends Record {
     fetch() {
         if (!this.loaded) {
             return hnFetch(`/item/${this.id}`).then(data => {
-                const { id, ...attrs } = data;
+                const {id, ...attrs} = data;
                 this.update(attrs);
             });
         } else {
@@ -149,7 +151,7 @@ class StoryStore extends StoreOf(Story) {
                 (this.start + 1) * this.limit
             ).map((id, idx) => {
                 return new Story(id, {
-                    order: this.start * this.limit + 1 + idx,
+                    order: (this.start * this.limit) + 1 + idx,
                 })
             });
             this.reset(storyRecords);
@@ -351,7 +353,9 @@ class StoryListing extends StyledComponent {
     //> To read more about a story (read the comments), we tell the router
     //  to go to the path, so the main app view can manage the rest.
     setActiveStory(evt) {
-        evt && evt.preventDefault();
+        if (evt) {
+            evt.preventDefault();
+        }
         router.go(this.getStoryPageURL());
     }
 
@@ -420,7 +424,9 @@ class CommentListing extends StyledComponent {
         //  reload the nested children comments.
         this.bind(comment, data => {
             this.comments.resetWith(data.kids || []);
-            if (!this.folded) this.comments.fetch();
+            if (!this.folded) {
+                this.comments.fetch();
+            }
             //> The "text" value is immutable in this app,
             //  so the first time we get a non-null text value,
             //  create a contentNode from it and cache it
@@ -475,7 +481,9 @@ class CommentListing extends StyledComponent {
     toggleFolded(evt) {
         evt.stopPropagation();
         this.folded = !this.folded;
-        if (!this.folded && this.comments) this.comments.fetch();
+        if (!this.folded && this.comments) {
+            this.comments.fetch();
+        }
         if (!this.kidsList) {
             this.kidsList = new CommentList(this.comments);
         }
@@ -497,7 +505,6 @@ class CommentListing extends StyledComponent {
 
         const time = attrs.time || 0;
         const author = attrs.by || '...';
-        const text = attrs.text || ''
         const kids = attrs.kids || [];
 
         return jdom`<div class="comment" onclick="${this.toggleFolded}">
@@ -600,7 +607,9 @@ class StoryPage extends Component {
 
     remove() {
         super.remove();
-        this.commentList && this.commentList.remove();
+        if (this.commentList) {
+            this.commentList.remove();
+        }
     }
 
 }
@@ -627,7 +636,7 @@ class App extends StyledComponent {
         //> Define our routing actions.
         this.bind(router, ([name, params]) => {
             switch (name) {
-                case 'story':
+                case 'story': {
                     let story = this.stories.find(+params.storyID);
                     //> Story sometimes doesn't exist in our collection,
                     //  if we're going directly to a story link from another page.
@@ -643,6 +652,7 @@ class App extends StyledComponent {
                     }
                     this.setActiveStory(story);
                     break;
+                }
                 default:
                     //> The default route is just the main page, `'/'`.
                     this.setActiveStory(null);

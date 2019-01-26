@@ -38,7 +38,7 @@ class SearchInput extends StyledComponent {
                 '&:focus': {
                     'background': '#f7f7f7',
                 },
-            }
+            },
         };
     }
 

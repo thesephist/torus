@@ -91,12 +91,16 @@ const jdomSourceNoDebug = stripDebugParts(jdomSource);
 
 // we don't use webpack for this dev build, so we can run coverage reports
 //  the easiest way (without depending on sourcemaps to work all the time).
-fs.writeFile('./dist/jdom.dev.js', iife(jdomSourceNoDebug), 'utf8', (err) => {
-    if (err) console.error('Error writing no-debug jdom.js', err);
+fs.writeFile('./dist/jdom.dev.js', iife(jdomSourceNoDebug), 'utf8', err => {
+    if (err) {
+        console.error('Error writing no-debug jdom.js', err);
+    }
 });
 
-fs.writeFile('./dist/torus.no-debug.js', torusSourceNoDebug, 'utf8', (err) => {
-    if (err) console.error('Error writing no-debug torus.js', err);
+fs.writeFile('./dist/torus.no-debug.js', torusSourceNoDebug, 'utf8', err => {
+    if (err) {
+        console.error('Error writing no-debug torus.js', err);
+    }
 
     for (const [name, config] of Object.entries(webpackConfigs)) {
         webpack(config, (err, stats) => {

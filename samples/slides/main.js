@@ -2,6 +2,10 @@
 //  slide deck library for the web, written as Torus
 //  components (mostly function components).
 
+//> Since this is more of a library than an app, there's
+//  going to be lots of unused vars
+/* eslint no-unused-vars: 0 */
+
 //> Bootstrap the required globals from Torus, since we're not bundling
 for (const exportedName in Torus) {
     window[exportedName] = Torus[exportedName];
@@ -26,7 +30,7 @@ const Subtitle = (content = 'Subtitle') => {
     }
 }
 
-const Paragraph = (content) => {
+const Paragraph = content => {
     return {
         tag: 'p',
         attrs: {
@@ -98,7 +102,7 @@ const Row = (...children) => {
                 flexDirection: 'row',
                 justifyContent: 'space-around',
                 alignItems: 'flex-start',
-            }
+            },
         },
         children: children,
     }
@@ -114,7 +118,7 @@ const Column = (...children) => {
                 flexDirection: 'column',
                 justifyContent: 'space-around',
                 alignItems: 'flex-start',
-            }
+            },
         },
         children: children,
     }
@@ -153,7 +157,6 @@ const Slide = (...children) => {
                 height: '100vh',
                 width: '100vw',
                 boxSizing: 'border-box',
-                overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -341,13 +344,15 @@ class App extends Component {
                             Paragraph('lit-html')
                         )
                     ),
-                    Center({
-                        horizontal: true,
-                    }, Image({
+                    Center(
+                        {
+                            horizontal: true,
+                        },
+                        Image({
                             src: 'https://www.ocf.berkeley.edu/~linuslee/pic.jpg',
                             alt: 'A picture of me',
                         })
-                    )
+                    ),
                 ),
             )
         );

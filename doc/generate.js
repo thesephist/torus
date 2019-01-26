@@ -26,7 +26,7 @@ const FILES_TO_ANNOTATE = {
 }
 
 const encodeHTML = code => {
-    return code.replace(/[\u00A0-\u9999<>\&]/gim, i => {
+    return code.replace(/[\u00A0-\u9999<>&]/gim, i => {
         return '&#' + i.codePointAt(0) + ';';
     });
 }
@@ -73,7 +73,9 @@ const linesToRows = lines => {
                 pushPair(line, idx + 1);
             }
         } else {
-            if (inAnnotationBlock) inAnnotationBlock = false;
+            if (inAnnotationBlock) {
+                inAnnotationBlock = false;
+            }
             pushPair(line, idx + 1);
         }
     });
@@ -100,11 +102,15 @@ const buildIndex = indexPage => {
         const errFn = err => console.error('Error building documentation page:', sourcePath, err);
         const fileName = `${name.replace(/\s+/g, '-').toLowerCase()}.html`;
         fs.readFile(sourcePath, 'utf8', (err, content) => {
-            if (err) errFn(err);
+            if (err) {
+                errFn(err);
+            }
 
             const annotatedPage = buildAnnotatedPage(name, linesToRows(content));
             fs.writeFile(path.join('./docs/', fileName), annotatedPage, 'utf8', err => {
-                if (err) errFn(err);
+                if (err) {
+                    errFn(err);
+                }
             });
         });
 
@@ -115,10 +121,13 @@ const buildIndex = indexPage => {
 }
 
 mkdirp.sync('./docs/');
-fs.writeFile('./docs/index.html', buildIndex(index), 'utf8', (err) => {
-    if (err) console.error('Error writing index page', err);
+fs.writeFile('./docs/index.html', buildIndex(index), 'utf8', err => {
+    if (err) {
+        console.error('Error writing index page', err);
+    }
 });
-fs.writeFile('./docs/main.css', css, 'utf8', (err) => {
-    if (err) console.error('Error writing main.css', err);
+fs.writeFile('./docs/main.css', css, 'utf8', err => {
+    if (err) {
+        console.error('Error writing main.css', err);
+    }
 });
-

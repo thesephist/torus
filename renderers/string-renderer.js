@@ -50,10 +50,10 @@ const renderToString = (_node, _previous, next) => {
     } else if (typeof next === 'object') {
         normalizeJDOM(next);
 
-        let attrs = [],
-            styles = [],
-            classes = [],
-            children = [];
+        const attrs = [];
+        const styles = [];
+        let classes = [];
+        const children = [];
 
         for (const attrName in next.attrs) {
             switch (attrName) {

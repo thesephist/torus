@@ -18,7 +18,7 @@ const READER_END = [];
 const RE_HEADER = /^(#{1,6})\s*(.*)/;
 const RE_IMAGE = /^%\s+(\S*)/;
 const RE_QUOTE = /^(>+)\s*(.*)/;
-const RE_LIST_ITEM = /^(\s*)(\-|\d+\.)\s+(.*)/;
+const RE_LIST_ITEM = /^(\s*)(-|\d+\.)\s+(.*)/;
 
 //> Delimiters for text styles. If you want the more
 //  standard flavor of markdown, you can change these
@@ -36,8 +36,8 @@ const LITERAL_DELIMITER = '%%';
 //> Some text expansions / replacements I find convenient.
 const BODY_TEXT_TRANSFORMS = new Map([
     // RegExp: replacement
-    [/\-\-/g, '—'], // em-dash from two dashes
-    [/(\?\!|\!\?)/g, '‽'], // interrobang!
+    [/--/g, '—'], // em-dash from two dashes
+    [/(\?!|!\?)/g, '‽'], // interrobang!
     [/\$\$/g, '💵'],
     [/:\)/g, '🙂'],
     [/<3/g, '❤️'],
@@ -271,7 +271,7 @@ const parseBody = (reader, tag, delimiter = '') => {
 }
 
 //> Given a reader of lines, parse (potentially) nested lists recursively.
-const parseList = (lineReader) => {
+const parseList = lineReader => {
     const children = [];
 
     //> We check out the first line in the sequence to determine
@@ -285,7 +285,7 @@ const parseList = (lineReader) => {
 
     //> Loop through the next few lines from the reader.
     while ((line = lineReader.next()) !== READER_END) {
-        const [_, indent, prefix] = RE_LIST_ITEM.exec(line) || [];
+        const [_, _indent, prefix] = RE_LIST_ITEM.exec(line) || [];
         //> If there's a valid list item prefix, we count it as a list item.
         if (prefix) {
             //> We compare the indentation level of this line, versus the
@@ -303,7 +303,7 @@ const parseList = (lineReader) => {
             //> If it's the same indentation, treat it as the next item in the list.
             //  Parse the list content as body text, and add it to the list of children.
             } else if (thisIndentLevel === indentLevel) {
-                const body = line.match(/\s*(?:\d+\.|\-)\s*(.*)/)[1];
+                const body = line.match(/\s*(?:\d+\.|-)\s*(.*)/)[1];
                 children.push(parseBody(new Reader(body), 'li'));
             //> If this line is indented farther than the first line,
             //  that means it's the start of a further-nested list.
@@ -329,7 +329,7 @@ const parseList = (lineReader) => {
 }
 
 //> Like `parseList`, but for nested block quotes.
-const parseQuote = (lineReader) => {
+const parseQuote = lineReader => {
     const children = [];
 
     //> Look ahead at the first line to determine how far nested we are.
@@ -393,7 +393,7 @@ const Markus = str => {
     let codeBlockResult = '';
     let inLiteralBlock = false;
     let literalBlockResult = '';
-    let result = [];
+    const result = [];
 
     let line;
     while ((line = lineReader.next()) !== READER_END) {

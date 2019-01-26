@@ -59,7 +59,7 @@ class App extends Component {
                         tag: 'h1',
                         children: [
                             'Hello, ',
-                            { tag: 'em', children: ['World!'] },
+                            {tag: 'em', children: ['World!']},
                         ],
                     } : {
                         tag: 'h1',
@@ -101,7 +101,7 @@ class App extends Component {
                             }
                         }),
                     ],
-                }
+                },
             ],
         }
     }

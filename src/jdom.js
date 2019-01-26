@@ -35,7 +35,7 @@ class Reader {
 
     //> Returns the current character and moves the pointer one place farther.
     next() {
-        let char = this.content[this.idx ++];
+        const char = this.content[this.idx ++];
         if (char === undefined) {
             this.idx = this.len;
         }
@@ -134,8 +134,8 @@ const parseOpeningTagContents = content => {
     let inQuotes = false;
     //> Array of parsed tokens
     const tokens = [];
-    const TYPE_KEY = 0,
-        TYPE_VALUE = 1;
+    const TYPE_KEY = 0;
+    const TYPE_VALUE = 1;
 
     //> Is the next token a key or a value? This is determined by the presence
     //  of equals signs `=`, quotations, and whitespace.
@@ -213,8 +213,8 @@ const parseOpeningTagContents = content => {
 
     //> The tag name is always the first token
     tag = tokens.shift().value;
-    let last = null,
-        curr = tokens.shift();
+    let last = null;
+    let curr = tokens.shift();
     //> Function to step through to the next token
     const step = () => {
         last = curr;
@@ -225,7 +225,7 @@ const parseOpeningTagContents = content => {
     //  the previous token is an attribute without value (like `disabled`).
     while (curr !== undefined) {
         if (curr.type === TYPE_VALUE) {
-            let key = last.value;
+            const key = last.value;
             let val = curr.value.trim();
             //> Commit a key-value pair of string attributes to the JDOM stub. This section
             //  treats class lists and style dictionaries separately, and adds function
@@ -389,13 +389,17 @@ const splitByPlaceholder = (str, dynamicParts) => {
         const processedBack = splitByPlaceholder(parts[1], dynamicParts);
 
         let result = [];
-        if (parts[0] !== '') result.push(parts[0]);
+        if (parts[0] !== '') {
+            result.push(parts[0]);
+        }
         if (Array.isArray(dynamicParts[number])) {
             result = result.concat(dynamicParts[number]);
         } else {
             result.push(dynamicParts[number]);
         }
-        if (processedBack.length !== 0) result = result.concat(processedBack);
+        if (processedBack.length !== 0) {
+            result = result.concat(processedBack);
+        }
         return result;
     } else {
         return str ? [str] : [];
@@ -405,7 +409,7 @@ const splitByPlaceholder = (str, dynamicParts) => {
 //> Given an array of child JDOM elements, flatten that list of children
 //  into a flat array and parse any placeholders in it.
 const replaceChildrenToFlatArray = (children, dynamicParts) => {
-    let newChildren = [];
+    const newChildren = [];
     for (const childString of children) {
         for (const child of splitByPlaceholder(childString, dynamicParts)) {
             if (isObject(child)) {
@@ -416,8 +420,12 @@ const replaceChildrenToFlatArray = (children, dynamicParts) => {
     }
     const first = newChildren[0];
     const last = newChildren[newChildren.length - 1];
-    if (typeof first === 'string' && first.trim() === '') newChildren.shift();
-    if (typeof last === 'string' && last.trim() === '') newChildren.pop();
+    if (typeof first === 'string' && first.trim() === '') {
+        newChildren.shift();
+    }
+    if (typeof last === 'string' && last.trim() === '') {
+        newChildren.pop();
+    }
     return newChildren;
 }
 
@@ -434,7 +442,7 @@ const replaceInString = (str, dynamicParts) => {
         } else if (str.trim() === match[0]) {
             return dynamicParts[match[1]];
         } else {
-            let parts = str.split(match[0]);
+            const parts = str.split(match[0]);
             return (parts[0] + dynamicParts[match[1]]
                 + replaceInString(parts[1], dynamicParts));
         }

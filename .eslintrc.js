@@ -87,7 +87,7 @@ module.exports = {
         ],
         'func-call-spacing': 'error',
         'func-name-matching': 'error',
-        'func-names': 'error',
+        'func-names': 'off',
         'func-style': [
             'error',
             'declaration',
@@ -204,7 +204,7 @@ module.exports = {
         'no-param-reassign': 'off',
         'no-path-concat': 'error',
         'no-plusplus': 'off',
-        'no-process-env': 'error',
+        'no-process-env': 'off', // for env vars
         'no-process-exit': 'error',
         'no-proto': 'error',
         'no-prototype-builtins': 'error',

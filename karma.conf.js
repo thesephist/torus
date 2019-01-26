@@ -14,7 +14,7 @@ if (IS_PROD) {
     ];
 }
 
-let coverageOptions = IS_PROD ? {} : {
+const coverageOptions = IS_PROD ? {} : {
     preprocessors: {
         'dist/**/*.js': ['coverage'],
     },
@@ -32,7 +32,7 @@ module.exports = function (config) {
         files: karmaFiles,
 
         exclude: [
-            '**/*.swp'
+            '**/*.swp',
         ],
 
         reporters: IS_PROD ? [

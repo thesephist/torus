@@ -39,8 +39,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong></pre></div>
 <div class="line"><div class="doc"><p>We create an instance of the task collection for our list, and initialize it with two items.</p>
 </div><pre class="source javascript"><strong class="lineNumber">24</strong>const tasks = new TaskStore([</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong>    new Task(1, {description: 'Do this', completed: false,}),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">26</strong>    new Task(2, {description: 'Do that', completed: false,}),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong>    new Task(1, {description: 'Do this', completed: false}),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">26</strong>    new Task(2, {description: 'Do that', completed: false}),</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">27</strong>]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">28</strong></pre></div>
 <div class="line"><div class="doc"><p>Component that represents a single todo item</p>
@@ -126,7 +126,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">114</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">115</strong></pre></div>
 <div class="line"><div class="doc"><p>If the add button is clicked, try to add a task</p>
-</div><pre class="source javascript"><strong class="lineNumber">117</strong>    onAddClick(evt) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">117</strong>    onAddClick() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">118</strong>        this._addTask();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">119</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong></pre></div>

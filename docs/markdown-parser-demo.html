@@ -32,7 +32,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">18</strong>const RE_HEADER = /^(#{1,6})\s*(.*)/;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">19</strong>const RE_IMAGE = /^%\s+(\S*)/;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong>const RE_QUOTE = /^(&#62;+)\s*(.*)/;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong>const RE_LIST_ITEM = /^(\s*)(\-|\d+\.)\s+(.*)/;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong>const RE_LIST_ITEM = /^(\s*)(-|\d+\.)\s+(.*)/;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">22</strong></pre></div>
 <div class="line"><div class="doc"><p>Delimiters for text styles. If you want the more standard flavor of markdown, you can change these these delimiters to get 90% of the way there (minus the links).</p>
 </div><pre class="source javascript"><strong class="lineNumber">27</strong>const ITALIC_DELIMITER = '/';</pre></div>
@@ -47,8 +47,8 @@
 <div class="line"><div class="doc"><p>Some text expansions / replacements I find convenient.</p>
 </div><pre class="source javascript"><strong class="lineNumber">37</strong>const BODY_TEXT_TRANSFORMS = new Map([</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">38</strong>    // RegExp: replacement</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">39</strong>    [/\-\-/g, '&#8212;'], // em-dash from two dashes</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">40</strong>    [/(\?\!|\!\?)/g, '&#8253;'], // interrobang!</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">39</strong>    [/--/g, '&#8212;'], // em-dash from two dashes</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">40</strong>    [/(\?!|!\?)/g, '&#8253;'], // interrobang!</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">41</strong>    [/\$\$/g, '💵'],</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>    [/:\)/g, '🙂'],</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">43</strong>    [/&#60;3/g, '&#10084;️'],</pre></div>
@@ -265,7 +265,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">271</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">272</strong></pre></div>
 <div class="line"><div class="doc"><p>Given a reader of lines, parse (potentially) nested lists recursively.</p>
-</div><pre class="source javascript"><strong class="lineNumber">274</strong>const parseList = (lineReader) =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">274</strong>const parseList = lineReader =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong>    const children = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong></pre></div>
 <div class="line"><div class="doc"><p>We check out the first line in the sequence to determine how far indented we are, and what kind of list (number, bullet) it is.</p>
@@ -277,7 +277,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">285</strong></pre></div>
 <div class="line"><div class="doc"><p>Loop through the next few lines from the reader.</p>
 </div><pre class="source javascript"><strong class="lineNumber">287</strong>    while ((line = lineReader.next()) !== READER_END) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong>        const [_, indent, prefix] = RE_LIST_ITEM.exec(line) || [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">288</strong>        const [_, _indent, prefix] = RE_LIST_ITEM.exec(line) || [];</pre></div>
 <div class="line"><div class="doc"><p>If there&#39;s a valid list item prefix, we count it as a list item.</p>
 </div><pre class="source javascript"><strong class="lineNumber">290</strong>        if (prefix) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
@@ -293,7 +293,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">302</strong>                }</pre></div>
 <div class="line"><div class="doc"><p>If it&#39;s the same indentation, treat it as the next item in the list. Parse the list content as body text, and add it to the list of children.</p>
 </div><pre class="source javascript"><strong class="lineNumber">305</strong>            } else if (thisIndentLevel === indentLevel) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>                const body = line.match(/\s*(?:\d+\.|\-)\s*(.*)/)[1];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>                const body = line.match(/\s*(?:\d+\.|-)\s*(.*)/)[1];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">307</strong>                children.push(parseBody(new Reader(body), 'li'));</pre></div>
 <div class="line"><div class="doc"><p>If this line is indented farther than the first line, that means it&#39;s the start of a further-nested list. Call <code>parseList</code> recursively, and add the returned list as a child.</p>
 </div><pre class="source javascript"><strong class="lineNumber">312</strong>            } else { // thisIndentLevel &#62; indentLevel</pre></div>
@@ -316,7 +316,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">329</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">330</strong></pre></div>
 <div class="line"><div class="doc"><p>Like <code>parseList</code>, but for nested block quotes.</p>
-</div><pre class="source javascript"><strong class="lineNumber">332</strong>const parseQuote = (lineReader) =&#62; {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">332</strong>const parseQuote = lineReader =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">333</strong>    const children = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">334</strong></pre></div>
 <div class="line"><div class="doc"><p>Look ahead at the first line to determine how far nested we are.</p>
@@ -372,7 +372,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>    let codeBlockResult = '';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong>    let inLiteralBlock = false;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">395</strong>    let literalBlockResult = '';</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong>    let result = [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">396</strong>    const result = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">397</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">398</strong>    let line;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">399</strong>    while ((line = lineReader.next()) !== READER_END) {</pre></div>

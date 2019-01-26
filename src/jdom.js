@@ -9,9 +9,9 @@ const clipStringEnd = (base, substr) => {
 }
 
 //> This allows us to write HTML entities like '<' and '>' without breaking
-//  the parser.
+//  the HTML parser.
 const decodeEntity = entity => {
-    return String.fromCodePoint((+('0' + (/&#(\w+);/).exec(entity)[1])));
+    return String.fromCodePoint((+(/&#(\w+);/).exec(entity)[1]));
 }
 
 //> Interpolate between lists of strings into a single string. Used to
@@ -43,9 +43,9 @@ class Reader {
     }
 
     //> Move the pointer back one place, undoing the last character read.
-    //  In practice, we never backtrack from index 0 -- we only use backtrack
+    //  In practice, we never backtrack from index 0 -- we only use back()
     //  to "un-read" a character we've read. So we don't check for negative cases here.
-    backtrack() {
+    back() {
         this.idx --;
     }
 
@@ -318,7 +318,7 @@ const parseTemplate = reader => {
             commit();
             //> ... it's an opening tag if the next character isn't `'/'`.
             if (reader.next() !== '/') {
-                reader.backtrack();
+                reader.back();
                 //> Read and parse the contents of the tag up to the end of
                 //  the opening tag.
                 const result = parseOpeningTagContents(reader.readUpto('>'));

@@ -25,9 +25,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong>    return base.substr(0, base.length - substr.length);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">10</strong></pre></div>
-<div class="line"><div class="doc"><p>This allows us to write HTML entities like &#39;&lt;&#39; and &#39;&gt;&#39; without breaking the parser.</p>
+<div class="line"><div class="doc"><p>This allows us to write HTML entities like &#39;&lt;&#39; and &#39;&gt;&#39; without breaking the HTML parser.</p>
 </div><pre class="source javascript"><strong class="lineNumber">13</strong>const decodeEntity = entity =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong>    return String.fromCodePoint((+('0' + (/&#38;#(\w+);/).exec(entity)[1])));</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong>    return String.fromCodePoint((+(/&#38;#(\w+);/).exec(entity)[1]));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">16</strong></pre></div>
 <div class="line"><div class="doc"><p>Interpolate between lists of strings into a single string. Used to merge the two parts of a template tag&#39;s arguments.</p>
@@ -57,8 +57,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>        return char;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">43</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">44</strong></pre></div>
-<div class="line"><div class="doc"><p>Move the pointer back one place, undoing the last character read. In practice, we never backtrack from index 0 -- we only use backtrack to &quot;un-read&quot; a character we&#39;ve read. So we don&#39;t check for negative cases here.</p>
-</div><pre class="source javascript"><strong class="lineNumber">48</strong>    backtrack() {</pre></div>
+<div class="line"><div class="doc"><p>Move the pointer back one place, undoing the last character read. In practice, we never backtrack from index 0 -- we only use back() to &quot;un-read&quot; a character we&#39;ve read. So we don&#39;t check for negative cases here.</p>
+</div><pre class="source javascript"><strong class="lineNumber">48</strong>    back() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>        this.idx --;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong></pre></div>
@@ -320,7 +320,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>... it&#39;s an opening tag if the next character isn&#39;t <code>&#39;/&#39;</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">320</strong>            if (reader.next() !== '/') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>                reader.backtrack();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>                reader.back();</pre></div>
 <div class="line"><div class="doc"><p>Read and parse the contents of the tag up to the end of the opening tag.</p>
 </div><pre class="source javascript"><strong class="lineNumber">324</strong>                const result = parseOpeningTagContents(reader.readUpto('&#62;'));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">325</strong>                reader.next(); // read the '&#62;'</pre></div>

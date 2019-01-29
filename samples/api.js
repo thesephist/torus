@@ -374,32 +374,35 @@ class AppWithSidebar extends Component {
 //  for example. In these cases where we don't need a component to keep local state, listen for
 //  events, or create side effects, we can describe the component's view with a pure function.
 
-//> Here's an example of a purely functional component. It returns a JDOM representation.
-const FancyButton = buttonText => jdom`<button class="fancy">
-    ${buttonText}
-</button>`;
+//> Here's an example of a purely functional component. It returns a JDOM representation. To distinguish
+//  functional components from class-based Torus components in usage, by convention, we name functional
+//  components with a name that begins with a lowercase letter. This distinction is helpful, because
+//  we use the `new` keyword with class components, and call their `compose()` method to get JDOM,
+//  while we call functional components directly to get JDOM.
+const fancyButton = buttonText =>
+    jdom`<button class="fancy">${buttonText}</button>`;
 
 //> Because these kinds of function "components" will return valid JDOM, we can compose them
-//  into any other `Component#compose()` method. Remember, `FancyButton` is just a JavaScript
+//  into any other `Component#compose()` method. Remember, `fancyButton` is just a JavaScript
 //  function! This allows for easy abstraction and code reuse within small parts of our rendering logic.
-//  Here, we can just pass the return value of `FancyButton()` off to another template.
+//  Here, we can just pass the return value of `fancyButton()` off to another template.
 class FancyForm extends Component {
     compose() {
         return `<form>
             <h1>Super fancy form!</h1>
             <input name="full_name"/>
-            ${FancyButton('Submit!')}
+            ${fancyButton('Submit!')}
         </form>`;
     }
 }
 
-//> But what if we want to compose our `FancyButton` with `Styled()` or use it in more complex views?
-//  We can upgrade the function component `FancyButton` to a full-fledged Torus class component with
-//  `Component.from()`. These two ways of defining `FancyButton` are equivalent.
-//  Here, `ClassyButton` emits exactly the same DOM as `FancyButton` when rendered, but it's gained
+//> But what if we want to compose our `fancyButton` with `Styled()` or use it in more complex views?
+//  We can upgrade the function component `fancyButton` to a full-fledged Torus class component with
+//  `Component.from()`. These two ways of defining `fancyButton` are equivalent.
+//  Here, `ClassyButton` emits exactly the same DOM as `fancyButton` when rendered, but it's gained
 //  additional capabilities accessible to a class component in Torus, like persistence across renders of
 //  the parent component and better composability with `Styled()` and `ListOf()`.
-const ClassyButton = Component.from(FancyButton);
+const ClassyButton = Component.from(fancyButton);
 //> This takes a purely functional component and returns a class component whose constructor
 //  takes the same arguments (`buttonText` in this case) and renders to the given JDOM.
 const ClassyButton = Component.from(buttonText => {

@@ -4,9 +4,15 @@ describe('jdom template tag', () => {
 
     const normalizeJDOM = jdom => {
         if (isObject(jdom)) {
-            if (!('attrs' in jdom)) jdom.attrs = {};
-            if (!('events' in jdom)) jdom.events = {};
-            if (!('children' in jdom)) jdom.children = [];
+            if (!('attrs' in jdom)) {
+                jdom.attrs = {};
+            }
+            if (!('events' in jdom)) {
+                jdom.events = {};
+            }
+            if (!('children' in jdom)) {
+                jdom.children = [];
+            }
             for (const c of jdom.children) {
                 normalizeJDOM(c);
             }
@@ -296,7 +302,7 @@ describe('jdom template tag', () => {
             'children as markup',
             jdom`<ul><li>Text</li></ul>`,
             {tag: 'ul', children: [
-                {tag: 'li', children: ['Text']}
+                {tag: 'li', children: ['Text']},
             ]}
         );
 
@@ -316,7 +322,7 @@ describe('jdom template tag', () => {
                 jdom`<li>Text</li>`
             }</ul>`,
             {tag: 'ul', children: [
-                {tag: 'li', children: ['Text']}
+                {tag: 'li', children: ['Text']},
             ]}
         );
 
@@ -324,11 +330,11 @@ describe('jdom template tag', () => {
             'children as array of JDOM',
             jdom`<ul>${[
                 jdom`<li>Text 1</li>`,
-                jdom`<li>Text 2</li>`
+                jdom`<li>Text 2</li>`,
             ]}</ul>`,
             {tag: 'ul', children: [
                 {tag: 'li', children: ['Text 1']},
-                {tag: 'li', children: ['Text 2']}
+                {tag: 'li', children: ['Text 2']},
             ]}
         );
 
@@ -422,7 +428,7 @@ describe('jdom template tag', () => {
             'JS code injected into JDOM template parameters should be escaped, not parsed as JS or HTML (security risk)',
             jdom`<script>${'</script>console.log("alert")'}</script>`,
             {tag: 'script', children: [
-                '</script>console.log("alert")'
+                '</script>console.log("alert")',
             ]},
         );
 
@@ -492,7 +498,7 @@ describe('jdom template tag', () => {
                     name2: 'thing',
                 }, [{
                     name3: 'thing',
-                }]]
+                }]],
             }}</div>`
         );
 

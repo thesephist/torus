@@ -12,7 +12,7 @@
     "test": "NODE_TEST_ENV=development karma start karma.conf.js",
     "test:prod": "NODE_TEST_ENV=production karma start karma.conf.js",
     "test:size": "bundlesize",
-    "lint": "eslint ./src/*.js ./renderers/*.js ./samples/**/main.js ./build/*.js ./doc/*.js",
+    "lint": "eslint ./src/*.js ./renderers/*.js ./samples/**/main.js ./build/*.js ./doc/*.js ./test/*.js",
     "build": "node build/build.js && cp dist/index.min.js samples/hn-reader/index.min.js && cp dist/index.min.js samples/graph-calc/index.min.js && cp dist/index.min.js samples/markus/index.min.js",
     "verify": "node build/build.js && karma start karma.conf.js && bundlesize",
     "clean": "rm -rvf dist/* coverage/*",

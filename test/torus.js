@@ -1,4 +1,12 @@
-// Bootstrap the required globals from Torus
+//> Because of Chai's assertion syntax, this ESLint rule
+//  doesn't really make sense.
+/* eslint-disable no-unused-expressions */
+
+//> Because we test object constructor logic, this ESLint rule
+//  doesn't really make sense.
+/* eslint-disable no-unused-vars */
+
+//> Bootstrap the required globals from Torus
 for (const exportedName in Torus) {
     window[exportedName] = Torus[exportedName];
 }
@@ -258,8 +266,8 @@ describe('render', () => {
                 node.getAttribute('data-magic').should.equal('magic');
                 node.getAttribute('data-foo').should.equal('bar');
                 const node2 = render(node, prev, next);
-                expect(node.getAttribute('checked')).to.be.null;
-                node.getAttribute('data-foo').should.equal('baz');
+                expect(node2.getAttribute('checked')).to.be.null;
+                node2.getAttribute('data-foo').should.equal('baz');
             });
 
             it('should reflect IDL properties as DOM properties', () => {
@@ -385,13 +393,13 @@ describe('render', () => {
             const prev = {
                 tag: 'button',
                 events: {
-                    click: () => firstClickCount++,
+                    click: () => firstClickCount ++,
                 },
             }
             const next = {
                 tag: 'button',
                 events: {
-                    click: () => secondClickCount++,
+                    click: () => secondClickCount ++,
                 },
             }
 
@@ -412,8 +420,8 @@ describe('render', () => {
                 tag: 'button',
                 events: {
                     click: [
-                        () => firstClickCount++,
-                        () => secondClickCount++,
+                        () => firstClickCount ++,
+                        () => secondClickCount ++,
                     ],
                 },
             });
@@ -429,14 +437,14 @@ describe('render', () => {
             let firstClickCount = 0;
             let secondClickCount = 0;
 
-            const firstFn = () => firstClickCount++;
+            const firstFn = () => firstClickCount ++;
 
             const prev = {
                 tag: 'button',
                 events: {
                     click: [
                         firstFn,
-                        () => secondClickCount++,
+                        () => secondClickCount ++,
                     ],
                 },
             }
@@ -458,14 +466,14 @@ describe('render', () => {
             let secondClickCount = 0;
             let thirdClickCount = 0;
 
-            const firstFn = () => firstClickCount++;
+            const firstFn = () => firstClickCount ++;
 
             const prev = {
                 tag: 'button',
                 events: {
                     click: [
                         firstFn,
-                        () => secondClickCount++,
+                        () => secondClickCount ++,
                     ],
                 },
             }
@@ -474,8 +482,8 @@ describe('render', () => {
                 events: {
                     click: [
                         firstFn,
-                        () => thirdClickCount++,
-                    ]
+                        () => thirdClickCount ++,
+                    ],
                 },
             }
 
@@ -640,7 +648,7 @@ describe('Component', () => {
 
             const c = new Component();
             const r = new Record();
-            c.bind(r, () => handlerCallCount++);
+            c.bind(r, () => handlerCallCount ++);
 
             r.update({key: 'value'});
             handlerCallCount.should.be.greaterThan(0);
@@ -655,7 +663,7 @@ describe('Component', () => {
 
             const c = new Component();
             const r = new Record();
-            c.bind(r, () => handlerCallCount++);
+            c.bind(r, () => handlerCallCount ++);
 
             r.update({key: 'value'});
             handlerCallCount.should.be.greaterThan(0);
@@ -725,7 +733,7 @@ describe('Component', () => {
 describe('Styled', () => {
 
     it('Returns a subclass of a given Component with CSS APIs', () => {
-        class Comp extends Component {};
+        class Comp extends Component {}
         const Tmp = Styled(Comp);
         const t = new Tmp();
         t.should.be.an.instanceof(Comp);
@@ -912,9 +920,9 @@ describe('List', () => {
             }
         }
         const s = new Store([
-            new Record({ label: 'first' }),
-            new Record({ label: 'second' }),
-            new Record({ label: 'third' }),
+            new Record({label: 'first'}),
+            new Record({label: 'second'}),
+            new Record({label: 'third'}),
         ]);
         const l = new MyList(s);
         l.node.textContent.should.equal('firstsecondthird');
@@ -938,11 +946,12 @@ describe('List', () => {
             }
         }
         const s = new Store([
-            new Record({ label: 'first' }),
-            new Record({ label: 'second' }),
-            new Record({ label: 'third' }),
+            new Record({label: 'first'}),
+            new Record({label: 'second'}),
+            new Record({label: 'third'}),
         ]);
         const l = new MyList(s, one, two);
+        [...l].length.should.equal(3);
         one[0].should.equal(3);
         two[0].should.equal(3);
     });
@@ -974,9 +983,9 @@ describe('List', () => {
                 }
             }
             const s = new Store([
-                new Record({ label: 'first' }),
-                new Record({ label: 'second' }),
-                new Record({ label: 'third' }),
+                new Record({label: 'first'}),
+                new Record({label: 'second'}),
+                new Record({label: 'third'}),
             ]);
             const l = new MyList(s);
             const comps = l.components;
@@ -996,9 +1005,9 @@ describe('List', () => {
                 }
             }
             const s = new Store([
-                new Record({ label: 'first' }),
-                new Record({ label: 'second' }),
-                new Record({ label: 'third' }),
+                new Record({label: 'first'}),
+                new Record({label: 'second'}),
+                new Record({label: 'third'}),
             ]);
             const l = new MyList(s);
             comps = [];
@@ -1020,9 +1029,9 @@ describe('List', () => {
             }
         }
         const s = new Store([
-            new Record({ label: 'first' }),
-            new Record({ label: 'second' }),
-            new Record({ label: 'third' }),
+            new Record({label: 'first'}),
+            new Record({label: 'second'}),
+            new Record({label: 'third'}),
         ]);
         const l = new MyList(s);
 
@@ -1043,7 +1052,9 @@ describe('List', () => {
         it('should call #remove on children', () => {
             let removed = 0;
             class Item extends Component {
-                remove() { removed++ }
+                remove() {
+                    removed ++;
+                }
             }
             const s = new Store([new Record(), new Record(), new Record()]);
             const l = new (ListOf(Item))(s);

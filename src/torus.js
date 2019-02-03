@@ -362,8 +362,8 @@ const render = (node, previous, next) => {
             const minLength = prevLength < nextLength ? prevLength : nextLength;
             if (nextLength > 0 || prevLength > 0) {
                 //> "sync" the common sections of the two children lists.
-                let i;
-                for (i = 0; i < minLength; i ++) {
+                let i = 0;
+                for (; i < minLength; i ++) {
                     if (prevChildren[i] !== nextChildren[i]) {
                         nodeChildren[i] = render(nodeChildren[i], prevChildren[i], nextChildren[i]);
                     }
@@ -371,7 +371,7 @@ const render = (node, previous, next) => {
                 //> If the new JDOM has more children than the old JDOM, we need to
                 //  add the extra children.
                 if (prevLength < nextLength) {
-                    while (i < nextLength) {
+                    for (; i < nextLength; i ++) {
                         // @begindebug
                         if (nextChildren[i].tagName) {
                             render_debug(`Add child <${nextChildren[i].tagName.toLowerCase()}>`);
@@ -383,13 +383,12 @@ const render = (node, previous, next) => {
                         // @enddebug
                         const newChild = render(undefined, undefined, nextChildren[i]);
                         opQueue.push([OP_APPEND, node, newChild]);
-                        nodeChildren.splice(i, 0, newChild);
-                        i ++;
+                        nodeChildren.push(newChild);
                     }
                 //> If the new JDOM has less than or equal number of children to the old
                 //  JDOM, we'll remove any stragglers.
                 } else {
-                    while (i < prevLength) {
+                    for (; i < prevLength; i ++) {
                         // @begindebug
                         if (prevChildren[i].tagName) {
                             render_debug(`Remove child <${prevChildren[i].tagName.toLowerCase()}>`);
@@ -404,7 +403,6 @@ const render = (node, previous, next) => {
                         //  instead, we add a placeholder and remove the placeholder
                         //  at the end.
                         opQueue.push([OP_REMOVE, node, nodeChildren[i]]);
-                        i ++;
                     }
                     nodeChildren.splice(nextLength, prevLength - nextLength);
                 }

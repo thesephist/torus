@@ -574,14 +574,14 @@ class App extends StyledComponent {
                     'overflow-x': 'auto',
                 },
                 'code': {
-                    'padding': '4px',
+                    'padding': '1px 5px',
                     'margin': '0 2px',
                 },
                 'pre, code': {
                     'font-family': '"Menlo", "Monaco", monospace',
                     'background': '#eee',
                     'line-height': '1.5em',
-                    'border-radius': '6px',
+                    'border-radius': '4px',
                 },
                 'q': {
                     //> By default, block quotes are just displayed

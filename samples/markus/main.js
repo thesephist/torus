@@ -615,7 +615,7 @@ class App extends StyledComponent {
         if (evt.key === 'Tab') {
             evt.preventDefault();
             const idx = evt.target.selectionStart;
-            if (idx) {
+            if (idx !== null) {
                 const front = this.inputValue.substr(0, idx);
                 const back = this.inputValue.substr(idx);
                 this.inputValue = front + '    ' + back;

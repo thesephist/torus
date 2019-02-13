@@ -576,7 +576,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">615</strong>        if (evt.key === 'Tab') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">616</strong>            evt.preventDefault();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">617</strong>            const idx = evt.target.selectionStart;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">618</strong>            if (idx) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">618</strong>            if (idx !== null) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">619</strong>                const front = this.inputValue.substr(0, idx);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">620</strong>                const back = this.inputValue.substr(idx);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">621</strong>                this.inputValue = front + '    ' + back;</pre></div>

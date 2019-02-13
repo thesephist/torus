@@ -573,7 +573,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">609</strong></pre></div>
 <div class="line"><div class="doc"><p>This is a way to make sure <code>TAB</code> keys can be used to enter four spaces (yay spaces instead of tabs!) instead of tab to the next input on the page. This makes the textarea behave like a text editor, allowing you to indent with tab.</p>
 </div><pre class="source javascript"><strong class="lineNumber">614</strong>    handleKeydown(evt) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">615</strong>        if (evt.keyCode === 9) { // Tab key</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">615</strong>        if (evt.key === 'Tab') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">616</strong>            evt.preventDefault();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">617</strong>            const idx = evt.target.selectionStart;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">618</strong>            if (idx) {</pre></div>

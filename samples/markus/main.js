@@ -612,7 +612,7 @@ class App extends StyledComponent {
     //  of tab to the next input on the page. This makes the textarea
     //  behave like a text editor, allowing you to indent with tab.
     handleKeydown(evt) {
-        if (evt.keyCode === 9) { // Tab key
+        if (evt.key === 'Tab') {
             evt.preventDefault();
             const idx = evt.target.selectionStart;
             if (idx) {

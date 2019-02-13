@@ -518,7 +518,7 @@ class FunctionPanel extends StyledComponent {
     }
 
     keyUp(evt) {
-        if (evt && evt.keyCode === 13) {
+        if (evt && evt.key === 'Enter') {
             this.updateFunctionText();
         }
     }

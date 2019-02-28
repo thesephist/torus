@@ -1020,10 +1020,13 @@ class Router extends Evented {
     }
 
     //> Click events from links can call `this.go()` with the destination URL
-    //  to trigger going to a new route without reloading the page.
+    //  to trigger going to a new route without reloading the page. New routes
+    //  are only added to the session history if the route is indeed new.
     go(destination) {
-        history.pushState(null, document.title, destination);
-        this.route(destination);
+        if (window.location.pathname !== destination) {
+            history.pushState(null, document.title, destination);
+            this.route(destination);
+        }
     }
 
     //> Main procedure to reconcile which of the defined route the current

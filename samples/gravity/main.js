@@ -41,6 +41,8 @@ class ParticleSystem {
 
     constructor() {
         //> Each entry in `this.particles` is `[xPos, yPos, xVel, yVel, mass]`
+        //  Particle data are represented in a naked array (not class instances or
+        //  objects) for performance.
         this.particles = [];
         for (let i = 0; i < PARTICLE_COUNT; i ++) {
             this.particles.push([randomWindowX(), randomWindowY(), 0, 0, 1]);
@@ -48,7 +50,9 @@ class ParticleSystem {
     }
 
     //> `step()` runs a single frame of the simulation, assuming the frame was
-    //  `duration` seconds long.
+    //  `duration` seconds long. This step takes a while even on modern computers
+    //  for `n > 1000`, and may benefit from a more optimized data structure for
+    //  particles like a quadtree.
     step(duration) {
         //> Memoize.
         const particles = this.particles;
@@ -100,6 +104,8 @@ class ParticleSystem {
 //  given the data backing the point from the simulation. To minimize any overhead of `jdom` parsing
 //  the HTML template at runtime, this functional component returns a dictionary representing the new DOM.
 const Particle = pData => {
+    //> We floor (`~~`) the result here, because the exact velocity doesn't matter, and it reduces
+    //  Torus's parsing overhead for CSS -- these are microoptimizations.
     const vel = ~~Math.sqrt((pData[2] * pData[2]) + (pData[3] * pData[3]));
     return {
         tag: 'div',
@@ -122,6 +128,8 @@ class Simulation extends StyledComponent {
         this.system = new ParticleSystem();
 
         //> Create a function to be called at every animation frame, for a demo.
+        //  `step()` measure the elapsed time since last call, and steps through
+        //  the simulated system by that elapsed duration, then calls render.
         let lastTime = new Date().getTime();
         const step = () => {
             const thisTime = new Date().getTime();
@@ -140,7 +148,8 @@ class Simulation extends StyledComponent {
         this.trackingMouse = false;
     }
 
-    //> When the user clicks the mouse down...
+    //> When the user starts dragging on the screen, we represent that point as a
+    //  100x more massive particle in the system, with constant 0 velocity.
     handleMousedown(evt) {
         this.trackingMouse = true;
         this.system.particles.push([
@@ -152,6 +161,7 @@ class Simulation extends StyledComponent {
         ]);
     }
 
+    //> When the user moves the mouse, if we're dragging, move the touch particle position.
     handleMousemove(evt) {
         if (this.trackingMouse) {
             const touchParticle = this.system.particles[PARTICLE_COUNT];
@@ -160,6 +170,7 @@ class Simulation extends StyledComponent {
         }
     }
 
+    //> Stop dragging and remove the touch particle.
     handleMouseup() {
         this.trackingMouse = false;
         this.system.particles.pop();
@@ -175,6 +186,8 @@ class Simulation extends StyledComponent {
             'left': '0',
             'overflow': 'hidden',
 
+            //> Because particles are just functions that map to JDOM (not
+            //  Torus components themselves), we define their styles here.
             '.particle': {
                 'height': PARTICLE_DIAMETER + 'px',
                 'width': PARTICLE_DIAMETER + 'px',
@@ -188,7 +201,9 @@ class Simulation extends StyledComponent {
     }
 
     compose() {
-        // touch support is trivial, but not added for sake of simplicity
+        //> Touch support is trivial, but not added for sake of simplicity.
+        //  If we wanted to add multi-touch support, we'd do something analogous
+        //  to what we've done for mouse click.
         return jdom`<div class="simulation"
             onmousedown="${this.handleMousedown}"
             onmousemove="${this.handleMousemove}"
@@ -200,6 +215,7 @@ class Simulation extends StyledComponent {
 
 }
 
+//> Main app that contains the simulation and a couple of other UI elements.
 class App extends StyledComponent {
 
     init() {

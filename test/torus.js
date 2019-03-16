@@ -1010,7 +1010,7 @@ describe('List', () => {
                 new Record({label: 'third'}),
             ]);
             const l = new MyList(s);
-            comps = [];
+            const comps = [];
             for (const comp of l) {
                 comps.push(comp);
             }

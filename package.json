@@ -21,7 +21,7 @@
     "deploy:hn": "surge -p samples/hn-reader/ --domain https://torushn.surge.sh",
     "deploy:graph": "surge -p samples/graph-calc/ --domain https://graphcalc.surge.sh",
     "deploy:markus": "surge -p samples/markus/ --domain https://markuswriter.surge.sh",
-    "deploy:gravity": "surge -p samples/gravity/ --domain https://gravity.surge.sh"
+    "deploy:gravity": "surge -p samples/gravity/ --domain https://tgrav.surge.sh"
   },
   "files": [
     "src",

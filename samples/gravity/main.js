@@ -1,8 +1,6 @@
-//> A renderer for a custom flavor of markdown, that renders
-//  live, with every keystroke. I wrote the `Marked` component
-//  to be integrated into my productivity apps (I'm rewriting my
-//  notes and todo apps soon), but it also works well as a live
-//  editor by itself.
+//> A many-body simulation of gravitationally interacting masses,
+//  designed as a potential DOM stress test. (This is why this is
+//  implemented in DOM. Otherwise, this would be ideal for canvas2D.)
 
 //> Bootstrap the required globals from Torus, since we're not bundling
 for (const exportedName in Torus) {
@@ -24,21 +22,22 @@ const randomWindowY = () => {
 class ParticleSystem {
 
     constructor() {
-        // each entry is [xPos, yPos, xVel, yVel];
+        // each entry is [xPos, yPos, xVel, yVel, mass];
         this.particles = [];
         for (let i = 0; i < PARTICLE_COUNT; i ++) {
-            this.particles.push([randomWindowX(), randomWindowY(), 0, 0]);
+            this.particles.push([randomWindowX(), randomWindowY(), 0, 0, 1]);
         }
     }
 
     step(duration) {
         const particles = this.particles;
+        const len = particles.length;
 
         for (let i = 0; i < PARTICLE_COUNT; i ++) {
             const p = particles[i];
             let xAcc = 0;
             let yAcc = 0;
-            for (let j = 0; j < PARTICLE_COUNT; j ++) {
+            for (let j = 0; j < len; j ++) {
                 if (j !== i) {
                     const q = particles[j];
 
@@ -50,7 +49,7 @@ class ParticleSystem {
                         sqDiagonal = PARTICLE_RADIUS;
                     }
                     const diagonal = Math.sqrt(sqDiagonal)
-                    const accel = GRAV_CONST / sqDiagonal / diagonal;
+                    const accel = GRAV_CONST / sqDiagonal / diagonal * q[4];
 
                     xAcc -= accel * xOffset;
                     yAcc -= accel * yOffset;
@@ -66,10 +65,6 @@ class ParticleSystem {
             part[0] += part[2] * duration;
             part[1] += part[3] * duration;
         }
-    }
-
-    state() {
-        return this.particles.slice();
     }
 
 }
@@ -100,6 +95,35 @@ class Simulation extends StyledComponent {
             requestAnimationFrame(step);
         }
         step();
+
+        this.handleMousedown = this.handleMousedown.bind(this);
+        this.handleMousemove = this.handleMousemove.bind(this);
+        this.handleMouseup = this.handleMouseup.bind(this);
+        this.trackingMouse = false;
+    }
+
+    handleMousedown(evt) {
+        this.trackingMouse = true;
+        this.system.particles.push([
+            evt.clientX,
+            evt.clientY,
+            0,
+            0,
+            50
+        ]);
+    }
+
+    handleMousemove(evt) {
+        if (this.trackingMouse) {
+            const touchParticle = this.system.particles[PARTICLE_COUNT];
+            touchParticle[0] = evt.clientX;
+            touchParticle[1] = evt.clientY;
+        }
+    }
+
+    handleMouseup() {
+        this.trackingMouse = false;
+        this.system.particles.pop();
     }
 
     styles() {
@@ -124,8 +148,12 @@ class Simulation extends StyledComponent {
     }
 
     compose() {
-        return jdom`<div class="simulation">
-            ${this.system.state().map(p => Particle(p[0], p[1]))}
+        return jdom`<div class="simulation"
+            onmousedown="${this.handleMousedown}"
+            onmousemove="${this.handleMousemove}"
+            onmouseup="${this.handleMouseup}"
+            >
+            ${this.system.particles.map(p => Particle(p[0], p[1]))}
         </div>`;
     }
 

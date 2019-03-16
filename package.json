@@ -45,6 +45,7 @@
     "webpack": "^4.27.1"
   },
   "keywords": [
+    "ui",
     "vdom",
     "virtual",
     "torus",

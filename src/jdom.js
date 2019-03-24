@@ -635,12 +635,11 @@ const CSS_CACHE = new Map();
 //> `css` is a CSS parser that takes a string and returns CSS style objects for JDOM.
 const css = (tplParts, ...dynamicParts) => {
     //> Parse template as a string first
-    const result = interpolate(tplParts, dynamicParts).trim().replace(/\s/g, ' ');
+    const result = interpolate(tplParts, dynamicParts).trim();
     //> If the CSS rule had not been parsed before (is not in the cache),
     //  parse and cache it before returning it.
     if (!CSS_CACHE.has(result)) {
-        const reader = new Reader('{' + result + '}');
-        CSS_CACHE.set(result, stringToDict(reader));
+        CSS_CACHE.set(result, stringToDict(new Reader('{' + result + '}')));
     }
     return CSS_CACHE.get(result);
 }

@@ -561,17 +561,29 @@ const injectedClassNames = new Set();
 //  new CSS rules. It's set the first time a styled component renders.
 let styledComponentSheet = null;
 
-//> Fast pure function to map a style rule to a very reasonably unique class name
-//  that won't conflict with other classes on the page.
+//> A weak (garbage-collected keys) cache for mapping styles objects to hashes
+//  class names. If we use the `css` template tag or cache the styles object
+//  generated in a component in other ways, it's substantially faster to do
+//  a shallow comparison of styles objects and cache unique classnames than
+//  to compare the styles objects deeply every time. This cache implements this
+//  without a huge memory hit in the case of non-cached styles objects, because
+//  `WeakMap`'s keys are garbage collected.
+const INJECTED_STYLES_CACHE = new WeakMap();
+
+//> Fast hash function to map a style rule to a very reasonably unique class name
+//  that won't conflict with other classes on the page. Checks the styles cache first.
 const generateUniqueClassName = stylesObject => {
-    // Modified from https://github.com/darkskyapp/string-hash/blob/master/index.js
-    const str = JSON.stringify(stylesObject);
-    let i = str.length;
-    let hash = 1989;
-    while (i) {
-        hash = (hash * 13) ^ str.charCodeAt(-- i);
+    if (!INJECTED_STYLES_CACHE.has(stylesObject)) {
+        // Modified from https://github.com/darkskyapp/string-hash/blob/master/index.js
+        const str = JSON.stringify(stylesObject);
+        let i = str.length;
+        let hash = 1989;
+        while (i) {
+            hash = (hash * 13) ^ str.charCodeAt(-- i);
+        }
+        INJECTED_STYLES_CACHE.set(stylesObject, '_torus' + (hash >>> 0));
     }
-    return '_torus' + (hash >>> 0);
+    return INJECTED_STYLES_CACHE.get(stylesObject);
 }
 
 //> We have to construct lots of a{b} syntax in CSS, so here's a shorthand.

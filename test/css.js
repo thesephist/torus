@@ -123,7 +123,7 @@ describe('css template tag', () => {
 'Roboto',
 sans-serif;`,
         {
-            'font-family': 'system-ui, \'Helvetica\', \'Roboto\', sans-serif',
+            'font-family': 'system-ui,\n\'Helvetica\',\n\'Roboto\',\nsans-serif',
         }
     );
 

@@ -577,6 +577,12 @@ class FancyList extends StyledComponent {
 //> Torus also comes with a template tag, `css`, that makes writing CSS like this
 //  less tedioius, by parsing a single block of string into the styles object for you.
 //  Using this template tag, `FancyList` can look like this.
+
+//> Writing this way with a template
+//  tag, just like using the `jdom` template tag, has a measurable performance penalty. For this
+//  reason, `css` is best avoided in performance-critical hot paths in your code (for that matter,
+//  `StyledComponent`s in general are best avoided in hot paths.) But in ordinary UI, this yields
+//  better developer experience. In the future, this (and `jdom`) may both be able to be compiled away.
 class FancyList extends StyledComponent {
 
     styles() {

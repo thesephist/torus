@@ -7,9 +7,10 @@
 //> If you're in the browser, you can import Torus with a script tag.
 <script src="https://unpkg.com/torus-dom/dist/index.min.js"></script>
 
-//> Imported like this, Torus exposes its entire API through these two globals.
-window.Torus; // contains everything except `jdom`, including `Torus.Component`, etc.
+//> Imported like this, Torus exposes its entire API through these globals.
+window.Torus; // contains all of the core library, including `Torus.Component`, etc.
 window.jdom; // contains the `jdom` template tag
+window.css; // contains the `css` template tag
 
 //> .. so you can create a component, for example, like this.
 //  We'll omit the `Torus.` prefix for the rest of this documentation, for
@@ -20,9 +21,9 @@ class MyComponent extends Torus.Component {
 
 //> If you're bundling within NodeJS, the `torus-dom` package contains
 //  all the exported names. You can use ES2015 imports...
-import { Component, Record, Store, jdom } from 'torus-dom';
+import { Component, Record, Store, jdom, css } from 'torus-dom';
 //> ... or CommonJS require.
-const { Component, Record, Store, jdom } = require('torus-dom');
+const { Component, Record, Store, jdom, css } = require('torus-dom');
 
 //> ## JDOM
 

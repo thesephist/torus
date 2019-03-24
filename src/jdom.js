@@ -541,12 +541,86 @@ const jdom = (tplParts, ...dynamicParts) => {
     }
 }
 
-//> We only expose one public API: `jdom`
+//> Helper to convert a string representation of a dict into a JavaScript object
+const stringToDict = reader => {
+    const dict = {};
+
+    const PROP = 0, VAL = 1;
+
+    let part = PROP;
+    let current = ['', ''];
+    const commit = () => {
+        if (typeof current[VAL] === 'string') {
+            dict[current[PROP].trim()] = current[VAL].trim();
+        } else {
+            dict[current[PROP].trim()] = current[VAL];
+        }
+        current = ['', ''];
+    }
+    reader.readUntil('{');
+
+    for (let next = reader.next(); next !== undefined; next = reader.next()) {
+        if (next === '}') {
+            break;
+        }
+        switch (next) {
+            case '"':
+            case '\'':
+                current[part] += next + reader.readUntil(next);
+                break;
+            case ':':
+                //> The colon character is ambiguous in SCSS syntax, because it is used
+                //  for pseudoselectors and pseudoelements, as well as in the dict syntax.
+                //  We disambiguate by looking at the preceding part of the token.
+                if (
+                    current[PROP].trim() === ''
+                    || current[PROP].includes('&')
+                    || current[PROP].includes(':')
+                ) {
+                    console.log(current);
+                    current[part] += next;
+                } else {
+                    part = VAL;
+                }
+                break;
+            case ';':
+                part = PROP;
+                commit();
+                break;
+            case '{':
+                reader.back();
+                current[VAL] = stringToDict(reader);
+                commit();
+                break;
+            default:
+                current[part] += next;
+                break;
+        }
+    }
+
+    if (current[PROP].trim() !== '') {
+        commit();
+    }
+
+    return dict;
+}
+
+//> CSS preprocessor that takes a string and returns CSS style objects
+const css = (tplParts, ...dynamicParts) => {
+    //> Parse template as a string first
+    const result = '{' + interpolate(tplParts, dynamicParts).trim().replace(/\s/g, ' ') + '}';
+    const reader = new Reader(result);
+    return stringToDict(reader);
+}
+
+//> We only expose two public APIs: `jdom` and `css`
 if (typeof window === 'object') {
     window.jdom = jdom;
+    window.css = css;
 }
 if (typeof module === 'object' && module.exports) {
     module.exports = {
         jdom: jdom,
+        css: css,
     };
 }

@@ -534,7 +534,7 @@ class FancyList extends StyledComponent {
         return {
             //> Normal CSS properties are applied to the root node
             'font-size': '18px',
-            'background': 'rgba(0, 0, 0, 0.4)',
+            'background': 'rgba(0, 0, 0, .4)',
 
             //> Keyframes and media queries will be scoped globally,
             //  just like in CSS
@@ -545,7 +545,7 @@ class FancyList extends StyledComponent {
 
             //> Note that we don't select the element again
             //  inside @media -- that's done for us by styled components.
-            '@media (min-width: 0px)': {
+            '@media (min-width: 600px)': {
                 'border-color': 'rgb(0, 1, 2)',
                 'p': {
                     'font-style': 'italic',
@@ -569,6 +569,55 @@ class FancyList extends StyledComponent {
             }
         }
     }
+
+    compose() { /* ... */ }
+
+}
+
+//> Torus also comes with a template tag, `css`, that makes writing CSS like this
+//  less tedioius, by parsing a single block of string into the styles object for you.
+//  Using this template tag, `FancyList` can look like this.
+class FancyList extends StyledComponent {
+
+    styles() {
+        //> Write the styles returned as a template literal with `css`.
+        return css`
+        font-size: 18px;
+        background: rgba(0, 0, 0, .4);
+
+        @keyframes some-name {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (min-width: 600px) {
+            border-color: rgb(0, 1, 2);
+            p {
+                font-style: italic;
+            }
+        }
+
+        &.invalid {
+            color: red;
+        }
+        &::after {
+            content: "";
+            display: block;
+        }
+        p {
+            font-weight: bold;
+            em {
+                color: blue;
+            }
+        }
+        `;
+    }
+
+    compose() { /* ... */ }
 
 }
 

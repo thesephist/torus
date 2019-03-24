@@ -24,7 +24,7 @@ const interpolate = (tplParts, dynamicParts) => {
     return str;
 }
 
-//> The `Reader` class represents a sequence of characters we can read from a JDOM template.
+//> The `Reader` class represents a sequence of characters we can read from a template.
 class Reader {
 
     constructor(content) {
@@ -63,7 +63,7 @@ class Reader {
         return this.toNext(nextIdx);
     }
 
-    //> Abstraction used for both `readUpto` and `readdUntil` above.
+    //> Abstraction used for both `readUpto` and `readUntil` above.
     toNext(nextIdx) {
         const rest = this.content.substr(this.idx);
         if (nextIdx === -1) {
@@ -541,15 +541,22 @@ const jdom = (tplParts, ...dynamicParts) => {
     }
 }
 
-//> Helper to convert a string representation of a dict into a JavaScript object
+//> Helper to convert a string representation of a dict into a JavaScript object, CSS-style.
+//  `stringToDict` is recursive to parse nested dictionaries.
 const stringToDict = reader => {
+
+    //> Dictionary to be constructed from this step
     const dict = {};
 
+    //> Enums for marking whether we are in a key or value section of a dictionary
     const PROP = 0;
     const VAL = 1;
-
     let part = PROP;
+
+    //> Current key, value pair being parsed
     let current = ['', ''];
+    //> Utility function to commit the tokens in the current read buffer (`current`) to the
+    //  result dictionary and move on to the next key-value pair.
     const commit = () => {
         if (typeof current[VAL] === 'string') {
             dict[current[PROP].trim()] = current[VAL].trim();
@@ -558,9 +565,13 @@ const stringToDict = reader => {
         }
         current = ['', ''];
     }
-    reader.readUntil('{');
 
+    //> Begin reading the dictionary by stripping off any whitespace before the starting curlybrace.
+    reader.readUntil('{');
+    //> Loop through each character in the string being read...
     for (let next = reader.next(); next !== undefined; next = reader.next()) {
+        //> If we encounter a closing brace, we assume it's the end of the dictionary at the current
+        //  level of nesting, so we halt parsing at this step and return.
         if (next === '}') {
             break;
         }
@@ -568,17 +579,22 @@ const stringToDict = reader => {
         switch (next) {
             case '"':
             case '\'':
+                //> If we encounter quotes, we read blindly until the end of the quoted section,
+                //  ignoring escaped quotes. This is a slightly strange but simple way to achieve that.
                 current[part] += next + reader.readUntil(next);
+                while (current[part].endsWith('\\' + next)) {
+                    current[part] += reader.readUntil(next);
+                }
                 break;
             case ':':
                 //> The colon character is ambiguous in SCSS syntax, because it is used
                 //  for pseudoselectors and pseudoelements, as well as in the dict syntax.
                 //  We disambiguate by looking at the preceding part of the token.
                 if (
-                    p.trim() === ''
-                    || p.includes('&')
-                    || p.includes('@')
-                    || p.includes(':')
+                    p.trim() === '' // empty key is not a thing; probably pseudoselector
+                    || p.includes('&') // probably part of nested SCSS selector
+                    || p.includes('@') // probably part of media query
+                    || p.includes(':') // probably pseudoselector/ pseudoelement selector
                 ) {
                     current[part] += next;
                 } else {
@@ -586,20 +602,26 @@ const stringToDict = reader => {
                 }
                 break;
             case ';':
+                //> Commit read tokens if we've reached the end of the rule
                 part = PROP;
                 commit();
                 break;
             case '{':
+                //> If we come across `{`, this means we found a nested structure.
+                //  We backtrack the reader and recursively call `stringToDict` to parse the nested dict first
+                //  before moving on.
                 reader.back();
                 current[VAL] = stringToDict(reader);
                 commit();
                 break;
             default:
+                //> For all other characters, just append it to the currently read buffer.
                 current[part] += next;
                 break;
         }
     }
 
+    //> Take care of any dangling CSS rules without a semicolon.
     if (current[PROP].trim() !== '') {
         commit();
     }
@@ -607,12 +629,20 @@ const stringToDict = reader => {
     return dict;
 }
 
-//> CSS preprocessor that takes a string and returns CSS style objects
+//> Cache for CSS parser outputs
+const CSS_CACHE = new Map();
+
+//> `css` is a CSS parser that takes a string and returns CSS style objects for JDOM.
 const css = (tplParts, ...dynamicParts) => {
     //> Parse template as a string first
-    const result = '{' + interpolate(tplParts, dynamicParts).trim().replace(/\s/g, ' ') + '}';
-    const reader = new Reader(result);
-    return stringToDict(reader);
+    const result = interpolate(tplParts, dynamicParts).trim().replace(/\s/g, ' ');
+    //> If the CSS rule had not been parsed before (is not in the cache),
+    //  parse and cache it before returning it.
+    if (!CSS_CACHE.has(result)) {
+        const reader = new Reader('{' + result + '}');
+        CSS_CACHE.set(result, stringToDict(reader));
+    }
+    return CSS_CACHE.get(result);
 }
 
 //> We only expose two public APIs: `jdom` and `css`

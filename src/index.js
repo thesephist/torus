@@ -13,6 +13,7 @@ const {
 
 const {
     jdom,
+    css,
 } = require('./jdom.js');
 
 module.exports = {
@@ -27,5 +28,5 @@ module.exports = {
     StoreOf,
     Router,
     jdom,
+    css,
 }
-

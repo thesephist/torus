@@ -434,7 +434,7 @@ describe('jdom template tag', () => {
 
     });
 
-    describe('Graceful failure', () => {
+    describe('graceful failure', () => {
 
         const noThrow = (title, fn) => {
             it(title, () => expect(fn).to.not.throw());
@@ -491,7 +491,7 @@ describe('jdom template tag', () => {
         );
 
         noThrow(
-            'Invalid JDOM into children',
+            'invalid JDOM into children',
             () => jdom`<div>${{
                 tag: 'div',
                 name: ['1', {
@@ -503,12 +503,12 @@ describe('jdom template tag', () => {
         );
 
         noThrow(
-            'Mismatched quotes',
+            'mismatched quotes',
             () => jdom`<img src="url ab c/>`
         );
 
         noThrow(
-            'Script tag that closes itself inside its contents',
+            'script tag that closes itself inside its contents',
             () => jdom`<script>console.log('</script>');</script>`
         );
 

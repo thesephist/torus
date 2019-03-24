@@ -63,7 +63,7 @@ describe('css template tag', () => {
         'should carry over escaped double quotes',
         css`a: "I\\"m doing well! What\\"s up?"`,
         {
-            'a': '"I\\\"m doing well! What\\\"s up?"',
+            'a': '"I\\"m doing well! What\\"s up?"',
         }
     );
 

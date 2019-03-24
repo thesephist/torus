@@ -545,7 +545,8 @@ const jdom = (tplParts, ...dynamicParts) => {
 const stringToDict = reader => {
     const dict = {};
 
-    const PROP = 0, VAL = 1;
+    const PROP = 0;
+    const VAL = 1;
 
     let part = PROP;
     let current = ['', ''];

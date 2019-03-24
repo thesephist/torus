@@ -228,7 +228,7 @@ class StoryListing extends StyledComponent {
     }
 
     styles() {
-        const c = css`
+        return css`
         display: block;
         margin-bottom: 24px;
         cursor: pointer;
@@ -339,124 +339,6 @@ class StoryListing extends StyledComponent {
             }
         }
         `;
-        const c2 = {
-            'display': 'block',
-            'margin-bottom': '24px',
-            'cursor': 'pointer',
-            '.listing': {
-                'display': 'flex',
-                'flex-direction': 'row',
-                'align-items': 'center',
-                'justify-content': 'flex-start',
-                'width': '100%',
-                '&:hover .stats': {
-                    'background': BRAND_COLOR,
-                    'color': '#fff',
-                    'transform': 'translate(0, -4px)',
-                    '&::after': {
-                        'background': '#fff',
-                    },
-                },
-            },
-            '.mono': {
-                'font-family': '"Monaco", "Menlo", monospace',
-            },
-            '.meta': {
-                'font-size': '.9em',
-                'opacity': .7,
-                'span': {
-                    'display': 'inline-block',
-                    'margin': '0 4px',
-                },
-            },
-            '.url': {
-                'overflow': 'hidden',
-                'text-overflow': 'ellipsis',
-                'font-size': '.8em',
-            },
-            '.content': {
-                'color': '#777',
-                'font-size': '1em',
-            },
-            'a.stats': {
-                'height': '64px',
-                'width': '64px',
-                'flex-shrink': 0,
-                'text-align': 'center',
-                'display': 'flex',
-                'flex-direction': 'column',
-                'align-items': 'center',
-                'justify-content': 'center',
-                'overflow': 'hidden',
-                'border-radius': '6px',
-                'background': '#eee',
-                'transition': 'background .2s, transform .2s',
-                'position': 'relative',
-                //> Overriding default `<a>` styles
-                'text-decoration': 'none',
-                'color': '#333',
-                '&::after': {
-                    'content': '""',
-                    'display': 'block',
-                    'height': '1px',
-                    'background': '#555',
-                    'width': '52px',
-                    'position': 'absolute',
-                    'top': '31.5px',
-                    'left': '6px',
-                },
-            },
-            '.score, .comments': {
-                'height': '32px',
-                'width': '100%',
-                'line-height': '32px',
-            },
-            '.synopsis': {
-                'margin-left': '12px',
-                'flex-shrink': 1,
-                'overflow': 'hidden',
-            },
-            '.previewWrapper': {
-                'display': 'block',
-                'width': '100%',
-                'max-width': '500px',
-                'margin': '0 auto',
-            },
-            '.preview': {
-                'position': 'relative',
-                'margin': '18px auto 0 auto',
-                'width': '100%',
-                //> This is a trick to force a 4x3 aspect ratio
-                //  even when the image is not loaded yet.
-                'height': 0,
-                'padding-bottom': '75%',
-                //> This is a trick to emulate a border without
-                //  messing up box sizing -- shadow with a bigger size than the box.
-                'box-shadow': '0 0 0 3px ' + BRAND_COLOR,
-                'box-sizing': 'border-box',
-                'transition': 'opacity .2s',
-                '.loadingIndicator': {
-                    'position': 'absolute',
-                    'z-index': '-1',
-                    'top': '50%',
-                    'left': '50%',
-                    'transform': 'translate(-50%, -50%)',
-                    'font-size': '1.3em',
-                    'text-align': 'center',
-                    'width': '100%',
-                    'color': LIGHT_BRAND_COLOR,
-                },
-                'img': {
-                    'box-sizing': 'border-box',
-                    'width': '100%',
-                },
-                '&:hover': {
-                    'opacity': '.7',
-                },
-            },
-        }
-        console.log(c, c2);
-        return c;
     }
 
     getStoryPageURL() {
@@ -552,41 +434,41 @@ class CommentListing extends StyledComponent {
     }
 
     styles() {
-        return {
-            'background': '#eee',
-            'margin-bottom': '12px',
-            'padding': '12px',
-            'border-radius': '6px',
-            'cursor': 'pointer',
-            'overflow': 'hidden',
-            '.byline': {
-                'background': '#aaa',
-                'padding': '1px 8px',
-                'border-radius': '6px',
-                'color': '#fff',
-                'display': 'inline-block',
-                'margin-bottom': '8px',
-                'font-size': '.9em',
-                'a': {
-                    'color': '#fff',
-                },
-            },
-            '.children': {
-                'margin-top': '12px',
-                'margin-left': '12px',
-            },
-            'code': {
-                'display': 'block',
-                'overflow': 'auto',
-                'max-width': '100%',
-            },
-            '@media (max-width: 600px)': {
-                '.text': {
-                    'font-size': '.95em',
-                    'line-height': '1.4em',
-                },
-            },
+        return css`
+        background: #eee;
+        margin-bottom: 12px;
+        padding: 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        overflow: hidden;
+        .byline {
+            background: #aaa;
+            padding: 1px 8px;
+            border-radius: 6px;
+            color: #fff;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-size: .9em;
+            a {
+                color: #fff;
+            }
         }
+        .children {
+            margin-top: 12px;
+            margin-left: 12px;
+        }
+        code {
+            display: block;
+            overflow: auto;
+            max-width: 100%;
+        }
+        @media (max-width: 600px) {
+            .text {
+                font-size: .95em;
+                line-height: 1.4em;
+            }
+        }
+        `;
     }
 
     //> The user can click/tap on the comment block to collapse or expand
@@ -646,9 +528,7 @@ class CommentList extends Styled(ListOf(CommentListing)) {
 
     //> <ul> elements automatically come with a default left padding we don't want.
     styles() {
-        return {
-            'padding-left': 0,
-        }
+        return css`padding-left: 0`;
     }
 
     compose() {
@@ -669,13 +549,13 @@ class CommentList extends Styled(ListOf(CommentListing)) {
 class StoryList extends Styled(ListOf(StoryListing)) {
 
     styles() {
-        return {
-            'padding-left': 0,
-            '.loadingMessage': {
-                'margin': '52px 0',
-                'font-style': 'italic',
-            },
+        return css`
+        padding-left: 0;
+        .loadingMessage {
+            margin: 52px 0;
+            font-style: italic;
         }
+        `;
     }
 
     compose() {
@@ -776,46 +656,44 @@ class App extends StyledComponent {
     }
 
     styles() {
-        return {
-            'font-family': '"San Francisco", "Helvetica", "Roboto", sans-serif',
-            'color': '#333',
-            'box-sizing': 'border-box',
-            'padding': '14px',
-            'padding-bottom': '24px',
-            'line-height': '1.5em',
-            'max-width': '800px',
-            'margin': '0 auto',
-            'h1': {
-                'cursor': 'pointer',
-            },
-            //> These styles still cascade, so this styles all links on the page
-            'a': {
-                'color': BRAND_COLOR,
-                '&:visited': {
-                    'color': LIGHT_BRAND_COLOR,
-                },
-            },
-            //> This styles all buttons on the page
-            'button': {
-                'color': '#fff',
-                'background': BRAND_COLOR,
-                'padding': '6px 10px',
-                'border': 0,
-                'font-size': '1em',
-                'margin-right': '12px',
-                'border-radius': '6px',
-                'cursor': 'pointer',
-                'transition': 'opacity .2s',
-                '&:hover': {
-                    'opacity': '.7',
-                },
-            },
-            'footer': {
-                'margin': '32px 0',
-                'color': '#aaa',
-                'font-style': 'italic',
-            },
+        return css`
+        font-family: system-ui, 'Helvetica', 'Roboto', sans-serif;
+        color: #333;
+        box-sizing: border-box;
+        padding: 14px;
+        padding-bottom: 24px;
+        line-height: 1.5em;
+        max-width: 800px;
+        margin: 0 auto;
+        h1 {
+            cursor: pointer;
         }
+        a {
+            color: ${BRAND_COLOR};
+            &:visited {
+                color: ${LIGHT_BRAND_COLOR}
+            }
+        }
+        button {
+            color: #fff;
+            background: ${BRAND_COLOR};
+            padding: 6px 10px;
+            border: 0;
+            font-size: 1em;
+            margin-right: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity .2s;
+            &:hover {
+                opacity: .7;
+            }
+        }
+        footer {
+            margin: 32px 0;
+            color: #aaa;
+            font-style: italic;
+        }
+        `;
     }
 
     //> Used to set an active story for the whole app. Called by the router logic.

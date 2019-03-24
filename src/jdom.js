@@ -563,6 +563,7 @@ const stringToDict = reader => {
         if (next === '}') {
             break;
         }
+        const p = current[PROP];
         switch (next) {
             case '"':
             case '\'':
@@ -573,11 +574,11 @@ const stringToDict = reader => {
                 //  for pseudoselectors and pseudoelements, as well as in the dict syntax.
                 //  We disambiguate by looking at the preceding part of the token.
                 if (
-                    current[PROP].trim() === ''
-                    || current[PROP].includes('&')
-                    || current[PROP].includes(':')
+                    p.trim() === ''
+                    || p.includes('&')
+                    || p.includes('@')
+                    || p.includes(':')
                 ) {
-                    console.log(current);
                     current[part] += next;
                 } else {
                     part = VAL;

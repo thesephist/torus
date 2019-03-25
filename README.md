@@ -12,6 +12,56 @@ You can find the 📄 **[full documentation for Torus here, on Github pages](htt
 
 Torus also has an annotated, easy to read version of the entire (pretty concise) codebase, also on [Github Pages](https://thesephist.github.io/torus/). Check it out if you want to learn more about how the frameworks is designed, and how the virtual DOM and templating works!
 
+Here's what Torus looks like in action! This is a fully functional counter app, no compilation or bundling steps needed.
+
+```javascript
+// every view extends Component or StyledComponent
+class App extends StyledComponent {
+
+    init() {
+        // initialize our local state
+        this.count = 0;
+    }
+
+    styles() {
+        // we can define dynamically and efficiently injected
+        //  styles for our component with styles(), like this.
+        //  These styles are also automatically scoped to the
+        //  component, and we can use the full, nested SCSS syntax.
+        return css`
+            font-family: system-ui, sans-serif;
+            h1 {
+                text-align: center;
+            }
+            button {
+                padding: 4px 8px;
+                &:hover {
+                    opacity: .8;
+                }
+            }
+        `;
+    }
+
+    compose() {
+        // We define the structure of our component in compose(),
+        //  using a JSX- and lit-html-like syntax as a template string.
+        return jdom`
+        <main>
+            <h1>Hi! You clicked ${this.count} times.</h1>
+            <button onclick="${() => {
+                this.count ++;
+                this.render();
+            }}">Count up!</button>
+        </main>
+        `;
+    }
+
+}
+
+// mount the app to the page
+document.body.appendChild(new App().node);
+```
+
 ## Features
 
 ### 👌 Tiny without compromises

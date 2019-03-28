@@ -416,7 +416,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">497</strong>            this.event = {source, handler};</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">498</strong>            source.addHandler(handler);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">499</strong>        } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">500</strong>            throw new Error(`Tried to bind to ${source}, which is not an instance of Evented`);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">500</strong>            throw new Error(`cannot bind to ${source}, which is not an instance of Evented.`);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">501</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">502</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">503</strong></pre></div>
@@ -450,13 +450,13 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">540</strong>        const jdom = this.preprocess(this.compose(data), data);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">541</strong>        if (jdom === undefined) {</pre></div>
 <div class="line"><div class="doc"><p>If the developer accidentally forgets to return the JDOM value from compose, instead of leading to a cryptic DOM API error, show a more friendly warning.</p>
-</div><pre class="source javascript"><strong class="lineNumber">545</strong>            throw new Error(this.constructor.name + '.compose() didn\'t return anything');</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">545</strong>            throw new Error(this.constructor.name + '.compose() returned undefined.');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">546</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">547</strong>        try {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">548</strong>            this.node = render(this.node, this.jdom, jdom);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">549</strong>        } catch (e) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">550</strong>            /* istanbul ignore next: haven't found a reproducible error case that triggers this */</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">551</strong>            console.error('Error rendering updates', e);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">551</strong>            console.error('rendering error.', e);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">552</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">553</strong>        return this.jdom = jdom;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">554</strong>    }</pre></div>

@@ -516,7 +516,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">534</strong>        return JDOM_CACHE.get(cacheKey)(dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">535</strong>    } catch (e) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">536</strong>        /* istanbul ignore next: haven't found error cases that trigger this, but exists just in case */</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">537</strong>        console.error(`Error parsing template.\nPlease check for any mismatched brackets, tags, and quotes.\n${</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">537</strong>        console.error(`jdom parse error.\ncheck for mismatched brackets, tags, quotes.\n${</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">538</strong>            interpolate(tplParts, dynamicParts)}\n${e.stack || e}`);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">539</strong>        /* istanbul ignore next: see above */</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">540</strong>        return '';</pre></div>

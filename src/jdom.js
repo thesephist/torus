@@ -534,7 +534,7 @@ const jdom = (tplParts, ...dynamicParts) => {
         return JDOM_CACHE.get(cacheKey)(dynamicParts);
     } catch (e) {
         /* istanbul ignore next: haven't found error cases that trigger this, but exists just in case */
-        console.error(`Error parsing template.\nPlease check for any mismatched brackets, tags, and quotes.\n${
+        console.error(`jdom parse error.\ncheck for mismatched brackets, tags, quotes.\n${
             interpolate(tplParts, dynamicParts)}\n${e.stack || e}`);
         /* istanbul ignore next: see above */
         return '';

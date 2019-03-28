@@ -497,7 +497,7 @@ class Component {
             this.event = {source, handler};
             source.addHandler(handler);
         } else {
-            throw new Error(`Tried to bind to ${source}, which is not an instance of Evented`);
+            throw new Error(`cannot bind to ${source}, which is not an instance of Evented.`);
         }
     }
 
@@ -542,13 +542,13 @@ class Component {
             //> If the developer accidentally forgets to return the JDOM value from
             //  compose, instead of leading to a cryptic DOM API error, show a more
             //  friendly warning.
-            throw new Error(this.constructor.name + '.compose() didn\'t return anything');
+            throw new Error(this.constructor.name + '.compose() returned undefined.');
         }
         try {
             this.node = render(this.node, this.jdom, jdom);
         } catch (e) {
             /* istanbul ignore next: haven't found a reproducible error case that triggers this */
-            console.error('Error rendering updates', e);
+            console.error('rendering error.', e);
         }
         return this.jdom = jdom;
     }

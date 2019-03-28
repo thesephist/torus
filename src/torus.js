@@ -353,14 +353,16 @@ const render = (node, previous, next) => {
             //  so we don't have to perform expensive, DOM-touching operations during reconciliation
             //  to look up children of the current node in the next render pass. `nodeChildren`
             //  will be updated alongside enqueued DOM mutation operations.
-            const nodeChildren = previous._nodes || [];
             const prevChildren = previous.children;
             const nextChildren = next.children;
             //> Memoize length lookups.
             const prevLength = prevChildren.length;
             const nextLength = nextChildren.length;
-            const minLength = prevLength < nextLength ? prevLength : nextLength;
             if (nextLength > 0 || prevLength > 0) {
+                //> Initialize variables we'll need / reference throughout child reconciliation.
+                const nodeChildren = previous._nodes || [];
+                const minLength = prevLength < nextLength ? prevLength : nextLength;
+
                 //> "sync" the common sections of the two children lists.
                 let i = 0;
                 for (; i < minLength; i ++) {

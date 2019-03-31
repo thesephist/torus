@@ -334,6 +334,7 @@ class App extends StyledComponent {
                 color: #fff;
                 margin-left: 8px;
                 transition: transform .2s;
+                border: 0;
                 &:first-child {
                     margin-left: 0;
                 }

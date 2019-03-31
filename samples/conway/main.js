@@ -5,7 +5,7 @@ for (const exportedName in Torus) {
     window[exportedName] = Torus[exportedName];
 }
 
-const CELL_SIZE = 8;
+const CELL_SIZE = 10;
 const CELL_RADIUS = 3;
 
 class GameOfLife {
@@ -127,6 +127,7 @@ class GameCanvas extends Component {
         this.ctx = this.canvas.getContext('2d');
 
         this.game = new GameOfLife();
+        this.randomize();
 
         this._down = false;
 
@@ -191,8 +192,10 @@ class GameCanvas extends Component {
         const ctx = this.ctx;
         const {cells, count, xCount} = this.game;
 
-        ctx.clearRect(0, 0, this.width, this.height);
+        const HALFCELL = CELL_SIZE / 2;
+        const TAU = Math.PI * 2;
 
+        ctx.clearRect(0, 0, this.width, this.height);
         ctx.fillStyle = '#333';
 
         for (let i = 0; i < count; i ++) {
@@ -201,11 +204,11 @@ class GameCanvas extends Component {
 
                 ctx.beginPath();
                 ctx.arc(
-                    (remainder - 1) * CELL_SIZE + (CELL_SIZE / 2),
-                    (i - remainder + 1) / xCount * CELL_SIZE + (CELL_SIZE / 2),
+                    (remainder - 1) * CELL_SIZE + HALFCELL,
+                    (i - remainder + 1) / xCount * CELL_SIZE + HALFCELL,
                     CELL_RADIUS,
                     0,
-                    Math.PI * 2
+                    TAU
                 );
                 ctx.fill();
             }
@@ -254,25 +257,42 @@ class App extends StyledComponent {
         menu {
             position: absolute;
             background: #fff;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, .3);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, .4);
             transform: translateX(-50%);
+            top: 20px;
             left: 50%;
-            bottom: 12px;
-            height: 40px;
+            border-radius: 40px;
             display: flex;
             margin: 0;
             padding: 8px;
             flex-direction: row;
             button {
-                padding: 4px 8px;
+                padding: 0 8px;
                 font-size: 1em;
                 cursor: pointer;
+                height: 36px;
+                line-height: 34px;
+                border-radius: 18px;
+                background: #333;
+                color: #fff;
+                margin-left: 8px;
+                transition: transform .2s;
+                &:first-child {
+                    margin-left: 0;
+                }
+                &:hover {
+                    opacity: .7;
+                    transform: translateY(-2px);
+                }
             }
         }
         footer {
             position: absolute;
             right: 4px;
             bottom: 4px;
+            padding: 0 6px;
+            box-sizing: border-box;
+            text-align: right;
             color: #777;
             font-family: system-ui, sans-serif;
             font-size: 14px;

@@ -13,7 +13,7 @@
     "test:prod": "NODE_TEST_ENV=production karma start karma.conf.js",
     "test:size": "bundlesize",
     "lint": "eslint ./src/*.js ./renderers/*.js ./samples/**/main.js ./build/*.js ./doc/*.js ./test/*.js",
-    "build": "node build/build.js && cp dist/index.min.js samples/hn-reader/index.min.js && cp dist/index.min.js samples/graph-calc/index.min.js && cp dist/index.min.js samples/markus/index.min.js && cp dist/index.min.js samples/gravity/index.min.js && cp dist/index.min.js samples/mondrian/index.min.js",
+    "build": "node build/build.js && cp dist/index.min.js samples/hn-reader/index.min.js && cp dist/index.min.js samples/graph-calc/index.min.js && cp dist/index.min.js samples/markus/index.min.js && cp dist/index.min.js samples/gravity/index.min.js && cp dist/index.min.js samples/mondrian/index.min.js && cp dist/index.min.js samples/conway/index.min.js",
     "verify": "node build/build.js && karma start karma.conf.js && bundlesize",
     "clean": "rm -rvf dist/* coverage/*",
     "docs": "node doc/generate.js",
@@ -22,6 +22,7 @@
     "deploy:graph": "surge -p samples/graph-calc/ --domain https://graphcalc.surge.sh",
     "deploy:markus": "surge -p samples/markus/ --domain https://markuswriter.surge.sh",
     "deploy:gravity": "surge -p samples/gravity/ --domain https://tgrav.surge.sh",
+    "deploy:conway": "surge -p samples/conway/ --domain https://conwaygame.surge.sh",
     "deploy:mondrian": "surge -p samples/mondrian/ --domain https://mondrian.surge.sh"
   },
   "files": [

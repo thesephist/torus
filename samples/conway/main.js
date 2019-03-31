@@ -1,25 +1,37 @@
-//> Conway's Game of Life
+//> Minimal Conway's Game of Life simulation
 
 //> Bootstrap the required globals from Torus, since we're not bundling
 for (const exportedName in Torus) {
     window[exportedName] = Torus[exportedName];
 }
 
+//> Constants to determine simulation scale and look
 const CELL_SIZE = 10;
 const CELL_RADIUS = 3;
 
+//> `GameOfLife` encapsulates the full state of a Game of Life simulation
+//  and implements all game logic. It forms the "model" layer of the app.
 class GameOfLife {
 
     constructor() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        this.xCount = ~~(width / CELL_SIZE) + 2;
-        this.yCount = ~~(height / CELL_SIZE) + 2;
+        //> Determine how many cells we have in our window, given the cell
+        //  sizes and the window size. The `+ 2` makes sure the full canvas
+        //  is filled.
+        this.xCount = ~~(window.innerWidth / CELL_SIZE) + 2;
+        this.yCount = ~~(window.innerHeight / CELL_SIZE) + 2;
         this.count = this.xCount * this.yCount;
 
-        this.cells = new Array(this.xCount * this.yCount).fill(0);
+        //> We represent the game as a single array of 0's and 1's,
+        //  scanning the grid row-by-row, left to right, from the top row
+        //  to the bottom row. Cells all begin with the "dead" 0 state.
+        this.cells = new Array(this.count);
+        //> `this.cells` is double-buffered, so that we don't have to keep creating
+        //  new cells arrays with each tick. This is the other "buffer" of the game state.
+        this._cells = new Array(this.count);
+        this.clear();
     }
 
+    //> Seed the entire game board randomly, without killing live cells.
     seedRandomly() {
         for (let i = 0; i < this.count; i ++) {
             if (this.cells[i] === 0) {
@@ -28,21 +40,28 @@ class GameOfLife {
         }
     }
 
+    //> Clear the entire game board for a new game.
     clear() {
         this.cells.fill(0);
     }
 
+    //> Utility function to get the index of a cell above the given one.
+    //  -1 is used as a sentinel value for "no such cell".
     north(i) {
         const result = i - this.xCount;
         return result < 0 ? -1 : result;
     }
 
+    //> Like `north()`, but for the cell below the given one.
     south(i) {
         const result = i + this.xCount;
         return result >= this.count ? -1 : result;
     }
 
+    //> Like `north()`, but for the cell to the right of the given one.
     east(i) {
+        //> We have to do this add-one, subtract-one trick here because
+        //  remainders should start at 1 but indexes start at 0.
         const remainder = (i + 1) % this.xCount;
         if (remainder === 0) {
             return -1;
@@ -51,6 +70,7 @@ class GameOfLife {
         }
     }
 
+    //> Like `north()`, but for the cell to the left of the given one.
     west(i) {
         const remainder = (i + 1) % this.xCount;
         if (remainder === 1) {
@@ -60,13 +80,17 @@ class GameOfLife {
         }
     }
 
+    //> Given current game state and a cell index, compute the next state of the cell
+    //  in the next tick/step. Each tick of the game computes this for each cell on the board.
     cellNextState(i) {
         const live = this.cells[i] === 1;
-        let liveNeighbors = 0;
         const cells = this.cells;
 
         const west = this.west(i);
         const east = this.east(i);
+
+        //> Compute live/dead state for each of the 8 neighboring cells.
+        let liveNeighbors = 0;
         if (this.cells[this.north(i)] === 1) {
             liveNeighbors ++;
         }
@@ -92,6 +116,7 @@ class GameOfLife {
             liveNeighbors ++;
         }
 
+        //> Literal implementation of Conway's Game of Life
         if (live && liveNeighbors < 2) {
             return 0;
         } else if (live && (liveNeighbors === 2 || liveNeighbors === 3)) {
@@ -101,36 +126,54 @@ class GameOfLife {
         } else if (!live && liveNeighbors === 3) {
             return 1;
         } else {
+            //> If no change, return the original state of the cell.
             return this.cells[i]
         }
     }
 
+    //> Iterate the entire game board for one tick.
     step() {
-        const nextCells = new Array(this.count);
+        //> `this.cells` is double-buffered, so we modify the non-current
+        //  buffer of cells with new cell states and swap them out at the end.
         for (let i = 0; i < this.count; i ++) {
-            nextCells[i] = this.cellNextState(i);
+            this._cells[i] = this.cellNextState(i);
         }
-        this.cells = nextCells;
+        const tmpCells = this.cells;
+        this.cells = this._cells;
+        this._cells = tmpCells;
     }
 
 }
 
+//> `GameCanvas` component represents the canvas on which the game unfolds.
+//  It contains just the canvas, and no other UI element, but is controllable
+//  via its API (methods).
 class GameCanvas extends Component {
 
     init() {
         this.width = window.innerWidth;
         this.height = window.innerHeight;
 
+        //> Create a `<canvas>` element for the game itself. We render this
+        //  programmatically, not through the `compose()` method, so we can control
+        //  exactly how things are painted on the canvas's 2D context.
         this.canvas = document.createElement('canvas');
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.ctx = this.canvas.getContext('2d');
+        //> Since we only ever paint one thing -- the dots -- we set a single fill
+        //  style here and never change it.
+        this.ctx.fillStyle = '#333';
 
+        //> New instance of the game state, seeded with a random state to begin
         this.game = new GameOfLife();
         this.randomize();
 
+        //> Local state that represents whether a mouse or touch pointer is being dragged,
+        //  for adding points to the game.
         this._down = false;
 
+        //> Bind UI event listener methods
         this.handleStart = this.handleStart.bind(this);
         this.handleMove = this.handleMove.bind(this);
         this.handleEnd = this.handleEnd.bind(this);
@@ -143,14 +186,23 @@ class GameCanvas extends Component {
         this.canvas.addEventListener('touchend', this.handleEnd);
     }
 
+    //> Helper that maps XY coordinates in the screen to an index
+    //  in the cells array. There's a slight leak of abstraction here
+    //  because we have to worry about the 1-dimensional array representation
+    //  of cells, but this gains us a measurable performance impact.
+    xyToCellIdx(x, y) {
+        return ~~(y / CELL_SIZE) * this.game.xCount + ~~(x / CELL_SIZE);
+    }
+
     handleStart(evt) {
         evt.preventDefault();
         this._down = true;
+        //> When the pointer is down, immediately start painting new cells in,
+        //  so a "click" will regiter a new live cell.
         if (evt.touches) {
             evt = evt.touches[0];
         }
-        const [xCoord, yCoord] = this.xyToCoords(evt.clientX, evt.clientY);
-        this.game.cells[yCoord * this.game.xCount + xCoord] = 1;
+        this.game.cells[this.xyToCellIdx(evt.clientX, evt.clientY)] = 1;
         this.render();
     }
 
@@ -160,8 +212,7 @@ class GameCanvas extends Component {
             if (evt.touches) {
                 evt = evt.touches[0];
             }
-            const [xCoord, yCoord] = this.xyToCoords(evt.clientX, evt.clientY);
-            this.game.cells[yCoord * this.game.xCount + xCoord] = 1;
+            this.game.cells[this.xyToCellIdx(evt.clientX, evt.clientY)] = 1;
             this.render();
         }
     }
@@ -169,13 +220,6 @@ class GameCanvas extends Component {
     handleEnd(evt) {
         evt.preventDefault();
         this._down = false;
-    }
-
-    xyToCoords(x, y) {
-        return [
-            ~~(x / CELL_SIZE),
-            ~~(y / CELL_SIZE),
-        ];
     }
 
     randomize() {
@@ -188,16 +232,19 @@ class GameCanvas extends Component {
         this.render();
     }
 
+    //> Main logic for rendering the game's state to the canvas
     redraw() {
         const ctx = this.ctx;
         const {cells, count, xCount} = this.game;
 
+        //> Memoize constants, since it's easy and cheap
         const HALFCELL = CELL_SIZE / 2;
         const TAU = Math.PI * 2;
 
+        //> Clear the canvas. We'll re-draw the entire world each time.
         ctx.clearRect(0, 0, this.width, this.height);
-        ctx.fillStyle = '#333';
 
+        //> For each cell, if the cell is alive, draw a circle and fill it in.
         for (let i = 0; i < count; i ++) {
             if (cells[i] === 1) {
                 const remainder = (i + 1) % xCount;
@@ -215,11 +262,14 @@ class GameCanvas extends Component {
         }
     }
 
+    //> Simulate and render a "tick" in the game. This is the API to progress
+    //  the game from components that consume this `GameCanvas` component.
     step() {
         this.game.step();
         this.render();
     }
 
+    //> We override the compose method to also re-draw the frame with each render.
     compose() {
         this.redraw();
         return this.canvas;
@@ -231,12 +281,17 @@ class GameCanvas extends Component {
 class App extends StyledComponent {
 
     init() {
+        //> By default, a game in "play" ticks forward every 100ms
         this.INTERVAL = 100;
+        //> This is where we store the timer of a game in play, so we can cancel it.
         this.timer = null;
+        //> Make a new game canvas to display game state.
         this.gameCanvas = new GameCanvas();
     }
 
     start() {
+        //> Iff game is not playing, start a new interval timer that steps the game
+        //  forward each time.
         if (this.timer === null) {
             this.timer = setInterval(() => this.gameCanvas.step(), this.INTERVAL);
             this.render();
@@ -244,6 +299,8 @@ class App extends StyledComponent {
     }
 
     pause() {
+        //> To pause, clear the timer and set it back to null, so we can check if
+        //  we're playing.
         clearInterval(this.timer);
         this.timer = null;
         this.render();
@@ -311,14 +368,16 @@ class App extends StyledComponent {
         return jdom`<main>
             ${this.gameCanvas.node}
             <menu>
+                <button onclick="${() => this.gameCanvas.clear()}">Clear</button>
+                <button onclick="${() => this.gameCanvas.randomize()}">Randomize</button>
+                <button onclick="${() => this.gameCanvas.step()}">Step</button>
                 ${this.timer === null ? (
+                        //> Depending on whether the game is in play or not, display
+                        // the appropriate button.
                         jdom`<button onclick="${() => this.start()}">Play</button>`
                     ) : (
                         jdom`<button onclick="${() => this.pause()}">Pause</button>`
                 )}
-                <button onclick="${() => this.gameCanvas.randomize()}">Randomize</button>
-                <button onclick="${() => this.gameCanvas.step()}">Step</button>
-                <button onclick="${() => this.gameCanvas.clear()}">Clear</button>
             </menu>
             <footer>
                 Conway's Game of Life by

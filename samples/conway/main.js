@@ -18,11 +18,18 @@ class GameOfLife {
         this.count = this.xCount * this.yCount;
 
         this.cells = new Array(this.xCount * this.yCount).fill(0);
+    }
 
-        // test
+    seedRandomly() {
         for (let i = 0; i < this.count; i ++) {
-            this.cells[i] = Math.random() < .4 ? 1 : 0;
+            if (this.cells[i] === 0) {
+                this.cells[i] = Math.random() < .1 ? 1 : 0;
+            }
         }
+    }
+
+    clear() {
+        this.cells.fill(0);
     }
 
     north(i) {
@@ -56,28 +63,32 @@ class GameOfLife {
     cellNextState(i) {
         const live = this.cells[i] === 1;
         let liveNeighbors = 0;
+        const cells = this.cells;
+
+        const west = this.west(i);
+        const east = this.east(i);
         if (this.cells[this.north(i)] === 1) {
             liveNeighbors ++;
         }
         if (this.cells[this.south(i)] === 1) {
             liveNeighbors ++;
         }
-        if (this.cells[this.east(i)] === 1) {
+        if (cells[east] === 1) {
             liveNeighbors ++;
         }
-        if (this.cells[this.west(i)] === 1) {
+        if (cells[west] === 1) {
             liveNeighbors ++;
         }
-        if (this.cells[this.north(this.west(i))] === 1) {
+        if (cells[this.north(west)] === 1) {
             liveNeighbors ++;
         }
-        if (this.cells[this.south(this.west(i))] === 1) {
+        if (cells[this.south(west)] === 1) {
             liveNeighbors ++;
         }
-        if (this.cells[this.north(this.east(i))] === 1) {
+        if (cells[this.north(east)] === 1) {
             liveNeighbors ++;
         }
-        if (this.cells[this.south(this.east(i))] === 1) {
+        if (cells[this.south(east)] === 1) {
             liveNeighbors ++;
         }
 
@@ -95,7 +106,7 @@ class GameOfLife {
     }
 
     step() {
-        const nextCells = this.cells.slice();
+        const nextCells = new Array(this.count);
         for (let i = 0; i < this.count; i ++) {
             nextCells[i] = this.cellNextState(i);
         }
@@ -116,6 +127,64 @@ class GameCanvas extends Component {
         this.ctx = this.canvas.getContext('2d');
 
         this.game = new GameOfLife();
+
+        this._down = false;
+
+        this.handleStart = this.handleStart.bind(this);
+        this.handleMove = this.handleMove.bind(this);
+        this.handleEnd = this.handleEnd.bind(this);
+
+        this.canvas.addEventListener('mousedown', this.handleStart);
+        this.canvas.addEventListener('mousemove', this.handleMove);
+        this.canvas.addEventListener('mouseup', this.handleEnd);
+        this.canvas.addEventListener('touchstart', this.handleStart);
+        this.canvas.addEventListener('touchmove', this.handleMove);
+        this.canvas.addEventListener('touchend', this.handleEnd);
+    }
+
+    handleStart(evt) {
+        evt.preventDefault();
+        this._down = true;
+        if (evt.touches) {
+            evt = evt.touches[0];
+        }
+        const [xCoord, yCoord] = this.xyToCoords(evt.clientX, evt.clientY);
+        this.game.cells[yCoord * this.game.xCount + xCoord] = 1;
+        this.render();
+    }
+
+    handleMove(evt) {
+        evt.preventDefault();
+        if (this._down) {
+            if (evt.touches) {
+                evt = evt.touches[0];
+            }
+            const [xCoord, yCoord] = this.xyToCoords(evt.clientX, evt.clientY);
+            this.game.cells[yCoord * this.game.xCount + xCoord] = 1;
+            this.render();
+        }
+    }
+
+    handleEnd(evt) {
+        evt.preventDefault();
+        this._down = false;
+    }
+
+    xyToCoords(x, y) {
+        return [
+            ~~(x / CELL_SIZE),
+            ~~(y / CELL_SIZE),
+        ];
+    }
+
+    randomize() {
+        this.game.seedRandomly();
+        this.render();
+    }
+
+    clear() {
+        this.game.clear();
+        this.render();
     }
 
     redraw() {
@@ -159,11 +228,22 @@ class GameCanvas extends Component {
 class App extends StyledComponent {
 
     init() {
+        this.INTERVAL = 100;
+        this.timer = null;
         this.gameCanvas = new GameCanvas();
+    }
 
-        setInterval(() => {
-            this.gameCanvas.step();
-        }, 100);
+    start() {
+        if (this.timer === null) {
+            this.timer = setInterval(() => this.gameCanvas.step(), this.INTERVAL);
+            this.render();
+        }
+    }
+
+    pause() {
+        clearInterval(this.timer);
+        this.timer = null;
+        this.render();
     }
 
     styles() {
@@ -171,6 +251,24 @@ class App extends StyledComponent {
         height: 100vh;
         width: 100vw;
         overflow: hidden;
+        menu {
+            position: absolute;
+            background: #fff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, .3);
+            transform: translateX(-50%);
+            left: 50%;
+            bottom: 12px;
+            height: 40px;
+            display: flex;
+            margin: 0;
+            padding: 8px;
+            flex-direction: row;
+            button {
+                padding: 4px 8px;
+                font-size: 1em;
+                cursor: pointer;
+            }
+        }
         footer {
             position: absolute;
             right: 4px;
@@ -192,6 +290,16 @@ class App extends StyledComponent {
     compose() {
         return jdom`<main>
             ${this.gameCanvas.node}
+            <menu>
+                ${this.timer === null ? (
+                        jdom`<button onclick="${() => this.start()}">Play</button>`
+                    ) : (
+                        jdom`<button onclick="${() => this.pause()}">Pause</button>`
+                )}
+                <button onclick="${() => this.gameCanvas.randomize()}">Randomize</button>
+                <button onclick="${() => this.gameCanvas.step()}">Step</button>
+                <button onclick="${() => this.gameCanvas.clear()}">Clear</button>
+            </menu>
             <footer>
                 Conway's Game of Life by
                 <a href="https://linus.zone/now">Linus</a>,

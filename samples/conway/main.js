@@ -191,7 +191,7 @@ class GameCanvas extends Component {
     //  because we have to worry about the 1-dimensional array representation
     //  of cells, but this gains us a measurable performance impact.
     xyToCellIdx(x, y) {
-        return ~~(y / CELL_SIZE) * this.game.xCount + ~~(x / CELL_SIZE);
+        return (~~(y / CELL_SIZE) * this.game.xCount) + ~~(x / CELL_SIZE);
     }
 
     handleStart(evt) {
@@ -251,8 +251,8 @@ class GameCanvas extends Component {
 
                 ctx.beginPath();
                 ctx.arc(
-                    (remainder - 1) * CELL_SIZE + HALFCELL,
-                    (i - remainder + 1) / xCount * CELL_SIZE + HALFCELL,
+                    ((remainder - 1) * CELL_SIZE) + HALFCELL,
+                    ((i - remainder + 1) / xCount * CELL_SIZE) + HALFCELL,
                     CELL_RADIUS,
                     0,
                     TAU
@@ -396,4 +396,3 @@ const app = new App();
 document.body.appendChild(app.node);
 document.body.style.margin = '0';
 document.body.style.padding = '0';
-

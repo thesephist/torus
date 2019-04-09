@@ -195,7 +195,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">188</strong></pre></div>
 <div class="line"><div class="doc"><p>Helper that maps XY coordinates in the screen to an index in the cells array. There&#39;s a slight leak of abstraction here because we have to worry about the 1-dimensional array representation of cells, but this gains us a measurable performance impact.</p>
 </div><pre class="source javascript"><strong class="lineNumber">193</strong>    xyToCellIdx(x, y) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">194</strong>        return ~~(y / CELL_SIZE) * this.game.xCount + ~~(x / CELL_SIZE);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">194</strong>        return (~~(y / CELL_SIZE) * this.game.xCount) + ~~(x / CELL_SIZE);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">195</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">196</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">197</strong>    handleStart(evt) {</pre></div>
@@ -254,8 +254,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">251</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">252</strong>                ctx.beginPath();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">253</strong>                ctx.arc(</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">254</strong>                    (remainder - 1) * CELL_SIZE + HALFCELL,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">255</strong>                    (i - remainder + 1) / xCount * CELL_SIZE + HALFCELL,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">254</strong>                    ((remainder - 1) * CELL_SIZE) + HALFCELL,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">255</strong>                    ((i - remainder + 1) / xCount * CELL_SIZE) + HALFCELL,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">256</strong>                    CELL_RADIUS,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">257</strong>                    0,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">258</strong>                    TAU</pre></div>
@@ -398,7 +398,6 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">397</strong>document.body.style.margin = '0';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">398</strong>document.body.style.padding = '0';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">399</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">400</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

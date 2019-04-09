@@ -987,6 +987,11 @@ const app = new App(router);
 //  we can just call...
 router.go('/tab/shop/page/3');
 
+//> If you want the new history entry to _replace_ the old one (rather than
+//  get added to the history as a new entry), pass the `{replace: true}` option
+//  to the `router.go()` method.
+router.go('/tab/shop/page/4', {replace: true});
+
 //> We can also write a component that abstracts this away from us
 const RoutedLink = (route, children) => {
     return jdom`<a onclick="${() => router.go(route)}">${children}</a>`;

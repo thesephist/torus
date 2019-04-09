@@ -843,34 +843,37 @@
 <div class="line"><div class="doc"><p>The router has a method, <code>#go()</code>, that we can call to navigate to a new route. For example, if we want some method to redirect the page to tab &#39;shop&#39;, page 3, we can just call...</p>
 </div><pre class="source javascript"><strong class="lineNumber">988</strong>router.go('/tab/shop/page/3');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">989</strong></pre></div>
+<div class="line"><div class="doc"><p>If you want the new history entry to <em>replace</em> the old one (rather than get added to the history as a new entry), pass the <code>{replace: true}</code> option to the <code>router.go()</code> method.</p>
+</div><pre class="source javascript"><strong class="lineNumber">993</strong>router.go('/tab/shop/page/4', {replace: true});</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">994</strong></pre></div>
 <div class="line"><div class="doc"><p>We can also write a component that abstracts this away from us</p>
-</div><pre class="source javascript"><strong class="lineNumber">991</strong>const RoutedLink = (route, children) =&#62; {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">992</strong>    return jdom`&#60;a onclick="${() =&#62; router.go(route)}"&#62;${children}&#60;/a&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">993</strong>};</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">996</strong>const RoutedLink = (route, children) =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">997</strong>    return jdom`&#60;a onclick="${() =&#62; router.go(route)}"&#62;${children}&#60;/a&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">998</strong>};</pre></div>
 <div class="line"><div class="doc"><p>... so we can write later in a nav bar, something like this.</p>
-</div><pre class="source javascript"><strong class="lineNumber">995</strong>class NavBar extends Component {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">996</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">997</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">998</strong>        return jdom`&#60;nav&#62;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">999</strong>            ${[</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1000</strong>                RoutedLink('/', 'Home'),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1001</strong>                RoutedLink('/about', 'About Us'),</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1002</strong>                RoutedLink('/contact', 'Contact')</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1003</strong>            ]}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1004</strong>        &#60;/nav&#62;`;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1005</strong>    }</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1006</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1007</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1008</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">1000</strong>class NavBar extends Component {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1001</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1002</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1003</strong>        return jdom`&#60;nav&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1004</strong>            ${[</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1005</strong>                RoutedLink('/', 'Home'),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1006</strong>                RoutedLink('/about', 'About Us'),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1007</strong>                RoutedLink('/contact', 'Contact')</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1008</strong>            ]}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1009</strong>        &#60;/nav&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1010</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1011</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1012</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1013</strong></pre></div>
 <div class="line"><div class="doc"><h2 id="conclusions">Conclusions</h2>
-</div><pre class="source javascript"><strong class="lineNumber">1010</strong></pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>That&#39;s it! That&#39;s all of Torus&#39;s API. It&#39;s pretty small. Torus tries to be simple, lightweight, and extensible, so rather than being opinionated about how to do common things, it provides a set of powerful extensible APIs on top of a simple component and data model system.</p>
 </div><pre class="source javascript"><strong class="lineNumber">1015</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
+<div class="line"><div class="doc"><p>That&#39;s it! That&#39;s all of Torus&#39;s API. It&#39;s pretty small. Torus tries to be simple, lightweight, and extensible, so rather than being opinionated about how to do common things, it provides a set of powerful extensible APIs on top of a simple component and data model system.</p>
+</div><pre class="source javascript"><strong class="lineNumber">1020</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>I hope you found this page useful, and I hope Torus helps you build something awesome. If you have any questions or come across bugs, please find me on Github or Twitter at @thesephist :) Thanks for checking out Torus!</p>
-</div><pre class="source javascript"><strong class="lineNumber">1019</strong>torus.build('🚀');</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1020</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">1024</strong>torus.build('🚀');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1025</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

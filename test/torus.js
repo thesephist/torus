@@ -1554,6 +1554,11 @@ describe('StoreOf', () => {
 
 describe('Router', () => {
 
+    beforeEach(() => {
+        // reset window history state before each test
+        window.history.pushState(null, '', '/');
+    });
+
     it('should fire a new event with the matching route when #go() is called', () => {
         let routeName = null;
         let routeParams = null;
@@ -1579,6 +1584,70 @@ describe('Router', () => {
         router.go('/tabs/3');
         expect(routeName).to.equal('tabs');
         expect(routeParams).to.deep.equal({tabNumber: '3'});
+        router.remove();
+    });
+
+    it('does not emit another event nor append to history, if the new route matches the old', () => {
+        let routeEventEmitted = false;
+        const router = new Router({
+            'tabs': '/tabs/:tabNumber',
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, ([name, params]) => {
+                    routeEventEmitted = true;
+                });
+            }
+        }
+        const v = new RouterView(router);
+
+        router.go('/tabs/3');
+        const beforeLength = window.history.length;
+        routeEventEmitted = false;
+
+        router.go('/tabs/3');
+
+        const afterLength = window.history.length;
+        routeEventEmitted.should.be.false;
+        (afterLength - beforeLength).should.equal(0, 'History should not change here');
+
+        router.remove();
+    });
+
+    it('should append to history by default when #go() is called', () => {
+        const router = new Router({
+            'tabs': '/tabs/:tabNumber',
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, () => {});
+            }
+        }
+        const v = new RouterView(router);
+        const beforeLength = window.history.length;
+        router.go('/tabs/3');
+        const afterLength = window.history.length;
+        (afterLength - beforeLength).should.equal(1, 'History should be bumped by 1');
+        router.remove();
+    });
+
+    it('should replace history, not append to it, with #go(..., {replace: true})', () => {
+        const router = new Router({
+            'tabs': '/tabs/:tabNumber',
+            'default': '/',
+        });
+        class RouterView extends Component {
+            init(router) {
+                this.bind(router, () => {});
+            }
+        }
+        const v = new RouterView(router);
+        const beforeLength = window.history.length;
+        router.go('/tabs/3', {replace: true});
+        const afterLength = window.history.length;
+        (afterLength - beforeLength).should.equal(0, 'History should have the same length');
         router.remove();
     });
 

@@ -358,7 +358,8 @@ const render = (node, previous, next) => {
             //> Memoize length lookups.
             const prevLength = prevChildren.length;
             const nextLength = nextChildren.length;
-            if (nextLength > 0 || prevLength > 0) {
+            //> Smaller way to check for "if either nextLength or prevLength is greater than zero"
+            if (nextLength + prevLength > 0) {
                 //> Initialize variables we'll need / reference throughout child reconciliation.
                 const nodeChildren = previous._nodes || [];
                 const minLength = prevLength < nextLength ? prevLength : nextLength;
@@ -415,13 +416,11 @@ const render = (node, previous, next) => {
         }
     }
 
-    //> We're done rendering the current node,
-    //  so decrement the render stack counter.
-    render_stack --;
-
-    //> If we've reached the top of the render tree, it's time
-    //  to flush replaced nodes to the DOM before the next frame.
-    if (render_stack === 0) {
+    //> We're done rendering the current node, so decrement the
+    //  render stack counter. If we've reached the top of the
+    //  render tree, it's time to flush replaced nodes to the DOM
+    //  before the next frame.
+    if (-- render_stack === 0) {
         //> `runDOMOperations()` can also be called completely asynchronously
         //  with utilities like `requestIdleCallback`, _a la_ Concurrent React,
         //  for better responsiveness on larger component trees. This requires
@@ -716,15 +715,16 @@ class List extends Component {
         //  `this.items`, add it and its view; if any were removed,
         //  also remove it from `this.items`.
         const data = this.store.summarize();
-        for (const record of this.items.keys()) {
+        const items = this.items;
+        for (const record of items.keys()) {
             if (!data.includes(record)) {
-                this.items.get(record).remove();
-                this.items.delete(record);
+                items.get(record).remove();
+                items.delete(record);
             }
         }
         for (const record of data) {
-            if (!this.items.has(record)) {
-                this.items.set(
+            if (!items.has(record)) {
+                items.set(
                     record,
                     //> We pass a callback that takes a record and removes it from
                     //  the list's store. It's common in UIs for items to have a button
@@ -739,7 +739,7 @@ class List extends Component {
             }
         }
 
-        let sorter = [...this.items.entries()];
+        let sorter = [...items.entries()];
         //> Sort by the provided filter function if there is one
         if (this.filterFn !== null) {
             sorter = sorter.filter(item => this.filterFn(item[0]));

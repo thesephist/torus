@@ -800,16 +800,41 @@ describe('Styled', () => {
         }
 
         it('should render without throwing, without overriding styles()', () => {
-            const Vanilla = Styled(class extends Component {
+            class Vanilla extends StyledComponent {
                 compose() {
                     return {tag: 'div'};
                 }
-            });
+            }
             const v = new Vanilla();
         });
 
         it('should not throw with styles defined (placeholder test)', () => {
             expect(() => new S()).to.not.throw();
+        });
+
+        it('should take from cached results when same styles object is used multiple renders', () => {
+            const styles = {
+                display: 'block',
+            }
+            class Vanilla extends StyledComponent {
+                styles() {
+                    return styles;
+                }
+                compose() {
+                    return {tag: 'div'};
+                }
+            }
+            const v1Node = new Vanilla().node;
+            const v2Node = new Vanilla().node;
+
+            document.body.appendChild(v1Node);
+            document.body.appendChild(v2Node);
+
+            getComputedStyle(v1Node).display.should.equal('block');
+            getComputedStyle(v2Node).display.should.equal('block');
+
+            document.body.removeChild(v1Node);
+            document.body.removeChild(v2Node);
         });
 
         describe('Style rendering correctness', () => {

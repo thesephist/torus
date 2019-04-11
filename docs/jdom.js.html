@@ -232,7 +232,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>            const key = last.value;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">229</strong>            let val = curr.value.trim();</pre></div>
 <div class="line"><div class="doc"><p>Commit a key-value pair of string attributes to the JDOM stub. This section treats class lists and style dictionaries separately, and adds function values as event handlers.</p>
-</div><pre class="source javascript"><strong class="lineNumber">233</strong>            if (val.startsWith('jdom_tmp_func')) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">233</strong>            if (val.startsWith('jdom_tpl_func')) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                events[key.substr(2)] = [val];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>            } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">236</strong>                if (key === 'class') {</pre></div>
@@ -356,13 +356,13 @@
 </div><pre class="source javascript"><strong class="lineNumber">362</strong>const JDOM_CACHE = new Map();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>This HTML parsing algorithm works by replacing all the dynamic parts with a unique string, parsing the string markup into a JSON tree, and caching that tree. On renders, we walk the tree and replace any matching strings with their correct dynamic parts. This makes the algorithm cache-friendly and relatively fast, despite doing a lot at runtime. <code>JDOM_PLACEHOLDER_RE</code> is the regex we use to correlate string keys to their correct dynamic parts.</p>
-</div><pre class="source javascript"><strong class="lineNumber">368</strong>const JDOM_PLACEHOLDER_RE = /jdom_tmp_(?:func|obj)_\[(\d+)\]/;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">368</strong>const JDOM_PLACEHOLDER_RE = /jdom_tpl_(?:func|obj)_\[(\d+)\]/;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>This is for a performance optimization, that when we&#39;re filling out template strings, if a string in which we&#39;re searching for a placeholder is shorter than placeholder strings, we just stop searching.</p>
 </div><pre class="source javascript"><strong class="lineNumber">372</strong>const JDOM_PLACEHOLDER_MIN_LENGTH = 16;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong></pre></div>
 <div class="line"><div class="doc"><p>Does a given string have a placeholder for the template values?</p>
-</div><pre class="source javascript"><strong class="lineNumber">375</strong>const hasPlaceholder = str =&#62; typeof str === 'string' &#38;&#38; str.includes('jdom_tmp_');</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">375</strong>const hasPlaceholder = str =&#62; typeof str === 'string' &#38;&#38; str.includes('jdom_tpl_');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">376</strong></pre></div>
 <div class="line"><div class="doc"><p><strong>Utility functions for walking a JSON tree and filling in placeholders</strong> The functions here that take mutable values (arrays, objects) will mutate the given value to be faster than creating new objects.</p>
 </div><pre class="source javascript"><strong class="lineNumber">380</strong></pre></div>
@@ -481,9 +481,9 @@
 </div><pre class="source javascript"><strong class="lineNumber">499</strong>                if (typeof obj === 'function') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Function values are treated as event listeners.</p>
-</div><pre class="source javascript"><strong class="lineNumber">501</strong>                    return `jdom_tmp_func_[${i}]`;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">501</strong>                    return `jdom_tpl_func_[${i}]`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">502</strong>                } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">503</strong>                    return `jdom_tmp_obj_[${i}]`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">503</strong>                    return `jdom_tpl_obj_[${i}]`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">504</strong>                }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">505</strong>            });</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">506</strong></pre></div>
@@ -622,18 +622,21 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">644</strong>    return CSS_CACHE.get(result);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">645</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">646</strong></pre></div>
-<div class="line"><div class="doc"><p>We only expose two public APIs: <code>jdom</code> and <code>css</code></p>
-</div><pre class="source javascript"><strong class="lineNumber">648</strong>if (typeof window === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">649</strong>    window.jdom = jdom;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">650</strong>    window.css = css;</pre></div>
+<div class="line"><div class="doc"><p>Expose both template tags as globals</p>
+</div><pre class="source javascript"><strong class="lineNumber">648</strong>const exposedNames = {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">649</strong>    jdom,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">650</strong>    css,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">651</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">652</strong>if (typeof module === 'object' &#38;&#38; module.exports) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">653</strong>    module.exports = {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">654</strong>        jdom: jdom,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">655</strong>        css: css,</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">656</strong>    };</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">657</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">658</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">652</strong></pre></div>
+<div class="line"><div class="doc"><p>If there is a global <code>window</code> object, bind API names to it.</p>
+</div><pre class="source javascript"><strong class="lineNumber">654</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">655</strong>    Object.assign(window, exposedNames);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">656</strong>}</pre></div>
+<div class="line"><div class="doc"><p>Export public APIs CommonJS-style</p>
+</div><pre class="source javascript"><strong class="lineNumber">658</strong>if (typeof module === 'object' &#38;&#38; module.exports) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">659</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">660</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">661</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

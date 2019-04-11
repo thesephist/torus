@@ -54,9 +54,15 @@ const isObject = obj => obj !== null && typeof obj === 'object';
 //  in our usage so far. `normalizeJDOM` is a hot path in rendering,
 //  so we need it as fast as it can be.
 const normalizeJDOM = jdom => {
-    jdom.attrs = jdom.attrs !== undefined ? jdom.attrs : {};
-    jdom.events = jdom.events !== undefined ? jdom.events : {};
-    jdom.children = jdom.children !== undefined ? jdom.children : [];
+    if (jdom.attrs === undefined) {
+        jdom.attrs = {};
+    }
+    if (jdom.events === undefined) {
+        jdom.events = {};
+    }
+    if (jdom.children === undefined) {
+        jdom.children = [];
+    }
 }
 
 //> Quick shorthand to normalize either 1. a single value or 2. an array
@@ -80,7 +86,9 @@ const OP_APPEND = 0; // append, parent, new
 const OP_REMOVE = 1; // remove, parent, old
 const OP_REPLACE = 2; // replace, old, new
 //> This is a stubbed `parentNode`. See below in `runDOMOperations` for why this exists.
-const STUB_PARENT = {replaceChild: () => {}};
+const STUB_PARENT = {
+    replaceChild: () => {},
+};
 
 //> `runDOMOperations` works through the `opQueue` and performs each
 //  DOM operation in order they were queued. rDO is called when the reconciler
@@ -560,7 +568,7 @@ const injectedClassNames = new Set();
 
 //> Global pointer to the stylesheet on the page that Torus uses to insert
 //  new CSS rules. It's set the first time a styled component renders.
-let styledComponentSheet = null;
+let styledComponentSheet;
 
 //> A weak (garbage-collected keys) cache for mapping styles objects to hashes
 //  class names. If we use the `css` template tag or cache the styles object
@@ -647,6 +655,7 @@ const initSheet = () => {
 //  We disambiguate by the class name, which is a hash of the CSS rules.
 const injectStylesOnce = stylesObject => {
     const className = generateUniqueClassName(stylesObject);
+    let sheetLength = 0;
     if (!injectedClassNames.has(className)) {
         if (!styledComponentSheet) {
             initSheet();
@@ -655,7 +664,7 @@ const injectStylesOnce = stylesObject => {
         for (const rule of rules) {
             // @debug
             render_debug(`Add new CSS rule: ${rule}`);
-            styledComponentSheet.insertRule(rule, styledComponentSheet.cssRules.length);
+            styledComponentSheet.insertRule(rule, sheetLength ++);
         }
         injectedClassNames.add(className);
     }
@@ -681,9 +690,6 @@ const Styled = Base => {
         }
     }
 }
-
-//> Provide a default, `StyledComponent` class
-const StyledComponent = Styled(Component);
 
 //> Torus's generic List implementation, based on Stores.
 //  React and similar virtual-dom view libraries depend on [key-based
@@ -813,7 +819,7 @@ const ListOf = itemClass => {
 class Evented {
 
     constructor() {
-        this.eventTargets = new Set();
+        this.handlers = new Set();
     }
 
     //> Base, empty implementation of `#summarize()` which is overridden in all subclasses.
@@ -825,18 +831,18 @@ class Evented {
     //  listeners, with a summary of its state.
     emitEvent() {
         const summary = this.summarize();
-        for (const handler of this.eventTargets) {
+        for (const handler of this.handlers) {
             handler(summary);
         }
     }
 
     addHandler(handler) {
-        this.eventTargets.add(handler);
+        this.handlers.add(handler);
         handler(this.summarize());
     }
 
     removeHandler(handler) {
-        this.eventTargets.delete(handler);
+        this.handlers.delete(handler);
     }
 
 }
@@ -1083,7 +1089,8 @@ const exposedNames = {
     render,
     Component,
     Styled,
-    StyledComponent,
+    //> Provide a default, `StyledComponent` class.
+    StyledComponent: Styled(Component),
     List,
     ListOf,
     Record,
@@ -1091,6 +1098,7 @@ const exposedNames = {
     StoreOf,
     Router,
 }
+
 //> If there is a global `window` object, bind API names to it.
 if (typeof window === 'object') {
     window.Torus = exposedNames;

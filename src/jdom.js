@@ -230,7 +230,7 @@ const parseOpeningTagContents = content => {
             //> Commit a key-value pair of string attributes to the JDOM stub. This section
             //  treats class lists and style dictionaries separately, and adds function
             //  values as event handlers.
-            if (val.startsWith('jdom_tmp_func')) {
+            if (val.startsWith('jdom_tpl_func')) {
                 events[key.substr(2)] = [val];
             } else {
                 if (key === 'class') {
@@ -365,14 +365,14 @@ const JDOM_CACHE = new Map();
 //  and replace any matching strings with their correct dynamic parts. This makes the algorithm
 //  cache-friendly and relatively fast, despite doing a lot at runtime. `JDOM_PLACEHOLDER_RE` is
 //  the regex we use to correlate string keys to their correct dynamic parts.
-const JDOM_PLACEHOLDER_RE = /jdom_tmp_(?:func|obj)_\[(\d+)\]/;
+const JDOM_PLACEHOLDER_RE = /jdom_tpl_(?:func|obj)_\[(\d+)\]/;
 //> This is for a performance optimization, that when we're filling out template
 //  strings, if a string in which we're searching for a placeholder is shorter than
 //  placeholder strings, we just stop searching.
 const JDOM_PLACEHOLDER_MIN_LENGTH = 16;
 
 //> Does a given string have a placeholder for the template values?
-const hasPlaceholder = str => typeof str === 'string' && str.includes('jdom_tmp_');
+const hasPlaceholder = str => typeof str === 'string' && str.includes('jdom_tpl_');
 
 //> **Utility functions for walking a JSON tree and filling in placeholders**
 //  The functions here that take mutable values (arrays, objects) will mutate the
@@ -498,9 +498,9 @@ const jdom = (tplParts, ...dynamicParts) => {
                 //  during parse.
                 if (typeof obj === 'function') {
                     //> Function values are treated as event listeners.
-                    return `jdom_tmp_func_[${i}]`;
+                    return `jdom_tpl_func_[${i}]`;
                 } else {
-                    return `jdom_tmp_obj_[${i}]`;
+                    return `jdom_tpl_obj_[${i}]`;
                 }
             });
 
@@ -644,14 +644,17 @@ const css = (tplParts, ...dynamicParts) => {
     return CSS_CACHE.get(result);
 }
 
-//> We only expose two public APIs: `jdom` and `css`
-if (typeof window === 'object') {
-    window.jdom = jdom;
-    window.css = css;
+//> Expose both template tags as globals
+const exposedNames = {
+    jdom,
+    css,
 }
+
+//> If there is a global `window` object, bind API names to it.
+if (typeof window === 'object') {
+    Object.assign(window, exposedNames);
+}
+//> Export public APIs CommonJS-style
 if (typeof module === 'object' && module.exports) {
-    module.exports = {
-        jdom: jdom,
-        css: css,
-    };
+    module.exports = exposedNames;
 }

@@ -70,7 +70,7 @@ const formatDate = unix => {
     } else if (delta < 86400 * 3) {
         return '2 days ago';
     } else {
-        return date.toLocaleDateString() + ' ' + formatTime(date) + ' ago';
+        return date.toLocaleDateString() + ' ' + formatTime(date);
     }
 }
 

@@ -35,7 +35,6 @@
     "bundlesize": "^0.17.0",
     "chai": "^4.2.0",
     "eslint": "^5.12.1",
-    "istanbul": "^0.4.5",
     "karma": "^2.0.2",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
@@ -45,6 +44,7 @@
     "marked": "^0.5.2",
     "mkdirp": "^0.5.1",
     "mocha": "^5.1.1",
+    "nyc": "^14.0.0",
     "webpack": "^4.27.1"
   },
   "keywords": [

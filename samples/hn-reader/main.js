@@ -7,6 +7,7 @@ for (const exportedName in Torus) {
 
 //> A few constants used through the app. The root URL for the
 //  Hacker News JSON API and the current time, for calculating relative datetimes.
+const APP_TITLE = 'Torus Hacker News';
 const HN_API_ROOT = 'https://hacker-news.firebaseio.com/v0';
 const NOW = new Date();
 
@@ -166,11 +167,11 @@ class StoryStore extends StoreOf(Story) {
     //  It could be more efficient, but it works, and flipping pages is
     //  not super frequent in the average HN reader use case, so it's not a catastrophe.
     nextPage() {
-        this.gotoPage(this.start + 1);
+        router.go(`/page/${this.start + 1}`);
     }
 
     previousPage() {
-        this.gotoPage(Math.max(0, this.start - 1));
+        router.go(`/page/${Math.max(0, this.start - 1)}`);
     }
 
     gotoPage(pageNumber) {
@@ -461,6 +462,7 @@ class CommentListing extends StyledComponent {
             display: block;
             overflow: auto;
             max-width: 100%;
+            font-family: 'Menlo', 'Monaco', 'Courier', monospace;
         }
         @media (max-width: 600px) {
             .text {
@@ -638,18 +640,30 @@ class App extends StyledComponent {
                     if (!story) {
                         story = new Story(+params.storyID);
                         story.fetch().then(() => {
-                            document.title = `${story.get('title')} | Torus Hacker News`;
+                            document.title = `${story.get('title')} | ${APP_TITLE}`;
                         });
                     } else {
-                        document.title = `${story.get('title')} | Torus Hacker News`;
+                        document.title = `${story.get('title')} | ${APP_TITLE}`;
                     }
                     this.setActiveStory(story);
+                    break;
+                }
+                case 'page': {
+                    const pageNumber = isNaN(+params.pageNumber) ? 0 : +params.pageNumber;
+                    if (pageNumber === 0) {
+                        router.go('/', {replace: true});
+                    } else {
+                        this.setActiveStory(null);
+                        document.title = APP_TITLE;
+                        this.stories.gotoPage(pageNumber);
+                    }
                     break;
                 }
                 default:
                     //> The default route is just the main page, `'/'`.
                     this.setActiveStory(null);
-                    document.title = 'Torus Hacker News';
+                    document.title = APP_TITLE;
+                    this.stories.gotoPage(0);
                     break;
             }
         });
@@ -722,7 +736,6 @@ class App extends StyledComponent {
 
     homeClick() {
         router.go('/');
-        this.stories.gotoPage(0);
     }
 
     //> When views switch, it's nice to automatically scroll up to the top of the page
@@ -762,6 +775,7 @@ class App extends StyledComponent {
 //> Let's define our routes!
 const router = new Router({
     story: '/story/:storyID',
+    page: '/page/:pageNumber',
     default: '/',
 });
 

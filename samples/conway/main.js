@@ -24,10 +24,10 @@ class GameOfLife {
         //> We represent the game as a single array of 0's and 1's,
         //  scanning the grid row-by-row, left to right, from the top row
         //  to the bottom row. Cells all begin with the "dead" 0 state.
-        this.cells = new Array(this.count);
+        this.cells = Array.from({length: this.count});
         //> `this.cells` is double-buffered, so that we don't have to keep creating
         //  new cells arrays with each tick. This is the other "buffer" of the game state.
-        this._cells = new Array(this.count);
+        this._cells = Array.from({length: this.count});
         this.clear();
     }
 
@@ -167,7 +167,11 @@ class GameCanvas extends Component {
 
         //> New instance of the game state, seeded with a random state to begin
         this.game = new GameOfLife();
-        this.randomize();
+        //> This stores the previous "snapshot" of the game state, for dragging / clicking
+        //  to toggle cell states. We need to do this because when we drag, we should flip each
+        //  cell state from a snapshot before we started dragging, not necessary the state immediately
+        //  before the mouse cursor reaches the cell.
+        this._prevGameCells = this.game.cells.slice();
 
         //> Local state that represents whether a mouse or touch pointer is being dragged,
         //  for adding points to the game.
@@ -184,6 +188,9 @@ class GameCanvas extends Component {
         this.canvas.addEventListener('touchstart', this.handleStart);
         this.canvas.addEventListener('touchmove', this.handleMove);
         this.canvas.addEventListener('touchend', this.handleEnd);
+
+        //> Randomly seed the game state to begin
+        this.seedRandomly();
     }
 
     //> Helper that maps XY coordinates in the screen to an index
@@ -194,6 +201,12 @@ class GameCanvas extends Component {
         return (~~(y / CELL_SIZE) * this.game.xCount) + ~~(x / CELL_SIZE);
     }
 
+    toggleCellStateAt(xCoord, yCoord) {
+        const cellIdx = this.xyToCellIdx(xCoord, yCoord);
+        //> `(x + 1) % 2` is an easy way to flip between the 0 and 1 states without a conditional
+        this.game.cells[cellIdx] = (this._prevGameCells[cellIdx] + 1) % 2;
+    }
+
     handleStart(evt) {
         evt.preventDefault();
         this._down = true;
@@ -202,7 +215,8 @@ class GameCanvas extends Component {
         if (evt.touches) {
             evt = evt.touches[0];
         }
-        this.game.cells[this.xyToCellIdx(evt.clientX, evt.clientY)] = 1;
+        this._prevGameCells = this.game.cells.slice();
+        this.toggleCellStateAt(evt.clientX, evt.clientY);
         this.render();
     }
 
@@ -212,7 +226,7 @@ class GameCanvas extends Component {
             if (evt.touches) {
                 evt = evt.touches[0];
             }
-            this.game.cells[this.xyToCellIdx(evt.clientX, evt.clientY)] = 1;
+            this.toggleCellStateAt(evt.clientX, evt.clientY);
             this.render();
         }
     }
@@ -222,7 +236,7 @@ class GameCanvas extends Component {
         this._down = false;
     }
 
-    randomize() {
+    seedRandomly() {
         this.game.seedRandomly();
         this.render();
     }
@@ -370,7 +384,7 @@ class App extends StyledComponent {
             ${this.gameCanvas.node}
             <menu>
                 <button onclick="${() => this.gameCanvas.clear()}">Clear</button>
-                <button onclick="${() => this.gameCanvas.randomize()}">Randomize</button>
+                <button onclick="${() => this.gameCanvas.seedRandomly()}">Randomize</button>
                 <button onclick="${() => this.gameCanvas.step()}">Step</button>
                 ${this.timer === null ? (
                         //> Depending on whether the game is in play or not, display

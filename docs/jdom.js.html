@@ -232,7 +232,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>            const key = last.value;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">229</strong>            let val = curr.value.trim();</pre></div>
 <div class="line"><div class="doc"><p>Commit a key-value pair of string attributes to the JDOM stub. This section treats class lists and style dictionaries separately, and adds function values as event handlers.</p>
-</div><pre class="source javascript"><strong class="lineNumber">233</strong>            if (val.startsWith('jdom_tpl_func')) {</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">233</strong>            if (val.startsWith('jdom_tpl_fnc')) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                events[key.substr(2)] = [val];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>            } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">236</strong>                if (key === 'class') {</pre></div>
@@ -356,10 +356,10 @@
 </div><pre class="source javascript"><strong class="lineNumber">362</strong>const JDOM_CACHE = new Map();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>This HTML parsing algorithm works by replacing all the dynamic parts with a unique string, parsing the string markup into a JSON tree, and caching that tree. On renders, we walk the tree and replace any matching strings with their correct dynamic parts. This makes the algorithm cache-friendly and relatively fast, despite doing a lot at runtime. <code>JDOM_PLACEHOLDER_RE</code> is the regex we use to correlate string keys to their correct dynamic parts.</p>
-</div><pre class="source javascript"><strong class="lineNumber">368</strong>const JDOM_PLACEHOLDER_RE = /jdom_tpl_(?:func|obj)_\[(\d+)\]/;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">368</strong>const JDOM_PLACEHOLDER_RE = /jdom_tpl_(?:fnc|obj)_\[(\d+)\]/;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>This is for a performance optimization, that when we&#39;re filling out template strings, if a string in which we&#39;re searching for a placeholder is shorter than placeholder strings, we just stop searching.</p>
-</div><pre class="source javascript"><strong class="lineNumber">372</strong>const JDOM_PLACEHOLDER_MIN_LENGTH = 16;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">372</strong>const JDOM_PLACEHOLDER_MIN_LENGTH = 14;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong></pre></div>
 <div class="line"><div class="doc"><p>Does a given string have a placeholder for the template values?</p>
 </div><pre class="source javascript"><strong class="lineNumber">375</strong>const hasPlaceholder = str =&#62; typeof str === 'string' &#38;&#38; str.includes('jdom_tpl_');</pre></div>
@@ -481,7 +481,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">499</strong>                if (typeof obj === 'function') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Function values are treated as event listeners.</p>
-</div><pre class="source javascript"><strong class="lineNumber">501</strong>                    return `jdom_tpl_func_[${i}]`;</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">501</strong>                    return `jdom_tpl_fnc_[${i}]`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">502</strong>                } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">503</strong>                    return `jdom_tpl_obj_[${i}]`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">504</strong>                }</pre></div>

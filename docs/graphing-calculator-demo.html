@@ -601,7 +601,7 @@
 </div><pre class="source javascript"><strong class="lineNumber">633</strong>            const {centerX, centerY, zoom, resolution, detectAsymptotes} = graphPropsSummary;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">634</strong>            const centerXScreen = width / 2;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">635</strong>            const centerYScreen = height / 2;</pre></div>
-<div class="line"><div class="doc"><p>These values represent min/max values _on the graph_, and help us determine which x- and y-values we need to worry about computing.</p>
+<div class="line"><div class="doc"><p>These values represent min/max values <em>on the graph</em>, and help us determine which x- and y-values we need to worry about computing.</p>
 </div><pre class="source javascript"><strong class="lineNumber">638</strong>            const minX = ~~(centerX - (centerXScreen / zoom)) - 1;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">639</strong>            const maxX = ~~(centerX + (centerXScreen / zoom)) + 1;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">640</strong>            const minY = ~~(centerY - (centerYScreen / zoom)) - 1;</pre></div>

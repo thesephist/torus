@@ -310,7 +310,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">368</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">369</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">370</strong></pre></div>
-<div class="line"><div class="doc"><h3 id="component-from-and-functional-components"><code>Component.from()</code> and functional components</h3>
+<div class="line"><div class="doc"><h3 id="componentfrom-and-functional-components"><code>Component.from()</code> and functional components</h3>
 </div><pre class="source javascript"><strong class="lineNumber">372</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Often, we want to create a new Component class whose rendered result only depends on its initial input. These might be small UI widgets in a design system like buttons and dialogs, for example. In these cases where we don&#39;t need a component to keep local state, listen for events, or create side effects, we can describe the component&#39;s view with a pure function.</p>
@@ -426,7 +426,7 @@
 <div class="line"><div class="doc"><p>Torus might get a higher-level API later to do something like this, maybe closer to React refs, but this is the current API design while larger Torus-based applications are built and patterns are better established.</p>
 </div><pre class="source javascript"><strong class="lineNumber">507</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><h3 id="styled-components-and-component-preprocess-">Styled components and <code>Component#preprocess()</code></h3>
+<div class="line"><div class="doc"><h3 id="styled-components-and-componentpreprocess">Styled components and <code>Component#preprocess()</code></h3>
 </div><pre class="source javascript"><strong class="lineNumber">509</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Although you can use Torus perfectly without using CSS in JS, if you like declaring your view styles in your component code, as I do, Torus has an efficient and well-integrated solution, called styled components (not to be confused with React&#39;s <code>styled-components</code>, which has a similar idea but wildly different API).</p>
@@ -789,7 +789,7 @@
 <div class="line"><div class="doc"><p>Let&#39;s only show movies that start with &#39;A&#39; or &#39;a&#39;</p>
 </div><pre class="source javascript"><strong class="lineNumber">928</strong>movieList.filter(movie =&#62; movie.get('name').toLowerCase()[0] === 'a');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Let&#39;s switch the filter to movies that are rated above 80% this _unsets the last filter_, and sets a new filter.</p>
+<div class="line"><div class="doc"><p>Let&#39;s switch the filter to movies that are rated above 80% this <em>unsets the last filter</em>, and sets a new filter.</p>
 </div><pre class="source javascript"><strong class="lineNumber">931</strong>movieList.filter(movie =&#62; movie.get('rating') &#62; 80);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Show all the movies again</p>

@@ -140,7 +140,7 @@ class StoryStore extends StoreOf(Story) {
         super();
         this.slug = slug;
         this.limit = limit;
-        this.start = 0;
+        this.pageNumber = 0;
     }
 
     //> Fetch all the new top stories from the API and reset the collection
@@ -148,11 +148,11 @@ class StoryStore extends StoreOf(Story) {
     fetch() {
         return hnFetch('/' + this.slug).then(stories => {
             const storyRecords = stories.slice(
-                this.start * this.limit,
-                (this.start + 1) * this.limit
+                this.pageNumber * this.limit,
+                (this.pageNumber + 1) * this.limit
             ).map((id, idx) => {
                 return new Story(id, {
-                    order: (this.start * this.limit) + 1 + idx,
+                    order: (this.pageNumber * this.limit) + 1 + idx,
                 })
             });
             this.reset(storyRecords);
@@ -167,16 +167,16 @@ class StoryStore extends StoreOf(Story) {
     //  It could be more efficient, but it works, and flipping pages is
     //  not super frequent in the average HN reader use case, so it's not a catastrophe.
     nextPage() {
-        router.go(`/page/${this.start + 1}`);
+        router.go(`/page/${this.pageNumber + 1}`);
     }
 
     previousPage() {
-        router.go(`/page/${Math.max(0, this.start - 1)}`);
+        router.go(`/page/${Math.max(0, this.pageNumber - 1)}`);
     }
 
     gotoPage(pageNumber) {
-        if (this.start !== pageNumber) {
-            this.start = pageNumber;
+        if (this.pageNumber !== pageNumber) {
+            this.pageNumber = pageNumber;
             this.reset();
             this.fetch();
         }
@@ -688,15 +688,16 @@ class App extends StyledComponent {
                 color: ${LIGHT_BRAND_COLOR}
             }
         }
-        button {
+        a.pageLink {
+            display: inline-block;
             color: #fff;
             background: ${BRAND_COLOR};
+            text-decoration: none;
             padding: 6px 10px;
             border: 0;
             font-size: 1em;
             margin-right: 12px;
             border-radius: 6px;
-            cursor: pointer;
             transition: opacity .2s;
             &:hover {
                 opacity: .7;
@@ -724,13 +725,17 @@ class App extends StyledComponent {
         }
     }
 
-    nextPage() {
+    nextPage(evt) {
+        evt.preventDefault();
         this.stories.nextPage();
+        this.render();
         this.resetScroll();
     }
 
-    previousPage() {
+    previousPage(evt) {
+        evt.preventDefault();
         this.stories.previousPage();
+        this.render();
         this.resetScroll();
     }
 
@@ -758,8 +763,12 @@ class App extends StyledComponent {
             ) : (
                 jdom`<div>
                     ${this.list.node}
-                    <button onclick="${this.previousPage}">👈 previous</button>
-                    <button onclick="${this.nextPage}">next 👉</button>
+                    <a class="pageLink" href="/page/${Math.max(0, this.stories.pageNumber - 1)}"
+                        title="previous page"
+                        onclick="${this.previousPage}">👈 prev</button>
+                    <a class="pageLink" href="/page/${this.stories.pageNumber + 1}"
+                        title="next page"
+                        onclick="${this.nextPage}">next 👉</button>
                 </div>`
             )}
             <footer>This HN reader was made with the

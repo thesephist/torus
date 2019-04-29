@@ -246,14 +246,14 @@ const render = (node, previous, next) => {
                 previous = {
                     tag: null,
                 };
-                replacePreviousNode(document.createElement(next.tag));
                 // @begindebug
                 if (node === undefined) {
                     render_debug(`Add <${next.tag}>`);
                 } else {
-                    render_debug(`Replace previous node <${node.tagName}> with <${next.tag}>`);
+                    render_debug(`Replace previous node <${node.tagName.toLowerCase()}> with <${next.tag}>`);
                 }
                 // @enddebug
+                replacePreviousNode(document.createElement(next.tag));
             }
             normalizeJDOM(previous);
             normalizeJDOM(next);

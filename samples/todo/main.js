@@ -108,7 +108,7 @@ class TaskInput extends StyledComponent {
 
     //> If an enter key is pressed, try to add a task
     onKeyPress(evt) {
-        if (evt.keyCode === 13) {
+        if (evt.key === 'Enter') {
             this._addTask();
         }
     }
@@ -131,7 +131,7 @@ class TaskInput extends StyledComponent {
     //  input value, in an uncompleted state.
     _addTask() {
         if (this.value) {
-            tasks.create(undefined, {
+            tasks.create({
                 description: this.value,
                 completed: false,
             });
@@ -146,7 +146,6 @@ class TaskInput extends StyledComponent {
             'width': '100%',
             'display': 'flex',
             'flex-direction': 'row',
-
             'input': {
                 'flex-grow': 1,
             },
@@ -178,7 +177,7 @@ class App extends StyledComponent {
 
     styles() {
         return {
-            'font-family': "'Helvetica', 'Ubuntu', sans-serif",
+            'font-family': "system-ui, 'Helvetica', 'Ubuntu', sans-serif",
             'width': '100%',
             'max-width': '500px',
             'margin': '0 auto',
@@ -188,7 +187,9 @@ class App extends StyledComponent {
     compose() {
         //> The app is really just both components' nodes wrapped
         //  in a single div.
-        return jdom`<div>${[this.input.node, this.list.node]}</div>`;
+        return jdom`<div>
+            ${[this.input.node, this.list.node]}
+        </div>`;
     }
 
 }

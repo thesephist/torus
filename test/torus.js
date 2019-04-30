@@ -1350,6 +1350,14 @@ describe('Store', () => {
             [...s.records][0].id.should.equal('some_id');
         });
 
+        it('should add a new recordClass instance with null id if no id given', () => {
+            const s = new MyStore();
+            s.create({some: 'data'});
+            s.records.size.should.equal(1);
+            [...s.records][0].should.be.an.instanceof(MyRecord);
+            expect([...s.records][0].id).to.be.null;
+        });
+
         it('should fire an event', () => {
             let eventEmitted = false;
             const s = new MyStore();

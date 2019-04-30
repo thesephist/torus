@@ -479,6 +479,9 @@ describe('render', () => {
             const next = {
                 tag: 'button',
                 events: {
+                    // "null" passes regardless of a regression on this, because addEventListener
+                    //  accepts any object type values as listeners, but not non-objects. So we test
+                    //  with a string.
                     click: '',
                 },
             }

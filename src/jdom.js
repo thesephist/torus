@@ -230,7 +230,7 @@ const parseOpeningTagContents = content => {
             //> Commit a key-value pair of string attributes to the JDOM stub. This section
             //  treats class lists and style dictionaries separately, and adds function
             //  values as event handlers.
-            if (val.startsWith('jdom_tpl_fnc')) {
+            if (key.startsWith('on')) {
                 events[key.substr(2)] = [val];
             } else {
                 if (key === 'class') {
@@ -365,7 +365,7 @@ const JDOM_CACHE = new Map();
 //  and replace any matching strings with their correct dynamic parts. This makes the algorithm
 //  cache-friendly and relatively fast, despite doing a lot at runtime. `JDOM_PLACEHOLDER_RE` is
 //  the regex we use to correlate string keys to their correct dynamic parts.
-const JDOM_PLACEHOLDER_RE = /jdom_tpl_(?:fnc|obj)_\[(\d+)\]/;
+const JDOM_PLACEHOLDER_RE = /jdom_tpl_obj_\[(\d+)\]/;
 //> This is for a performance optimization, that when we're filling out template
 //  strings, if a string in which we're searching for a placeholder is shorter than
 //  placeholder strings, we just stop searching.
@@ -492,17 +492,8 @@ const jdom = (tplParts, ...dynamicParts) => {
         //> If we don't have the template in cache, we need to put a translator function
         //  in the cache now.
         if (!JDOM_CACHE.has(cacheKey)) {
-            const dpPlaceholders = dynamicParts.map((obj, i) => {
-                //> Different kinds of template values are replaced by different
-                //  strings, since some of them need to be dealt with differently
-                //  during parse.
-                if (typeof obj === 'function') {
-                    //> Function values are treated as event listeners.
-                    return `jdom_tpl_fnc_[${i}]`;
-                } else {
-                    return `jdom_tpl_obj_[${i}]`;
-                }
-            });
+            //> Generate placeholder string values for each dynamic value in the template
+            const dpPlaceholders = dynamicParts.map((_obj, i) => `jdom_tpl_obj_[${i}]`);
 
             //> Make a new reader, interpolating the template's static and dynamic parts together.
             const reader = new Reader(interpolate(tplParts.map(part => part.replace(/\s+/g, ' ')), dpPlaceholders));

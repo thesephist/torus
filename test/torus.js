@@ -461,6 +461,37 @@ describe('render', () => {
             secondClickCount.should.equal(1);
         });
 
+        it('should not fail when an event handler is not a function, but ignore it', () => {
+            let firstClickCount = 0;
+            let secondClickCount = 0;
+
+            const firstFn = () => firstClickCount ++;
+
+            const prev = {
+                tag: 'button',
+                events: {
+                    click: [
+                        firstFn,
+                        () => secondClickCount ++,
+                    ],
+                },
+            }
+            const next = {
+                tag: 'button',
+                events: {
+                    click: '',
+                },
+            }
+
+            const node = renderNext(prev);
+            node.click();
+            const node2 = render(node, prev, next);
+            node2.click();
+
+            firstClickCount.should.equal(1);
+            secondClickCount.should.equal(1);
+        });
+
         it('should remove listeners as changed in JDOM, given in arrays', () => {
             let firstClickCount = 0;
             let secondClickCount = 0;

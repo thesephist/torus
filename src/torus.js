@@ -151,7 +151,10 @@ const diffEvents = (whole, sub, cb) => {
         const wholeEvents = arrayNormalize(whole[eventName]);
         const subEvents = arrayNormalize(sub[eventName] || []);
         for (const handlerFn of wholeEvents) {
-            if (!subEvents.includes(handlerFn)) {
+            //> Sometimes, it's nice to be able to pass in non-function values to event
+            //  objects in JDOM, because we may be toggling the presence of an event listener
+            //  with a ternary expression, for example. We only attach function handlers here.
+            if (!subEvents.includes(handlerFn) && typeof handlerFn === 'function') {
                 cb(eventName, handlerFn);
             }
         }

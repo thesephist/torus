@@ -771,8 +771,8 @@ class App extends StyledComponent {
                         onclick="${this.nextPage}">next 👉</button>
                 </div>`
             )}
-            <footer>This HN reader was made with the
-                <a href="https://linus.zone/torus" target="_blank" noreferrer>Torus framework</a>
+            <footer>This HN reader was made with
+                <a href="https://linus.zone/torus" target="_blank" noreferrer>Torus</a>
                 and &#60;3 by
                 <a href="https://linus.zone/now" target="_blank" noreferrer>Linus</a>
             </footer>

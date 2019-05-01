@@ -353,6 +353,16 @@ describe('jdom template tag', () => {
         );
 
         compare(
+            'jdom inside jdom with falsy template values (regression)',
+            jdom`<div>${jdom`<div>${0}</div>`}</div>`,
+            {tag: 'div', children: [
+                {tag: 'div', children: [
+                    0,
+                ]},
+            ]}
+        );
+
+        compare(
             'HTML entities in children',
             jdom`<span>&#60;test&#62;</span>`,
             {tag: 'span', children: ['<test>']}

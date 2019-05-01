@@ -22,11 +22,9 @@ const Tab = Component.from((number, content) => {
 //> The tab buttons are nav buttons to switch between tabs using the Torus router.
 //  Because it's such a simple component, we just write it as a function to reuse in `App`.
 const TabButton = (number, active) => {
-    const link = `/tab/${number}`;
-
     //> We can tell the router to go to a specific location with `Router#go()`.
-    return jdom`<button style="${active ? 'background:#555;color:#fff' : ''}"
-        onclick="${() => router.go(link)}">Switch to tab #${number}
+    return jdom`<button style="background:${active ? '#555' : '#fff'};color:${active ? '#fff' : '#000'}"
+        onclick="${() => router.go(`/tab/${number}`)}">Switch to tab #${number}
     </button>`;
 }
 
@@ -64,7 +62,7 @@ class App extends StyledComponent {
 
     styles() {
         return {
-            'font-family': 'sans-serif',
+            'font-family': 'system-ui, sans-serif',
         }
     }
 

@@ -402,7 +402,7 @@ const splitByPlaceholder = (str, dynamicParts) => {
         }
         return result;
     } else {
-        return str ? [str] : [];
+        return str !== '' ? [str] : [];
     }
 }
 
@@ -454,7 +454,7 @@ const replaceInArrayLiteral = (arr, dynamicParts) => {
     for (let i = 0, len = arr.length; i < len; i ++) {
         const val = arr[i];
         if (typeof val === 'string') {
-            arr[i] = replaceInString(val.toString(), dynamicParts);
+            arr[i] = replaceInString(val, dynamicParts);
         } else if (Array.isArray(val)) {
             replaceInArrayLiteral(val, dynamicParts);
         } else { // it's an object otherwise
@@ -468,7 +468,7 @@ const replaceInObjectLiteral = (obj, dynamicParts) => {
     for (const prop of Object.keys(obj)) {
         const val = obj[prop];
         if (typeof val === 'string') {
-            obj[prop] = replaceInString(val.toString(), dynamicParts);
+            obj[prop] = replaceInString(val, dynamicParts);
         } else if (Array.isArray(val)) {
             if (prop === 'children') {
                 //> We need to treat children of JDOM objects differently because

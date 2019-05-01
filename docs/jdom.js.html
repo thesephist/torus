@@ -389,7 +389,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">402</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">403</strong>        return result;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">404</strong>    } else {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">405</strong>        return str ? [str] : [];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">405</strong>        return str !== '' ? [str] : [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">406</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">407</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">408</strong></pre></div>
@@ -440,7 +440,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">454</strong>    for (let i = 0, len = arr.length; i &#60; len; i ++) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">455</strong>        const val = arr[i];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">456</strong>        if (typeof val === 'string') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">457</strong>            arr[i] = replaceInString(val.toString(), dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">457</strong>            arr[i] = replaceInString(val, dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">458</strong>        } else if (Array.isArray(val)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">459</strong>            replaceInArrayLiteral(val, dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">460</strong>        } else { // it's an object otherwise</pre></div>
@@ -454,7 +454,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">468</strong>    for (const prop of Object.keys(obj)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">469</strong>        const val = obj[prop];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">470</strong>        if (typeof val === 'string') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">471</strong>            obj[prop] = replaceInString(val.toString(), dynamicParts);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">471</strong>            obj[prop] = replaceInString(val, dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">472</strong>        } else if (Array.isArray(val)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">473</strong>            if (prop === 'children') {</pre></div>
 <div class="line"><div class="doc"><p>We need to treat children of JDOM objects differently because they need to all be flat arrays, and sometimes for API convenience they&#39;re passed in as nested arrays.</p>

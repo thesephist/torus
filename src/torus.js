@@ -34,6 +34,20 @@ const render_debug = (msg, header = false) => {
         }
     }
 }
+
+//> Helper function for debugging logs where we want to print
+//  a JDOM node in the most appropriate way, depending on type.
+const printNode = node => {
+    if (node === null) {
+        return '<!---->';
+    } else if (node.tag) {
+        return `<${node.tag}>`;
+    } else if (typeof node === 'string' || typeof node === 'number') {
+        return `"${node}"`;
+    }
+    return node.toString();
+}
+
 // @enddebug
 
 //> A global counter for how deep we are in our render tree.
@@ -194,7 +208,7 @@ const render = (node, previous, next) => {
             if (node === undefined) {
                 render_debug('Add comment node');
             } else {
-                render_debug(`Replace previous node <${node.tagName}> with comment node`);
+                render_debug(`Replace previous node ${printNode(previous)} with comment node`);
             }
             // @enddebug
             replacePreviousNode(tmpNode());
@@ -205,7 +219,7 @@ const render = (node, previous, next) => {
             if (node === undefined) {
                 render_debug(`Add text node "${next}"`);
             } else {
-                render_debug(`Replace previous node "${previous}" with text node "${next}"`);
+                render_debug(`Replace previous node ${printNode(previous)} with text node "${next}"`);
             }
             // @enddebug
             //> If the previous node was also a text node, just replace the `.nodeValue`, which is
@@ -244,18 +258,18 @@ const render = (node, previous, next) => {
                 //  an optimization shared with React's reconciler.
                 || previous.tag !== next.tag
             ) {
+                // @begindebug
+                if (node === undefined) {
+                    render_debug(`Add <${next.tag}>`);
+                } else {
+                    render_debug(`Replace previous node ${printNode(previous)} with <${next.tag}>`);
+                }
+                // @enddebug
                 //> If the previous JDOM doesn't exist or wasn't JDOM, we're adding a completely
                 //  new node into the DOM. Stub an empty `previous`.
                 previous = {
                     tag: null,
                 };
-                // @begindebug
-                if (node === undefined) {
-                    render_debug(`Add <${next.tag}>`);
-                } else {
-                    render_debug(`Replace previous node <${node.tagName.toLowerCase()}> with <${next.tag}>`);
-                }
-                // @enddebug
                 replacePreviousNode(document.createElement(next.tag));
             }
             normalizeJDOM(previous);

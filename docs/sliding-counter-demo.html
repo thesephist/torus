@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sliding counter demo annotated source</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <main>
+        <div class="line">
+            <div class="doc">
+                <h1>Sliding counter demo <span class="fade">annotated source</span></h1>
+                <em><a class="back" href="./">Back to index</a></em>
+            </div>
+            <pre></pre>
+        </div>
+        <div class="line"><div class="doc"><p>This counter example is a demonstration of the power of declaratively defined views, JDOM templates&#39; expressive power, and how to compose simple functions together to form interesting Torus components.</p>
+</div><pre class="source javascript"><strong class="lineNumber">4</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
+<div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
+</div><pre class="source javascript"><strong class="lineNumber">6</strong>for (const exportedName in Torus) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">7</strong>    window[exportedName] = Torus[exportedName];</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong></pre></div>
+<div class="line"><div class="doc"><p>This component represents a single digit in the counter. This digit will slide between different vertical positions to only show the correct digit through the &quot;window&quot; of the containing element.</p>
+</div><pre class="source javascript"><strong class="lineNumber">13</strong>const Digit = d =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong>    return jdom`&#60;div class="digit" style="transform:translateY(-${d}em)"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong>        &#60;div class="digitSlice"&#62;0&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">16</strong>        &#60;div class="digitSlice"&#62;1&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">17</strong>        &#60;div class="digitSlice"&#62;2&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">18</strong>        &#60;div class="digitSlice"&#62;3&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">19</strong>        &#60;div class="digitSlice"&#62;4&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong>        &#60;div class="digitSlice"&#62;5&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong>        &#60;div class="digitSlice"&#62;6&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">22</strong>        &#60;div class="digitSlice"&#62;7&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">23</strong>        &#60;div class="digitSlice"&#62;8&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">24</strong>        &#60;div class="digitSlice"&#62;9&#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong>        &#60;div class="digitSlice"&#62; &#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">26</strong>    &#60;/div&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">27</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">28</strong></pre></div>
+<div class="line"><div class="doc"><p>The <code>Counter</code> component is the container window through which all the digits are shown. We take in a number, convert it to a string, and reduce it to add commas in the thousandths places while mapping digits to the <code>Digit</code> components.</p>
+</div><pre class="source javascript"><strong class="lineNumber">32</strong>const Counter = number =&#62; {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">33</strong>    return jdom`&#60;div class="counter"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">34</strong>        ${[</pre></div>
+<div class="line"><div class="doc"><p>this is a padding digit to balance out the leading padding digit</p>
+</div><pre class="source javascript"><strong class="lineNumber">36</strong>            Digit(10),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">37</strong>            ...number.toString()</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">38</strong>                .split('')</pre></div>
+<div class="line"><div class="doc"><p>We reverse the digits so the digits begin filling out on the lower places</p>
+</div><pre class="source javascript"><strong class="lineNumber">40</strong>                .reverse()</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">41</strong>                .map(d =&#62; Digit(+d))</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>                .reduce((acc, cur, i) =&#62; {</pre></div>
+<div class="line"><div class="doc"><p>Quick, concise way to comma-separate the thousands places.</p>
+</div><pre class="source javascript"><strong class="lineNumber">45</strong>                    if (i % 3 === 0 &#38;&#38; i &#62; 0) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">46</strong>                        acc.push(',');</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong>                    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong>                    return acc.concat(cur);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>                }, []),</pre></div>
+<div class="line"><div class="doc"><p>Padding digit so a newly added digit will slide into place, rather than blink into existence.</p>
+</div><pre class="source javascript"><strong class="lineNumber">52</strong>            Digit(10),</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">53</strong>        ]}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">54</strong>    &#60;/div&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">55</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">56</strong></pre></div>
+<div class="line"><div class="doc"><p>Main counter application.</p>
+</div><pre class="source javascript"><strong class="lineNumber">58</strong>class App extends StyledComponent {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">59</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">60</strong>    init() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">61</strong>        this.value = 1024;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>        this.handleInput = this.handleInput.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">63</strong>        this.handleMinus = this.handleMinus.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">64</strong>        this.handlePlus = this.handlePlus.bind(this);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">65</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">66</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">67</strong>    handleInput(evt) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">68</strong>        this.value = Math.max(~~evt.target.value, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">69</strong>        this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">70</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">71</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">72</strong>    handleMinus() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">73</strong>        this.value = Math.max(this.value - 1, 0);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">74</strong>        this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">75</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">76</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">77</strong>    handlePlus() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">78</strong>        this.value ++;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">79</strong>        this.render();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">80</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">81</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong>    styles() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">83</strong>        return css`</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">84</strong>        font-family: system-ui, sans-serif;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">85</strong>        height: 100vh;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">86</strong>        width: 96%;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">87</strong>        max-width: 600px;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">88</strong>        margin: 0 auto;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">89</strong>        display: flex;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">90</strong>        flex-direction: column;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">91</strong>        align-items: center;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>        justify-content: center;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">93</strong>        .counter {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">94</strong>            display: flex;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong>            flex-direction: row-reverse;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">96</strong>            height: 1em;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">97</strong>            overflow: hidden;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">98</strong>            font-size: 24vw;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">99</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">100</strong>        .digit {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>            transition: transform .4s ease-out;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">103</strong>        .digitSlice {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">104</strong>            height: 1em;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">105</strong>            text-align: center;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">106</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">107</strong>        .inputGroup {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">108</strong>            margin-top: 6vh;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">109</strong>            input,</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">110</strong>            button {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">111</strong>                font-size: 1.6em;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">112</strong>                padding: 6px 10px;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">113</strong>                border-radius: 6px;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">114</strong>                box-shadow: none;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">115</strong>                border: 2px solid #777;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">116</strong>                background: #fff;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">117</strong>                cursor: pointer;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">118</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">119</strong>            input {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong>                margin-left: 8px;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong>                margin-right: 8px;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">122</strong>                text-align: right;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">123</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">124</strong>            button {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong>                padding-left: 12px;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>                padding-right: 12px;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>            }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>        }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">129</strong>        `;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">130</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">131</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">132</strong>    compose() {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">133</strong>        return jdom`&#60;main&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">134</strong>            ${Counter(this.value)}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">135</strong>            &#60;div class="inputGroup"&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">136</strong>                &#60;button onclick="${this.handleMinus}"&#62;-&#60;/button&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">137</strong>                &#60;input type="number" value="${this.value}" oninput="${this.handleInput}" autofocus/&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">138</strong>                &#60;button onclick="${this.handlePlus}"&#62;+&#60;/button&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">139</strong>            &#60;/div&#62;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">140</strong>        &#60;/main&#62;`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">141</strong>    }</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">142</strong></pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">143</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">144</strong></pre></div>
+<div class="line"><div class="doc"><p>Create an instance of the app, and append to the DOM.</p>
+</div><pre class="source javascript"><strong class="lineNumber">146</strong>const app = new App();</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">147</strong>document.body.appendChild(app.node);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">148</strong>document.body.style.padding = '0';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">149</strong>document.body.style.margin = '0';</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">150</strong></pre></div>
+    </main>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>
+        for (const el of document.querySelectorAll('.line pre')) {
+            hljs.highlightBlock(el);
+        }
+    </script>
+</body>
+
+</html>

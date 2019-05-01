@@ -22,6 +22,7 @@ const FILES_TO_ANNOTATE = {
     'Many-body Simulation demo': './samples/gravity/main.js',
     'Conway\'s Game of Life demo': './samples/conway/main.js',
     'Mondrian Painting demo': './samples/mondrian/main.js',
+    'Sliding counter demo': './samples/counter/main.js',
     'Slide deck demo': './samples/slides/main.js',
     'Todo demo': './samples/todo/main.js',
     'Tabbed UI demo': './samples/tabs/main.js',

@@ -502,7 +502,7 @@ class App extends StyledComponent {
     styles() {
         return {
             'box-sizing': 'border-box',
-            'font-family': 'sans-serif',
+            'font-family': 'system-ui, sans-serif',
             'display': 'flex',
             'flex-direction': 'column',
             'justify-content': 'space-between',

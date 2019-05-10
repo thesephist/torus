@@ -651,7 +651,10 @@ const rulesFromStylesObject = (selector, stylesObject) => {
         }
     }
     if (selfDeclarations) {
-        rules.push(brace(selector, selfDeclarations));
+        //> We unshift the self declarations to the beginning of the list of rules
+        //  instead of simply pushing it to the end, because we want the nested rules
+        //  to have precedence / override rules on self.
+        rules.unshift(brace(selector, selfDeclarations));
     }
 
     return rules;

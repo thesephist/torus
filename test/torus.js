@@ -783,6 +783,7 @@ describe('Styled', () => {
                     //  like rgb() and font-weight: 700.
                     'font-size': '18px',
                     'background': 'rgba(0, 0, 0, 0.4)',
+                    'border-top-right-radius': '10px',
                     '@keyframes some-name': {
                         'from': {'opacity': 0},
                         'to': {'opacity': 1},
@@ -790,6 +791,7 @@ describe('Styled', () => {
                     // guaranteed to always match
                     '@media (min-width: 0px)': {
                         'border-color': 'rgb(0, 1, 2)',
+                        'border-top-right-radius': '6px',
                         'p': {
                             'font-style': 'italic',
                         },
@@ -891,6 +893,11 @@ describe('Styled', () => {
             it('should support styles set on children', () => {
                 const styles = getComputedStyle(s.node.querySelector('p'));
                 styles.fontWeight.should.equal('700');
+            });
+
+            it('should ensure that nested rules take precedence over parent rules', () => {
+                const styles = getComputedStyle(s.node);
+                styles.borderTopRightRadius.should.equal('6px');
             });
 
             it('should correctly render @keyframes rules', () => {

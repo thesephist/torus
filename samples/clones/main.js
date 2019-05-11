@@ -1,9 +1,9 @@
 //> Clones of popular complex web applications to test rendering
-//  fidelity.
+//  performance.
 
-//> Task: Build a complex UI (FB5, Twitter, Trello clone) in Torus
-//  and actually measure perf in depe trees, using function components
-//  liberally to be conservative and not cut Torus any corners.
+//> Original motivation: Build a complex UI (FB5, Twitter, Trello clone) in Torus
+//  and actually measure perf in deep trees, using function components
+//  liberally to be conservative and not cut Torus any corners in rendering.
 
 //> Bootstrap the required globals from Torus, since we're not bundling
 for (const exportedName in Torus) {
@@ -110,10 +110,11 @@ class FBHeader extends Styled(Component.from(() => {
         }
         `;
     }
-};
+}
 
-const FBFSItem = (label) => {
+const FBFSItem = label => {
     return jdom`<li class="fsItem">
+        <span>ICON</span>
         ${label}
     </li>`;
 }
@@ -129,38 +130,8 @@ const FBFSSection = (title, labels) => {
     </div>`;
 }
 
-const FBPost = (
-    annotation,
-    profile,
-    content,
-    likes,
-    comments,
-) => {
-    return jdom`<div class="fbPost">
-        post
-    <div>`;
-}
-
-const FBComposePost = () => {
-    return jdom`<div class="fbPost fbCompose">
-        <div class="postHead">Create Post</div>
-    </div>`;
-}
-
-class FBPostList extends Styled(Component.from(() => {
-    return jdom`<div class="fbPostList">
-        ${FBComposePost()}
-    </div>`;
-})) {
-    styles() {
-        return css`
-        background: pink;
-        `;
-    }
-}
-
 class FBFavoritesSidebar extends Styled(Component.from(() => {
-    return jdom`<div class="favoritesSidebar">
+    return jdom`<div class="favoritesSidebar column">
         ${FBFSSection('Main', [
             'News Feed',
             'Messenger',
@@ -195,23 +166,190 @@ class FBFavoritesSidebar extends Styled(Component.from(() => {
 })) {
     styles() {
         return css`
-            background: #eee;
+        width: 200px;
+        .fsItem {
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background .2s, transform .2s;
+            padding: 2px 6px;
+            &:hover {
+                background: rgba(0, 0, 0, .1);
+            }
+            &:active {
+                transform: scale(.96);
+            }
+        }
         `;
     }
-};
+}
+
+const FBPost = ({
+    annotation,
+    profile,
+    date,
+    content,
+    likes,
+    comments,
+}) => {
+    return jdom`<div class="fbPost panel">
+        <div class="fbPostAnnotation">${annotation}</div>
+        <div class="fbPostBody">
+            <div class="fbPostProfile">${profile}</div>
+            <div class="fbPostDate">${date.toLocaleString()}</div>
+            <div class="fbPostContent">${content}</div>
+        </div>
+        <div class="fbPostStats">
+            <div class="fbPostLikes">${likes} likes</div>
+            <div class="fbPostComments">${comments} comments</div>
+        </div>
+    <div>`;
+}
+
+const FBComposePost = () => {
+    return jdom`<div class="fbPost fbCompose panel">
+        <div class="postHead">
+            Create Post
+        </div>
+        <div class="postComposer">
+            <textarea placeholder="What's on your mind?"></textarea>
+        </div>
+    </div>`;
+}
+
+class FBPostList extends Styled(Component.from(() => {
+    return jdom`<div class="fbPostList column">
+        ${FBComposePost()}
+        ${[
+            {
+                annotation: 'By linus',
+                profile: 'Linus Lee',
+                date: new Date(),
+                content: 'this is some content',
+                likes: '10k',
+                comments: '100k',
+            },
+            {
+                annotation: 'By linus',
+                profile: 'Linus Lee',
+                date: new Date(),
+                content: 'this is some content',
+                likes: '10k',
+                comments: '100k',
+            },
+            {
+                annotation: 'By linus',
+                profile: 'Linus Lee',
+                date: new Date(),
+                content: 'this is some content',
+                likes: '10k',
+                comments: '100k',
+            },
+        ].map(FBPost)}
+    </div>`;
+})) {
+    styles() {
+        return css`
+        min-width: 360px;
+        width: 40%;
+        .fbPostAnnotation {
+            font-weight: bold;
+            padding-bottom: 8px;
+        }
+        .fbPostBody {
+            border-top: 1px solid #aaa;
+            border-bottom: 1px solid #aaa;
+        }
+        .fbPostProfile {
+            font-weight: bold;
+            padding: 8px 0;
+        }
+        .fbPostDate {
+            padding-bottom: 12px 0;
+            color: #777;
+        }
+        .fbPostContent {
+            font-size: 1.5em;
+            line-height: 1.5em;
+        }
+        .fbPostStats {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        `;
+    }
+}
+
+const FBStoryItem = (label, description) => {
+    return jdom`<div class="fbStoryItem">
+        <div class="fbStoryLabel">${label}</div>
+        <div class="fbStoryDescription">${description}</div>
+    </div>`;
+}
+
+class FBPanelSidebar extends Styled(Component.from(() => {
+    return jdom`<div class="fbPanelSidebar column">
+        <div class="storiesPanel panel">
+            <div class="title">Stories</div>
+            <div class="fbStoryList">
+                ${FBStoryItem('Add to Your Story', 'do it now')}
+                ${FBStoryItem('John Smith', '15 hours ago')}
+                ${FBStoryItem('Amy Zahn', '12 hours ago')}
+            </div>
+        </div>
+        <div class="fbEventsSidebar panel">
+            <div class="title">Events</div>
+            <div class="fbEvents">2 events this week</div>
+        </div>
+        <div class="fbPagesSidebar panel">
+            <div class="title">Your Pages</div>
+        </div>
+        <div class="fbAdSidebar panel">
+            <div class="title">Sponsored Ad</div>
+        </div>
+    </div>`;
+})) {
+
+    styles() {
+        return css`
+        width: 200px;
+        .title {
+            font-weight: bold;
+        }
+        .fbStoryItem {
+            display: flex;
+            flex-direction: column;
+            padding: 4px 8px;
+        }
+        .fbStoryLabel {
+            font-weight: bold;
+        }
+        .fbStoryDescription {
+            color: #777;
+        }
+        `;
+    }
+
+}
 
 //> Main Facebook component
 CLONES.Facebook = class extends StyledComponent {
 
     styles() {
         return css`
+        display: flex;
+        flex-direction: column;
         width: 100%;
+        min-height: 100vh;
         .contents {
             margin-top: 50px;
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: flex-start;
+            background: #f0f0f0;
+            flex-grow: 1;
         }
         ul {
             padding-left: 0;
@@ -222,6 +360,17 @@ CLONES.Facebook = class extends StyledComponent {
         li {
             list-style: none;
         }
+        .column {
+            padding: 12px;
+        }
+        .panel {
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+            border-radius: 4px;
+            padding: 12px 16px;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+        }
         `;
     }
 
@@ -231,6 +380,7 @@ CLONES.Facebook = class extends StyledComponent {
             <div class="contents">
                 ${new FBFavoritesSidebar().node}
                 ${new FBPostList().node}
+                ${new FBPanelSidebar().node}
             </div>
         </div>`;
     }
@@ -241,7 +391,7 @@ CLONES.Facebook = class extends StyledComponent {
 CLONES.GitHub = class extends StyledComponent {
 
     compose() {
-        return jdom`GH`;
+        return jdom`GitHub Clone (not built yet)`;
     }
 
 }
@@ -250,7 +400,7 @@ CLONES.GitHub = class extends StyledComponent {
 CLONES.Twitter = class extends StyledComponent {
 
     compose() {
-        return jdom`Twitter`;
+        return jdom`Twitter clone (not built yet)`;
     }
 
 }

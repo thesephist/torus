@@ -335,6 +335,10 @@ const render = (node, previous, next) => {
                 } else if (attrName in node) {
                     // @debug
                     render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
+                    //> We explicitly make a comparison here before setting, because setting reflected
+                    //  HTML properties is _not idempotent_ -- on some elements like audio, video, and iframe,
+                    //  setting properties like src will call a setter that sometimes resets UI state in some
+                    //  browsers.
                     if (previous.attrs[attrName] !== next.attrs[attrName]) {
                         node[attrName] = next.attrs[attrName];
                     }

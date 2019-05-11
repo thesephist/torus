@@ -405,6 +405,101 @@ CLONES.Twitter = class extends StyledComponent {
 
 }
 
+//> ## React Fiber demo clone
+
+//> Sierpinski's triangle
+const RAND_COLOR_LIMIT = Math.pow(16, 6);
+const randomColor = () => '#' + (~~(Math.random() * RAND_COLOR_LIMIT)).toString(16);
+
+const Triangle = (size, depth, number) => {
+    if (depth < 0) {
+        return null;
+    }
+
+    const thisSize = size / 2;
+    return jdom`<div class="triangle n${number}" style="height:${size}px;width:${size}px;background-color:${randomColor()}">
+        ${Triangle(thisSize, depth - 1, 1)}
+        ${Triangle(thisSize, depth - 1, 2)}
+        ${Triangle(thisSize, depth - 1, 3)}
+    </div>`;
+}
+
+//> Faster version of `Triangle()`, with jdom parsing optimized away. This isolates
+//  the Torus rendering / reconciliation algorithm itself and stress tests that, apart from
+//  the jdom parser, which is usually the higher-order bit performance culprit.
+const FastTriangle = (size, depth, number) => {
+    if (depth < 0) {
+        return null;
+    }
+
+    const thisSize = size / 2;
+    return {
+        tag: 'div',
+        attrs: {
+            class: 'triangle n' + number,
+            style: {
+                height: size + 'px',
+                width: size + 'px',
+                backgroundColor: randomColor(),
+            },
+        },
+        children: [
+            FastTriangle(thisSize, depth - 1, 1),
+            FastTriangle(thisSize, depth - 1, 2),
+            FastTriangle(thisSize, depth - 1, 3),
+        ],
+    }
+}
+
+const TriangleCSS = css`
+.triangle {
+    position: relative;
+    box-sizing: border-box;
+    .n1 {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .n2{
+        position: absolute;
+        top: 50%;
+        left: 0;
+    }
+    .n3{
+        position: absolute;
+        top: 50%;
+        right: 0;
+    }
+}
+`;
+
+CLONES.Triangle = class extends StyledComponent {
+    styles() {
+        return TriangleCSS;
+    }
+
+    compose() {
+        return jdom`<div class="tabRoot">
+            <div>Triangle (not Fast)</div>
+            ${Triangle(Math.min(window.innerHeight, window.innerWidth), 7, 1)}
+        </div>`;
+    }
+}
+
+CLONES.FastTriangle = class extends StyledComponent {
+    styles() {
+        return TriangleCSS;
+    }
+
+    compose() {
+        return jdom`<div class="tabRoot">
+            <div>FastTriangle</div>
+            ${FastTriangle(Math.min(window.innerHeight, window.innerWidth), 7, 1)}
+        </div>`;
+    }
+}
+
 class App extends StyledComponent {
 
     init() {
@@ -442,6 +537,10 @@ class App extends StyledComponent {
                 &:active {
                     background: #aaa;
                 }
+                &.active {
+                    color: #fff;
+                    background: #333;
+                }
             }
         }
         .tabHeader {
@@ -467,9 +566,15 @@ class App extends StyledComponent {
             <header class="tabHeader">
                 <h1>Clones</h1>
                 <nav>
-                    <button onclick="${this.switchView.bind(this, 'Facebook')}">Facebook</button>
-                    <button onclick="${this.switchView.bind(this, 'GitHub')}">GitHub</button>
-                    <button onclick="${this.switchView.bind(this, 'Twitter')}">Twitter</button>
+                    ${[
+                        'Facebook',
+                        'Triangle',
+                        'FastTriangle',
+                        'GitHub',
+                        'Twitter',
+                    ].map(name => jdom`<button
+                        class="${this.activeClone === CLONES[name] ? 'active' : ''}"
+                        onclick="${this.switchView.bind(this, name)}">${name}</button>`)}
                 </nav>
             </header>
             <div id="cloneContainer">

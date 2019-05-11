@@ -519,6 +519,7 @@ class App extends StyledComponent {
             display: flex;
             flex-direction: row;
             align-items: center;
+            z-index: 100;
 
             button {
                 background: #fff;

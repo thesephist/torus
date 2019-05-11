@@ -335,7 +335,9 @@ const render = (node, previous, next) => {
                 } else if (attrName in node) {
                     // @debug
                     render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
-                    node[attrName] = next.attrs[attrName];
+                    if (previous.attrs[attrName] !== next.attrs[attrName]) {
+                        node[attrName] = next.attrs[attrName];
+                    }
                 } else {
                     if (next.attrs[attrName] !== previous.attrs[attrName]) {
                         // @debug

@@ -41,9 +41,13 @@ const printNode = node => {
     if (node === null) {
         return '<!---->';
     } else if (node.tag) {
-        return `<${node.tag}>`;
+        return `<${node.tag.toLowerCase()}>`;
+    } else if (node.tagName) {
+        return `<${node.tagName.toLowerCase()}>`;
     } else if (typeof node === 'string' || typeof node === 'number') {
         return `"${node}"`;
+    } else if (node.nodeType === 3) {
+        return `text node "${node.nodeValue}"`;
     }
     return node.toString();
 }
@@ -234,9 +238,9 @@ const render = (node, previous, next) => {
         } else if (next.appendChild !== undefined) { // check if next instanceof Node; fastest way is checking for presence of a non-getter property
             // @begindebug
             if (node === undefined) {
-                render_debug(`Add literal element <${next.tagName.toLowerCase()}>`);
+                render_debug(`Add literal element ${printNode(next)}`);
             } else {
-                render_debug(`Replace literal element <${previous.tagName.toLowerCase()}> with literal element <${next.tagName.toLowerCase()}>`);
+                render_debug(`Replace literal element ${printNode(previous)} with literal element ${printNode(next)}`);
             }
             // @enddebug
             replacePreviousNode(next);
@@ -402,9 +406,9 @@ const render = (node, previous, next) => {
                     for (; i < nextLength; i ++) {
                         // @begindebug
                         if (nextChildren[i].tagName) {
-                            render_debug(`Add child <${nextChildren[i].tagName.toLowerCase()}>`);
+                            render_debug(`Add child ${printNode(nextChildren[i])}`);
                         } else if (nextChildren[i].tag) {
-                            render_debug(`Add child <${nextChildren[i].tag}>`);
+                            render_debug(`Add child ${printNode(nextChildren[i])}`);
                         } else {
                             render_debug(`Add child "${nextChildren[i]}"`);
                         }
@@ -419,9 +423,9 @@ const render = (node, previous, next) => {
                     for (; i < prevLength; i ++) {
                         // @begindebug
                         if (prevChildren[i].tagName) {
-                            render_debug(`Remove child <${prevChildren[i].tagName.toLowerCase()}>`);
+                            render_debug(`Remove child ${printNode(prevChildren[i])}`);
                         } else if (prevChildren[i].tag) {
-                            render_debug(`Remove child <${prevChildren[i].tag}>`);
+                            render_debug(`Remove child ${printNode(prevChildren[i])}`);
                         } else {
                             render_debug(`Remove child "${prevChildren[i]}"`);
                         }

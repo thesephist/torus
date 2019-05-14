@@ -388,6 +388,9 @@ const render = (node, previous, next) => {
             //  so we don't have to perform expensive, DOM-touching operations during reconciliation
             //  to look up children of the current node in the next render pass. `nodeChildren`
             //  will be updated alongside enqueued DOM mutation operations.
+            //  In the future, we may also look at optimizing more of the common cases of list diffs
+            //  as [domdiff](https://github.com/WebReflection/domdiff/blob/master/esm/index.js) does,
+            //  before delving into a full iterative diff of two lists.
             const prevChildren = previous.children;
             const nextChildren = next.children;
             //> Memoize length lookups.

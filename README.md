@@ -134,6 +134,12 @@ Torus doesn't try to be another build-time tool. One of Torus's goals is to be a
 
 Adding compilation support is not currently on the roadmap, but it should be straightforward, since Torus is a subset of modern JavaScript. We may come back to addressing these marginal benefits of compilation in the future, especially if decorators show no progress in the proposal track.
 
+### A note on fragments
+
+Similar declarative UI frameworks like React and Preact have introduced the notion of [Fragments](https://reactjs.org/docs/fragments.html), which is syntax sugar for rendering an array of (virtual) DOM nodes from a function. This is because while having a component return an array of nodes doesn't make sense on its own, it's often useful to have internal functions that return parts of components and views as nodes without a wrapper element. Torus natively supports an array representation of a list of nodes -- just wrap JDOM objects in an array! Although, unlike in React, a component cannot render more than one node, most use cases of fragments are covered by simply being able to pass around a representation of a list of nodes in an array internally inside a component, and this is intuitively supported out-of-the box in Torus.
+
+I've toyed with the idea of modifying the `jdom` template tag to be able to turn template representations of fragments like `<>...</>` into arrays of nodes. `jdom` is also capable of simply parsing adjacent top-level elements in the template and return them in a single array. However, I decided not to ship these features for now, because I believe these use cases are adequately covered by being able to return the `.children` of a jdom template, even perhaps one wrapped inside the `<>...</>` fragment markers for readability, or simply returning an array of JDOM objects. I appreciate the explicitness of the extra step involved in returning a nontraditional array from a rendering operation, and I think the occasional cost of returning arrays as intermediate representations of parts of a view is not worth the extra feature cost.
+
 ## Compatibility
 
 Torus uses Symbols, Maps, and Sets, so is compatible with the latest versions of all major browsers except Internet Explorer 11. On older browsers that don't support e.g. Array spread operators, you may need to transpile the library to ES5 using a tool like Babel.

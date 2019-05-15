@@ -858,7 +858,7 @@ class Evented {
     //> Base, empty implementation of `#summarize()` which is overridden in all subclasses.
     //  In subclasses, this returns the "summary" of the current state of the
     //  event emitter as an object/array.
-    summarize() {}
+    summarize /* istanbul ignore next */ () {}
 
     //> Whenever something changes, we fire an event to all subscribed
     //  listeners, with a summary of its state.
@@ -1133,10 +1133,12 @@ const exposedNames = {
 }
 
 //> If there is a global `window` object, bind API names to it.
+/* istanbul ignore else */
 if (typeof window === 'object') {
     window.Torus = exposedNames;
 }
 //> Export public APIs CommonJS-style
+/* istanbul ignore next */
 if (typeof module === 'object' && module.exports) {
     module.exports = exposedNames;
 }

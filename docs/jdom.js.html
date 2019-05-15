@@ -622,14 +622,16 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">642</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">643</strong></pre></div>
 <div class="line"><div class="doc"><p>If there is a global <code>window</code> object, bind API names to it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">645</strong>if (typeof window === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">646</strong>    Object.assign(window, exposedNames);</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">647</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">645</strong>/* istanbul ignore else */</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">646</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">647</strong>    Object.assign(window, exposedNames);</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">648</strong>}</pre></div>
 <div class="line"><div class="doc"><p>Export public APIs CommonJS-style</p>
-</div><pre class="source javascript"><strong class="lineNumber">649</strong>if (typeof module === 'object' &#38;&#38; module.exports) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">650</strong>    module.exports = exposedNames;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">651</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">652</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">650</strong>/* istanbul ignore next */</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">651</strong>if (typeof module === 'object' &#38;&#38; module.exports) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">652</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">653</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">654</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

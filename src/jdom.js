@@ -642,10 +642,12 @@ const exposedNames = {
 }
 
 //> If there is a global `window` object, bind API names to it.
+/* istanbul ignore else */
 if (typeof window === 'object') {
     Object.assign(window, exposedNames);
 }
 //> Export public APIs CommonJS-style
+/* istanbul ignore next */
 if (typeof module === 'object' && module.exports) {
     module.exports = exposedNames;
 }

@@ -716,7 +716,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">856</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">857</strong></pre></div>
 <div class="line"><div class="doc"><p>Base, empty implementation of <code>#summarize()</code> which is overridden in all subclasses. In subclasses, this returns the &quot;summary&quot; of the current state of the event emitter as an object/array.</p>
-</div><pre class="source javascript"><strong class="lineNumber">861</strong>    summarize() {}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">861</strong>    summarize /* istanbul ignore next */ () {}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">862</strong></pre></div>
 <div class="line"><div class="doc"><p>Whenever something changes, we fire an event to all subscribed listeners, with a summary of its state.</p>
 </div><pre class="source javascript"><strong class="lineNumber">865</strong>    emitEvent() {</pre></div>
@@ -961,14 +961,16 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1133</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1134</strong></pre></div>
 <div class="line"><div class="doc"><p>If there is a global <code>window</code> object, bind API names to it.</p>
-</div><pre class="source javascript"><strong class="lineNumber">1136</strong>if (typeof window === 'object') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1137</strong>    window.Torus = exposedNames;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1138</strong>}</pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">1136</strong>/* istanbul ignore else */</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1137</strong>if (typeof window === 'object') {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1138</strong>    window.Torus = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1139</strong>}</pre></div>
 <div class="line"><div class="doc"><p>Export public APIs CommonJS-style</p>
-</div><pre class="source javascript"><strong class="lineNumber">1140</strong>if (typeof module === 'object' &#38;&#38; module.exports) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1141</strong>    module.exports = exposedNames;</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1142</strong>}</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1143</strong></pre></div>
+</div><pre class="source javascript"><strong class="lineNumber">1141</strong>/* istanbul ignore next */</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1142</strong>if (typeof module === 'object' &#38;&#38; module.exports) {</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1143</strong>    module.exports = exposedNames;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1144</strong>}</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1145</strong></pre></div>
     </main>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github-gist.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>

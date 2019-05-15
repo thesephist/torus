@@ -562,7 +562,7 @@ class Component {
     //> `#preprocess()` is an API on the component to allow us to extend `Component` to give
     //  it additional capabilities idiomatically. It consumes the result of `#compose()` and
     //  returns JDOM to be used to actually render the component. See `Styled()` for a
-    //  usage example -- it fills similar use cases as React's render props or HOCs.
+    //  usage example.
     preprocess(jdom) {
         return jdom;
     }

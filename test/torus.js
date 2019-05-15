@@ -741,6 +741,38 @@ describe('Component', () => {
             }).to.throw(Error);
         });
 
+        it('should pass argument 0 (data) to #compose()', () => {
+            const testData = 'some_test_data';
+            let testDataTarget = 'wrong_data';
+            class Test extends Component {
+                compose(data) {
+                    testDataTarget = data;
+                    return null;
+                }
+            }
+            const t = new Test();
+            t.render(testData);
+
+            testDataTarget.should.equal(testData);
+        });
+
+        it('should pass jdom and argument 0 (data) to #preprocess()', () => {
+            const testData = 'some_test_data';
+            let testDataTarget = 'wrong_data';
+            let testJDOM = null;
+            class Test extends Component {
+                preprocess(jdom, data) {
+                    testDataTarget = data;
+                    testJDOM = jdom;
+                    return null;
+                }
+            }
+            const t = new Test();
+            t.render(testData);
+
+            expect(t.jdom).to.equal(testJDOM);
+            testDataTarget.should.equal(testData);
+        });
 
     });
 

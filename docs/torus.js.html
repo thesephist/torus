@@ -58,7 +58,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong>    } else if (typeof node === 'string' || typeof node === 'number') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong>        return `"${node}"`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>    } else if (node.nodeType === 3) {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong>        return `text node "${node.nodeValue}"`;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong>        return `text node "${node.data}"`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">52</strong>    return node.toString();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">53</strong>}</pre></div>
@@ -190,9 +190,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">226</strong>                render_debug(`Replace previous node ${printNode(previous)} with text node "${next}"`);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>            }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>            // @enddebug</pre></div>
-<div class="line"><div class="doc"><p>If the previous node was also a text node, just replace the <code>.nodeValue</code>, which is very fast. Otherwise, create a new <code>TextNode</code>.</p>
+<div class="line"><div class="doc"><p>If the previous node was also a text node, just replace the <code>.data</code>, which is very fast (as of 5/2019 faster than <code>.nodeValue</code>, <code>.textContent</code>, and .<code>innerText</code>). Otherwise, create a new <code>TextNode</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">231</strong>            if (typeof previous === 'string' || typeof previous === 'number') {</pre></div>
-<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">232</strong>                node.nodeValue = next;</pre></div>
+<div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">232</strong>                node.data = next;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">233</strong>            } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                replacePreviousNode(document.createTextNode(next));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>            }</pre></div>

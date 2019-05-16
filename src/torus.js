@@ -47,7 +47,7 @@ const printNode = node => {
     } else if (typeof node === 'string' || typeof node === 'number') {
         return `"${node}"`;
     } else if (node.nodeType === 3) {
-        return `text node "${node.nodeValue}"`;
+        return `text node "${node.data}"`;
     }
     return node.toString();
 }
@@ -226,10 +226,10 @@ const render = (node, previous, next) => {
                 render_debug(`Replace previous node ${printNode(previous)} with text node "${next}"`);
             }
             // @enddebug
-            //> If the previous node was also a text node, just replace the `.nodeValue`, which is
-            //  very fast. Otherwise, create a new `TextNode`.
+            //> If the previous node was also a text node, just replace the `.data`, which is
+            //  very fast (as of 5/2019 faster than `.nodeValue`, `.textContent`, and .`innerText`). Otherwise, create a new `TextNode`.
             if (typeof previous === 'string' || typeof previous === 'number') {
-                node.nodeValue = next;
+                node.data = next;
             } else {
                 replacePreviousNode(document.createTextNode(next));
             }

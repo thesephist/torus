@@ -491,6 +491,11 @@ describe('jdom template tag', () => {
         );
 
         noThrow(
+            'broken and incomplete quoted attributes',
+            () => jdom`<img srcset=source_set" src="source_url""/>`
+        );
+
+        noThrow(
             'broken tag',
             () => jdom`<div>di>`
         );

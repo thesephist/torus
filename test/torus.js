@@ -25,9 +25,11 @@ describe('render', () => {
                 'p', 'a', 'em', 'strong',
                 'img',
                 'button',
-                'input',
+                'input', 'textarea',
                 'label',
                 'ul', 'ol', 'li',
+                'iframe',
+                'main', 'header', 'footer', 'article',
             ];
             for (const tagName of supportedTags) {
                 const node = renderNext({
@@ -50,7 +52,7 @@ describe('render', () => {
         node2.textContent.should.equal(second);
     });
 
-    it('efficiently updates the content (nodeValue) of a TextNode', () => {
+    it('efficiently updates the content of a TextNode (updates its text content without replacing the node)', () => {
         const first = 'first text';
         const second = 'second text';
         const node = renderNext(first);
@@ -602,6 +604,120 @@ describe('render', () => {
         node.textContent.should.equal('firstsecondthirdfourth');
         const node2 = render(node, prev, next);
         node2.textContent.should.equal('thirdfirstsecond');
+    });
+
+    it('passes a more complex end-to-end deep tree diff test', () => {
+        let firstClickCount = 0;
+        let secondClickCount = 0;
+        const firstClickHandler = () => {
+            firstClickCount ++;
+        };
+        const secondClickHandler = () => {
+            secondClickCount ++;
+        };
+        const firstDiv = document.createElement('div');
+        firstDiv.classList.add('firstDiv');
+        const secondDiv = document.createElement('div');
+        secondDiv.classList.add('secondDiv');
+        const tree1 = {
+            tag: 'main',
+            children: [
+                {
+                    tag: 'div',
+                    attrs: {
+                        class: [
+                            'testForm',
+                        ],
+                    },
+                    children: [
+                        'Hello World',
+                        firstDiv,
+                        {
+                            tag: 'input',
+                            attrs: {
+                                type: 'text',
+                                style: {
+                                    border: '1px solid black',
+                                    color: 'blue',
+                                },
+                            },
+                        },
+                        {
+                            tag: 'button',
+                            attrs: {
+                                class: [
+                                    'button',
+                                    'submitButton',
+                                ],
+                            },
+                            events: {
+                                click: firstClickHandler,
+                            },
+                            children: [
+                                'Click',
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+        const tree2 = {
+            tag: 'main',
+            children: [
+                {
+                    tag: 'div',
+                    attrs: {
+                        class: [
+                            'testForm',
+                            'testComplete',
+                        ],
+                    },
+                    children: [
+                        'Hello World Redux',
+                        secondDiv,
+                        {
+                            tag: 'input',
+                            attrs: {
+                                type: 'search',
+                                class: ['inputField'],
+                                style: {
+                                    'border': '1px solid grey',
+                                },
+                            },
+                        },
+                        firstDiv,
+                        {
+                            tag: 'button',
+                            attrs: {
+                                class: [
+                                    'submitButton',
+                                ],
+                            },
+                            events: {
+                                click: secondClickHandler,
+                            },
+                            children: [
+                                'Click me!',
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+
+        //> innerHTML is not the most reliable and stable way to access the inner DOM tree,
+        //  but for our purposes, it's stable enough that it'll give us more true positives
+        //  than false positives, which is really all we care about.
+        const dom1 = render(undefined, undefined, tree1);
+        dom1.innerHTML.should.equal('<div class="testForm">Hello World<div class="firstDiv"></div><input type="text" style="border: 1px solid black; color: blue;"><button class="button submitButton">Click</button></div>');
+        dom1.querySelector('.submitButton').click();
+
+        const dom2 = render(dom1, tree1, tree2);
+        dom2.innerHTML.should.equal('<div class="testForm testComplete">Hello World Redux<div class="secondDiv"></div><input type="search" style="border: 1px solid grey;" class="inputField"><div class="firstDiv"></div><button class="submitButton">Click me!</button></div>');
+        dom1.querySelector('.submitButton').click();
+
+        expect(firstClickCount).to.equal(1);
+        expect(secondClickCount).to.equal(1);
     });
 
 });

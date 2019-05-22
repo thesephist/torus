@@ -32,7 +32,7 @@
     "types"
   ],
   "devDependencies": {
-    "bundlesize": "^0.17.1",
+    "bundlesize": "^0.17.2",
     "chai": "^4.2.0",
     "eslint": "^5.16.0",
     "karma": "^4.1.0",
@@ -44,8 +44,8 @@
     "marked": "^0.6.2",
     "mkdirp": "^0.5.1",
     "mocha": "^6.1.4",
-    "nyc": "^14.1.0",
-    "webpack": "^4.30.0"
+    "nyc": "^14.1.1",
+    "webpack": "^4.32.2"
   },
   "keywords": [
     "ui",

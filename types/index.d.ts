@@ -123,7 +123,7 @@ declare module 'torus-dom' {
 
         summarize(): Summary
 
-        go(destination: string): void
+        go(destination: string, options?: object): void
 
         remove(): void
 

@@ -281,11 +281,14 @@ const render = (node, previous, next) => {
 
             //> Compare and update attributes
             for (const attrName of Object.keys(next.attrs)) {
+                const pAttr = previous.attrs[attrName];
+                const nAttr = next.attrs[attrName]
+
                 if (attrName === 'class') {
                     //> JDOM can pass classes as either a single string
                     //  or an array of strings, so we need to check for either
                     //  of those cases.
-                    const nextClass = next.attrs.class;
+                    const nextClass = nAttr;
                     //> Mutating `className` is faster than iterating through
                     //  `classList` objects if there's only one batch operation
                     //  for all class changes.
@@ -308,8 +311,8 @@ const render = (node, previous, next) => {
                     //> JDOM takes style attributes as a dictionary
                     //  rather than a string for API ergonomics, so we serialize
                     //  it differently than other attributes.
-                    const prevStyle = previous.attrs.style || {};
-                    const nextStyle = next.attrs.style;
+                    const prevStyle = pAttr || {};
+                    const nextStyle = nAttr;
 
                     //> When we iterate through the key/values of a flat object like this,
                     //  you may be tempted to use `Object.entries()`. We use `Object.keys()` and lookups,
@@ -334,19 +337,19 @@ const render = (node, previous, next) => {
                 //  properties like `value` and `indeterminate`.
                 } else if (attrName in node) {
                     // @debug
-                    render_debug(`Set <${next.tag}> property ${attrName} = ${next.attrs[attrName]}`);
+                    render_debug(`Set <${next.tag}> property ${attrName} = ${nAttr}`);
                     //> We explicitly make a comparison here before setting, because setting reflected
                     //  HTML properties is _not idempotent_ -- on some elements like audio, video, and iframe,
                     //  setting properties like src will call a setter that sometimes resets UI state in some
                     //  browsers.
-                    if (previous.attrs[attrName] !== next.attrs[attrName]) {
-                        node[attrName] = next.attrs[attrName];
+                    if (pAttr !== nAttr) {
+                        node[attrName] = nAttr;
                     }
                 } else {
-                    if (next.attrs[attrName] !== previous.attrs[attrName]) {
+                    if (pAttr !== nAttr) {
                         // @debug
-                        render_debug(`Set <${next.tag}> attribute "${attrName}" to "${next.attrs[attrName]}"`);
-                        node.setAttribute(attrName, next.attrs[attrName]);
+                        render_debug(`Set <${next.tag}> attribute "${attrName}" to "${nAttr}"`);
+                        node.setAttribute(attrName, nAttr);
                     }
                 }
             }

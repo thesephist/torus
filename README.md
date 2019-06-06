@@ -14,6 +14,14 @@ Torus also has an annotated, easy to read version of the entire (pretty concise)
 
 Here's what Torus looks like in action! This is a fully functional counter app, no compilation or bundling steps needed.
 
+Drop this script tag in your HTML
+
+```html
+<script src="https://unpkg.com/torus-dom/dist/index.min.js"></script>
+```
+
+... and load this script.
+
 ```javascript
 // every view extends Component or StyledComponent
 class App extends StyledComponent {

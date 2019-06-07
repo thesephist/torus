@@ -24,7 +24,7 @@ Drop this script tag in your HTML
 
 ```javascript
 // every view extends Component or StyledComponent
-class App extends StyledComponent {
+class App extends Torus.StyledComponent {
 
     init() {
         // initialize our local state
@@ -37,31 +37,29 @@ class App extends StyledComponent {
         //  These styles are also automatically scoped to the
         //  component, and we can use the full, nested SCSS syntax.
         return css`
-            font-family: system-ui, sans-serif;
-            h1 {
-                text-align: center;
+        font-family: system-ui, sans-serif;
+        h1 {
+            text-align: center;
+        }
+        button {
+            padding: 4px 8px;
+            &:hover {
+                opacity: .8;
             }
-            button {
-                padding: 4px 8px;
-                &:hover {
-                    opacity: .8;
-                }
-            }
+        }
         `;
     }
 
     compose() {
         // We define the structure of our component in compose(),
         //  using a JSX- and lit-html-like syntax as a template string.
-        return jdom`
-        <main>
+        return jdom`<main>
             <h1>Hi! You clicked ${this.count} times.</h1>
             <button onclick="${() => {
                 this.count ++;
                 this.render();
             }}">Count up!</button>
-        </main>
-        `;
+        </main>`;
     }
 
 }

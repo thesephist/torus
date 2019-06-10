@@ -161,7 +161,7 @@ yarn add torus-dom
 ```
 
 ```javascript
-import { Component, Record, Store } from 'torus-dom';
+import { StyledComponent, Record, Store, Router } from 'torus-dom';
 ```
 
 Alternatively, you can also just import Torus with:
@@ -178,23 +178,21 @@ If you find bugs, please open an issue or put in a pull request with a test to r
 
 ### Builds
 
-To build Torus, run
+You can use both npm and Yarn to develop Torus, but the npm scripts use Yarn, and Yarn is officially supported as it's what I use to develop and build Torus.
+
+To build Torus from source, run
 
 ```sh
-npm build
-# or
 yarn build
 ```
 
-This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`. Running `npm/yarn clean` will delete any such build artifacts, as well as any generated coverage reports.
+This will run `./src/torus.js` through a custom toolchain, first removing any debug function calls and running that result through Webpack, through both `development` and `production` modes. Both outputs, as well as the vanilla version of Torus without Webpack processing, are saved to `./dist/`. Running `yarn clean` will delete any such build artifacts, as well as any generated coverage reports.
 
 ### Generating documentation from comments
 
 Torus has a unique system for generating documentation from code comments that begin with `//>`. To generate comment docs, run
 
 ```sh
-npm run docs
-# or
 yarn docs
 ```
 
@@ -205,8 +203,6 @@ Docs files will be generated at `./docs/` and are viewable on a web browser. Che
 To run Torus's unit tests and generate a coverage report to `coverage/`, run
 
 ```sh
-npm test
-# or
 yarn test
 ```
 
@@ -215,8 +211,6 @@ This will run the basic test suite on a development build of Torus. More compreh
 We can also run tests on the production build, with:
 
 ```sh
-npm test:prod
-# or
 yarn test:prod
 ```
 
@@ -224,12 +218,10 @@ This **won't generate a coverage report**, but will run the tests against a mini
 
 ### Linting
 
-Torus lints with ESLint, using a custom configuration (my personal style, which hopefully isn't too distasteful). To run the linter, run
+Torus lints with ESLint, using a custom configuration. To run the linter, run
 
 ```sh
-npm run lint
-# or
 yarn lint
 ```
 
-or consider using an editor plugin!
+or consider using an editor plugin for ESLint.

@@ -45,7 +45,7 @@
     "mkdirp": "^0.5.1",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
-    "webpack": "^4.33.0"
+    "webpack": "^4.35.0"
   },
   "keywords": [
     "ui",

@@ -83,7 +83,7 @@ class SearchButton extends StyledComponent {
     compose() {
         //> When the user clicks the search button, we just call the callback
         //  passed in from our parent component.
-        return jdom`<button onclick="${this.searchCallback}>Search</button>`;
+        return jdom`<button onclick="${this.searchCallback}">Search</button>`;
     }
 }
 

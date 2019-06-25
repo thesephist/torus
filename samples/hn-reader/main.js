@@ -375,9 +375,15 @@ class StoryListing extends StyledComponent {
             </a>`
         ) : '';
 
+        const createTitle = (score, commentCount) => {
+            const upvotes = score === 1 ? '1 upvote' : `${score} upvotes`;
+            const comments = commentCount === 1 ? '1 comment' : `${commentCount} comments`;
+            return upvotes + ', ' + comments;
+        }
+
         return jdom`<li data-id=${attrs.id} onclick="${this.setActiveStory}">
             <div class="listing">
-                <a class="stats mono" title="${score} upvotes, ${descendants} comments"
+                <a class="stats mono" title="${createTitle(score, descendants)}"
                     href="${this.getStoryPageURL()}" onclick="${this.setActiveStory}">
                     <div class="score">${score}</div>
                     <div class="comments">${descendants}</div>

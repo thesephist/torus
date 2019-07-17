@@ -442,7 +442,7 @@
 <div class="line"><div class="doc"><p>Here&#39;s a sample of the ways you can define styles this way.</p>
 </div><pre class="source javascript"><strong class="lineNumber">527</strong>class FancyList extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">528</strong></pre></div>
-<div class="line"><div class="doc"><p>We define all of our styles in a <code>styled()</code> method, which returns a JSON that resembles normal CSS, but with nesting and automagical media query resolution, as well as downward scoping of CSS rules to this component. That means that when we style <code>button</code> in this component, it won&#39;t ever conflict with other <code>button</code> elements anywhere else on the page.</p>
+<div class="line"><div class="doc"><p>We define all of our styles in a <code>styles()</code> method, which returns a JSON that resembles normal CSS, but with nesting and automagical media query resolution, as well as downward scoping of CSS rules to this component. That means that when we style <code>button</code> in this component, it won&#39;t ever conflict with other <code>button</code> elements anywhere else on the page.</p>
 </div><pre class="source javascript"><strong class="lineNumber">534</strong>    styles() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">535</strong>        return {</pre></div>
 <div class="line"><div class="doc"><p>Normal CSS properties are applied to the root node</p>

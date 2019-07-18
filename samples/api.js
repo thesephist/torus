@@ -526,7 +526,7 @@ const StyledComponent = Styled(Component); // literally what's in Torus's source
 //> Here's a sample of the ways you can define styles this way.
 class FancyList extends StyledComponent {
 
-    //> We define all of our styles in a `styled()` method, which returns a JSON
+    //> We define all of our styles in a `styles()` method, which returns a JSON
     //  that resembles normal CSS, but with nesting and automagical media query resolution,
     //  as well as downward scoping of CSS rules to this component. That means that when we
     //  style `button` in this component, it won't ever conflict with other `button` elements

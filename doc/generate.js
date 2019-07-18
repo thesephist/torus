@@ -35,11 +35,6 @@ const encodeHTML = code => {
     });
 }
 
-const markedOptions = {
-    sanitize: true,
-    sanitizer: encodeHTML,
-}
-
 const linesToRows = lines => {
     const linePairs = [];
     let docLine = '';
@@ -51,7 +46,7 @@ const linesToRows = lines => {
             if (lastLine && lastLine[0]) {
                 linePairs.push(['', '', '']);
             }
-            linePairs.push([marked(docLine, markedOptions), encodeHTML(codeLine), lineNumber]);
+            linePairs.push([marked(docLine), encodeHTML(codeLine), lineNumber]);
         } else {
             linePairs.push(['', encodeHTML(codeLine), lineNumber]);
         }

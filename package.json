@@ -34,7 +34,7 @@
   "devDependencies": {
     "bundlesize": "^0.18.0",
     "chai": "^4.2.0",
-    "eslint": "^6.0.1",
+    "eslint": "^6.1.0",
     "karma": "^4.2.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.0.0",
@@ -43,9 +43,9 @@
     "karma-mocha-reporter": "^2.2.5",
     "marked": "^0.7.0",
     "mkdirp": "^0.5.1",
-    "mocha": "^6.1.4",
+    "mocha": "^6.2.0",
     "nyc": "^14.1.1",
-    "webpack": "^4.36.1"
+    "webpack": "^4.38.0"
   },
   "keywords": [
     "ui",

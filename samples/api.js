@@ -670,8 +670,8 @@ cake2.update({
 cake2.get('price_usd');
 // 12.99
 
-//> `Record#summarize()` returns a "summary" of the state of the record,
-//  which is a dictionary of all of its properties, plus its id, even if it's null.
+//> `Record#serialize()` will return a JSON-serialized version of the state of the record.
+//  Normally, this is the same as the summary, but we can override this behavior as appropriate.
 cake1.serialize();
 /*
     {
@@ -683,8 +683,8 @@ cake1.serialize();
     }
 */
 
-//> `Record#serialize()` will return a JSON-serialized version of the state of the record.
-//  Normally, this is the same as the summary, but we can override this behavior as appropriate.
+//> `Record#summarize()` returns a "summary" of the state of the record,
+//  which is a dictionary of all of its properties, plus its id, even if it's null.
 cake2.summarize();
 /*
     {

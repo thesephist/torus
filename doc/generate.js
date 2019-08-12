@@ -29,11 +29,7 @@ const FILES_TO_ANNOTATE = {
     'Search UI demo': './samples/searchbar/main.js',
 }
 
-const encodeHTML = code => {
-    return code.replace(/[\u00A0-\u9999<>&]/gim, i => {
-        return '&#' + i.codePointAt(0) + ';';
-    });
-}
+const encodeHTML = code => code.replace(/[<>&]/gim, i => '&#' + i.codePointAt(0) + ';');
 
 const linesToRows = lines => {
     const linePairs = [];

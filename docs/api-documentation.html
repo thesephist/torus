@@ -573,7 +573,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">670</strong>cake2.get('price_usd');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">671</strong>// 12.99</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">672</strong></pre></div>
-<div class="line"><div class="doc"><p><code>Record#summarize()</code> returns a &quot;summary&quot; of the state of the record, which is a dictionary of all of its properties, plus its id, even if it&#39;s null.</p>
+<div class="line"><div class="doc"><p><code>Record#serialize()</code> will return a JSON-serialized version of the state of the record. Normally, this is the same as the summary, but we can override this behavior as appropriate.</p>
 </div><pre class="source javascript"><strong class="lineNumber">675</strong>cake1.serialize();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">676</strong>/*</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">677</strong>    {</pre></div>
@@ -585,7 +585,7 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">683</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">684</strong>*/</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">685</strong></pre></div>
-<div class="line"><div class="doc"><p><code>Record#serialize()</code> will return a JSON-serialized version of the state of the record. Normally, this is the same as the summary, but we can override this behavior as appropriate.</p>
+<div class="line"><div class="doc"><p><code>Record#summarize()</code> returns a &quot;summary&quot; of the state of the record, which is a dictionary of all of its properties, plus its id, even if it&#39;s null.</p>
 </div><pre class="source javascript"><strong class="lineNumber">688</strong>cake2.summarize();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">689</strong>/*</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">690</strong>    {</pre></div>

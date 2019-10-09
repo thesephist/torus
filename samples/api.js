@@ -276,7 +276,7 @@ class FancyInput extends Component {
 
     init() {
         this.onFocus = this.onFocus.bind(this);
-        this.onBLur = this.onBLur.bind(this);
+        this.onBlur = this.onBlur.bind(this);
     }
 
     onFocus() {

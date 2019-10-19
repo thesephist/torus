@@ -197,7 +197,7 @@ class Deck extends StyledComponent {
         this.slideIndex = Math.max(
             Math.min(
                 this.slides.length - 1,
-                idx,
+                idx
             ), 0);
         this.render();
     }
@@ -352,8 +352,8 @@ class App extends Component {
                             src: 'https://www.ocf.berkeley.edu/~linuslee/pic.jpg',
                             alt: 'A picture of me',
                         })
-                    ),
-                ),
+                    )
+                )
             )
         );
     }

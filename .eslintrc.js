@@ -43,7 +43,6 @@ module.exports = {
         'camelcase': 'off',
         'capitalized-comments': 'off',
         'class-methods-use-this': 'off',
-        'comma-dangle': 'off',
         'comma-spacing': [
             'error',
             {
@@ -55,7 +54,13 @@ module.exports = {
             'error',
             'last'
         ],
-        'comma-dangle': ['error', 'always-multiline'],
+        'comma-dangle': ['error', {
+            'arrays': 'always-multiline',
+            'objects': 'always-multiline',
+            'imports': 'always-multiline',
+            'exports': 'always-multiline',
+            'functions': 'never',
+        }],
         'complexity': 'off',
         'computed-property-spacing': [
             'error',

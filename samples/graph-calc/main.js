@@ -153,7 +153,7 @@ class FunctionRecord extends Record {
             {
                 jsFunction: fn,
                 invalid: invalid,
-            },
+            }
         );
     }
 

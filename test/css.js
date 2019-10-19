@@ -23,7 +23,7 @@ describe('css template tag', () => {
     compare(
         'empty input',
         css``,
-        {},
+        {}
     );
 
     compare(

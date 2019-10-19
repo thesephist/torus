@@ -56,7 +56,7 @@ describe('jdom template tag', () => {
     compare(
         'comment',
         jdom`<!--- some comment that should be ignored -->`,
-        null,
+        null
     );
 
     const tn = document.createElement('video');
@@ -401,7 +401,7 @@ describe('jdom template tag', () => {
                         {tag: 'h1', children: ['hi']},
                     ]},
                 ]},
-            ]},
+            ]}
         );
 
         compare(
@@ -431,7 +431,7 @@ describe('jdom template tag', () => {
             jdom`<div>${'<h1>Hi</h1>'}</div>`,
             {tag: 'div', children: [
                 '<h1>Hi</h1>',
-            ]},
+            ]}
         );
 
         compare(
@@ -439,7 +439,7 @@ describe('jdom template tag', () => {
             jdom`<script>${'</script>console.log("alert")'}</script>`,
             {tag: 'script', children: [
                 '</script>console.log("alert")',
-            ]},
+            ]}
         );
 
     });

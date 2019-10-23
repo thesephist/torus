@@ -5,7 +5,9 @@
   "repository": "git@github.com:thesephist/torus.git",
   "author": "Linus Lee <linus@thesephist.com>",
   "private": false,
-  "main": "src/index.js",
+  "type": "module",
+  "main": "dist/index.min.js",
+  "module": "src/index.js",
   "types": "types/index.d.ts",
   "license": "MIT",
   "scripts": {

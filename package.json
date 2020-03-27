@@ -42,11 +42,11 @@
     "karma-coverage": "^2.0.1",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
-    "marked": "^0.8.0",
+    "marked": "^0.8.2",
     "mkdirp": "^1.0.3",
-    "mocha": "^7.1.0",
+    "mocha": "^7.1.1",
     "nyc": "^15.0.0",
-    "webpack": "^4.42.0"
+    "webpack": "^4.42.1"
   },
   "keywords": [
     "ui",

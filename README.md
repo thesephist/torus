@@ -122,6 +122,17 @@ class I18nComponent extends Component {
 }
 ```
 
+## Examples
+
+I (Linus) use Torus for most of my personal projects when I need a client-side UI library. Some of these projects include:
+
+- [Codeframe, an online code editor](https://github.com/thesephist/codeframe)
+- [Mira, a contacts app](https://github.com/thesephist/mira)
+- [A Hacker News reader](https://torushn.surge.sh)
+- [Sounds from Places](https://soundsfromplaces.surge.sh)
+- [Graphing calculator](https://graphcalc.surge.sh)
+- [Conway's Game of Life](https://conwaygame.surge.sh)
+
 ## Influences
 
 Torus's API is a mixture of declarative interfaces for defining user interfaces and views, and imperative patterns for state management, which I personally find is the best balance of the two styles when building large applications. As a general practice, components should try to remain declarative and idempotent, and interact with data models / state via public, stable imperative APIs exposed by data models.

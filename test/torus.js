@@ -312,6 +312,48 @@ describe('render', () => {
                 node3.type.should.not.equal('checkbox');
             });
 
+            it('should not update IDL properties if DOM mutation already occurred', () => {
+                const prev = {
+                    tag: 'input',
+                    attrs: {
+                        type: 'text',
+                        value: '12345',
+                    },
+                }
+                const next = {
+                    tag: 'input',
+                    attrs: {
+                        type: 'text',
+                        value: '123456',
+                    },
+                }
+
+                const wrap = jd => {
+                    return {
+                        tag: 'div',
+                        children: [jd],
+                    }
+                }
+
+                const node = renderNext(wrap(prev));
+                const ipt = node.querySelector('input');
+                ipt.value.should.equal('12345');
+
+                ipt.value = '123456';
+                ipt.selectionStart = 1;
+                ipt.value.should.equal('123456');
+                ipt.selectionStart.should.equal(1);
+
+                // this test validates that when DOM value for input.value changes out
+                // from underneath Torus to first match the new attribute value,
+                // Torus is smart enough not to re-set that property again during render
+                // and potentially trigger DOM side effects like moving the cursor (selectionStart).
+                const node2 = render(node, wrap(prev), wrap(next));
+                node.querySelector('input').should.equal(ipt);
+                ipt.value.should.equal('123456');
+                ipt.selectionStart.should.equal(1);
+            });
+
         });
 
     });

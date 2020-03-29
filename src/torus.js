@@ -341,8 +341,9 @@ const render = (node, previous, next) => {
                     //> We explicitly make a comparison here before setting, because setting reflected
                     //  HTML properties is _not idempotent_ -- on some elements like audio, video, and iframe,
                     //  setting properties like src will call a setter that sometimes resets UI state in some
-                    //  browsers.
-                    if (pAttr !== nAttr) {
+                    //  browsers. We must compare the new value to both JDOM's and DOM's values, because they differ
+                    //  sometimes when the DOM mutates from under Torus's control, like on a user input.
+                    if (pAttr !== nAttr || node[attrName] !== nAttr) {
                         node[attrName] = nAttr;
                     }
                 } else {

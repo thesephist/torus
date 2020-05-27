@@ -480,10 +480,20 @@ const Markus = str => {
     return jdom`<div class="render" style="padding-bottom:75vh">${result}</div>`;
 }
 
+//> EDITOR MODES:
+//  0 -> two-up, preview and editor; default
+//  1 -> editor only
+//  2 -> preview only
+const BOTH_MODE = 0,
+    EDITOR_MODE = 1,
+    PREVIEW_MODE = 2;
+
 //> The app component wraps the entire application and handles state.
 class App extends StyledComponent {
 
     init() {
+        this.mode = BOTH_MODE;
+
         //> If we've previously saved the user input, pull that back out.
         //  Otherwise, use the default placeholder.
         this.inputValue = window.localStorage.getItem('markusInput') || INPUT_PLACEHOLDER;
@@ -491,6 +501,7 @@ class App extends StyledComponent {
         //> Bind a few methods we're using to handle input.
         this.handleInput = this.handleInput.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);
+        this.handleToggleMode = this.handleToggleMode.bind(this);
 
         //> Before the user leaves the site, we want to save the user input to
         //  local storage so we can pull it back out later when the user visits the site again.
@@ -500,102 +511,125 @@ class App extends StyledComponent {
     }
 
     styles() {
-        return {
-            'box-sizing': 'border-box',
-            'font-family': 'system-ui, sans-serif',
-            'display': 'flex',
-            'flex-direction': 'column',
-            'justify-content': 'space-between',
-            'align-items': 'flex-start',
-            'height': '100vh',
-            'width': '100%',
-            'max-width': '1600px',
-            'margin': '0 auto',
-            'overflow': 'hidden',
-            '.title': {
-                'margin': '20px 18px 0 18px',
-                'font-weight': 'normal',
-                'color': '#888',
-                '.dark': {
-                    'color': '#000',
-                },
-            },
-            '.renderContainer': {
-                'display': 'flex',
-                'flex-direction': 'row',
-                'justify-content': 'space-between',
-                'align-items': 'flex-start',
-                'height': 'calc(100% - 60px)',
-                'width': '100%',
-                'padding': '16px',
-                'box-sizing': 'border-box',
-            },
-            '.half': {
-                'width': 'calc(50% - 8px)',
-                'height': '100%',
-                'box-sizing': 'border-box',
-            },
-            '.render, textarea': {
-                'box-sizing': 'border-box',
-                'border': 0,
-                'box-shadow': '0 3px 8px -1px rgba(0, 0, 0, .3)',
-                'padding': '12px',
-                'border-radius': '6px',
-                'background': '#fff',
-                'height': '100%',
-                '-webkit-overflow-scrolling': 'touch',
-                'overflow-y': 'auto',
-            },
-            'textarea': {
-                'font-family': '"Fira Code", "Menlo", "Monaco", monospace',
-                'width': '100%',
-                'resize': 'none',
-                'font-size': '14px',
-                'outline': 'none',
-                'color': '#999',
-                'line-height': '1.5em',
-                '&:focus': {
-                    'color': '#000',
-                },
-            },
-            '.result': {
-                'height': '100%',
-            },
-            '.render': {
-                //> Styles for things that are rendered by the markdown parser
-                'p': {
-                    'line-height': '1.5em',
-                },
-                'li': {
-                    'margin-bottom': '6px',
-                },
-                'pre': {
-                    'padding': '8px',
-                    'overflow-x': 'auto',
-                },
-                'code': {
-                    'padding': '1px 5px',
-                    'margin': '0 2px',
-                },
-                'pre, code': {
-                    'font-family': '"Menlo", "Monaco", monospace',
-                    'background': '#eee',
-                    'line-height': '1.5em',
-                    'border-radius': '4px',
-                },
-                'q': {
-                    //> By default, block quotes are just displayed
-                    //  with double quotes around the text. We're displaying it
-                    //  like how we may see block quotes in email threads.
-                    '&::before, &::after': {
-                        'content': '""',
-                    },
-                    'display': 'block',
-                    'border-left': '3px solid #777',
-                    'padding-left': '6px',
-                },
-            },
+        return css`
+        box-sizing: border-box;
+        font-family: system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: 100vh;
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        overflow: hidden;
+
+        header {
+            padding: 20px 18px 0 18px;
+            box-sizing: border-box;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+
+            button {
+                padding: 6px 10px;
+                font-size: 1em;
+                border-radius: 4px;
+                background: #fff;
+                box-shadow: 0 3px 8px -1px rgba(0, 0, 0, .3);
+                border: 0;
+                cursor: pointer;
+                &:hover {
+                    opacity: .7;
+                }
+            }
         }
+        .title {
+            margin: 0;
+            font-weight: normal;
+            color: #888;
+            .dark {
+                color: #000;
+            }
+        }
+        .renderContainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            height: calc(100% - 60px);
+            width: 100%;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        .half {
+            width: calc(50% - 8px);
+        }
+        .full {
+            width: calc(100% - 8px);
+        }
+        .half, .full {
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .render, textarea {
+            box-sizing: border-box;
+            border: 0;
+            box-shadow: 0 3px 8px -1px rgba(0, 0, 0, .3);
+            padding: 12px;
+            border-radius: 6px;
+            background: #fff;
+            height: 100%;
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
+        }
+        textarea {
+            font-family: 'Fira Code', 'Menlo', 'Monaco', monospace;
+            width: 100%;
+            resize: none;
+            font-size: 14px;
+            outline: none;
+            color: #999;
+            line-height: 1.5em;
+            &:focus {
+                color: #000;
+            }
+        }
+        .result {
+            height: 100%;
+        }
+        .render {
+            p, pre, code {
+                line-height: 1.5em;
+            }
+            li {
+                margin-bottom: 6px;
+            }
+            pre {
+                padding: 8px;
+                overflow-x: auto;
+            }
+            code {
+                padding: 1px 5px;
+                margin: 0 2px;
+            }
+            pre, code {
+                font-family: 'Menlo', 'Monaco', monospace;
+                background: #eee;
+                border-radius: 4px;
+            }
+            q {
+                &::before, &::after {
+                    content: '';
+                }
+                display: block;
+                border-left: 3px solid #777;
+                padding-left: 6px;
+            }
+        }
+        `;
     }
 
     //> When the input changes, set the new local state
@@ -628,18 +662,52 @@ class App extends StyledComponent {
         }
     }
 
+    handleToggleMode(evt) {
+        //> Increment mode counter to stay within [0, 2] range.
+        this.mode = ++this.mode % 3;
+        this.render();
+    }
+
     compose() {
-        return jdom`<main>
-            <h1 class="title"><span class="dark">Markus</span>, a live markdown renderer</h1>
-            <div class="renderContainer">
-                <div class="half result">
+        let modeView = null; // unreachable
+
+        //> Provide the correct mode view to the app shell depending
+        //  on the chosen view.
+        switch (this.mode) {
+            case EDITOR_MODE:
+                modeView = jdom`<div class="full result">
                     ${Markus(this.inputValue)}
-                </div>
-                <div class="half markdown">
+                </div>`;
+                break;
+            case PREVIEW_MODE:
+                modeView = jdom`<div class="full markdown">
                     <textarea autofocus value="${this.inputValue}" oninput="${this.handleInput}"
                         placeholder="Start writing ..." onkeydown="${this.handleKeydown}" />
-                </div>
-            </div>
+                </div>`;
+                break;
+            default:
+                modeView = [
+                    jdom`<div class="half result">
+                        ${Markus(this.inputValue)}
+                    </div>`,
+                    jdom`<div class="half markdown">
+                        <textarea autofocus value="${this.inputValue}" oninput="${this.handleInput}"
+                            placeholder="Start writing ..." onkeydown="${this.handleKeydown}" />
+                    </div>`,
+                ];
+                break;
+        }
+
+        return jdom`<main>
+            <header>
+                <h1 class="title">
+                    <span class="dark">Markus</span>, a live markdown editor
+                </h1>
+                <button class="showRenderedToggle" onclick="${this.handleToggleMode}">
+                    mode ++
+                </button>
+            </header>
+            <div class="renderContainer">${modeView}</div>
         </main>`;
     }
 

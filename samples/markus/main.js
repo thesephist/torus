@@ -493,6 +493,7 @@ class App extends StyledComponent {
 
     init() {
         this.mode = BOTH_MODE;
+        this.showSavedIndicator = false;
 
         //> If we've previously saved the user input, pull that back out.
         //  Otherwise, use the default placeholder.
@@ -502,12 +503,24 @@ class App extends StyledComponent {
         this.handleInput = this.handleInput.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleToggleMode = this.handleToggleMode.bind(this);
+        this.handleSave = this.save.bind(this, {showIndicator: true});
 
         //> Before the user leaves the site, we want to save the user input to
         //  local storage so we can pull it back out later when the user visits the site again.
-        window.addEventListener('beforeunload', () => {
-            window.localStorage.setItem('markusInput', this.inputValue);
-        });
+        window.addEventListener('beforeunload',
+            this.save.bind(this, {showIndicator: false}));
+    }
+
+    save({showIndicator} = {}) {
+        if (showIndicator) {
+            this.showSavedIndicator = true;
+            setTimeout(() => {
+                this.showSavedIndicator = false;
+                this.render();
+            }, 1000);
+            this.render();
+        }
+        window.localStorage.setItem('markusInput', this.inputValue);
     }
 
     styles() {
@@ -532,8 +545,15 @@ class App extends StyledComponent {
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
+        }
+        .buttonGroup {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
 
             button {
+                margin: 0 6px;
                 padding: 6px 10px;
                 font-size: 1em;
                 border-radius: 4px;
@@ -703,9 +723,14 @@ class App extends StyledComponent {
                 <h1 class="title">
                     <span class="dark">Markus</span>, a live markdown editor
                 </h1>
-                <button class="showRenderedToggle" onclick="${this.handleToggleMode}">
-                    mode ++
-                </button>
+                <div class="buttonGroup">
+                    <button class="saveButton" onclick="${this.handleSave}">
+                        ${this.showSavedIndicator ? 'saved' : 'save'}
+                    </button>
+                    <button class="showRenderedToggle" onclick="${this.handleToggleMode}">
+                        mode ++
+                    </button>
+                </div>
             </header>
             <div class="renderContainer">${modeView}</div>
         </main>`;

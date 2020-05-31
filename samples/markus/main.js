@@ -484,15 +484,17 @@ const Markus = str => {
 //  0 -> two-up, preview and editor; default
 //  1 -> editor only
 //  2 -> preview only
-const BOTH_MODE = 0,
-    EDITOR_MODE = 1,
-    PREVIEW_MODE = 2;
+const MODE = {
+    BOTH: 0,
+    EDITOR: 1,
+    PREVIEW: 2,
+}
 
 //> The app component wraps the entire application and handles state.
 class App extends StyledComponent {
 
     init() {
-        this.mode = BOTH_MODE;
+        this.mode = MODE.BOTH;
         this.showSavedIndicator = false;
 
         //> If we've previously saved the user input, pull that back out.
@@ -682,9 +684,9 @@ class App extends StyledComponent {
         }
     }
 
-    handleToggleMode(evt) {
+    handleToggleMode() {
         //> Increment mode counter to stay within [0, 2] range.
-        this.mode = ++this.mode % 3;
+        this.mode = ++ this.mode % 3;
         this.render();
     }
 
@@ -694,12 +696,12 @@ class App extends StyledComponent {
         //> Provide the correct mode view to the app shell depending
         //  on the chosen view.
         switch (this.mode) {
-            case EDITOR_MODE:
+            case MODE.EDITOR:
                 modeView = jdom`<div class="full result">
                     ${Markus(this.inputValue)}
                 </div>`;
                 break;
-            case PREVIEW_MODE:
+            case MODE.PREVIEW:
                 modeView = jdom`<div class="full markdown">
                     <textarea autofocus value="${this.inputValue}" oninput="${this.handleInput}"
                         placeholder="Start writing ..." onkeydown="${this.handleKeydown}" />

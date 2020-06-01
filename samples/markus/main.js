@@ -480,13 +480,13 @@ const Markus = str => {
     return jdom`<div class="render" style="padding-bottom:75vh">${result}</div>`;
 }
 
-//> EDITOR MODES:
-//  0 -> two-up, preview and editor; default
-//  1 -> editor only
-//  2 -> preview only
+//> Editor view modes
 const MODE = {
+    //>  0 -> two-up, preview and editor; default
     BOTH: 0,
+    //>  1 -> editor only
     EDITOR: 1,
+    //>  2 -> preview only
     PREVIEW: 2,
 }
 
@@ -494,7 +494,10 @@ const MODE = {
 class App extends StyledComponent {
 
     init() {
+        //> We start with the default two-up view
         this.mode = MODE.BOTH;
+        //> Temporary state used to store whether the save button should show
+        //  the saving state indicator ("saved")
         this.showSavedIndicator = false;
 
         //> If we've previously saved the user input, pull that back out.
@@ -513,6 +516,9 @@ class App extends StyledComponent {
             this.save.bind(this, {showIndicator: false}));
     }
 
+    //> Callback to save current editor buffer contents to `localStorage`.
+    //  This method takes an option to give feedback to the user, which is
+    //  set to false if saving on the onbeforeunload event.
     save({showIndicator} = {}) {
         if (showIndicator) {
             this.showSavedIndicator = true;

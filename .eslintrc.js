@@ -2,7 +2,7 @@ module.exports = {
     'env': {
         'browser': true,
         'commonjs': true,
-        'es6': true
+        'es6': true,
     },
     'extends': 'eslint:recommended',
     'parserOptions': {
@@ -17,27 +17,27 @@ module.exports = {
         ],
         'array-bracket-spacing': [
             'error',
-            'never'
+            'never',
         ],
         'array-callback-return': 'error',
         'array-element-newline': 'off',
         'arrow-body-style': 'off',
         'arrow-parens': [
             'error',
-            'as-needed'
+            'as-needed',
         ],
         'arrow-spacing': [
             'error',
             {
                 'after': true,
-                'before': true
-            }
+                'before': true,
+            },
         ],
         'block-scoped-var': 'error',
         'block-spacing': 'error',
         'brace-style': [
             'error',
-            '1tbs'
+            '1tbs',
         ],
         'callback-return': 'off',
         'camelcase': 'off',
@@ -47,12 +47,12 @@ module.exports = {
             'error',
             {
                 'after': true,
-                'before': false
-            }
+                'before': false,
+            },
         ],
         'comma-style': [
             'error',
-            'last'
+            'last',
         ],
         'comma-dangle': ['error', {
             'arrays': 'always-multiline',
@@ -64,7 +64,7 @@ module.exports = {
         'complexity': 'off',
         'computed-property-spacing': [
             'error',
-            'never'
+            'never',
         ],
         'consistent-return': 'error',
         'consistent-this': 'error',
@@ -75,13 +75,13 @@ module.exports = {
         'default-case': 'off',
         'dot-location': [
             'error',
-            'property'
+            'property',
         ],
         'dot-notation': [
             'error',
             {
-                'allowKeywords': true
-            }
+                'allowKeywords': true,
+            },
         ],
         'eol-last': [
             'error',
@@ -98,8 +98,8 @@ module.exports = {
             'error',
             'declaration',
             {
-                'allowArrowFunctions': true
-            }
+                'allowArrowFunctions': true,
+            },
         ],
         'function-paren-newline': 'off',
         'generator-star-spacing': 'error',
@@ -111,7 +111,7 @@ module.exports = {
         'id-match': 'error',
         'implicit-arrow-linebreak': [
             'error',
-            'beside'
+            'beside',
         ],
         'indent': [
             'error',
@@ -121,7 +121,7 @@ module.exports = {
                 // When expression are indented in multiline templates,
                 //  we don't necessary want them indented to the template start.
                 'ignoredNodes': ['TemplateLiteral *'],
-            }
+            },
         ],
         'indent-legacy': 'off',
         'init-declarations': 'off',
@@ -131,13 +131,13 @@ module.exports = {
             'error',
             {
                 'after': true,
-                'before': true
-            }
+                'before': true,
+            },
         ],
         'line-comment-position': 'off',
         'linebreak-style': [
             'error',
-            'unix'
+            'unix',
         ],
         'lines-around-comment': 'error',
         'lines-around-directive': 'error',
@@ -266,7 +266,7 @@ module.exports = {
         'object-curly-newline': 'error',
         'object-curly-spacing': [
             'error',
-            'never'
+            'never',
         ],
         'object-shorthand': 'off',
         'one-var': [
@@ -276,11 +276,11 @@ module.exports = {
         'one-var-declaration-per-line': 'error',
         'operator-assignment': [
             'error',
-            'always'
+            'always',
         ],
         'operator-linebreak': [
             'error',
-            'before'
+            'before',
         ],
         'padded-blocks': 'off',
         'padding-line-between-statements': 'error',
@@ -289,7 +289,7 @@ module.exports = {
             'error',
             {
                 'destructuring': 'any',
-            }
+            },
         ],
         'prefer-destructuring': 'off',
         'prefer-numeric-literals': 'error',
@@ -314,7 +314,7 @@ module.exports = {
         'require-unicode-regexp': 'off',
         'rest-spread-spacing': [
             'error',
-            'never'
+            'never',
         ],
         // eslint doesn't have an easy option for 'always,
         //  except after curlybraces'
@@ -323,12 +323,12 @@ module.exports = {
             'error',
             {
                 'after': true,
-                'before': false
-            }
+                'before': false,
+            },
         ],
         'semi-style': [
             'error',
-            'last'
+            'last',
         ],
         'sort-imports': 'error',
         'sort-keys': 'off',
@@ -337,7 +337,7 @@ module.exports = {
         'space-before-function-paren': 'off',
         'space-in-parens': [
             'error',
-            'never'
+            'never',
         ],
         'space-infix-ops': 'error',
         'space-unary-ops': [
@@ -357,22 +357,22 @@ module.exports = {
             {
                 // for litterate docs
                 'markers': ['>'],
-            }
+            },
         ],
         'strict': [
             'error',
-            'never'
+            'never',
         ],
         'switch-colon-spacing': 'error',
         'symbol-description': 'error',
         'template-curly-spacing': [
             'error',
-            'never'
+            'never',
         ],
         'template-tag-spacing': 'error',
         'unicode-bom': [
             'error',
-            'never'
+            'never',
         ],
         'valid-jsdoc': 'error',
         'valid-typeof': 'error',
@@ -382,7 +382,7 @@ module.exports = {
         'yield-star-spacing': 'error',
         'yoda': [
             'error',
-            'never'
-        ]
-    }
+            'never',
+        ],
+    },
 };

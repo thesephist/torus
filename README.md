@@ -128,10 +128,11 @@ I (Linus) use Torus for most of my personal projects when I need a client-side U
 
 - [Codeframe, an online code editor](https://github.com/thesephist/codeframe)
 - [Mira, a contacts app](https://github.com/thesephist/mira)
-- [A Hacker News reader](https://torushn.surge.sh)
-- [Sounds from Places](https://soundsfromplaces.surge.sh)
+- [Unim.press, a newspaper-style Reddit reader](https://unim.press/)
 - [Graphing calculator](https://graphcalc.surge.sh)
-- [Conway's Game of Life](https://conwaygame.surge.sh)
+- [A Hacker News reader](https://torushn.surge.sh)
+- [1989.style, a quiz about Taylor Swift songs](https://1989.style/)
+- [Sounds from Places](https://soundsfromplaces.surge.sh)
 
 ## Influences
 

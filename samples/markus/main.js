@@ -408,7 +408,11 @@ const Markus = str => {
                 inCodeBlock = false;
                 codeBlockResult = '';
             } else {
-                codeBlockResult += line + '\n';
+                if (!codeBlockResult) {
+                    codeBlockResult = line.trimStart() + '\n';
+                } else {
+                    codeBlockResult += line + '\n';
+                }
             }
         //> ... likewise for literal HTML blocks.
         } else if (inLiteralBlock) {

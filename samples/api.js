@@ -979,7 +979,7 @@ class App extends Component {
 
 }
 
-//> When we creat the app later, we can pass it our page router
+//> When we create the app later, we can pass it our page router
 const app = new App(router);
 
 //> The router has a method, `#go()`, that we can call to navigate to a new route.

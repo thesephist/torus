@@ -465,6 +465,8 @@ const replaceInArrayLiteral = (arr, dynamicParts) => {
 
 //> Given an object, replace placeholders in it and its values.
 const replaceInObjectLiteral = (obj, dynamicParts) => {
+    if (obj instanceof Node) return;
+
     for (const prop of Object.keys(obj)) {
         const val = obj[prop];
         if (typeof val === 'string') {

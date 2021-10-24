@@ -33,7 +33,7 @@
     "types"
   ],
   "devDependencies": {
-    "bundlesize": "^0.18.0",
+    "bundlesize2": "^0.0.31",
     "chai": "^4.2.0",
     "eslint": "^8.1.0",
     "karma": "^6.3.6",
@@ -60,7 +60,7 @@
   "bundlesize": [
     {
       "path": "./dist/*.min.js",
-      "threshold": "4.7kB"
+      "maxSize": "5kB"
     }
   ]
 }

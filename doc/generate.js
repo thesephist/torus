@@ -4,7 +4,6 @@
 const fs = require('fs');
 const path = require('path');
 const marked = require('marked');
-const mkdirp = require('mkdirp');
 
 const index = fs.readFileSync('./doc/index.html', 'utf8');
 const css = fs.readFileSync('./doc/main.css', 'utf8');
@@ -42,7 +41,7 @@ const linesToRows = lines => {
             if (lastLine && lastLine[0]) {
                 linePairs.push(['', '', '']);
             }
-            linePairs.push([marked(docLine), encodeHTML(codeLine), lineNumber]);
+            linePairs.push([marked.parse(docLine), encodeHTML(codeLine), lineNumber]);
         } else {
             linePairs.push(['', encodeHTML(codeLine), lineNumber]);
         }
@@ -115,7 +114,7 @@ const buildIndex = indexPage => {
     return indexPage.replace(/{{sources}}/, sources.join('\n'));
 }
 
-mkdirp.sync('./docs/');
+fs.mkdirSync('./docs', {recursive: true});
 fs.writeFile('./docs/index.html', buildIndex(index), 'utf8', err => {
     if (err) {
         console.error('Error writing index page', err);

@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const mkdirp = require('mkdirp');
 const webpack = require('webpack');
 
 function stripDebugParts(source) {
@@ -84,7 +83,7 @@ const iife = s => `(function(){${s}})();`;
 const torusSource = fs.readFileSync('./src/torus.js', 'utf8');
 const jdomSource = fs.readFileSync('./src/jdom.js', 'utf8');
 
-mkdirp.sync('./dist/');
+fs.mkdirSync('./dist');
 
 const torusSourceNoDebug = stripDebugParts(torusSource);
 const jdomSourceNoDebug = stripDebugParts(jdomSource);

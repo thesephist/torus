@@ -83,7 +83,7 @@ const iife = s => `(function(){${s}})();`;
 const torusSource = fs.readFileSync('./src/torus.js', 'utf8');
 const jdomSource = fs.readFileSync('./src/jdom.js', 'utf8');
 
-fs.mkdirSync('./dist');
+fs.mkdirSync('./dist', {recursive: true});
 
 const torusSourceNoDebug = stripDebugParts(torusSource);
 const jdomSourceNoDebug = stripDebugParts(jdomSource);

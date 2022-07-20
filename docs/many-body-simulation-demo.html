@@ -17,7 +17,9 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>A many-body simulation of gravitationally interacting masses, designed as a potential DOM stress test. (This is why this is implemented in DOM. Otherwise, this would be ideal for canvas2D.)</p>
+        <div class="line"><div class="doc"><p>A many-body simulation of gravitationally interacting masses,
+designed as a potential DOM stress test. (This is why this is
+implemented in DOM. Otherwise, this would be ideal for canvas2D.)</p>
 </div><pre class="source javascript"><strong class="lineNumber">4</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
@@ -25,7 +27,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">7</strong>    window[exportedName] = Torus[exportedName];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong></pre></div>
-<div class="line"><div class="doc"><p>We allow the user to specify the number of particles to include in the simulated universe using the <code>q=???</code> query parameter in the URL. This bit of code tries to detect that using a pretty native but reliable approach.</p>
+<div class="line"><div class="doc"><p>We allow the user to specify the number of particles to include in
+the simulated universe using the <code>q=???</code> query parameter in the URL.
+This bit of code tries to detect that using a pretty native but reliable approach.</p>
 </div><pre class="source javascript"><strong class="lineNumber">13</strong>let digits = null;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong>if (window.location.search.length &#62; 0) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong>    const digitsMatch = window.location.search.match(/\Wp=(\d*)/);</pre></div>
@@ -41,7 +45,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">26</strong>console.log(`Simulating with ${PARTICLE_COUNT} particles.`);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">27</strong></pre></div>
-<div class="line"><div class="doc"><p>These functions are used to seed the initial particle positions such that they&#39;re uniformly distributed within the browser viewport.</p>
+<div class="line"><div class="doc"><p>These functions are used to seed the initial particle positions
+such that they&#39;re uniformly distributed within the browser viewport.</p>
 </div><pre class="source javascript"><strong class="lineNumber">30</strong>const randomWindowX = () =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">31</strong>    return Math.random() * window.innerWidth;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">32</strong>}</pre></div>
@@ -49,25 +54,33 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">34</strong>    return Math.random() * window.innerHeight;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">35</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">36</strong></pre></div>
-<div class="line"><div class="doc"><p>Class <code>ParticleSystem</code> models the many-body problem and behavior of gravitationally attracted objects. It&#39;s in charge of computing incremental changes to positions and velocities in every frame.</p>
+<div class="line"><div class="doc"><p>Class <code>ParticleSystem</code> models the many-body problem and behavior of gravitationally
+attracted objects. It&#39;s in charge of computing incremental changes to positions and
+velocities in every frame.</p>
 </div><pre class="source javascript"><strong class="lineNumber">40</strong>class ParticleSystem {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">41</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>    constructor() {</pre></div>
-<div class="line"><div class="doc"><p>Each entry in <code>this.particles</code> is <code>[xPos, yPos, xVel, yVel, mass]</code> Particle data are represented in a naked array (not class instances or objects) for performance.</p>
+<div class="line"><div class="doc"><p>Each entry in <code>this.particles</code> is <code>[xPos, yPos, xVel, yVel, mass]</code>
+Particle data are represented in a naked array (not class instances or
+objects) for performance.</p>
 </div><pre class="source javascript"><strong class="lineNumber">46</strong>        this.particles = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong>        for (let i = 0; i &#60; PARTICLE_COUNT; i ++) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong>            this.particles.push([randomWindowX(), randomWindowY(), 0, 0, 1]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong></pre></div>
-<div class="line"><div class="doc"><p><code>step()</code> runs a single frame of the simulation, assuming the frame was <code>duration</code> seconds long. This step takes a while even on modern computers for <code>n &gt; 1000</code>, and may benefit from a more optimized data structure for particles like a quadtree.</p>
+<div class="line"><div class="doc"><p><code>step()</code> runs a single frame of the simulation, assuming the frame was
+<code>duration</code> seconds long. This step takes a while even on modern computers
+for <code>n &gt; 1000</code>, and may benefit from a more optimized data structure for
+particles like a quadtree.</p>
 </div><pre class="source javascript"><strong class="lineNumber">56</strong>    step(duration) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Memoize.</p>
 </div><pre class="source javascript"><strong class="lineNumber">58</strong>        const particles = this.particles;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">59</strong>        const len = particles.length;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">60</strong></pre></div>
-<div class="line"><div class="doc"><p>First, loop through all particles and update their velocities from our newly computed values of acceleration between particles.</p>
+<div class="line"><div class="doc"><p>First, loop through all particles and update their velocities
+from our newly computed values of acceleration between particles.</p>
 </div><pre class="source javascript"><strong class="lineNumber">63</strong>        for (let i = 0; i &#60; PARTICLE_COUNT; i ++) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">64</strong>            const p = particles[i];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">65</strong>            let xAcc = 0;</pre></div>
@@ -85,7 +98,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">77</strong>                        sqDiagonal = PARTICLE_DIAMETER;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">78</strong>                    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">79</strong>                    const diagonal = Math.sqrt(sqDiagonal)</pre></div>
-<div class="line"><div class="doc"><p>This seems a little odd, but is a more performant, least redundant to compute something mathematically equivalent to the formula for gravitational acceleration.</p>
+<div class="line"><div class="doc"><p>This seems a little odd, but is a more performant, least
+redundant to compute something mathematically equivalent
+to the formula for gravitational acceleration.</p>
 </div><pre class="source javascript"><strong class="lineNumber">83</strong>                    const accel = ((GRAV_CONST / sqDiagonal) / diagonal) * q[4];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">84</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">85</strong>                    xAcc -= accel * xOffset;</pre></div>
@@ -106,10 +121,13 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">100</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong></pre></div>
-<div class="line"><div class="doc"><p>The <code>Particle</code> function is a functional Torus component that renders an individual point, given the data backing the point from the simulation. To minimize any overhead of <code>jdom</code> parsing the HTML template at runtime, this functional component returns a dictionary representing the new DOM.</p>
+<div class="line"><div class="doc"><p>The <code>Particle</code> function is a functional Torus component that renders an individual point,
+given the data backing the point from the simulation. To minimize any overhead of <code>jdom</code> parsing
+the HTML template at runtime, this functional component returns a dictionary representing the new DOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">106</strong>const Particle = pData =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>We floor (<code>~~</code>) the result here, because the exact velocity doesn&#39;t matter, and it reduces Torus&#39;s parsing overhead for CSS -- these are microoptimizations.</p>
+<div class="line"><div class="doc"><p>We floor (<code>~~</code>) the result here, because the exact velocity doesn&#39;t matter, and it reduces
+Torus&#39;s parsing overhead for CSS -- these are microoptimizations.</p>
 </div><pre class="source javascript"><strong class="lineNumber">109</strong>    const vel = ~~Math.sqrt((pData[2] * pData[2]) + (pData[3] * pData[3]));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">110</strong>    return {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">111</strong>        tag: 'div',</pre></div>
@@ -132,7 +150,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>    init() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>        this.system = new ParticleSystem();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">129</strong></pre></div>
-<div class="line"><div class="doc"><p>Create a function to be called at every animation frame, for a demo. <code>step()</code> measure the elapsed time since last call, and steps through the simulated system by that elapsed duration, then calls render.</p>
+<div class="line"><div class="doc"><p>Create a function to be called at every animation frame, for a demo.
+<code>step()</code> measure the elapsed time since last call, and steps through
+the simulated system by that elapsed duration, then calls render.</p>
 </div><pre class="source javascript"><strong class="lineNumber">133</strong>        let lastTime = new Date().getTime();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">134</strong>        const step = () =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">135</strong>            const thisTime = new Date().getTime();</pre></div>
@@ -151,7 +171,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">148</strong>        this.trackingMouse = false;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">149</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">150</strong></pre></div>
-<div class="line"><div class="doc"><p>When the user starts dragging on the screen, we represent that point as a 100x more massive particle in the system, with constant 0 velocity.</p>
+<div class="line"><div class="doc"><p>When the user starts dragging on the screen, we represent that point as a
+100x more massive particle in the system, with constant 0 velocity.</p>
 </div><pre class="source javascript"><strong class="lineNumber">153</strong>    handleMousedown(evt) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">154</strong>        this.trackingMouse = true;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">155</strong>        this.system.particles.push([</pre></div>
@@ -188,7 +209,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong>            'left': '0',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">187</strong>            'overflow': 'hidden',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">188</strong></pre></div>
-<div class="line"><div class="doc"><p>Because particles are just functions that map to JDOM (not Torus components themselves), we define their styles here.</p>
+<div class="line"><div class="doc"><p>Because particles are just functions that map to JDOM (not
+Torus components themselves), we define their styles here.</p>
 </div><pre class="source javascript"><strong class="lineNumber">191</strong>            '.particle': {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">192</strong>                'height': PARTICLE_DIAMETER + 'px',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">193</strong>                'width': PARTICLE_DIAMETER + 'px',</pre></div>
@@ -202,7 +224,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">203</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"><p>Touch support is trivial, but not added for sake of simplicity. If we wanted to add multi-touch support, we&#39;d do something analogous to what we&#39;ve done for mouse click.</p>
+<div class="line"><div class="doc"><p>Touch support is trivial, but not added for sake of simplicity.
+If we wanted to add multi-touch support, we&#39;d do something analogous
+to what we&#39;ve done for mouse click.</p>
 </div><pre class="source javascript"><strong class="lineNumber">207</strong>        return jdom`&#60;div class="simulation"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">208</strong>            onmousedown="${this.handleMousedown}"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">209</strong>            onmousemove="${this.handleMousemove}"</pre></div>

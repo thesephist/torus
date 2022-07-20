@@ -29,19 +29,25 @@
 </div><pre class="source javascript"><strong class="lineNumber">9</strong>const CELL_SIZE = 10;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">10</strong>const CELL_RADIUS = 3;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">11</strong></pre></div>
-<div class="line"><div class="doc"><p><code>GameOfLife</code> encapsulates the full state of a Game of Life simulation and implements all game logic. It forms the &quot;model&quot; layer of the app.</p>
+<div class="line"><div class="doc"><p><code>GameOfLife</code> encapsulates the full state of a Game of Life simulation
+and implements all game logic. It forms the &quot;model&quot; layer of the app.</p>
 </div><pre class="source javascript"><strong class="lineNumber">14</strong>class GameOfLife {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">16</strong>    constructor() {</pre></div>
-<div class="line"><div class="doc"><p>Determine how many cells we have in our window, given the cell sizes and the window size. The <code>+ 2</code> makes sure the full canvas is filled.</p>
+<div class="line"><div class="doc"><p>Determine how many cells we have in our window, given the cell
+sizes and the window size. The <code>+ 2</code> makes sure the full canvas
+is filled.</p>
 </div><pre class="source javascript"><strong class="lineNumber">20</strong>        this.xCount = ~~(window.innerWidth / CELL_SIZE) + 2;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong>        this.yCount = ~~(window.innerHeight / CELL_SIZE) + 2;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">22</strong>        this.count = this.xCount * this.yCount;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">23</strong></pre></div>
-<div class="line"><div class="doc"><p>We represent the game as a single array of 0&#39;s and 1&#39;s, scanning the grid row-by-row, left to right, from the top row to the bottom row. Cells all begin with the &quot;dead&quot; 0 state.</p>
+<div class="line"><div class="doc"><p>We represent the game as a single array of 0&#39;s and 1&#39;s,
+scanning the grid row-by-row, left to right, from the top row
+to the bottom row. Cells all begin with the &quot;dead&quot; 0 state.</p>
 </div><pre class="source javascript"><strong class="lineNumber">27</strong>        this.cells = Array.from({length: this.count});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p><code>this.cells</code> is double-buffered, so that we don&#39;t have to keep creating new cells arrays with each tick. This is the other &quot;buffer&quot; of the game state.</p>
+<div class="line"><div class="doc"><p><code>this.cells</code> is double-buffered, so that we don&#39;t have to keep creating
+new cells arrays with each tick. This is the other &quot;buffer&quot; of the game state.</p>
 </div><pre class="source javascript"><strong class="lineNumber">30</strong>        this._cells = Array.from({length: this.count});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">31</strong>        this.clear();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">32</strong>    }</pre></div>
@@ -60,7 +66,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">45</strong>        this.cells.fill(0);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">46</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong></pre></div>
-<div class="line"><div class="doc"><p>Utility function to get the index of a cell above the given one. -1 is used as a sentinel value for &quot;no such cell&quot;.</p>
+<div class="line"><div class="doc"><p>Utility function to get the index of a cell above the given one.
+-1 is used as a sentinel value for &quot;no such cell&quot;.</p>
 </div><pre class="source javascript"><strong class="lineNumber">50</strong>    north(i) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong>        const result = i - this.xCount;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">52</strong>        return result &#60; 0 ? -1 : result;</pre></div>
@@ -75,7 +82,8 @@
 <div class="line"><div class="doc"><p>Like <code>north()</code>, but for the cell to the right of the given one.</p>
 </div><pre class="source javascript"><strong class="lineNumber">62</strong>    east(i) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>We have to do this add-one, subtract-one trick here because remainders should start at 1 but indexes start at 0.</p>
+<div class="line"><div class="doc"><p>We have to do this add-one, subtract-one trick here because
+remainders should start at 1 but indexes start at 0.</p>
 </div><pre class="source javascript"><strong class="lineNumber">65</strong>        const remainder = (i + 1) % this.xCount;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">66</strong>        if (remainder === 0) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">67</strong>            return -1;</pre></div>
@@ -94,7 +102,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">80</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">81</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong></pre></div>
-<div class="line"><div class="doc"><p>Given current game state and a cell index, compute the next state of the cell in the next tick/step. Each tick of the game computes this for each cell on the board.</p>
+<div class="line"><div class="doc"><p>Given current game state and a cell index, compute the next state of the cell
+in the next tick/step. Each tick of the game computes this for each cell on the board.</p>
 </div><pre class="source javascript"><strong class="lineNumber">85</strong>    cellNextState(i) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">86</strong>        const live = this.cells[i] === 1;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">87</strong>        const cells = this.cells;</pre></div>
@@ -147,7 +156,8 @@
 <div class="line"><div class="doc"><p>Iterate the entire game board for one tick.</p>
 </div><pre class="source javascript"><strong class="lineNumber">135</strong>    step() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p><code>this.cells</code> is double-buffered, so we modify the non-current buffer of cells with new cell states and swap them out at the end.</p>
+<div class="line"><div class="doc"><p><code>this.cells</code> is double-buffered, so we modify the non-current
+buffer of cells with new cell states and swap them out at the end.</p>
 </div><pre class="source javascript"><strong class="lineNumber">138</strong>        for (let i = 0; i &#60; this.count; i ++) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">139</strong>            this._cells[i] = this.cellNextState(i);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">140</strong>        }</pre></div>
@@ -158,28 +168,37 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">145</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">146</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">147</strong></pre></div>
-<div class="line"><div class="doc"><p><code>GameCanvas</code> component represents the canvas on which the game unfolds. It contains just the canvas, and no other UI element, but is controllable via its API (methods).</p>
+<div class="line"><div class="doc"><p><code>GameCanvas</code> component represents the canvas on which the game unfolds.
+It contains just the canvas, and no other UI element, but is controllable
+via its API (methods).</p>
 </div><pre class="source javascript"><strong class="lineNumber">151</strong>class GameCanvas extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">152</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">153</strong>    init() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">154</strong>        this.width = window.innerWidth;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">155</strong>        this.height = window.innerHeight;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">156</strong></pre></div>
-<div class="line"><div class="doc"><p>Create a <code>&lt;canvas&gt;</code> element for the game itself. We render this programmatically, not through the <code>compose()</code> method, so we can control exactly how things are painted on the canvas&#39;s 2D context.</p>
+<div class="line"><div class="doc"><p>Create a <code>&lt;canvas&gt;</code> element for the game itself. We render this
+programmatically, not through the <code>compose()</code> method, so we can control
+exactly how things are painted on the canvas&#39;s 2D context.</p>
 </div><pre class="source javascript"><strong class="lineNumber">160</strong>        this.canvas = document.createElement('canvas');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">161</strong>        this.canvas.width = this.width;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">162</strong>        this.canvas.height = this.height;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">163</strong>        this.ctx = this.canvas.getContext('2d');</pre></div>
-<div class="line"><div class="doc"><p>Since we only ever paint one thing -- the dots -- we set a single fill style here and never change it.</p>
+<div class="line"><div class="doc"><p>Since we only ever paint one thing -- the dots -- we set a single fill
+style here and never change it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">166</strong>        this.ctx.fillStyle = '#333';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">167</strong></pre></div>
 <div class="line"><div class="doc"><p>New instance of the game state, seeded with a random state to begin</p>
 </div><pre class="source javascript"><strong class="lineNumber">169</strong>        this.game = new GameOfLife();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>This stores the previous &quot;snapshot&quot; of the game state, for dragging / clicking to toggle cell states. We need to do this because when we drag, we should flip each cell state from a snapshot before we started dragging, not necessary the state immediately before the mouse cursor reaches the cell.</p>
+<div class="line"><div class="doc"><p>This stores the previous &quot;snapshot&quot; of the game state, for dragging / clicking
+to toggle cell states. We need to do this because when we drag, we should flip each
+cell state from a snapshot before we started dragging, not necessary the state immediately
+before the mouse cursor reaches the cell.</p>
 </div><pre class="source javascript"><strong class="lineNumber">174</strong>        this._prevGameCells = this.game.cells.slice();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">175</strong></pre></div>
-<div class="line"><div class="doc"><p>Local state that represents whether a mouse or touch pointer is being dragged, for adding points to the game.</p>
+<div class="line"><div class="doc"><p>Local state that represents whether a mouse or touch pointer is being dragged,
+for adding points to the game.</p>
 </div><pre class="source javascript"><strong class="lineNumber">178</strong>        this._down = false;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">179</strong></pre></div>
 <div class="line"><div class="doc"><p>Bind UI event listener methods</p>
@@ -198,7 +217,10 @@
 </div><pre class="source javascript"><strong class="lineNumber">193</strong>        this.seedRandomly();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">194</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">195</strong></pre></div>
-<div class="line"><div class="doc"><p>Helper that maps XY coordinates in the screen to an index in the cells array. There&#39;s a slight leak of abstraction here because we have to worry about the 1-dimensional array representation of cells, but this gains us a measurable performance impact.</p>
+<div class="line"><div class="doc"><p>Helper that maps XY coordinates in the screen to an index
+in the cells array. There&#39;s a slight leak of abstraction here
+because we have to worry about the 1-dimensional array representation
+of cells, but this gains us a measurable performance impact.</p>
 </div><pre class="source javascript"><strong class="lineNumber">200</strong>    xyToCellIdx(x, y) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong>        return (~~(y / CELL_SIZE) * this.game.xCount) + ~~(x / CELL_SIZE);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">202</strong>    }</pre></div>
@@ -212,7 +234,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">210</strong>    handleStart(evt) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">211</strong>        evt.preventDefault();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">212</strong>        this._down = true;</pre></div>
-<div class="line"><div class="doc"><p>When the pointer is down, immediately start painting new cells in, so a &quot;click&quot; will regiter a new live cell.</p>
+<div class="line"><div class="doc"><p>When the pointer is down, immediately start painting new cells in,
+so a &quot;click&quot; will regiter a new live cell.</p>
 </div><pre class="source javascript"><strong class="lineNumber">215</strong>        if (evt.touches) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">216</strong>            evt = evt.touches[0];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">217</strong>        }</pre></div>
@@ -277,7 +300,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">278</strong></pre></div>
-<div class="line"><div class="doc"><p>Simulate and render a &quot;tick&quot; in the game. This is the API to progress the game from components that consume this <code>GameCanvas</code> component.</p>
+<div class="line"><div class="doc"><p>Simulate and render a &quot;tick&quot; in the game. This is the API to progress
+the game from components that consume this <code>GameCanvas</code> component.</p>
 </div><pre class="source javascript"><strong class="lineNumber">281</strong>    step() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">282</strong>        this.game.step();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">283</strong>        this.render();</pre></div>
@@ -306,7 +330,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">304</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">305</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>    start() {</pre></div>
-<div class="line"><div class="doc"><p>Iff game is not playing, start a new interval timer that steps the game forward each time.</p>
+<div class="line"><div class="doc"><p>Iff game is not playing, start a new interval timer that steps the game
+forward each time.</p>
 </div><pre class="source javascript"><strong class="lineNumber">309</strong>        if (this.timer === null) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">310</strong>            this.timer = setInterval(() =&#62; this.gameCanvas.step(), this.INTERVAL);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong>            this.render();</pre></div>
@@ -314,7 +339,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">313</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">314</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">315</strong>    pause() {</pre></div>
-<div class="line"><div class="doc"><p>To pause, clear the timer and set it back to null, so we can check if we&#39;re playing.</p>
+<div class="line"><div class="doc"><p>To pause, clear the timer and set it back to null, so we can check if
+we&#39;re playing.</p>
 </div><pre class="source javascript"><strong class="lineNumber">318</strong>        clearInterval(this.timer);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">319</strong>        this.timer = null;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">320</strong>        this.render();</pre></div>
@@ -387,7 +413,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">387</strong>                &#60;button onclick="${() =&#62; this.gameCanvas.seedRandomly()}"&#62;Randomize&#60;/button&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">388</strong>                &#60;button onclick="${() =&#62; this.gameCanvas.step()}"&#62;Step&#60;/button&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">389</strong>                ${this.timer === null ? (</pre></div>
-<div class="line"><div class="doc"><p>Depending on whether the game is in play or not, display the appropriate button.</p>
+<div class="line"><div class="doc"><p>Depending on whether the game is in play or not, display
+the appropriate button.</p>
 </div><pre class="source javascript"><strong class="lineNumber">392</strong>                        jdom`&#60;button onclick="${() =&#62; this.start()}"&#62;Play&#60;/button&#62;`</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">393</strong>                    ) : (</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">394</strong>                        jdom`&#60;button onclick="${() =&#62; this.pause()}"&#62;Pause&#60;/button&#62;`</pre></div>

@@ -25,7 +25,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">5</strong>    window[exportedName] = Torus[exportedName];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">6</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">7</strong></pre></div>
-<div class="line"><div class="doc"><p>A few constants used through the app. The root URL for the Hacker News JSON API and the current time, for calculating relative datetimes.</p>
+<div class="line"><div class="doc"><p>A few constants used through the app. The root URL for the
+Hacker News JSON API and the current time, for calculating relative datetimes.</p>
 </div><pre class="source javascript"><strong class="lineNumber">10</strong>const APP_TITLE = 'Torus Hacker News';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">11</strong>const HN_API_ROOT = 'https://hacker-news.firebaseio.com/v0';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">12</strong>const NOW = new Date();</pre></div>
@@ -34,7 +35,11 @@
 </div><pre class="source javascript"><strong class="lineNumber">15</strong>const BRAND_COLOR = '#1fada2';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">16</strong>const LIGHT_BRAND_COLOR = '#a4abbb';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">17</strong></pre></div>
-<div class="line"><div class="doc"><p>An abstraction over the Hacker News JSON API. Given a short path, it expands it out and makes sure no requests are cached by the browser, then returns the result in a JSON format. <code>hnFetch()</code> also handles caching, so multiple requests about the same thing only result on one request using the <code>CACHE</code>, which is a map from API routes to responses.</p>
+<div class="line"><div class="doc"><p>An abstraction over the Hacker News JSON API. Given a short path, it
+expands it out and makes sure no requests are cached by the browser,
+then returns the result in a JSON format. <code>hnFetch()</code> also handles caching,
+so multiple requests about the same thing only result on one request
+using the <code>CACHE</code>, which is a map from API routes to responses.</p>
 </div><pre class="source javascript"><strong class="lineNumber">23</strong>const CACHE = new Map();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">24</strong>const hnFetch = async (apiPath, skipCache) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong>    if (!CACHE.has(apiPath) || skipCache) {</pre></div>
@@ -48,11 +53,13 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">33</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">34</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">35</strong></pre></div>
-<div class="line"><div class="doc"><p>This app also uses my personal <a href="https://github.com/thesephist/looking-glass">screenshot service</a> to deliver screenshot previews for HN story links. These are API details for that service.</p>
+<div class="line"><div class="doc"><p>This app also uses my personal <a href="https://github.com/thesephist/looking-glass">screenshot service</a>
+to deliver screenshot previews for HN story links. These are API details for that service.</p>
 </div><pre class="source javascript"><strong class="lineNumber">38</strong>const LOOKING_GLASS_API_ROOT = 'https://glass.v37.co';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">39</strong>const LOOKING_GLASS_TOKEN = 'lg_48461186351534';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">40</strong></pre></div>
-<div class="line"><div class="doc"><p>A function to map a site&#39;s URL to the URL for a screenshot of that site, using the Looking Glass service.</p>
+<div class="line"><div class="doc"><p>A function to map a site&#39;s URL to the URL for a screenshot of that site,
+using the Looking Glass service.</p>
 </div><pre class="source javascript"><strong class="lineNumber">43</strong>const getLookingGlassScreenshotURL = siteURL =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">44</strong>    return `${LOOKING_GLASS_API_ROOT}/screenshot?token=${</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">45</strong>        LOOKING_GLASS_TOKEN}&#38;url=${encodeURI(siteURL)}`;</pre></div>
@@ -64,7 +71,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong>    return `${pad(date.getHours())}:${pad(date.getMinutes())}`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">52</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">53</strong></pre></div>
-<div class="line"><div class="doc"><p>A date formatter that does relative dates in English for the last 2 days.</p>
+<div class="line"><div class="doc"><p>A date formatter that does relative dates in English for the last
+2 days.</p>
 </div><pre class="source javascript"><strong class="lineNumber">56</strong>const formatDate = unix =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">57</strong>    if (!unix) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">58</strong>        return 'some time ago';</pre></div>
@@ -87,14 +95,18 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">75</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">76</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">77</strong></pre></div>
-<div class="line"><div class="doc"><p>Hacker News&#39;s text posts have content in escaped HTML, so this is the easiest way to display that HTML through Torus&#39;s renderer -- create a wrapper element, and pass that off to JDOM.</p>
+<div class="line"><div class="doc"><p>Hacker News&#39;s text posts have content in escaped HTML, so this
+is the easiest way to display that HTML through Torus&#39;s renderer --
+create a wrapper element, and pass that off to JDOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">81</strong>const decodeHTML = html =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong>    const container = document.createElement('span');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">83</strong>    container.innerHTML = html</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">84</strong>    return container;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">85</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">86</strong></pre></div>
-<div class="line"><div class="doc"><p>Shortcut function to go from a username to the link to the user&#39;s profile on news.ycombinator.com. I didn&#39;t make a user view in this app because I personally rarely visit profiles on HN.</p>
+<div class="line"><div class="doc"><p>Shortcut function to go from a username to the link to the user&#39;s profile
+on news.ycombinator.com. I didn&#39;t make a user view in this app
+because I personally rarely visit profiles on HN.</p>
 </div><pre class="source javascript"><strong class="lineNumber">90</strong>const stopProp = evt =&#62; evt.stopPropagation();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">91</strong>const userLink = username =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>    const href = `https://news.ycombinator.com/user?id=${username}`;</pre></div>
@@ -130,7 +142,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">122</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">123</strong></pre></div>
-<div class="line"><div class="doc"><p>Use the <code>type</code> property as a proxy to check if the rest are already loaded, so we don&#39;t double-fetch.</p>
+<div class="line"><div class="doc"><p>Use the <code>type</code> property as a proxy to check if the rest
+are already loaded, so we don&#39;t double-fetch.</p>
 </div><pre class="source javascript"><strong class="lineNumber">126</strong>    get loaded() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>        return this.get('type');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>    }</pre></div>
@@ -151,7 +164,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">143</strong>        this.pageNumber = 0;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">144</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">145</strong></pre></div>
-<div class="line"><div class="doc"><p>Fetch all the new top stories from the API and reset the collection with those new stories.</p>
+<div class="line"><div class="doc"><p>Fetch all the new top stories from the API and reset the collection
+with those new stories.</p>
 </div><pre class="source javascript"><strong class="lineNumber">148</strong>    fetch() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">149</strong>        return hnFetch('/' + this.slug).then(stories =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">150</strong>            const storyRecords = stories.slice(</pre></div>
@@ -169,7 +183,10 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">162</strong>        });</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">163</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong></pre></div>
-<div class="line"><div class="doc"><p>Because the collection is paged with <code>limit</code>, we need to be able to flip to the next and previous pages. These take care of that. It could be more efficient, but it works, and flipping pages is not super frequent in the average HN reader use case, so it&#39;s not a catastrophe.</p>
+<div class="line"><div class="doc"><p>Because the collection is paged with <code>limit</code>, we need to be able to
+flip to the next and previous pages. These take care of that.
+It could be more efficient, but it works, and flipping pages is
+not super frequent in the average HN reader use case, so it&#39;s not a catastrophe.</p>
 </div><pre class="source javascript"><strong class="lineNumber">169</strong>    nextPage() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">170</strong>        router.go(`/page/${this.pageNumber + 1}`);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">171</strong>    }</pre></div>
@@ -197,7 +214,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">193</strong>    constructor(comment_ids = [], limit = 25) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">194</strong>        super();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">195</strong>        this.resetWith(comment_ids);</pre></div>
-<div class="line"><div class="doc"><p>Comment lists have a limit set so we don&#39;t load excessively, but it&#39;s nice to know how many were hidden away as a result. That&#39;s <code>hiddenCount</code>.</p>
+<div class="line"><div class="doc"><p>Comment lists have a limit set so we don&#39;t load excessively,
+but it&#39;s nice to know how many were hidden away as a result. That&#39;s
+<code>hiddenCount</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">199</strong>        this.hiddenCount = 0;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">200</strong>        this.limit = limit;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">201</strong>    }</pre></div>
@@ -208,7 +227,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">206</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">207</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">208</strong></pre></div>
-<div class="line"><div class="doc"><p>Reset the collection with a new list of comment IDs (from a parent comment). This might seem like a wonky way to do things, but it&#39;s mirroring the API itself, which is also sort of weird.</p>
+<div class="line"><div class="doc"><p>Reset the collection with a new list of comment IDs (from a parent comment).
+This might seem like a wonky way to do things, but it&#39;s mirroring the API itself,
+which is also sort of weird.</p>
 </div><pre class="source javascript"><strong class="lineNumber">212</strong>    resetWith(comment_ids) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">213</strong>        this.hiddenCount = Math.max(comment_ids.length - this.limit, 0);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">214</strong>        this.reset(comment_ids.slice(0, this.limit).map(id =&#62; new Comment(id)));</pre></div>
@@ -347,7 +368,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">346</strong>        return `/story/${this.record.id}`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">347</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">348</strong></pre></div>
-<div class="line"><div class="doc"><p>To read more about a story (read the comments), we tell the router to go to the path, so the main app view can manage the rest.</p>
+<div class="line"><div class="doc"><p>To read more about a story (read the comments), we tell the router
+to go to the path, so the main app view can manage the rest.</p>
 </div><pre class="source javascript"><strong class="lineNumber">351</strong>    setActiveStory(evt) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">352</strong>        if (evt) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">353</strong>            evt.preventDefault();</pre></div>
@@ -413,20 +435,27 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">413</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">414</strong>    init(comment) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">415</strong>        this.folded = true;</pre></div>
-<div class="line"><div class="doc"><p>Comments can always nest other comments as children. So each comment view has a collection of children comments.</p>
+<div class="line"><div class="doc"><p>Comments can always nest other comments as children.
+So each comment view has a collection of children comments.</p>
 </div><pre class="source javascript"><strong class="lineNumber">418</strong>        this.comments = new CommentStore();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>It&#39;s common for comment threads to never be expanded, so we optimize for the common case and don&#39;t even render the comment thread under this listing until expanded.</p>
+<div class="line"><div class="doc"><p>It&#39;s common for comment threads to never be expanded, so we
+optimize for the common case and don&#39;t even render the
+comment thread under this listing until expanded.</p>
 </div><pre class="source javascript"><strong class="lineNumber">422</strong>        this.kidsList = null;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">423</strong>        this.contentNode = null; // decoded HTML content, wrapped in a &#60;span&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">424</strong>        this.toggleFolded = this.toggleFolded.bind(this);</pre></div>
-<div class="line"><div class="doc"><p>Anytime the <code>kids</code> property on the parent comment changes, reload the nested children comments.</p>
+<div class="line"><div class="doc"><p>Anytime the <code>kids</code> property on the parent comment changes,
+reload the nested children comments.</p>
 </div><pre class="source javascript"><strong class="lineNumber">427</strong>        this.bind(comment, data =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">428</strong>            this.comments.resetWith(data.kids || []);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">429</strong>            if (!this.folded) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">430</strong>                this.comments.fetch();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">431</strong>            }</pre></div>
-<div class="line"><div class="doc"><p>The &quot;text&quot; value is immutable in this app, so the first time we get a non-null text value, create a contentNode from it and cache it so we don&#39;t need to keep parsing the HTML again.</p>
+<div class="line"><div class="doc"><p>The &quot;text&quot; value is immutable in this app,
+so the first time we get a non-null text value,
+create a contentNode from it and cache it
+so we don&#39;t need to keep parsing the HTML again.</p>
 </div><pre class="source javascript"><strong class="lineNumber">436</strong>            if (!this.contentNode &#38;&#38; data.text) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">437</strong>                this.contentNode = decodeHTML(data.text || '');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">438</strong>            }</pre></div>
@@ -473,7 +502,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">479</strong>        `;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">480</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">481</strong></pre></div>
-<div class="line"><div class="doc"><p>The user can click/tap on the comment block to collapse or expand the comments nested under it.</p>
+<div class="line"><div class="doc"><p>The user can click/tap on the comment block to collapse or expand
+the comments nested under it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">484</strong>    toggleFolded(evt) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">485</strong>        evt.stopPropagation();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">486</strong>        this.folded = !this.folded;</pre></div>
@@ -487,7 +517,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">494</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">495</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">496</strong>    compose(attrs) {</pre></div>
-<div class="line"><div class="doc"><p>If a comment has been deleted, all the other information are zeroed out, so we have to treat it separately and show a placeholder.</p>
+<div class="line"><div class="doc"><p>If a comment has been deleted, all the other information are zeroed out,
+so we have to treat it separately and show a placeholder.</p>
 </div><pre class="source javascript"><strong class="lineNumber">499</strong>        if (attrs.deleted) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">500</strong>            return jdom`&#60;div class="comment" onclick="${this.toggleFolded}"&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">501</strong>                &#60;div class="byline"&#62;unknown&#60;/div&#62;</pre></div>
@@ -542,7 +573,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">551</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">552</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">553</strong></pre></div>
-<div class="line"><div class="doc"><p>List of stories that appears on the main/home page. Most of the main page styles are handled in <code>App</code>, so we just use this component to clear margins on the <code>&lt;ul&gt;</code>.</p>
+<div class="line"><div class="doc"><p>List of stories that appears on the main/home page. Most of the
+main page styles are handled in <code>App</code>, so we just use this component
+to clear margins on the <code>&lt;ul&gt;</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">557</strong>class StoryList extends Styled(ListOf(StoryListing)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">558</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">559</strong>    styles() {</pre></div>
@@ -557,7 +590,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">568</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">569</strong>    compose() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">570</strong>        const nodes = this.nodes;</pre></div>
-<div class="line"><div class="doc"><p>On slow connections, the list of stories may take a second or two to load. Rather than awkwardly showing an empty list wit no stories, let&#39;s show a message.</p>
+<div class="line"><div class="doc"><p>On slow connections, the list of stories may take a second or two to load. Rather
+than awkwardly showing an empty list wit no stories, let&#39;s show a message.</p>
 </div><pre class="source javascript"><strong class="lineNumber">573</strong>        return jdom`&#60;ul&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">574</strong>            ${nodes.length ? nodes : jdom`&#60;div class="loadingMessage"&#62;loading your stories...&#60;/div&#62;`}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">575</strong>        &#60;/ul&#62;`;</pre></div>
@@ -565,7 +599,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">577</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">578</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">579</strong></pre></div>
-<div class="line"><div class="doc"><p>A <code>StoryPage</code> is the page showing an individual story and any comments under it. It holds both a story listing view, as well as a comment list view.</p>
+<div class="line"><div class="doc"><p>A <code>StoryPage</code> is the page showing an individual story and any comments under it.
+It holds both a story listing view, as well as a comment list view.</p>
 </div><pre class="source javascript"><strong class="lineNumber">582</strong>class StoryPage extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">583</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">584</strong>    init(story, expanded = false) {</pre></div>
@@ -575,7 +610,8 @@
 <div class="line"><div class="doc"><p>A list of comments for this story</p>
 </div><pre class="source javascript"><strong class="lineNumber">588</strong>        this.comments = new CommentStore();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">589</strong>        this.commentList = new CommentList(this.comments);</pre></div>
-<div class="line"><div class="doc"><p>When the list of children comments for the story loads/changes, re-render the comment list.</p>
+<div class="line"><div class="doc"><p>When the list of children comments for the story loads/changes, re-render
+the comment list.</p>
 </div><pre class="source javascript"><strong class="lineNumber">592</strong>        this.bind(story, data =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">593</strong>            this.comments.resetWith(data.kids || []);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">594</strong>            this.comments.fetch();</pre></div>
@@ -610,7 +646,8 @@
 </div><pre class="source javascript"><strong class="lineNumber">623</strong>        this.activeStory = null;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">624</strong>        this.activePage = null;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">625</strong></pre></div>
-<div class="line"><div class="doc"><p>We load the top stories list from the HN API. There are others, but I really never read them so yeah.</p>
+<div class="line"><div class="doc"><p>We load the top stories list from the HN API. There are others, but
+I really never read them so yeah.</p>
 </div><pre class="source javascript"><strong class="lineNumber">628</strong>        this.stories = new StoryStore('topstories', 20);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">629</strong>        this.list = new StoryList(this.stories);</pre></div>
 <div class="line"><div class="doc"><p>Fetch the first page of stories</p>
@@ -625,7 +662,10 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">639</strong>            switch (name) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">640</strong>                case 'story': {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">641</strong>                    let story = this.stories.find(+params.storyID);</pre></div>
-<div class="line"><div class="doc"><p>Story sometimes doesn&#39;t exist in our collection, if we&#39;re going directly to a story link from another page. In this case, we want to just fetch information about the story itself manually.</p>
+<div class="line"><div class="doc"><p>Story sometimes doesn&#39;t exist in our collection,
+if we&#39;re going directly to a story link from another page.
+In this case, we want to just fetch information about the
+story itself manually.</p>
 </div><pre class="source javascript"><strong class="lineNumber">646</strong>                    if (!story) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">647</strong>                        story = new Story(+params.storyID);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">648</strong>                        story.fetch().then(() =&#62; {</pre></div>
@@ -732,7 +772,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">749</strong>        router.go('/');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">750</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">751</strong></pre></div>
-<div class="line"><div class="doc"><p>When views switch, it&#39;s nice to automatically scroll up to the top of the page to read the new stuff. This does that.</p>
+<div class="line"><div class="doc"><p>When views switch, it&#39;s nice to automatically scroll up to the top of the page
+to read the new stuff. This does that.</p>
 </div><pre class="source javascript"><strong class="lineNumber">754</strong>    resetScroll() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">755</strong>        requestAnimationFrame(() =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">756</strong>            requestAnimationFrame(() =&#62; {</pre></div>
@@ -776,7 +817,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">794</strong>    default: '/',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">795</strong>});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">796</strong></pre></div>
-<div class="line"><div class="doc"><p>Create the app instance, which we define earlier to be called with a router, and mount it to the DOM.</p>
+<div class="line"><div class="doc"><p>Create the app instance, which we define earlier to be
+called with a router, and mount it to the DOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">799</strong>const app = new App(router);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">800</strong>document.body.appendChild(app.node);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">801</strong></pre></div>

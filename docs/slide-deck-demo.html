@@ -17,10 +17,13 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>Slides framework demo. This showcases a super simple slide deck library for the web, written as Torus components (mostly function components).</p>
+        <div class="line"><div class="doc"><p>Slides framework demo. This showcases a super simple
+slide deck library for the web, written as Torus
+components (mostly function components).</p>
 </div><pre class="source javascript"><strong class="lineNumber">4</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Since this is more of a library than an app, there&#39;s going to be lots of unused vars</p>
+<div class="line"><div class="doc"><p>Since this is more of a library than an app, there&#39;s
+going to be lots of unused vars</p>
 </div><pre class="source javascript"><strong class="lineNumber">7</strong>/* eslint no-unused-vars: 0 */</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong></pre></div>
 <div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
@@ -59,7 +62,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">43</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">44</strong></pre></div>
-<div class="line"><div class="doc"><p>Internal List implementation. <code>BulletList</code> and <code>NumberedList</code> compose this.</p>
+<div class="line"><div class="doc"><p>Internal List implementation. <code>BulletList</code> and <code>NumberedList</code>
+compose this.</p>
 </div><pre class="source javascript"><strong class="lineNumber">47</strong>const List = (type, children) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong>    return {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>        tag: type,</pre></div>
@@ -104,7 +108,10 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">88</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">89</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">90</strong></pre></div>
-<div class="line"><div class="doc"><p><code>Row</code> and <code>Column</code> are flexbox-type containers that align the children vertically or horizontally. As a general pattern function components that take children should accept them as spread arguments, like this.</p>
+<div class="line"><div class="doc"><p><code>Row</code> and <code>Column</code> are flexbox-type containers
+that align the children vertically or horizontally. As
+a general pattern function components that take children should
+accept them as spread arguments, like this.</p>
 </div><pre class="source javascript"><strong class="lineNumber">95</strong>const Row = (...children) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">96</strong>    return {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">97</strong>        tag: 'div',</pre></div>
@@ -137,7 +144,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">124</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong></pre></div>
-<div class="line"><div class="doc"><p>A general component to center things vertically and horizontally, by using flexboxes centering and taking up all available space.</p>
+<div class="line"><div class="doc"><p>A general component to center things vertically and horizontally,
+by using flexboxes centering and taking up all available space.</p>
 </div><pre class="source javascript"><strong class="lineNumber">129</strong>const Center = ({</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">130</strong>    horizontal =  true,</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">131</strong>    vertical = true,</pre></div>
@@ -184,7 +192,9 @@
 <div class="line"><div class="doc"><h2 id="slide-deck-component-that-controls-the-entire-presentation">Slide deck component, that controls the entire presentation.</h2>
 </div><pre class="source javascript"><strong class="lineNumber">173</strong>class Deck extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">174</strong></pre></div>
-<div class="line"><div class="doc"><p>We start the presentation at slide 0, and keep track of the list of slides. Every time we advance or rewind, we increment/decrement the slide index and only display that particular slide.</p>
+<div class="line"><div class="doc"><p>We start the presentation at slide 0, and keep track of the list of slides.
+Every time we advance or rewind, we increment/decrement the slide index
+and only display that particular slide.</p>
 </div><pre class="source javascript"><strong class="lineNumber">178</strong>    init(...slides) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">179</strong>        this.slideIndex = 0;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">180</strong>        this.slides = slides;</pre></div>
@@ -194,7 +204,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">184</strong>        this.handleRewindClick = this.handleRewindClick.bind(this);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong>        this.handleKeydown = this.handleKeydown.bind(this);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong></pre></div>
-<div class="line"><div class="doc"><p>In order to also advance/rewind slides when the user presses left/right arrow keys, we listen for the <code>keydown</code> DOM event.</p>
+<div class="line"><div class="doc"><p>In order to also advance/rewind slides when the user presses
+left/right arrow keys, we listen for the <code>keydown</code> DOM event.</p>
 </div><pre class="source javascript"><strong class="lineNumber">189</strong>        document.addEventListener('keydown', this.handleKeydown);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">190</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">191</strong></pre></div>
@@ -227,7 +238,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">218</strong>        this.rewind();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">219</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">220</strong></pre></div>
-<div class="line"><div class="doc"><p>When the user presses a key, we advance or rewind if it&#39;s either of the left/right arrow keys.</p>
+<div class="line"><div class="doc"><p>When the user presses a key, we advance or rewind if it&#39;s either of the
+left/right arrow keys.</p>
 </div><pre class="source javascript"><strong class="lineNumber">223</strong>    handleKeydown(evt) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">224</strong>        switch (evt.key) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">225</strong>            case 'ArrowLeft':</pre></div>
@@ -306,7 +318,10 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">298</strong>            &#60;button class="navButton rewindButton" onclick="${this.handleRewindClick}"&#62;${'&#60;'}&#60;/button&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">299</strong>            &#60;div class="indicators"&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">300</strong>                ${this.slides.map((s, idx) =&#62; {</pre></div>
-<div class="line"><div class="doc"><p>We could make these place indicator dots individual components, but because they&#39;re so simple, they work better as simple functions embedded in another component, like this. Even so, we can still attach event listeners, like this one for example, that brings the user directly to the clicked slide.</p>
+<div class="line"><div class="doc"><p>We could make these place indicator dots individual components, but because
+they&#39;re so simple, they work better as simple functions embedded in another component,
+like this. Even so, we can still attach event listeners, like this one for example,
+that brings the user directly to the clicked slide.</p>
 </div><pre class="source javascript"><strong class="lineNumber">305</strong>                    return jdom`&#60;div class="indicatorDot ${idx === this.slideIndex ? 'active' : ''}"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>                        onclick="${() =&#62; this.setSlideIndex(idx)}"&#62;&#60;/div&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">307</strong>                })}</pre></div>
@@ -320,7 +335,9 @@
 </div><pre class="source javascript"><strong class="lineNumber">315</strong>class App extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">316</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">317</strong>    init() {</pre></div>
-<div class="line"><div class="doc"><p>Because the slide deck is one big functional component, we can define our presentation as nested function calls that construct a tree of components to be rendered by the <code>Deck</code>.</p>
+<div class="line"><div class="doc"><p>Because the slide deck is one big functional component, we can define
+our presentation as nested function calls that construct a tree of components
+to be rendered by the <code>Deck</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">321</strong>        this.deck = new Deck(</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">322</strong>            Slide(</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">323</strong>                Title('Torus Slide Deck Demo'),</pre></div>
@@ -332,7 +349,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">329</strong>                Paragraph('This ability to create simple units of UI that can be used together and within each other is one of the strengths of following React\'s lead in reusable, composable component-based UI frameworks.')</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">330</strong>            ),</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">331</strong>            Slide(</pre></div>
-<div class="line"><div class="doc"><p>This pattern of nesting functional components&#39; children as ES2015 spread arguments makes nested functional component code quite readable.</p>
+<div class="line"><div class="doc"><p>This pattern of nesting functional components&#39; children as ES2015
+spread arguments makes nested functional component code
+quite readable.</p>
 </div><pre class="source javascript"><strong class="lineNumber">335</strong>                Title('Split slide'),</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">336</strong>                Paragraph('This is a split slide, with a more complex layout.'),</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">337</strong>                Row(</pre></div>

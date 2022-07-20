@@ -17,7 +17,11 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>A Mondrian-style drawing generator. Of the Torus samples, this is one of the few that may not be much easier to write with plain JavaScript. However, relying on Torus&#39;s functional way of describing components does simplify the process of recursively generating DOM here.</p>
+        <div class="line"><div class="doc"><p>A Mondrian-style drawing generator.
+Of the Torus samples, this is one of the few that may
+not be much easier to write with plain JavaScript. However,
+relying on Torus&#39;s functional way of describing components
+does simplify the process of recursively generating DOM here.</p>
 </div><pre class="source javascript"><strong class="lineNumber">6</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
@@ -25,7 +29,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong>    window[exportedName] = Torus[exportedName];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">10</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">11</strong></pre></div>
-<div class="line"><div class="doc"><p>Color palette, roughly taken after Mondrian&#39;s characteristic paintings. There are two of RYB; this is a cheap way to make sure they occur more often than black.</p>
+<div class="line"><div class="doc"><p>Color palette, roughly taken after Mondrian&#39;s characteristic paintings.
+There are two of RYB; this is a cheap way to make sure they occur more
+often than black.</p>
 </div><pre class="source javascript"><strong class="lineNumber">15</strong>const MONDRIAN_COLORS = [</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">16</strong>    '#c71b1b', // red</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">17</strong>    '#23238c', // blue</pre></div>
@@ -44,10 +50,12 @@
 <div class="line"><div class="doc"><p>How likely is it that a region will contain subregions?</p>
 </div><pre class="source javascript"><strong class="lineNumber">31</strong>const RECURSION_LIKELIHOOD = 0.88;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">32</strong></pre></div>
-<div class="line"><div class="doc"><p>Minimum level of recursion required. If this is set to lower values, the resulting painting will tend to look quite sparse / boring.</p>
+<div class="line"><div class="doc"><p>Minimum level of recursion required. If this is set to lower values,
+the resulting painting will tend to look quite sparse / boring.</p>
 </div><pre class="source javascript"><strong class="lineNumber">35</strong>const RECURSION_MIN = 3;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Maximum level of recursion. This is set based on screen width to avoid paintings that are too crowded.</p>
+<div class="line"><div class="doc"><p>Maximum level of recursion. This is set based on screen width
+to avoid paintings that are too crowded.</p>
 </div><pre class="source javascript"><strong class="lineNumber">38</strong>const RECURSION_LIMIT = ~~(Math.max(window.innerHeight, window.innerWidth) / 130);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">39</strong></pre></div>
 <div class="line"><div class="doc"><p>Shorthand for generating a random double.</p>
@@ -58,7 +66,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">45</strong>    return list[~~(Math.random() * list.length)];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">46</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong></pre></div>
-<div class="line"><div class="doc"><p>The Mondrian function component contains the core logic of recursively generating a Mondrian-style drawing. The painting in the app is a single Mondrian component with starting depth 0.</p>
+<div class="line"><div class="doc"><p>The Mondrian function component contains the core logic of recursively
+generating a Mondrian-style drawing. The painting in the app is a single
+Mondrian component with starting depth 0.</p>
 </div><pre class="source javascript"><strong class="lineNumber">51</strong>const Mondrian = depth =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">52</strong></pre></div>
 <div class="line"><div class="doc"><p>By default, the child of a Mondrian block is <code>null</code> (a comment).</p>
@@ -67,7 +77,8 @@
 <div class="line"><div class="doc"><p>If we&#39;re under the recursion limit, then...</p>
 </div><pre class="source javascript"><strong class="lineNumber">56</strong>    if (depth &#60; RECURSION_LIMIT &#38;&#38; (</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>If we need to traverse down the recursion tree again, the children of this Mondrian block is two more Mondrian blocks.</p>
+<div class="line"><div class="doc"><p>If we need to traverse down the recursion tree again,
+the children of this Mondrian block is two more Mondrian blocks.</p>
 </div><pre class="source javascript"><strong class="lineNumber">59</strong>        depth &#60; RECURSION_MIN || rand() &#60; Math.pow(RECURSION_LIKELIHOOD, depth)</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">60</strong>    )) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">61</strong>        child = [</pre></div>
@@ -84,7 +95,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">71</strong>        color = randOf(MONDRIAN_COLORS);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">72</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">73</strong></pre></div>
-<div class="line"><div class="doc"><p>Return a Mondrian block with a random split direction, the generated color, and a random flexbox size.</p>
+<div class="line"><div class="doc"><p>Return a Mondrian block with a random split direction,
+the generated color, and a random flexbox size.</p>
 </div><pre class="source javascript"><strong class="lineNumber">76</strong>    return jdom`&#60;div class="block ${randOf(['vertical', 'horizontal'])}"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">77</strong>        style="background:${color};flex-grow:${randOf([1, 2, 3, 4])}"&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">78</strong>        ${child}</pre></div>
@@ -123,7 +135,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">111</strong>                'display': 'flex',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">112</strong>                'flex-direction': 'row',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">113</strong>            },</pre></div>
-<div class="line"><div class="doc"><p>A block is just a flexbox, where the <code>flex-direction</code> determines the direction of split of blocks inside it.</p>
+<div class="line"><div class="doc"><p>A block is just a flexbox, where the <code>flex-direction</code> determines
+the direction of split of blocks inside it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">116</strong>            '.block': {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">117</strong>                'display': 'flex',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">118</strong>                'flex-grow': '1',</pre></div>
@@ -137,7 +150,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>                    'flex-direction': 'row',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>                },</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>            },</pre></div>
-<div class="line"><div class="doc"><p>Clever method of adding separator lines between blocks, such that every block has equal sized borders on all sides regardless of recursion depth.</p>
+<div class="line"><div class="doc"><p>Clever method of adding separator lines between blocks,
+such that every block has equal sized borders on all sides
+regardless of recursion depth.</p>
 </div><pre class="source javascript"><strong class="lineNumber">132</strong>            '.vertical &#62; .block + .block': {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">133</strong>                'border-top': '8px solid #181818',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">134</strong>            },</pre></div>

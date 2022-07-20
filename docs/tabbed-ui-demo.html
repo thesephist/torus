@@ -17,7 +17,10 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>The tabs sample project demonstrates the Torus Router and <code>Component.from()</code>. All of the state here is kept within the views for demonstration purposes, but should probably be moved to a Record under the App instance in practice for simplicity.</p>
+        <div class="line"><div class="doc"><p>The tabs sample project demonstrates the Torus Router and <code>Component.from()</code>.
+All of the state here is kept within the views for demonstration purposes,
+but should probably be moved to a Record under the App instance
+in practice for simplicity.</p>
 </div><pre class="source javascript"><strong class="lineNumber">5</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
@@ -25,7 +28,10 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong>    window[exportedName] = Torus[exportedName];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">10</strong></pre></div>
-<div class="line"><div class="doc"><p>This is a single tab page. Because we want tab contents to be long-lived, we define it as a function, but make a class component out of it with <code>Component.from()</code> This makes a class component that can be constructed with the arguments <code>number</code>, <code>content</code>, whose compose function produces the given DOM.</p>
+<div class="line"><div class="doc"><p>This is a single tab page. Because we want tab contents to be long-lived,
+we define it as a function, but make a class component out of it with <code>Component.from()</code>
+This makes a class component that can be constructed with the arguments <code>number</code>, <code>content</code>,
+whose compose function produces the given DOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">15</strong>const Tab = Component.from((number, content) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">16</strong>    return jdom`&#60;div&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">17</strong>        &#60;h2&#62;Tab #${number}&#60;/h2&#62;</pre></div>
@@ -33,7 +39,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">19</strong>    &#60;/div&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong>});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong></pre></div>
-<div class="line"><div class="doc"><p>The tab buttons are nav buttons to switch between tabs using the Torus router. Because it&#39;s such a simple component, we just write it as a function to reuse in <code>App</code>.</p>
+<div class="line"><div class="doc"><p>The tab buttons are nav buttons to switch between tabs using the Torus router.
+Because it&#39;s such a simple component, we just write it as a function to reuse in <code>App</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">24</strong>const TabButton = (number, active) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>We can tell the router to go to a specific location with <code>Router#go()</code>.</p>
@@ -56,7 +63,9 @@
 <div class="line"><div class="doc"><p>By default the active tab is the 0th tab.</p>
 </div><pre class="source javascript"><strong class="lineNumber">43</strong>        this.setActiveTab(0);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">44</strong></pre></div>
-<div class="line"><div class="doc"><p>Rather than binding this component to some model, we bind it to the router. This means every time the URL changes, an event will fire with the name we gave the matching route, and any parameters we gave the route.</p>
+<div class="line"><div class="doc"><p>Rather than binding this component to some model, we bind it to the router.
+This means every time the URL changes, an event will fire with the name we gave
+the matching route, and any parameters we gave the route.</p>
 </div><pre class="source javascript"><strong class="lineNumber">48</strong>        this.bind(router, ([name, params]) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>            switch (name) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong>                case 'tab':</pre></div>
@@ -98,13 +107,15 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">86</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">87</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">88</strong></pre></div>
-<div class="line"><div class="doc"><p>We define the app&#39;s router here, by giving it a dictionary of the routes we want, keyed by unique names.</p>
+<div class="line"><div class="doc"><p>We define the app&#39;s router here, by giving it a dictionary
+of the routes we want, keyed by unique names.</p>
 </div><pre class="source javascript"><strong class="lineNumber">91</strong>const router = new Router({</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>    tab: '/tab/:tabNumber',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">93</strong>    default: '/',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">94</strong>});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong></pre></div>
-<div class="line"><div class="doc"><p>Create the app instance, which we define earlier to be called with a router, and mount it to the DOM.</p>
+<div class="line"><div class="doc"><p>Create the app instance, which we define earlier to be
+called with a router, and mount it to the DOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">98</strong>const app = new App(router);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">99</strong>document.body.appendChild(app.node);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">100</strong></pre></div>

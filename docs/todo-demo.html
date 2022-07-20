@@ -17,7 +17,8 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>The todo sample project shows how the view and model layers of Torus interact in a simple case.</p>
+        <div class="line"><div class="doc"><p>The todo sample project shows how the view and model
+layers of Torus interact in a simple case.</p>
 </div><pre class="source javascript"><strong class="lineNumber">3</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
@@ -25,10 +26,12 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">6</strong>    window[exportedName] = Torus[exportedName];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">7</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong></pre></div>
-<div class="line"><div class="doc"><p><code>Task</code> is our model for a single todo item. We just extend <code>Record</code> since we don&#39;t need it to have any special functionality.</p>
+<div class="line"><div class="doc"><p><code>Task</code> is our model for a single todo item. We just extend
+<code>Record</code> since we don&#39;t need it to have any special functionality.</p>
 </div><pre class="source javascript"><strong class="lineNumber">11</strong>class Task extends Record {}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">12</strong></pre></div>
-<div class="line"><div class="doc"><p><code>TaskStore</code> represents a collection of todos, or our to-do list. Our todo list component will be bound to this store.</p>
+<div class="line"><div class="doc"><p><code>TaskStore</code> represents a collection of todos, or our to-do list.
+Our todo list component will be bound to this store.</p>
 </div><pre class="source javascript"><strong class="lineNumber">15</strong>class TaskStore extends StoreOf(Task) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Let&#39;s sort this collection by the task description</p>
@@ -37,7 +40,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">19</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong></pre></div>
-<div class="line"><div class="doc"><p>We create an instance of the task collection for our list, and initialize it with two items.</p>
+<div class="line"><div class="doc"><p>We create an instance of the task collection for our list,
+and initialize it with two items.</p>
 </div><pre class="source javascript"><strong class="lineNumber">24</strong>const tasks = new TaskStore([</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">25</strong>    new Task(1, {description: 'Do this', completed: false}),</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">26</strong>    new Task(2, {description: 'Do that', completed: false}),</pre></div>
@@ -50,7 +54,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">33</strong>        this.removeCallback = removeCallback;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">34</strong>        this.onCheck = this.onCheck.bind(this);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">35</strong>        this.deleteClick = this.deleteClick.bind(this);</pre></div>
-<div class="line"><div class="doc"><p>We want the component to re-render when the todo item&#39;s properties change, so we bind the record&#39;s events to re-renders.</p>
+<div class="line"><div class="doc"><p>We want the component to re-render when the todo item&#39;s properties
+change, so we bind the record&#39;s events to re-renders.</p>
 </div><pre class="source javascript"><strong class="lineNumber">38</strong>        this.bind(source, data =&#62; this.render(data));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">39</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">40</strong></pre></div>
@@ -78,7 +83,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">63</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">64</strong></pre></div>
-<div class="line"><div class="doc"><p>When we check the item off the list from the UI, we toggle the &#39;completed&#39; property on the record.</p>
+<div class="line"><div class="doc"><p>When we check the item off the list from the UI,
+we toggle the &#39;completed&#39; property on the record.</p>
 </div><pre class="source javascript"><strong class="lineNumber">67</strong>    onCheck() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">68</strong>        this.record.update({</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">69</strong>            completed: !this.record.get('completed'),</pre></div>
@@ -99,7 +105,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">84</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">85</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">86</strong></pre></div>
-<div class="line"><div class="doc"><p>Subclass of the default list view that represents a list of tasks. We use the <code>ListOf(TaskItem)</code> syntax to tell <code>TaskList</code> to render new items that appear in the collection as <code>TaskItem</code> components.</p>
+<div class="line"><div class="doc"><p>Subclass of the default list view that represents a list of tasks.
+We use the <code>ListOf(TaskItem)</code> syntax to tell <code>TaskList</code> to render
+new items that appear in the collection as <code>TaskItem</code> components.</p>
 </div><pre class="source javascript"><strong class="lineNumber">90</strong>class TaskList extends ListOf(TaskItem) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">91</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">92</strong>    compose() {</pre></div>
@@ -108,7 +116,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">96</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">97</strong></pre></div>
-<div class="line"><div class="doc"><p>Input field with a submit button that creates new items in the list of tasks.</p>
+<div class="line"><div class="doc"><p>Input field with a submit button that creates new items in the
+list of tasks.</p>
 </div><pre class="source javascript"><strong class="lineNumber">100</strong>class TaskInput extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong>    init() {</pre></div>
@@ -130,13 +139,17 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">118</strong>        this._addTask();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">119</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong></pre></div>
-<div class="line"><div class="doc"><p>We want the input component to be a <a href="https://reactjs.org/docs/forms.html#controlled-components">controlled component</a> so every time there&#39;s an input, we update the component&#39;s <code>value</code> property accordingly.</p>
+<div class="line"><div class="doc"><p>We want the input component to be a <a href="https://reactjs.org/docs/forms.html#controlled-components">controlled
+component</a>
+so every time there&#39;s an input, we update the component&#39;s <code>value</code> property accordingly.</p>
 </div><pre class="source javascript"><strong class="lineNumber">124</strong>    setValue(evt) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">125</strong>        this.value = evt.target.value;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>        this.render();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong></pre></div>
-<div class="line"><div class="doc"><p>What happens when we try to add a task? Create a new task in the task list with the current input value, in an uncompleted state.</p>
+<div class="line"><div class="doc"><p>What happens when we try to add a task?
+Create a new task in the task list with the current
+input value, in an uncompleted state.</p>
 </div><pre class="source javascript"><strong class="lineNumber">132</strong>    _addTask() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">133</strong>        if (this.value) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">134</strong>            tasks.create({</pre></div>
@@ -172,11 +185,13 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">164</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">165</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">166</strong></pre></div>
-<div class="line"><div class="doc"><p>A component to represent the entire app, bringing together the input component and the todo list component.</p>
+<div class="line"><div class="doc"><p>A component to represent the entire app, bringing together
+the input component and the todo list component.</p>
 </div><pre class="source javascript"><strong class="lineNumber">169</strong>class App extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">170</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">171</strong>    init() {</pre></div>
-<div class="line"><div class="doc"><p>We create instances of both input and list views here, to reuse in repeated renders.</p>
+<div class="line"><div class="doc"><p>We create instances of both input and list views here,
+to reuse in repeated renders.</p>
 </div><pre class="source javascript"><strong class="lineNumber">174</strong>        this.input = new TaskInput();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">175</strong>        this.list = new TaskList(tasks);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">176</strong>    }</pre></div>
@@ -191,7 +206,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">187</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"><p>The app is really just both components&#39; nodes wrapped in a single div.</p>
+<div class="line"><div class="doc"><p>The app is really just both components&#39; nodes wrapped
+in a single div.</p>
 </div><pre class="source javascript"><strong class="lineNumber">190</strong>        return jdom`&#60;div&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">191</strong>            ${[this.input.node, this.list.node]}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">192</strong>        &#60;/div&#62;`;</pre></div>

@@ -17,7 +17,10 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>The searchbar sample project demonstrates <code>StyledComponent</code> and communicating small view state between components in a hierarchy. More complex or shared state should be stored in Records, and views should listen to events on the view state Records.</p>
+        <div class="line"><div class="doc"><p>The searchbar sample project demonstrates <code>StyledComponent</code>
+and communicating small view state between components in a hierarchy.
+More complex or shared state should be stored in Records, and views
+should listen to events on the view state Records.</p>
 </div><pre class="source javascript"><strong class="lineNumber">5</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
@@ -71,7 +74,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">54</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">55</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">56</strong></pre></div>
-<div class="line"><div class="doc"><p>Component for the button that says &quot;Search&quot; making this a separate component might be overkill, but it&#39;s here for demonstration purposes.</p>
+<div class="line"><div class="doc"><p>Component for the button that says &quot;Search&quot;
+making this a separate component might be overkill,
+but it&#39;s here for demonstration purposes.</p>
 </div><pre class="source javascript"><strong class="lineNumber">60</strong>class SearchButton extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">61</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>    init({searchCallback}) {</pre></div>
@@ -96,7 +101,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">81</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">83</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"><p>When the user clicks the search button, we just call the callback passed in from our parent component.</p>
+<div class="line"><div class="doc"><p>When the user clicks the search button, we just call the callback
+passed in from our parent component.</p>
 </div><pre class="source javascript"><strong class="lineNumber">86</strong>        return jdom`&#60;button onclick="${this.searchCallback}"&#62;Search&#60;/button&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">87</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">88</strong>}</pre></div>
@@ -147,7 +153,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">133</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">134</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">135</strong>    search() {</pre></div>
-<div class="line"><div class="doc"><p>For this demo, when you search, instead of bringing you useful information, we&#39;ll just pop up an alert with what you searched for.</p>
+<div class="line"><div class="doc"><p>For this demo, when you search, instead of bringing you
+useful information, we&#39;ll just pop up an alert
+with what you searched for.</p>
 </div><pre class="source javascript"><strong class="lineNumber">139</strong>        window.alert('You searched for: ' + this.value);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">140</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">141</strong></pre></div>

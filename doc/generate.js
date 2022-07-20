@@ -52,7 +52,7 @@ const linesToRows = lines => {
         if (line.trim().startsWith(ANNOTATION_START)) {
             docLine = line.replace(ANNOTATION_START, '').trim();
         } else {
-            docLine += ' ' + line.replace(ANNOTATION_CONTINUE, '').trim();
+            docLine += '\n' + line.replace(ANNOTATION_CONTINUE, '').trim();
         }
     };
 

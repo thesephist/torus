@@ -17,7 +17,9 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>Shortcut utility function to check if a given name is bound to something that&#39;s an actual object (not just null) We perform the <code>null</code> check first because it&#39;s faster.</p>
+        <div class="line"><div class="doc"><p>Shortcut utility function to check if a given name is
+bound to something that&#39;s an actual object (not just null)
+We perform the <code>null</code> check first because it&#39;s faster.</p>
 </div><pre class="source javascript"><strong class="lineNumber">4</strong>const isObject = obj =&#62; obj !== null &#38;&#38; typeof obj === 'object';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">5</strong></pre></div>
 <div class="line"><div class="doc"><p>Clip the end of a given string by the length of a substring</p>
@@ -25,12 +27,14 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong>    return base.substr(0, base.length - substr.length);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">10</strong></pre></div>
-<div class="line"><div class="doc"><p>This allows us to write HTML entities like &#39;&lt;&#39; and &#39;&gt;&#39; without breaking the HTML parser.</p>
+<div class="line"><div class="doc"><p>This allows us to write HTML entities like &#39;&lt;&#39; and &#39;&gt;&#39; without breaking
+the HTML parser.</p>
 </div><pre class="source javascript"><strong class="lineNumber">13</strong>const decodeEntity = entity =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong>    return String.fromCodePoint((+(/&#38;#(\w+);/).exec(entity)[1]));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">16</strong></pre></div>
-<div class="line"><div class="doc"><p>Interpolate between lists of strings into a single string. Used to merge the two parts of a template tag&#39;s arguments.</p>
+<div class="line"><div class="doc"><p>Interpolate between lists of strings into a single string. Used to
+merge the two parts of a template tag&#39;s arguments.</p>
 </div><pre class="source javascript"><strong class="lineNumber">19</strong>const interpolate = (tplParts, dynamicParts) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong>    let str = tplParts[0];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong>    for (let i = 1, len = dynamicParts.length; i &#60;= len; i ++) {</pre></div>
@@ -57,18 +61,22 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>        return char;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">43</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">44</strong></pre></div>
-<div class="line"><div class="doc"><p>Move the pointer back one place, undoing the last character read. In practice, we never backtrack from index 0 -- we only use back() to &quot;un-read&quot; a character we&#39;ve read. So we don&#39;t check for negative cases here.</p>
+<div class="line"><div class="doc"><p>Move the pointer back one place, undoing the last character read.
+In practice, we never backtrack from index 0 -- we only use back()
+to &quot;un-read&quot; a character we&#39;ve read. So we don&#39;t check for negative cases here.</p>
 </div><pre class="source javascript"><strong class="lineNumber">48</strong>    back() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>        this.idx --;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong></pre></div>
-<div class="line"><div class="doc"><p>Read up to a specified <em>contiguous</em> substring, but not including the substring.</p>
+<div class="line"><div class="doc"><p>Read up to a specified <em>contiguous</em> substring,
+but not including the substring.</p>
 </div><pre class="source javascript"><strong class="lineNumber">54</strong>    readUpto(substr) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">55</strong>        const nextIdx = this.content.substr(this.idx).indexOf(substr);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">56</strong>        return this.toNext(nextIdx);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">57</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">58</strong></pre></div>
-<div class="line"><div class="doc"><p>Read up to and including a <em>contiguous</em> substring, or read until the end of the template.</p>
+<div class="line"><div class="doc"><p>Read up to and including a <em>contiguous</em> substring, or read until
+the end of the template.</p>
 </div><pre class="source javascript"><strong class="lineNumber">61</strong>    readUntil(substr) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">62</strong>        const nextIdx = this.content.substr(this.idx).indexOf(substr) + substr.length;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">63</strong>        return this.toNext(nextIdx);</pre></div>
@@ -87,7 +95,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">76</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">77</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">78</strong></pre></div>
-<div class="line"><div class="doc"><p>Remove some substring from the end of the template, if it ends in the substring. This also returns whether the given substring was a valid ending substring.</p>
+<div class="line"><div class="doc"><p>Remove some substring from the end of the template, if it ends in the substring.
+This also returns whether the given substring was a valid ending substring.</p>
 </div><pre class="source javascript"><strong class="lineNumber">81</strong>    clipEnd(substr) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">82</strong>        if (this.content.endsWith(substr)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">83</strong>            this.content = clipStringEnd(this.content, substr);</pre></div>
@@ -110,7 +119,8 @@
 <div class="line"><div class="doc"><p>Pure function to parse the contents of an HTML opening tag to a JDOM stub</p>
 </div><pre class="source javascript"><strong class="lineNumber">101</strong>const parseOpeningTagContents = content =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong></pre></div>
-<div class="line"><div class="doc"><p>If the opening tag is just the tag name (the most common case), take a shortcut and run a simpler algorithm.</p>
+<div class="line"><div class="doc"><p>If the opening tag is just the tag name (the most common case), take
+a shortcut and run a simpler algorithm.</p>
 </div><pre class="source javascript"><strong class="lineNumber">105</strong>    content = content.trim();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">106</strong>    if (content[0] === '!') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">107</strong>        // comment</pre></div>
@@ -134,7 +144,8 @@
 </div><pre class="source javascript"><strong class="lineNumber">125</strong>    const reader = new Reader(content);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">126</strong>    const selfClosing = reader.clipEnd('/');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">127</strong></pre></div>
-<div class="line"><div class="doc"><p>Read the individual characters into a list of tokens: things that may be attribute names, and values.</p>
+<div class="line"><div class="doc"><p>Read the individual characters into a list of tokens:
+things that may be attribute names, and values.</p>
 </div><pre class="source javascript"><strong class="lineNumber">130</strong>    let head = '';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Are we waiting to read an attribute value?</p>
@@ -148,7 +159,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">137</strong>    const TYPE_KEY = 0;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">138</strong>    const TYPE_VALUE = 1;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">139</strong></pre></div>
-<div class="line"><div class="doc"><p>Is the next token a key or a value? This is determined by the presence of equals signs <code>=</code>, quotations, and whitespace.</p>
+<div class="line"><div class="doc"><p>Is the next token a key or a value? This is determined by the presence
+of equals signs <code>=</code>, quotations, and whitespace.</p>
 </div><pre class="source javascript"><strong class="lineNumber">142</strong>    let nextType = TYPE_KEY;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">143</strong></pre></div>
 <div class="line"><div class="doc"><p>Commit what&#39;s currently read as a new token.</p>
@@ -163,7 +175,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">153</strong>            head = '';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">154</strong>        }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">155</strong>    }</pre></div>
-<div class="line"><div class="doc"><p>Iterate through each read character from the reader and parse the character stream into tokens.</p>
+<div class="line"><div class="doc"><p>Iterate through each read character from the reader and parse the character
+stream into tokens.</p>
 </div><pre class="source javascript"><strong class="lineNumber">158</strong>    for (let next = reader.next(); next !== undefined; next = reader.next()) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">159</strong>        switch (next) {</pre></div>
 <div class="line"><div class="doc"><p>Equals sign denotes the start of an attribute value unless in quotes</p>
@@ -176,7 +189,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">167</strong>                    nextType = TYPE_VALUE;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">168</strong>                }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">169</strong>                break;</pre></div>
-<div class="line"><div class="doc"><p>Because we replaced all whitespace with spaces earlier, this catches all whitespaces. Whitespaces are only meaningful separates of values if we&#39;re not in quotes.</p>
+<div class="line"><div class="doc"><p>Because we replaced all whitespace with spaces earlier, this catches
+all whitespaces. Whitespaces are only meaningful separates of values
+if we&#39;re not in quotes.</p>
 </div><pre class="source javascript"><strong class="lineNumber">173</strong>            case ' ':</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">174</strong>                if (inQuotes) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">175</strong>                    head += next;</pre></div>
@@ -192,7 +207,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">185</strong>                    head += next;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">186</strong>                }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">187</strong>                break;</pre></div>
-<div class="line"><div class="doc"><p>If we&#39;re in quotes, &#39;&quot;&#39; escapes quotes. Otherwise, it opens a quoted section.</p>
+<div class="line"><div class="doc"><p>If we&#39;re in quotes, &#39;&quot;&#39; escapes quotes. Otherwise, it opens
+a quoted section.</p>
 </div><pre class="source javascript"><strong class="lineNumber">190</strong>            case '"':</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">191</strong>                if (inQuotes) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">192</strong>                    inQuotes = false;</pre></div>
@@ -226,12 +242,16 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">220</strong>        last = curr;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">221</strong>        curr = tokens.shift();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">222</strong>    }</pre></div>
-<div class="line"><div class="doc"><p>Walk through the token list. If the token is a value token, the previous token is its key. If the current token is a key, the previous token is an attribute without value (like <code>disabled</code>).</p>
+<div class="line"><div class="doc"><p>Walk through the token list. If the token is a value token,
+the previous token is its key. If the current token is a key,
+the previous token is an attribute without value (like <code>disabled</code>).</p>
 </div><pre class="source javascript"><strong class="lineNumber">226</strong>    while (curr !== undefined) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>        if (curr.type === TYPE_VALUE) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong>            const key = last.value;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">229</strong>            let val = curr.value.trim();</pre></div>
-<div class="line"><div class="doc"><p>Commit a key-value pair of string attributes to the JDOM stub. This section treats class lists and style dictionaries separately, and adds function values as event handlers.</p>
+<div class="line"><div class="doc"><p>Commit a key-value pair of string attributes to the JDOM stub. This section
+treats class lists and style dictionaries separately, and adds function
+values as event handlers.</p>
 </div><pre class="source javascript"><strong class="lineNumber">233</strong>            if (key.startsWith('on')) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">234</strong>                events[key.substr(2)] = [val];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">235</strong>            } else {</pre></div>
@@ -276,7 +296,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">274</strong>    };</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">275</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong></pre></div>
-<div class="line"><div class="doc"><p>Function to parse an entire JDOM template tree (which we vaguely call JSX here). This recursively calls itself on children elements.</p>
+<div class="line"><div class="doc"><p>Function to parse an entire JDOM template tree (which we vaguely call JSX here).
+This recursively calls itself on children elements.</p>
 </div><pre class="source javascript"><strong class="lineNumber">279</strong>const parseTemplate = reader =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">280</strong>    const result = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">281</strong></pre></div>
@@ -309,7 +330,12 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">305</strong>        currentElement += next;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">307</strong></pre></div>
-<div class="line"><div class="doc"><p>Main parsing logic. This might be confusingly recursive. In essence, the parser recursively calls itself with its <code>reader</code> if it has children to parse, and trusts that the parser will return when it encounters the closing tag that marks the end of the list of children. So, the parser breaks the loop and returns if it encounters a closing tag. This cooperation between the function and the parent function that called it recursively makes this parser work.</p>
+<div class="line"><div class="doc"><p>Main parsing logic. This might be confusingly recursive. In essence, the parser
+recursively calls itself with its <code>reader</code> if it has children to parse,
+and trusts that the parser will return when it encounters the closing tag
+that marks the end of the list of children. So, the parser breaks the loop
+and returns if it encounters a closing tag. This cooperation between the function
+and the parent function that called it recursively makes this parser work.</p>
 </div><pre class="source javascript"><strong class="lineNumber">314</strong>    for (let next = reader.next(); next !== undefined; next = reader.next()) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>if we see the start of a tag ...</p>
@@ -321,18 +347,24 @@
 <div class="line"><div class="doc"><p>... it&#39;s an opening tag if the next character isn&#39;t <code>&#39;/&#39;</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">320</strong>            if (reader.next() !== '/') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>                reader.back();</pre></div>
-<div class="line"><div class="doc"><p>Read and parse the contents of the tag up to the end of the opening tag.</p>
+<div class="line"><div class="doc"><p>Read and parse the contents of the tag up to the end of
+the opening tag.</p>
 </div><pre class="source javascript"><strong class="lineNumber">324</strong>                const result = parseOpeningTagContents(reader.readUpto('&#62;'));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">325</strong>                reader.next(); // read the '&#62;'</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">326</strong>                currentElement = result &#38;&#38; result.jdom;</pre></div>
-<div class="line"><div class="doc"><p>If the current element is a full-fledged element (and not a comment or text node), let&#39;s try to parse the children by handing the reader to a recursively call of this function.</p>
+<div class="line"><div class="doc"><p>If the current element is a full-fledged element (and not a comment
+or text node), let&#39;s try to parse the children by handing the reader
+to a recursively call of this function.</p>
 </div><pre class="source javascript"><strong class="lineNumber">330</strong>                if (!result.selfClosing &#38;&#38; currentElement !== null) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">331</strong>                    currentElement.children = parseTemplate(reader);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">332</strong>                }</pre></div>
 <div class="line"><div class="doc"><p>... it&#39;s a closing tag otherwise ...</p>
 </div><pre class="source javascript"><strong class="lineNumber">334</strong>            } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>... so finish out reading the closing tag. A top-level closing tag means it&#39;s actually closing the parent tag, so we need to stop parsing and hand the parsing flow back to the parent call in this recursive function.</p>
+<div class="line"><div class="doc"><p>... so finish out reading the closing tag.
+A top-level closing tag means it&#39;s actually closing the parent tag, so
+we need to stop parsing and hand the parsing flow back to the parent
+call in this recursive function.</p>
 </div><pre class="source javascript"><strong class="lineNumber">339</strong>                reader.readUntil('&#62;');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">340</strong>                break;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">341</strong>            }</pre></div>
@@ -352,22 +384,35 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">355</strong>    return result;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">356</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">357</strong></pre></div>
-<div class="line"><div class="doc"><p>Cache for <code>jdom</code>, keyed by the string parts, value is a function that takes the dynamic parts of the template as input and returns the result of parseTemplate. We make an assumption here that the user of the template won&#39;t swap between having an element attribute being a function once and something that isn&#39;t a function the next time. In practice this is fine.</p>
+<div class="line"><div class="doc"><p>Cache for <code>jdom</code>, keyed by the string parts, value is a function that takes the dynamic
+parts of the template as input and returns the result of parseTemplate. We make an assumption
+here that the user of the template won&#39;t swap between having an element attribute being
+a function once and something that isn&#39;t a function the next time. In practice this is fine.</p>
 </div><pre class="source javascript"><strong class="lineNumber">362</strong>const JDOM_CACHE = new Map();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>This HTML parsing algorithm works by replacing all the dynamic parts with a unique string, parsing the string markup into a JSON tree, and caching that tree. On renders, we walk the tree and replace any matching strings with their correct dynamic parts. This makes the algorithm cache-friendly and relatively fast, despite doing a lot at runtime. <code>JDOM_PLACEHOLDER_RE</code> is the regex we use to correlate string keys to their correct dynamic parts.</p>
+<div class="line"><div class="doc"><p>This HTML parsing algorithm works by replacing all the dynamic parts with a unique string,
+parsing the string markup into a JSON tree, and caching that tree. On renders, we walk the tree
+and replace any matching strings with their correct dynamic parts. This makes the algorithm
+cache-friendly and relatively fast, despite doing a lot at runtime. <code>JDOM_PLACEHOLDER_RE</code> is
+the regex we use to correlate string keys to their correct dynamic parts.</p>
 </div><pre class="source javascript"><strong class="lineNumber">368</strong>const JDOM_PLACEHOLDER_RE = /jdom_tpl_obj_\[(\d+)\]/;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>This is for a performance optimization, that when we&#39;re filling out template strings, if a string in which we&#39;re searching for a placeholder is shorter than placeholder strings, we just stop searching.</p>
+<div class="line"><div class="doc"><p>This is for a performance optimization, that when we&#39;re filling out template
+strings, if a string in which we&#39;re searching for a placeholder is shorter than
+placeholder strings, we just stop searching.</p>
 </div><pre class="source javascript"><strong class="lineNumber">372</strong>const JDOM_PLACEHOLDER_MIN_LENGTH = 14;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">373</strong></pre></div>
 <div class="line"><div class="doc"><p>Does a given string have a placeholder for the template values?</p>
 </div><pre class="source javascript"><strong class="lineNumber">375</strong>const hasPlaceholder = str =&#62; typeof str === 'string' &#38;&#38; str.includes('jdom_tpl_');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">376</strong></pre></div>
-<div class="line"><div class="doc"><p><strong>Utility functions for walking a JSON tree and filling in placeholders</strong> The functions here that take mutable values (arrays, objects) will mutate the given value to be faster than creating new objects.</p>
+<div class="line"><div class="doc"><p><strong>Utility functions for walking a JSON tree and filling in placeholders</strong>
+The functions here that take mutable values (arrays, objects) will mutate the
+given value to be faster than creating new objects.</p>
 </div><pre class="source javascript"><strong class="lineNumber">380</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Given a string, replace placeholders with their correct dynamic parts and return the result as an array, so if any dynamic values are objects or HTML nodes, they are not cast to strings. Used to parse HTML children.</p>
+<div class="line"><div class="doc"><p>Given a string, replace placeholders with their correct dynamic parts and return
+the result as an array, so if any dynamic values are objects or HTML nodes, they
+are not cast to strings. Used to parse HTML children.</p>
 </div><pre class="source javascript"><strong class="lineNumber">384</strong>const splitByPlaceholder = (str, dynamicParts) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">385</strong>    if (hasPlaceholder(str)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">386</strong>        const match = JDOM_PLACEHOLDER_RE.exec(str);</pre></div>
@@ -393,7 +438,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">406</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">407</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">408</strong></pre></div>
-<div class="line"><div class="doc"><p>Given an array of child JDOM elements, flatten that list of children into a flat array and parse any placeholders in it.</p>
+<div class="line"><div class="doc"><p>Given an array of child JDOM elements, flatten that list of children
+into a flat array and parse any placeholders in it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">411</strong>const replaceChildrenToFlatArray = (children, dynamicParts) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">412</strong>    const newChildren = [];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">413</strong>    for (const childString of children) {</pre></div>
@@ -418,7 +464,8 @@
 <div class="line"><div class="doc"><p>Given a string, replace any placeholder values and return a new string.</p>
 </div><pre class="source javascript"><strong class="lineNumber">433</strong>const replaceInString = (str, dynamicParts) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>As an optimization, if the string is too short to contain placeholders, just return early.</p>
+<div class="line"><div class="doc"><p>As an optimization, if the string is too short to contain placeholders,
+just return early.</p>
 </div><pre class="source javascript"><strong class="lineNumber">436</strong>    if (str.length &#60; JDOM_PLACEHOLDER_MIN_LENGTH) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">437</strong>        return str;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">438</strong>    } else {</pre></div>
@@ -461,7 +508,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">475</strong>            obj[prop] = replaceInString(val, dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">476</strong>        } else if (Array.isArray(val)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">477</strong>            if (prop === 'children') {</pre></div>
-<div class="line"><div class="doc"><p>We need to treat children of JDOM objects differently because they need to all be flat arrays, and sometimes for API convenience they&#39;re passed in as nested arrays.</p>
+<div class="line"><div class="doc"><p>We need to treat children of JDOM objects differently because
+they need to all be flat arrays, and sometimes for API convenience
+they&#39;re passed in as nested arrays.</p>
 </div><pre class="source javascript"><strong class="lineNumber">481</strong>                obj.children = replaceChildrenToFlatArray(val, dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">482</strong>            } else {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">483</strong>                replaceInArrayLiteral(val, dynamicParts);</pre></div>
@@ -478,7 +527,8 @@
 <div class="line"><div class="doc"><p>The key for our cache is just the string parts, joined together with a unique joiner string.</p>
 </div><pre class="source javascript"><strong class="lineNumber">494</strong>    const cacheKey = tplParts.join('jdom_tpl_joiner');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">495</strong>    try {</pre></div>
-<div class="line"><div class="doc"><p>If we don&#39;t have the template in cache, we need to put a translator function in the cache now.</p>
+<div class="line"><div class="doc"><p>If we don&#39;t have the template in cache, we need to put a translator function
+in the cache now.</p>
 </div><pre class="source javascript"><strong class="lineNumber">498</strong>        if (!JDOM_CACHE.has(cacheKey)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Generate placeholder string values for each dynamic value in the template</p>
@@ -492,16 +542,19 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">506</strong>            const resultType = typeof result;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">507</strong>            const resultString = JSON.stringify(result);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">508</strong></pre></div>
-<div class="line"><div class="doc"><p>Put a function into the cache that translates an array of the dynamic parts of a template into the full JDOM for the template.</p>
+<div class="line"><div class="doc"><p>Put a function into the cache that translates an array of the dynamic parts of a template
+into the full JDOM for the template.</p>
 </div><pre class="source javascript"><strong class="lineNumber">511</strong>            JDOM_CACHE.set(cacheKey, dynamicParts =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">512</strong>                if (resultType === 'string') {</pre></div>
 <div class="line"><div class="doc"><p>If the result of the template is just a string, replace stuff in the string</p>
 </div><pre class="source javascript"><strong class="lineNumber">514</strong>                    return replaceInString(result, dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">515</strong>                } else if (resultType === 'object') {</pre></div>
-<div class="line"><div class="doc"><p>Recall that the template translating functions above mutate the object passed in wherever possible. so we make a brand-new object to represent a new result.</p>
+<div class="line"><div class="doc"><p>Recall that the template translating functions above mutate the object passed
+in wherever possible. so we make a brand-new object to represent a new result.</p>
 </div><pre class="source javascript"><strong class="lineNumber">518</strong>                    const target = {};</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Since the non-dynamic parts of JDOM objects are by definition completely JSON serializable, this is a good enough way to deep-copy the cached result of <code>parseTemplate()</code>.</p>
+<div class="line"><div class="doc"><p>Since the non-dynamic parts of JDOM objects are by definition completely JSON
+serializable, this is a good enough way to deep-copy the cached result of <code>parseTemplate()</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">521</strong>                    const template = JSON.parse(resultString);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">522</strong>                    replaceInObjectLiteral(Object.assign(target, template), dynamicParts);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">523</strong>                    return target;</pre></div>
@@ -520,7 +573,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">536</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">537</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">538</strong></pre></div>
-<div class="line"><div class="doc"><p>Helper to convert a string representation of a dict into a JavaScript object, CSS-style. <code>stringToDict</code> is recursive to parse nested dictionaries.</p>
+<div class="line"><div class="doc"><p>Helper to convert a string representation of a dict into a JavaScript object, CSS-style.
+<code>stringToDict</code> is recursive to parse nested dictionaries.</p>
 </div><pre class="source javascript"><strong class="lineNumber">541</strong>const stringToDict = reader =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">542</strong></pre></div>
 <div class="line"><div class="doc"><p>Dictionary to be constructed from this step</p>
@@ -534,7 +588,8 @@
 <div class="line"><div class="doc"><p>Current key, value pair being parsed</p>
 </div><pre class="source javascript"><strong class="lineNumber">552</strong>    let current = ['', ''];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Utility function to commit the tokens in the current read buffer (<code>current</code>) to the result dictionary and move on to the next key-value pair.</p>
+<div class="line"><div class="doc"><p>Utility function to commit the tokens in the current read buffer (<code>current</code>) to the
+result dictionary and move on to the next key-value pair.</p>
 </div><pre class="source javascript"><strong class="lineNumber">555</strong>    const commit = () =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">556</strong>        if (typeof current[VAL] === 'string') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">557</strong>            dict[current[PROP].trim()] = current[VAL].trim();</pre></div>
@@ -550,7 +605,8 @@
 <div class="line"><div class="doc"><p>Loop through each character in the string being read...</p>
 </div><pre class="source javascript"><strong class="lineNumber">567</strong>    for (let next = reader.next(); next !== undefined; next = reader.next()) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>If we encounter a closing brace, we assume it&#39;s the end of the dictionary at the current level of nesting, so we halt parsing at this step and return.</p>
+<div class="line"><div class="doc"><p>If we encounter a closing brace, we assume it&#39;s the end of the dictionary at the current
+level of nesting, so we halt parsing at this step and return.</p>
 </div><pre class="source javascript"><strong class="lineNumber">570</strong>        if (next === '}') {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">571</strong>            break;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">572</strong>        }</pre></div>
@@ -558,14 +614,17 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">574</strong>        switch (next) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">575</strong>            case '"':</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">576</strong>            case '\'':</pre></div>
-<div class="line"><div class="doc"><p>If we encounter quotes, we read blindly until the end of the quoted section, ignoring escaped quotes. This is a slightly strange but simple way to achieve that.</p>
+<div class="line"><div class="doc"><p>If we encounter quotes, we read blindly until the end of the quoted section,
+ignoring escaped quotes. This is a slightly strange but simple way to achieve that.</p>
 </div><pre class="source javascript"><strong class="lineNumber">579</strong>                current[part] += next + reader.readUntil(next);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">580</strong>                while (current[part].endsWith('\\' + next)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">581</strong>                    current[part] += reader.readUntil(next);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">582</strong>                }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">583</strong>                break;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">584</strong>            case ':':</pre></div>
-<div class="line"><div class="doc"><p>The colon character is ambiguous in SCSS syntax, because it is used for pseudoselectors and pseudoelements, as well as in the dict syntax. We disambiguate by looking at the preceding part of the token.</p>
+<div class="line"><div class="doc"><p>The colon character is ambiguous in SCSS syntax, because it is used
+for pseudoselectors and pseudoelements, as well as in the dict syntax.
+We disambiguate by looking at the preceding part of the token.</p>
 </div><pre class="source javascript"><strong class="lineNumber">588</strong>                if (</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">589</strong>                    p.trim() === '' // empty key is not a thing; probably pseudoselector</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">590</strong>                    || p.includes('&#38;') // probably part of nested SCSS selector</pre></div>
@@ -583,7 +642,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">602</strong>                commit();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">603</strong>                break;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">604</strong>            case '{':</pre></div>
-<div class="line"><div class="doc"><p>If we come across <code>{</code>, this means we found a nested structure. We backtrack the reader and recursively call <code>stringToDict</code> to parse the nested dict first before moving on.</p>
+<div class="line"><div class="doc"><p>If we come across <code>{</code>, this means we found a nested structure.
+We backtrack the reader and recursively call <code>stringToDict</code> to parse the nested dict first
+before moving on.</p>
 </div><pre class="source javascript"><strong class="lineNumber">608</strong>                reader.back();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">609</strong>                current[VAL] = stringToDict(reader);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">610</strong>                commit();</pre></div>
@@ -612,7 +673,8 @@
 <div class="line"><div class="doc"><p>Parse template as a string first</p>
 </div><pre class="source javascript"><strong class="lineNumber">633</strong>    const result = interpolate(tplParts, dynamicParts).trim();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>If the CSS rule had not been parsed before (is not in the cache), parse and cache it before returning it.</p>
+<div class="line"><div class="doc"><p>If the CSS rule had not been parsed before (is not in the cache),
+parse and cache it before returning it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">636</strong>    if (!CSS_CACHE.has(result)) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">637</strong>        CSS_CACHE.set(result, stringToDict(new Reader('{' + result + '}')));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">638</strong>    }</pre></div>

@@ -17,7 +17,9 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>This counter example is a demonstration of the power of declaratively defined views, JDOM templates&#39; expressive power, and how to compose simple functions together to form interesting Torus components.</p>
+        <div class="line"><div class="doc"><p>This counter example is a demonstration of the power of
+declaratively defined views, JDOM templates&#39; expressive power,
+and how to compose simple functions together to form interesting Torus components.</p>
 </div><pre class="source javascript"><strong class="lineNumber">4</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Bootstrap the required globals from Torus, since we&#39;re not bundling</p>
@@ -25,7 +27,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">7</strong>    window[exportedName] = Torus[exportedName];</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">8</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">9</strong></pre></div>
-<div class="line"><div class="doc"><p>This component represents a single digit in the counter. This digit will slide between different vertical positions to only show the correct digit through the &quot;window&quot; of the containing element.</p>
+<div class="line"><div class="doc"><p>This component represents a single digit in the counter. This digit will
+slide between different vertical positions to only show the correct digit
+through the &quot;window&quot; of the containing element.</p>
 </div><pre class="source javascript"><strong class="lineNumber">13</strong>const Digit = d =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong>    return jdom`&#60;div class="digit" style="transform:translateY(-${d}em)"&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">15</strong>        &#60;div class="digitSlice"&#62;0&#60;/div&#62;</pre></div>
@@ -42,7 +46,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">26</strong>    &#60;/div&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">27</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">28</strong></pre></div>
-<div class="line"><div class="doc"><p>The <code>Counter</code> component is the container window through which all the digits are shown. We take in a number, convert it to a string, and reduce it to add commas in the thousandths places while mapping digits to the <code>Digit</code> components.</p>
+<div class="line"><div class="doc"><p>The <code>Counter</code> component is the container window through which all the digits
+are shown. We take in a number, convert it to a string, and reduce it to add
+commas in the thousandths places while mapping digits to the <code>Digit</code> components.</p>
 </div><pre class="source javascript"><strong class="lineNumber">32</strong>const Counter = number =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">33</strong>    return jdom`&#60;div class="counter"&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">34</strong>        ${[</pre></div>
@@ -54,13 +60,15 @@
 </div><pre class="source javascript"><strong class="lineNumber">40</strong>                .reverse()</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">41</strong>                .map(d =&#62; Digit(+d))</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong>                .reduce((acc, cur, i) =&#62; {</pre></div>
-<div class="line"><div class="doc"><p>Quick, concise way to comma-separate the thousands places.</p>
+<div class="line"><div class="doc"><p>Quick, concise way to comma-separate
+the thousands places.</p>
 </div><pre class="source javascript"><strong class="lineNumber">45</strong>                    if (i % 3 === 0 &#38;&#38; i &#62; 0) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">46</strong>                        acc.push(',');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong>                    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong>                    return acc.concat(cur);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">49</strong>                }, []),</pre></div>
-<div class="line"><div class="doc"><p>Padding digit so a newly added digit will slide into place, rather than blink into existence.</p>
+<div class="line"><div class="doc"><p>Padding digit so a newly added digit will slide into place,
+rather than blink into existence.</p>
 </div><pre class="source javascript"><strong class="lineNumber">52</strong>            Digit(10),</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">53</strong>        ]}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">54</strong>    &#60;/div&#62;`;</pre></div>

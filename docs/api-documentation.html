@@ -17,7 +17,9 @@
             </div>
             <pre></pre>
         </div>
-        <div class="line"><div class="doc"><p>This is an example-driven documentation for Torus&#39;s entire API surface. If you want to know more about Torus as an open-source project, or what it is, check out the <a href="https://github.com/thesephist/torus">Github repository</a>.</p>
+        <div class="line"><div class="doc"><p>This is an example-driven documentation for Torus&#39;s entire API surface.
+If you want to know more about Torus as an open-source project, or what it is,
+check out the <a href="https://github.com/thesephist/torus">Github repository</a>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">4</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><h2 id="using-torus-with-your-project">Using Torus with your project</h2>
@@ -31,12 +33,15 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">12</strong>window.jdom; // contains the `jdom` template tag</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">13</strong>window.css; // contains the `css` template tag</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">14</strong></pre></div>
-<div class="line"><div class="doc"><p>.. so you can create a component, for example, like this. We&#39;ll omit the <code>Torus.</code> prefix for the rest of this documentation, for sake of brevity.</p>
+<div class="line"><div class="doc"><p>.. so you can create a component, for example, like this.
+We&#39;ll omit the <code>Torus.</code> prefix for the rest of this documentation, for
+sake of brevity.</p>
 </div><pre class="source javascript"><strong class="lineNumber">18</strong>class MyComponent extends Torus.Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">19</strong>    /* ... */</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">20</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">21</strong></pre></div>
-<div class="line"><div class="doc"><p>If you&#39;re bundling within NodeJS, the <code>torus-dom</code> package contains all the exported names. You can use ES2015 imports...</p>
+<div class="line"><div class="doc"><p>If you&#39;re bundling within NodeJS, the <code>torus-dom</code> package contains
+all the exported names. You can use ES2015 imports...</p>
 </div><pre class="source javascript"><strong class="lineNumber">24</strong>import { Component, Record, Store, jdom, css } from 'torus-dom';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>... or CommonJS require.</p>
@@ -45,7 +50,12 @@
 <div class="line"><div class="doc"><h2 id="jdom">JDOM</h2>
 </div><pre class="source javascript"><strong class="lineNumber">29</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Torus, like React, Preact, and Vue, uses a virtual DOM to reconcile differences between a previous render of a component and the new render of a component before committing any changes to the DOM. To run the reconciliation algorithm, we need an intermediate representation of the component render tree that&#39;s efficient to create and traverse. Torus achieves this with <code>JDOM</code>, a JSON format for representing all DOM nodes.</p>
+<div class="line"><div class="doc"><p>Torus, like React, Preact, and Vue, uses a virtual DOM to reconcile
+differences between a previous render of a component and the new render
+of a component before committing any changes to the DOM. To run the reconciliation
+algorithm, we need an intermediate representation of the component render tree
+that&#39;s efficient to create and traverse. Torus achieves this with <code>JDOM</code>, a JSON
+format for representing all DOM nodes.</p>
 </div><pre class="source javascript"><strong class="lineNumber">36</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p><code>null</code> values are always translated to comments</p>
@@ -54,7 +64,9 @@
 <div class="line"><div class="doc"><p>String values represent text (they map to <code>TextNode</code>s)</p>
 </div><pre class="source javascript"><strong class="lineNumber">41</strong>'Hello, World!'; // 'Hello, World!'</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">42</strong></pre></div>
-<div class="line"><div class="doc"><p>HTML elements are represented with an object with four keys: <strong>tag</strong>, <strong>attrs</strong>, <strong>events</strong>, and <strong>children</strong>. <code>tag</code> is the name of the HTML tag for the element. All fields are optional, except <code>tag</code>, which is required.</p>
+<div class="line"><div class="doc"><p>HTML elements are represented with an object with four keys: <strong>tag</strong>,
+<strong>attrs</strong>, <strong>events</strong>, and <strong>children</strong>. <code>tag</code> is the name of the HTML
+tag for the element. All fields are optional, except <code>tag</code>, which is required.</p>
 </div><pre class="source javascript"><strong class="lineNumber">46</strong>const el = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">47</strong>    tag: 'ul',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">48</strong>    attrs: {},</pre></div>
@@ -62,7 +74,11 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">50</strong>    children: [],</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">51</strong>} // &#60;ul&#62;&#60;/ul&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">52</strong></pre></div>
-<div class="line"><div class="doc"><p><code>attrs</code> is an object containing all attributes and properties of the element. <code>attrs.class</code> is a special property, because it can either be a string representation of the element&#39;s <code>className</code> property, or an array of class names. If it&#39;s an array, the members of that array will be joined together during render. Other <code>attrs</code> properties should be strings or numbers.</p>
+<div class="line"><div class="doc"><p><code>attrs</code> is an object containing all attributes and properties of the element.
+<code>attrs.class</code> is a special property, because it can either be a string representation
+of the element&#39;s <code>className</code> property, or an array of class names. If it&#39;s an array, the
+members of that array will be joined together during render. Other <code>attrs</code> properties
+should be strings or numbers.</p>
 </div><pre class="source javascript"><strong class="lineNumber">58</strong>const $input = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">59</strong>    tag: 'input',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">60</strong>    attrs: {</pre></div>
@@ -73,7 +89,9 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">65</strong>} //&#60;input class="formInput lightblue"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">66</strong>  //       data-importance="5" value="42.420" /&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">67</strong></pre></div>
-<div class="line"><div class="doc"><p>Although Torus advocates for using the <code>Styled()</code> higher-order component when styling components, sometimes it&#39;s useful to have access to inline styles. Inline styles are represented in JDOM as a flat object, using CSS-style camelCase CSS property names.</p>
+<div class="line"><div class="doc"><p>Although Torus advocates for using the <code>Styled()</code> higher-order component when styling
+components, sometimes it&#39;s useful to have access to inline styles. Inline styles are represented
+in JDOM as a flat object, using CSS-style camelCase CSS property names.</p>
 </div><pre class="source javascript"><strong class="lineNumber">71</strong>const $fancyButton = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">72</strong>    tag: 'button',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">73</strong>    attrs: {</pre></div>
@@ -85,7 +103,11 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">79</strong>    },</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">80</strong>} // &#60;button style="color:red;background-color:blue;font-size: 16px"&#62;&#60;/button&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">81</strong></pre></div>
-<div class="line"><div class="doc"><p><code>events</code> is a dictionary of events and event listeners. Each key in the dictionary is an event name, like <code>&#39;click&#39;</code> or <code>&#39;mouseover&#39;</code>, and each value is either a single function or an array of functions that are handlers for the event. Torus <em>does not currently delegate events</em>. Each event is bound to the given element directly. However, this may change in the future as Torus is used in more complex UIs.</p>
+<div class="line"><div class="doc"><p><code>events</code> is a dictionary of events and event listeners. Each key in the dictionary
+is an event name, like <code>&#39;click&#39;</code> or <code>&#39;mouseover&#39;</code>, and each value is either a single
+function or an array of functions that are handlers for the event. Torus <em>does not
+currently delegate events</em>. Each event is bound to the given element directly. However,
+this may change in the future as Torus is used in more complex UIs.</p>
 </div><pre class="source javascript"><strong class="lineNumber">87</strong>const $button = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">88</strong>    tag: 'button',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">89</strong>    events: {</pre></div>
@@ -97,7 +119,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">95</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">96</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">97</strong></pre></div>
-<div class="line"><div class="doc"><p><code>children</code> is a flat array of the element&#39;s children, in JDOM format. This means children can be any string, <code>null</code>s, or other JDOM &quot;nodes&quot; as objects.</p>
+<div class="line"><div class="doc"><p><code>children</code> is a flat array of the element&#39;s children, in JDOM format. This means
+children can be any string, <code>null</code>s, or other JDOM &quot;nodes&quot; as objects.</p>
 </div><pre class="source javascript"><strong class="lineNumber">100</strong>const $container = {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">101</strong>    // Implied 'div'</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">102</strong>    children: [</pre></div>
@@ -113,11 +136,19 @@
 <div class="line"><div class="doc"><h3 id="the-jdom-template-tag">The <code>jdom</code> template tag</h3>
 </div><pre class="source javascript"><strong class="lineNumber">113</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>These basic rules allow us to compose relatively complex elements that are still readable, but JDOM is an intermediate representation used for reconciliation and rendering, and isn&#39;t suitable for writing good code. To help writing component markup easier, Torus comes with a helper function in the form of a <a href="https://wesbos.com/tagged-template-literals/">template tag</a>.</p>
+<div class="line"><div class="doc"><p>These basic rules allow us to compose relatively complex elements
+that are still readable, but JDOM is an intermediate representation used for
+reconciliation and rendering, and isn&#39;t suitable for writing good code.
+To help writing component markup easier, Torus comes with a helper function
+in the form of a <a href="https://wesbos.com/tagged-template-literals/">template tag</a>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">119</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">120</strong>jdom`&#60;p&#62;Hi&#60;/p&#62;`; // creates JDOM for &#60;p&#62;Hi&#60;/p&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">121</strong></pre></div>
-<div class="line"><div class="doc"><p>This function, called <code>jdom</code>, allows us to write in plain HTML markup with variables and dynamic template values mixed in, and it&#39;ll translate our markup to valid JDOM <em>during runtime</em>. This means there&#39;s <em>no compilation</em> and <em>no build step</em>. Despite the fact that templates are parsed at runtime, because each template is cached on the first read, rendering remains fast.</p>
+<div class="line"><div class="doc"><p>This function, called <code>jdom</code>, allows us to write in plain HTML markup
+with variables and dynamic template values mixed in, and it&#39;ll translate our
+markup to valid JDOM <em>during runtime</em>. This means there&#39;s <em>no compilation</em> and
+<em>no build step</em>. Despite the fact that templates are parsed at runtime, because
+each template is cached on the first read, rendering remains fast.</p>
 </div><pre class="source javascript"><strong class="lineNumber">127</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">128</strong>let name = 'Dan';</pre></div>
 <div class="line"><div class="doc"><p>We can embed variables into <code>jdom</code> templates.</p>
@@ -125,14 +156,19 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">131</strong>    My name is ${name}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">132</strong>&#60;/strong&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">133</strong></pre></div>
-<div class="line"><div class="doc"><p>Using the <code>jdom</code> template tag, we can express everything that JDOM can represent using HTML-like markup. Here, we bind an event listener to this <code>&lt;input&gt;</code> element by passing in a function as an <code>onchange</code> value.</p>
+<div class="line"><div class="doc"><p>Using the <code>jdom</code> template tag, we can express everything that JDOM can represent
+using HTML-like markup. Here, we bind an event listener to this <code>&lt;input&gt;</code> element
+by passing in a function as an <code>onchange</code> value.</p>
 </div><pre class="source javascript"><strong class="lineNumber">137</strong>jdom`&#60;input</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">138</strong>    type="text"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">139</strong>    value="${user_input_value}"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">140</strong>    onchange="${evt =&#62; console.log(evt.target.value)}"</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">141</strong>/&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">142</strong></pre></div>
-<div class="line"><div class="doc"><p>Of course, we can embed children elements inside <code>jdom</code> templates. The template tag allows children to be either a single element or JDOM object, or an array of element (HTML node) or JDOM objects. This allows nesting sub-lists in lists easy.</p>
+<div class="line"><div class="doc"><p>Of course, we can embed children elements inside <code>jdom</code> templates. The template
+tag allows children to be either a single element or JDOM object, or an array
+of element (HTML node) or JDOM objects. This allows nesting sub-lists in lists
+easy.</p>
 </div><pre class="source javascript"><strong class="lineNumber">147</strong>const snippet = jdom`&#60;h1&#62;This is a title&#60;/h1&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">148</strong>const listPart = [</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">149</strong>    document.createElement('li'),</pre></div>
@@ -147,26 +183,43 @@
 <div class="line"><div class="doc"><p>As a bonus, quotes are optional...</p>
 </div><pre class="source javascript"><strong class="lineNumber">159</strong>jdom`&#60;input type=text value=default-value /&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">160</strong></pre></div>
-<div class="line"><div class="doc"><p>... and general closing tags <code>&lt;/&gt;</code> can close out their corresponding tags, although this can make for less readable code and isn&#39;t recommended most of the time. This can come in handy if our tag name changes conditionally.</p>
+<div class="line"><div class="doc"><p>... and general closing tags <code>&lt;/&gt;</code> can close out their corresponding tags, although
+this can make for less readable code and isn&#39;t recommended most of the time. This can
+come in handy if our tag name changes conditionally.</p>
 </div><pre class="source javascript"><strong class="lineNumber">164</strong>const tagName = isEven(someNumber) ? 'em' : 'strong';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">165</strong>jdom`&#60;span&#62;&#60;${tagName}&#62;${someNumber} is my favorite number.&#60;/&#62;&#60;/span&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">166</strong></pre></div>
 <div class="line"><div class="doc"><p><strong>An important note on security</strong></p>
 </div><pre class="source javascript"><strong class="lineNumber">168</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Inline <code>&lt;script&gt;</code> tags are well known to be a source of many tricky security issues, and are generally best avoided unless it&#39;s the only way to solve your problem at hand. Inline scripts are especially problematic in templating code like <code>jdom</code> because it&#39;s easy to write templates and accidentally forget to escape user input when rendering it into DOM.</p>
+<div class="line"><div class="doc"><p>Inline <code>&lt;script&gt;</code> tags are well known to be a source of many tricky security issues,
+and are generally best avoided unless it&#39;s the only way to solve your problem at hand.
+Inline scripts are especially problematic in templating code like <code>jdom</code> because it&#39;s easy
+to write templates and accidentally forget to escape user input when rendering it into DOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">173</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>To help alleviate the potential security risks here, <strong>no user-provided input (no variable passed into <code>jdom</code> templates inside curly braces) will <em>ever</em> be parsed into HTML</strong> by the template processor. This prevents potential cross-site scripting issues or premature <code>&lt;script&gt;</code> tag terminations, for example, but it means that you&#39;ll have to wrap any template string in <code>jdom</code> tags, even if it&#39;s inside another <code>jdom</code> tagged template.</p>
+<div class="line"><div class="doc"><p>To help alleviate the potential security risks here, <strong>no user-provided input (no variable
+passed into <code>jdom</code> templates inside curly braces) will <em>ever</em> be parsed into HTML</strong> by the
+template processor. This prevents potential cross-site scripting issues or premature <code>&lt;script&gt;</code>
+tag terminations, for example, but it means that you&#39;ll have to wrap any template string in
+<code>jdom</code> tags, even if it&#39;s inside another <code>jdom</code> tagged template.</p>
 </div><pre class="source javascript"><strong class="lineNumber">179</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>On a related note, if you <em>must</em> use an inline <code>&lt;script&gt;</code> in a template, <code>jdom</code> allows this (for now). However, you&#39;ll want to escape the entire contents of the script tag, by wrapping the full contents of the tag in curly braces, to avoid security pitfalls around escaping code.</p>
+<div class="line"><div class="doc"><p>On a related note, if you <em>must</em> use an inline <code>&lt;script&gt;</code> in a template, <code>jdom</code> allows this
+(for now). However, you&#39;ll want to escape the entire contents of the script tag, by wrapping
+the full contents of the tag in curly braces, to avoid security pitfalls around escaping code.</p>
 </div><pre class="source javascript"><strong class="lineNumber">183</strong>jdom`&#60;script&#62;${'console.log("This is highly discouraged, for security reasons.")'}&#60;/script&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">184</strong></pre></div>
 <div class="line"><div class="doc"><h2 id="component">Component</h2>
 </div><pre class="source javascript"><strong class="lineNumber">186</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>In Torus, we build user interfaces by composing and connecting reusable components together. A Torus component extends the base <code>Component</code> class, and has a <code>#compose()</code> method that returns the JDOM representation of the UI component&#39;s DOM. Torus uses this method to render the component. Because Torus renders components declaratively, we should avoid calling methods on the component (like mutating the local state) within <code>#compose()</code>. Mutating state during render may lead to race conditions or infinite loops, since state mutations are usually linked to more render calls.</p>
+<div class="line"><div class="doc"><p>In Torus, we build user interfaces by composing and connecting reusable components
+together. A Torus component extends the base <code>Component</code> class, and has a <code>#compose()</code>
+method that returns the JDOM representation of the UI component&#39;s DOM. Torus uses this
+method to render the component. Because Torus renders components declaratively, we should
+avoid calling methods on the component (like mutating the local state) within <code>#compose()</code>.
+Mutating state during render may lead to race conditions or infinite loops, since state mutations
+are usually linked to more render calls.</p>
 </div><pre class="source javascript"><strong class="lineNumber">194</strong>class MyFirstComponent extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">195</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">196</strong>    compose() {</pre></div>
@@ -187,37 +240,57 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">211</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">212</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">213</strong></pre></div>
-<div class="line"><div class="doc"><p>Now that we&#39;ve defined a component, we can render that component to our page. Each component has a <code>#node</code> property, which always represents the root DOM node of that component. To add our component to the page, we can just create a new instance of our component and add its node to the document.</p>
+<div class="line"><div class="doc"><p>Now that we&#39;ve defined a component, we can render that component to our page.
+Each component has a <code>#node</code> property, which always represents the root
+DOM node of that component. To add our component to the page, we can just create
+a new instance of our component and add its node to the document.</p>
 </div><pre class="source javascript"><strong class="lineNumber">218</strong>const first = new MyFirstComponent();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>We use the native <code>appendChild()</code> API to add our node to the page.</p>
 </div><pre class="source javascript"><strong class="lineNumber">220</strong>document.body.appendChild(first.node);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">221</strong></pre></div>
-<div class="line"><div class="doc"><p>All components have a <code>#render()</code> method that&#39;s provided by Torus. The render method is owned by Torus, and we rarely need to override it, because we tell torus what to render with <code>#compose()</code>. But if we want to tell torus to re-compose and re-render our component, we can do so by calling <code>Component#render()</code>.</p>
+<div class="line"><div class="doc"><p>All components have a <code>#render()</code> method that&#39;s provided by Torus. The render method
+is owned by Torus, and we rarely need to override it, because we tell torus what to render
+with <code>#compose()</code>. But if we want to tell torus to re-compose and re-render our component,
+we can do so by calling <code>Component#render()</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">226</strong>const second = new MySecondComponent(); // rendered once, by default, on initialization</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">227</strong>second.render(); // rendered a second time</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">228</strong></pre></div>
-<div class="line"><div class="doc"><p>Torus intelligently only mutates the DOM on the page if anything has changed, so renders are quick and efficient (but not free -- we should still only call render when we have something new to display).</p>
+<div class="line"><div class="doc"><p>Torus intelligently only mutates the DOM on the page if anything has changed, so
+renders are quick and efficient (but not free -- we should still only call render
+when we have something new to display).</p>
 </div><pre class="source javascript"><strong class="lineNumber">232</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Sometimes, we need to create components with different properties each time. We define the initial state of our component in an <code>#init()</code> method, which is called with the arguments passed in when we construct an instance of our component. The init method is also a good place to bind methods and listen to event targets.</p>
+<div class="line"><div class="doc"><p>Sometimes, we need to create components with different properties each time.
+We define the initial state of our component in an <code>#init()</code> method, which is called
+with the arguments passed in when we construct an instance of our component.
+The init method is also a good place to bind methods and listen to event targets.</p>
 </div><pre class="source javascript"><strong class="lineNumber">237</strong>class Tweet extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">238</strong></pre></div>
-<div class="line"><div class="doc"><p>This is called from the parent class&#39;s constructor. Why is it called <code>init()</code> and not <code>constructor()</code>, you might ask? There are a few reasons why I made this call. Primarily, this ensured that components always had a valid and correct <code>#node</code> property by allowing Torus to render all components in the constructor. This allows for the component system to have a generally more ergonomic API. We can read and override <code>Component#super()</code> if we want to extend Torus&#39;s functionality.</p>
+<div class="line"><div class="doc"><p>This is called from the parent class&#39;s constructor.
+Why is it called <code>init()</code> and not <code>constructor()</code>, you might ask?
+There are a few reasons why I made this call. Primarily, this ensured that
+components always had a valid and correct <code>#node</code> property by allowing
+Torus to render all components in the constructor. This allows for the component
+system to have a generally more ergonomic API. We can read and override
+<code>Component#super()</code> if we want to extend Torus&#39;s functionality.</p>
 </div><pre class="source javascript"><strong class="lineNumber">246</strong>    init(author, content) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">247</strong>        this.author = author;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">248</strong>        this.content = content;</pre></div>
-<div class="line"><div class="doc"><p>For some reason, if we want this component to update every time the window is resized, we can do add kinds of listeners here.</p>
+<div class="line"><div class="doc"><p>For some reason, if we want this component to update every time
+the window is resized, we can do add kinds of listeners here.</p>
 </div><pre class="source javascript"><strong class="lineNumber">251</strong>        this.render = this.render.bind(this);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">252</strong>        window.addEventListener('resize', this.render);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">253</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">254</strong></pre></div>
-<div class="line"><div class="doc"><p>Since we bound a listener in <code>init()</code>, we need to make sure we clean up after ourselves.</p>
+<div class="line"><div class="doc"><p>Since we bound a listener in <code>init()</code>, we need to make sure we clean up
+after ourselves.</p>
 </div><pre class="source javascript"><strong class="lineNumber">257</strong>    remove() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">258</strong>        window.removeEventListener('resize', this.render);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">259</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">260</strong></pre></div>
-<div class="line"><div class="doc"><p>We can access the instance and class variables within our JDOM template, because it&#39;s just a JavaScript method.</p>
+<div class="line"><div class="doc"><p>We can access the instance and class variables within our JDOM template,
+because it&#39;s just a JavaScript method.</p>
 </div><pre class="source javascript"><strong class="lineNumber">263</strong>    compose() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">264</strong>        return jdom`&#60;div class="tweet"&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">265</strong>            &#60;div&#62;${this.content}&#60;/div&#62;</pre></div>
@@ -228,7 +301,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">270</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">271</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">272</strong></pre></div>
-<div class="line"><div class="doc"><p>We can have components with event listeners and other methods that we use to respond to events</p>
+<div class="line"><div class="doc"><p>We can have components with event listeners and other methods
+that we use to respond to events</p>
 </div><pre class="source javascript"><strong class="lineNumber">275</strong>class FancyInput extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">276</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">277</strong>    init() {</pre></div>
@@ -252,14 +326,17 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">295</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">296</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">297</strong></pre></div>
-<div class="line"><div class="doc"><p>If we need to fetch data within a component, here&#39;s one way to do so, by re-rendering when new data arrives. Let&#39;s say we want a component that displays a list of the top 10 winners in some competition, using a JSON API.</p>
+<div class="line"><div class="doc"><p>If we need to fetch data within a component, here&#39;s one way to do so, by
+re-rendering when new data arrives. Let&#39;s say we want a component that displays
+a list of the top 10 winners in some competition, using a JSON API.</p>
 </div><pre class="source javascript"><strong class="lineNumber">301</strong>class RankingsList extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">302</strong></pre></div>
 <div class="line"><div class="doc"><p>Let&#39;s say we want this component to display top 10 places by default</p>
 </div><pre class="source javascript"><strong class="lineNumber">304</strong>    init(limit = 10) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">305</strong>        this.limit = limit;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">306</strong>        this.rankings = [];</pre></div>
-<div class="line"><div class="doc"><p>We don&#39;t always want to fetch when we create a view, but just for today, let&#39;s say we&#39;ll fetch for new data when this view first appears.</p>
+<div class="line"><div class="doc"><p>We don&#39;t always want to fetch when we create a view, but just for today,
+let&#39;s say we&#39;ll fetch for new data when this view first appears.</p>
 </div><pre class="source javascript"><strong class="lineNumber">309</strong>        this.fetch();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">310</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">311</strong></pre></div>
@@ -275,7 +352,10 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">320</strong>    compose() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">321</strong>        return jdom`&#60;ol&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">322</strong>            ${this.rankings.map(winner =&#62; {</pre></div>
-<div class="line"><div class="doc"><p>We can nest a template within a template to render a very simple list like this. For more complex lists, we&#39;ll want to use a <code>List</code> component, like the one below, where each item gets its own component.</p>
+<div class="line"><div class="doc"><p>We can nest a template within a template to render
+a very simple list like this. For more complex lists,
+we&#39;ll want to use a <code>List</code> component, like the one below,
+where each item gets its own component.</p>
 </div><pre class="source javascript"><strong class="lineNumber">327</strong>                return jdom`&#60;li&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">328</strong>                    ${winner.name}, from ${winner.city}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">329</strong>                &#60;/li&#62;`;</pre></div>
@@ -285,23 +365,33 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">333</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">334</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">335</strong></pre></div>
-<div class="line"><div class="doc"><p>One notable difference between Torus&#39;s and React&#39;s component API, which this somewhat resembles, is that Torus components are much more self-managing. Torus components are long-lived and have state, and so have no lifecycle methods, but instead call <code>#render</code> imperatively whenever the component&#39;s DOM tree needs to update (when local state changes or a data source emits an event). This manual render-call replaces React&#39;s <code>shouldComponentUpdate</code> in a sense, and means that render functions are <em>never</em> run unless a re-render is explicitly requested as the result of a state change, even if the component in question is a child of a parent that re-renders frequently.</p>
+<div class="line"><div class="doc"><p>One notable difference between Torus&#39;s and React&#39;s component API, which this somewhat
+resembles, is that Torus components are much more self-managing. Torus components
+are long-lived and have state, and so have no lifecycle methods, but instead call
+<code>#render</code> imperatively whenever the component&#39;s DOM tree needs to update (when
+local state changes or a data source emits an event). This manual render-call replaces
+React&#39;s <code>shouldComponentUpdate</code> in a sense, and means that render functions are <em>never</em>
+run unless a re-render is explicitly requested as the result of a state change, even if
+the component in question is a child of a parent that re-renders frequently.</p>
 </div><pre class="source javascript"><strong class="lineNumber">344</strong>class AppWithSidebar extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">345</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">346</strong>    init() {</pre></div>
-<div class="line"><div class="doc"><p>As a downside of that tradeoff, we need to keep track of children components ourselves...</p>
+<div class="line"><div class="doc"><p>As a downside of that tradeoff, we need to keep track
+of children components ourselves...</p>
 </div><pre class="source javascript"><strong class="lineNumber">349</strong>        this.sidebar = new Sidebar();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">350</strong>        this.main = new MainPanel();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">351</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">352</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">353</strong>    remove() {</pre></div>
-<div class="line"><div class="doc"><p>... but most of that just means instantiating and removing children views inside parent views, like this.</p>
+<div class="line"><div class="doc"><p>... but most of that just means instantiating and removing children views
+inside parent views, like this.</p>
 </div><pre class="source javascript"><strong class="lineNumber">356</strong>        this.sidebar.remove();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">357</strong>        this.main.remove();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">358</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">359</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">360</strong>    compose() {</pre></div>
-<div class="line"><div class="doc"><p>Because we can embed HTML nodes inside <code>jdom</code> templates, we can include our children components in the parent component&#39;s DOM tree easily, like this.</p>
+<div class="line"><div class="doc"><p>Because we can embed HTML nodes inside <code>jdom</code> templates, we can
+include our children components in the parent component&#39;s DOM tree easily, like this.</p>
 </div><pre class="source javascript"><strong class="lineNumber">363</strong>        return jdom`&#60;div class="root"&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">364</strong>            ${this.sidebar.node}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">365</strong>            ${this.main.node}</pre></div>
@@ -313,14 +403,24 @@
 <div class="line"><div class="doc"><h3 id="componentfrom-and-functional-components"><code>Component.from()</code> and functional components</h3>
 </div><pre class="source javascript"><strong class="lineNumber">372</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Often, we want to create a new Component class whose rendered result only depends on its initial input. These might be small UI widgets in a design system like buttons and dialogs, for example. In these cases where we don&#39;t need a component to keep local state, listen for events, or create side effects, we can describe the component&#39;s view with a pure function.</p>
+<div class="line"><div class="doc"><p>Often, we want to create a new Component class whose rendered result only depends on its
+initial input. These might be small UI widgets in a design system like buttons and dialogs,
+for example. In these cases where we don&#39;t need a component to keep local state, listen for
+events, or create side effects, we can describe the component&#39;s view with a pure function.</p>
 </div><pre class="source javascript"><strong class="lineNumber">377</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Here&#39;s an example of a purely functional component. It returns a JDOM representation. To distinguish functional components from class-based Torus components in usage, by convention, we name functional components with a name that begins with a lowercase letter. This distinction is helpful, because we use the <code>new</code> keyword with class components, and call their <code>compose()</code> method to get JDOM, while we call functional components directly to get JDOM.</p>
+<div class="line"><div class="doc"><p>Here&#39;s an example of a purely functional component. It returns a JDOM representation. To distinguish
+functional components from class-based Torus components in usage, by convention, we name functional
+components with a name that begins with a lowercase letter. This distinction is helpful, because
+we use the <code>new</code> keyword with class components, and call their <code>compose()</code> method to get JDOM,
+while we call functional components directly to get JDOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">383</strong>const fancyButton = buttonText =&#62;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">384</strong>    jdom`&#60;button class="fancy"&#62;${buttonText}&#60;/button&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">385</strong></pre></div>
-<div class="line"><div class="doc"><p>Because these kinds of function &quot;components&quot; will return valid JDOM, we can compose them into any other <code>Component#compose()</code> method. Remember, <code>fancyButton</code> is just a JavaScript function! This allows for easy abstraction and code reuse within small parts of our rendering logic. Here, we can just pass the return value of <code>fancyButton()</code> off to another template.</p>
+<div class="line"><div class="doc"><p>Because these kinds of function &quot;components&quot; will return valid JDOM, we can compose them
+into any other <code>Component#compose()</code> method. Remember, <code>fancyButton</code> is just a JavaScript
+function! This allows for easy abstraction and code reuse within small parts of our rendering logic.
+Here, we can just pass the return value of <code>fancyButton()</code> off to another template.</p>
 </div><pre class="source javascript"><strong class="lineNumber">390</strong>class FancyForm extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">391</strong>    compose() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">392</strong>        return `&#60;form&#62;</pre></div>
@@ -331,15 +431,22 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">397</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">398</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">399</strong></pre></div>
-<div class="line"><div class="doc"><p>But what if we want to compose our <code>fancyButton</code> with <code>Styled()</code> or use it in more complex views? We can upgrade the function component <code>fancyButton</code> to a full-fledged Torus class component with <code>Component.from()</code>. These two ways of defining <code>fancyButton</code> are equivalent. Here, <code>ClassyButton</code> emits exactly the same DOM as <code>fancyButton</code> when rendered, but it&#39;s gained additional capabilities accessible to a class component in Torus, like persistence across renders of the parent component and better composability with <code>Styled()</code> and <code>ListOf()</code>.</p>
+<div class="line"><div class="doc"><p>But what if we want to compose our <code>fancyButton</code> with <code>Styled()</code> or use it in more complex views?
+We can upgrade the function component <code>fancyButton</code> to a full-fledged Torus class component with
+<code>Component.from()</code>. These two ways of defining <code>fancyButton</code> are equivalent.
+Here, <code>ClassyButton</code> emits exactly the same DOM as <code>fancyButton</code> when rendered, but it&#39;s gained
+additional capabilities accessible to a class component in Torus, like persistence across renders of
+the parent component and better composability with <code>Styled()</code> and <code>ListOf()</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">406</strong>const ClassyButton = Component.from(fancyButton);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>This takes a purely functional component and returns a class component whose constructor takes the same arguments (<code>buttonText</code> in this case) and renders to the given JDOM.</p>
+<div class="line"><div class="doc"><p>This takes a purely functional component and returns a class component whose constructor
+takes the same arguments (<code>buttonText</code> in this case) and renders to the given JDOM.</p>
 </div><pre class="source javascript"><strong class="lineNumber">409</strong>const ClassyButton = Component.from(buttonText =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">410</strong>    return jdom`&#60;button class="fancy"&#62;${buttonText}&#60;/button&#62;`;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">411</strong>});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">412</strong></pre></div>
-<div class="line"><div class="doc"><p>We can use these upgraded components this way, by creating an instance of it and accessing its <code>#node</code>.</p>
+<div class="line"><div class="doc"><p>We can use these upgraded components this way, by creating an instance of it and
+accessing its <code>#node</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">415</strong>class FancyForm extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">416</strong>    init() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">417</strong>        this.button = new ClassyButton('Submit!');</pre></div>
@@ -359,7 +466,9 @@
 <div class="line"><div class="doc"><h3 id="component-lifecycles">Component lifecycles</h3>
 </div><pre class="source javascript"><strong class="lineNumber">431</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Because Torus components are designed to be long-lived, it&#39;s useful to think about the &quot;life cycle&quot; of a component, and what methods are called on it by Torus from its creation to its destruction. Currently, it&#39;s a short list.</p>
+<div class="line"><div class="doc"><p>Because Torus components are designed to be long-lived, it&#39;s useful to think about
+the &quot;life cycle&quot; of a component, and what methods are called on it by Torus
+from its creation to its destruction. Currently, it&#39;s a short list.</p>
 </div><pre class="source javascript"><strong class="lineNumber">435</strong>const comp = new Component();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">436</strong>// 1. Create new component</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">437</strong>comp.init()</pre></div>
@@ -371,19 +480,29 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">443</strong>comp.remove();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">444</strong>    comp.unbind(); // called by remove()</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">445</strong></pre></div>
-<div class="line"><div class="doc"><p><strong>Note</strong>: It&#39;s generally a good idea to call <code>Component#remove()</code> when the component no longer becomes needed, like when a model tied to it is destroyed or the user switches to a completely different view. But because Torus components are lightweight, there&#39;s no need to use it as a memory management mechanism or to trigger garbage collection. Torus components, unlike React components, are designed to be long-lived and last through a full session or page lifecycle.</p>
+<div class="line"><div class="doc"><p><strong>Note</strong>: It&#39;s generally a good idea to call <code>Component#remove()</code> when the component
+no longer becomes needed, like when a model tied to it is destroyed or the user switches to a
+completely different view. But because Torus components are lightweight, there&#39;s no need to use
+it as a memory management mechanism or to trigger garbage collection. Torus components, unlike
+React components, are designed to be long-lived and last through a full session or page lifecycle.</p>
 </div><pre class="source javascript"><strong class="lineNumber">451</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><h3 id="accessing-stateful-htmlelement-methods">Accessing stateful HTMLElement methods</h3>
 </div><pre class="source javascript"><strong class="lineNumber">453</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Torus tries to define UI components as declaratively as possible, but the rest of the web, and crucially the DOM, expose stateful APIS, like <code>VideoElement.play()</code> and <code>FormElement.submit()</code>. React&#39;s approach to resolving this conflict is <a href="https://reactjs.org/docs/refs-and-the-dom.html">refs</a>, which are declaratively defined bindings to HTML elements that are later created by React&#39;s renderer. Torus&#39;s Component API is lower-level, and tries to expose the underlying DOM more transparently. Because we can embed literal DOM nodes within what <code>Component#compose()</code> returns, we can do this instead:</p>
+<div class="line"><div class="doc"><p>Torus tries to define UI components as declaratively as possible, but the rest of the web,
+and crucially the DOM, expose stateful APIS, like <code>VideoElement.play()</code> and <code>FormElement.submit()</code>.
+React&#39;s approach to resolving this conflict is <a href="https://reactjs.org/docs/refs-and-the-dom.html">refs</a>,
+which are declaratively defined bindings to HTML elements that are later created by React&#39;s renderer.
+Torus&#39;s Component API is lower-level, and tries to expose the underlying DOM more transparently.
+Because we can embed literal DOM nodes within what <code>Component#compose()</code> returns, we can do this instead:</p>
 </div><pre class="source javascript"><strong class="lineNumber">460</strong>class MyVideoPlayer extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">461</strong></pre></div>
 <div class="line"><div class="doc"><p><strong>Option A</strong></p>
 </div><pre class="source javascript"><strong class="lineNumber">463</strong>    init() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Create a new element when the component is created, and keep track of it.</p>
+<div class="line"><div class="doc"><p>Create a new element when the component is created,
+and keep track of it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">466</strong>        this.videoEl = document.createElement('video');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">467</strong>        this.videoEl.src = '/videos/abc';</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">468</strong>    }</pre></div>
@@ -406,12 +525,14 @@
 <div class="line"><div class="doc"><p><strong>Option B</strong></p>
 </div><pre class="source javascript"><strong class="lineNumber">486</strong>    submit() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Because the root element of this component is the <code>&lt;form/&gt;</code>, this.node corresponds to the form element.</p>
+<div class="line"><div class="doc"><p>Because the root element of this component is
+the <code>&lt;form/&gt;</code>, this.node corresponds to the form element.</p>
 </div><pre class="source javascript"><strong class="lineNumber">489</strong>        this.node.submit();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">490</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">491</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">492</strong>    getFirstInput() {</pre></div>
-<div class="line"><div class="doc"><p>This isn&#39;t ideal. I don&#39;t think this will be a commonly required pattern.</p>
+<div class="line"><div class="doc"><p>This isn&#39;t ideal. I don&#39;t think this will be a commonly
+required pattern.</p>
 </div><pre class="source javascript"><strong class="lineNumber">495</strong>        return this.node.querySelector('input');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">496</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">497</strong></pre></div>
@@ -429,33 +550,46 @@
 <div class="line"><div class="doc"><h3 id="styled-components-and-componentpreprocess">Styled components and <code>Component#preprocess()</code></h3>
 </div><pre class="source javascript"><strong class="lineNumber">509</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Although you can use Torus perfectly without using CSS in JS, if you like declaring your view styles in your component code, as I do, Torus has an efficient and well-integrated solution, called styled components (not to be confused with React&#39;s <code>styled-components</code>, which has a similar idea but wildly different API).</p>
+<div class="line"><div class="doc"><p>Although you can use Torus perfectly without using CSS in JS,
+if you like declaring your view styles in your component code, as I do,
+Torus has an efficient and well-integrated solution, called styled components
+(not to be confused with React&#39;s <code>styled-components</code>, which has a similar idea
+but wildly different API).</p>
 </div><pre class="source javascript"><strong class="lineNumber">515</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>You can create a styled Torus component by calling <code>Styled()</code> on a normal component</p>
 </div><pre class="source javascript"><strong class="lineNumber">517</strong>class NormalButton extends Component { /*...*/ }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">518</strong>const StyledButton = Styled(NormalButton);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">519</strong></pre></div>
-<div class="line"><div class="doc"><p>But Torus already comes with <code>StyledComponent</code>, which is just <code>Styled(Component)</code>. You should extend <code>StyledComponent</code> for new components, and only use the <code>Styled()</code> wrapper if you don&#39;t have access to the original component&#39;s code, such as when styling the default <code>List</code> implementation (below).</p>
+<div class="line"><div class="doc"><p>But Torus already comes with <code>StyledComponent</code>, which is just <code>Styled(Component)</code>.
+You should extend <code>StyledComponent</code> for new components, and only use the <code>Styled()</code>
+wrapper if you don&#39;t have access to the original component&#39;s code, such as when styling
+the default <code>List</code> implementation (below).</p>
 </div><pre class="source javascript"><strong class="lineNumber">524</strong>const StyledComponent = Styled(Component); // literally what's in Torus's source code</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">525</strong></pre></div>
 <div class="line"><div class="doc"><p>Here&#39;s a sample of the ways you can define styles this way.</p>
 </div><pre class="source javascript"><strong class="lineNumber">527</strong>class FancyList extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">528</strong></pre></div>
-<div class="line"><div class="doc"><p>We define all of our styles in a <code>styles()</code> method, which returns a JSON that resembles normal CSS, but with nesting and automagical media query resolution, as well as downward scoping of CSS rules to this component. That means that when we style <code>button</code> in this component, it won&#39;t ever conflict with other <code>button</code> elements anywhere else on the page.</p>
+<div class="line"><div class="doc"><p>We define all of our styles in a <code>styles()</code> method, which returns a JSON
+that resembles normal CSS, but with nesting and automagical media query resolution,
+as well as downward scoping of CSS rules to this component. That means that when we
+style <code>button</code> in this component, it won&#39;t ever conflict with other <code>button</code> elements
+anywhere else on the page.</p>
 </div><pre class="source javascript"><strong class="lineNumber">534</strong>    styles() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">535</strong>        return {</pre></div>
 <div class="line"><div class="doc"><p>Normal CSS properties are applied to the root node</p>
 </div><pre class="source javascript"><strong class="lineNumber">537</strong>            'font-size': '18px',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">538</strong>            'background': 'rgba(0, 0, 0, .4)',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">539</strong></pre></div>
-<div class="line"><div class="doc"><p>Keyframes and media queries will be scoped globally, just like in CSS</p>
+<div class="line"><div class="doc"><p>Keyframes and media queries will be scoped globally,
+just like in CSS</p>
 </div><pre class="source javascript"><strong class="lineNumber">542</strong>            '@keyframes some-name': {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">543</strong>                'from': {'opacity': 0},</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">544</strong>                'to': {'opacity': 1},</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">545</strong>            },</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">546</strong></pre></div>
-<div class="line"><div class="doc"><p>Note that we don&#39;t select the element again inside @media -- that&#39;s done for us by styled components.</p>
+<div class="line"><div class="doc"><p>Note that we don&#39;t select the element again
+inside @media -- that&#39;s done for us by styled components.</p>
 </div><pre class="source javascript"><strong class="lineNumber">549</strong>            '@media (min-width: 600px)': {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">550</strong>                'border-color': 'rgb(0, 1, 2)',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">551</strong>                'p': {</pre></div>
@@ -463,7 +597,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">553</strong>                },</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">554</strong>            },</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">555</strong></pre></div>
-<div class="line"><div class="doc"><p>We can use SCSS-like syntax for hierarchy. &#39;&amp;&#39; are replaced by the parent selector.</p>
+<div class="line"><div class="doc"><p>We can use SCSS-like syntax for hierarchy.
+&#39;&amp;&#39; are replaced by the parent selector.</p>
 </div><pre class="source javascript"><strong class="lineNumber">558</strong>            '&#38;.invalid': { // FancyList.invalid</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">559</strong>                'color': 'red',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">560</strong>            },</pre></div>
@@ -484,10 +619,16 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">575</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">576</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">577</strong></pre></div>
-<div class="line"><div class="doc"><p>Torus also comes with a template tag, <code>css</code>, that makes writing CSS like this less tedioius, by parsing a single block of string into the styles object for you. Using this template tag, <code>FancyList</code> can look like this.</p>
+<div class="line"><div class="doc"><p>Torus also comes with a template tag, <code>css</code>, that makes writing CSS like this
+less tedioius, by parsing a single block of string into the styles object for you.
+Using this template tag, <code>FancyList</code> can look like this.</p>
 </div><pre class="source javascript"><strong class="lineNumber">581</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Styles defined with the <code>css</code> template tag are cached for render, so for stylesheets that do not change often between renders, writing styles with the template tag may yield performance benefits over defining styles as objects, like above. For styles that change often, however, code in hot paths may perform better with inline styles in JDOM or with styles defined as objects, not through the template tag.</p>
+<div class="line"><div class="doc"><p>Styles defined with the <code>css</code> template tag are cached for render, so for stylesheets
+that do not change often between renders, writing styles with the template tag may yield performance
+benefits over defining styles as objects, like above. For styles that change often, however,
+code in hot paths may perform better with inline styles in JDOM or with styles defined as objects,
+not through the template tag.</p>
 </div><pre class="source javascript"><strong class="lineNumber">587</strong>class FancyList extends StyledComponent {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">588</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">589</strong>    styles() {</pre></div>
@@ -538,7 +679,9 @@
 <div class="line"><div class="doc"><h3 id="record">Record</h3>
 </div><pre class="source javascript"><strong class="lineNumber">634</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p><code>Record</code> is how Torus represents a unit of mutable state, whether that&#39;s global app state, some user state, or a model fetched from the server. Let&#39;s say we want to make a page for a cake shop. We can have a record represent a cake customers can buy.</p>
+<div class="line"><div class="doc"><p><code>Record</code> is how Torus represents a unit of mutable state, whether that&#39;s global
+app state, some user state, or a model fetched from the server. Let&#39;s say we want to
+make a page for a cake shop. We can have a record represent a cake customers can buy.</p>
 </div><pre class="source javascript"><strong class="lineNumber">638</strong>class CakeProduct extends Record {}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">639</strong></pre></div>
 <div class="line"><div class="doc"><p>To create an instance of a cake...</p>
@@ -565,7 +708,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">661</strong>cake2.get('price_usd');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">662</strong>// 13.99</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">663</strong></pre></div>
-<div class="line"><div class="doc"><p>To update something about the record, call &#39;#update()` with a dictionary of the new properties.</p>
+<div class="line"><div class="doc"><p>To update something about the record, call &#39;#update()` with a dictionary
+of the new properties.</p>
 </div><pre class="source javascript"><strong class="lineNumber">666</strong>cake2.update({</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">667</strong>    name: 'Chocolate Volcano',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">668</strong>    price_usd: 12.99,</pre></div>
@@ -573,7 +717,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">670</strong>cake2.get('price_usd');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">671</strong>// 12.99</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">672</strong></pre></div>
-<div class="line"><div class="doc"><p><code>Record#serialize()</code> will return a JSON-serialized version of the state of the record. Normally, this is the same as the summary, but we can override this behavior as appropriate.</p>
+<div class="line"><div class="doc"><p><code>Record#serialize()</code> will return a JSON-serialized version of the state of the record.
+Normally, this is the same as the summary, but we can override this behavior as appropriate.</p>
 </div><pre class="source javascript"><strong class="lineNumber">675</strong>cake1.serialize();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">676</strong>/*</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">677</strong>    {</pre></div>
@@ -585,7 +730,8 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">683</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">684</strong>*/</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">685</strong></pre></div>
-<div class="line"><div class="doc"><p><code>Record#summarize()</code> returns a &quot;summary&quot; of the state of the record, which is a dictionary of all of its properties, plus its id, even if it&#39;s null.</p>
+<div class="line"><div class="doc"><p><code>Record#summarize()</code> returns a &quot;summary&quot; of the state of the record,
+which is a dictionary of all of its properties, plus its id, even if it&#39;s null.</p>
 </div><pre class="source javascript"><strong class="lineNumber">688</strong>cake2.summarize();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">689</strong>/*</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">690</strong>    {</pre></div>
@@ -597,14 +743,21 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">696</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">697</strong>*/</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">698</strong></pre></div>
-<div class="line"><div class="doc"><p>We can have components whose state is bound to a record&#39;s state, so when the record updates its properties, the component can respond appropriately. We do this with <code>Component#bind()</code></p>
+<div class="line"><div class="doc"><p>We can have components whose state is bound to a record&#39;s state, so when the record updates
+its properties, the component can respond appropriately. We do this with <code>Component#bind()</code></p>
 </div><pre class="source javascript"><strong class="lineNumber">701</strong>class CakeProductListing extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">702</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">703</strong>    init(cakeProduct) {</pre></div>
-<div class="line"><div class="doc"><p>Bind this component to <code>cakeProduct</code>, so that when <code>cakeProduct</code> updates, this callback function is called with the summary of the record. Usually, we&#39;ll want to re-render. Note that when we bind, it immediately calls the callback (in this case, <code>this.render(props)</code>) once. That means everything we need to run render should be defined before this bind call.</p>
+<div class="line"><div class="doc"><p>Bind this component to <code>cakeProduct</code>, so that when <code>cakeProduct</code>
+updates, this callback function is called with the summary of the record.
+Usually, we&#39;ll want to re-render. Note that when we bind, it immediately
+calls the callback (in this case, <code>this.render(props)</code>) once. That means
+everything we need to run render should be defined before this bind call.</p>
 </div><pre class="source javascript"><strong class="lineNumber">709</strong>        this.bind(cakeProduct, props =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p><code>compose()</code> will be called with <code>props</code>, the summary of the cake record. We don&#39;t always have to just re-render when the record updates. we can also do other things in this callback. But rendering is most common.</p>
+<div class="line"><div class="doc"><p><code>compose()</code> will be called with <code>props</code>, the summary of the cake record.
+We don&#39;t always have to just re-render when the record updates.
+we can also do other things in this callback. But rendering is most common.</p>
 </div><pre class="source javascript"><strong class="lineNumber">713</strong>            this.render(props);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">714</strong>        });</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">715</strong>    }</pre></div>
@@ -629,13 +782,18 @@
 <div class="line"><div class="doc"><h3 id="store">Store</h3>
 </div><pre class="source javascript"><strong class="lineNumber">735</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>A store represents a (potentially) ordered collection of records. Used in conjunction with lists below, stores are a good way of organizing records into list-like structures. Components can bind to stores just like they can bind to records.</p>
+<div class="line"><div class="doc"><p>A store represents a (potentially) ordered collection of records. Used in conjunction
+with lists below, stores are a good way of organizing records into list-like structures.
+Components can bind to stores just like they can bind to records.</p>
 </div><pre class="source javascript"><strong class="lineNumber">739</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>We can create a store by giving it an array of records.</p>
 </div><pre class="source javascript"><strong class="lineNumber">741</strong>const cakes = new Store([cake1, cake2]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p><code>Store#records</code> points to a <code>Set</code> instance with all the records in the collection. If you want to check the size of a store, use <code>#records.size</code>. But if you want to access the records in a store, <code>Store#summarize()</code> is a better interface, since it can be pre-sorted based on a comparator.</p>
+<div class="line"><div class="doc"><p><code>Store#records</code> points to a <code>Set</code> instance with all the records in the collection.
+If you want to check the size of a store, use <code>#records.size</code>.
+But if you want to access the records in a store, <code>Store#summarize()</code> is a better interface,
+since it can be pre-sorted based on a comparator.</p>
 </div><pre class="source javascript"><strong class="lineNumber">746</strong>cakes.records; // Set({ cake1, cake2 }), a Set</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">747</strong>cakes.records.size; // 2</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">748</strong>cakes.summarize(); // [cake1, cake2], an Array</pre></div>
@@ -646,7 +804,9 @@
 </div><pre class="source javascript"><strong class="lineNumber">752</strong>for (const cake of cakes) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">753</strong>    do_something_with_cake(cake);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">754</strong>}</pre></div>
-<div class="line"><div class="doc"><p>Like records, <code>Store#serialize()</code> returns a JSON representation of its contents. For stores, this means it&#39;s an array that contains the serialized JSON form of each of its records, sorted by the comparator (below).</p>
+<div class="line"><div class="doc"><p>Like records, <code>Store#serialize()</code> returns a JSON representation of its contents.
+For stores, this means it&#39;s an array that contains the serialized JSON form of each
+of its records, sorted by the comparator (below).</p>
 </div><pre class="source javascript"><strong class="lineNumber">758</strong>cakes.serialize(); // [{ /* cake1 props */ }, { /* cake2 props */ }]</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">759</strong></pre></div>
 <div class="line"><div class="doc"><p>We can also add to stores later...</p>
@@ -664,30 +824,39 @@
 <div class="line"><div class="doc"><p>... it&#39;ll return <code>null</code> if the store doesn&#39;t contain a match</p>
 </div><pre class="source javascript"><strong class="lineNumber">772</strong>cakes2.find(100); // null</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">773</strong></pre></div>
-<div class="line"><div class="doc"><p>If we want to refresh the contents of the store with a new set of cakes, we can use <code>#reset()</code>. This will also emit an event to any components listening.</p>
+<div class="line"><div class="doc"><p>If we want to refresh the contents of the store
+with a new set of cakes, we can use <code>#reset()</code>.
+This will also emit an event to any components listening.</p>
 </div><pre class="source javascript"><strong class="lineNumber">777</strong>cakeA = new CakeProduct(/*...*/);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">778</strong>cakeB = new CakeProduct(/*...*/);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">779</strong>cakes2.reset([cakeA, cakeB]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">780</strong>cakes2.summarize(); // [cakeA, cakeB]</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">781</strong></pre></div>
-<div class="line"><div class="doc"><p>In practice, we&#39;ll want to define a custom store that knows how to sort the collection in some order, and what record the collection contains. We can extend <code>Store</code> to do this.</p>
+<div class="line"><div class="doc"><p>In practice, we&#39;ll want to define a custom store that knows
+how to sort the collection in some order, and what record the collection
+contains. We can extend <code>Store</code> to do this.</p>
 </div><pre class="source javascript"><strong class="lineNumber">785</strong>class CakeProductStore extends Store {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">786</strong></pre></div>
-<div class="line"><div class="doc"><p>The <code>recordClass</code> getter tells the Store what this store contains.</p>
+<div class="line"><div class="doc"><p>The <code>recordClass</code> getter tells the Store
+what this store contains.</p>
 </div><pre class="source javascript"><strong class="lineNumber">789</strong>    get recordClass() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">790</strong>        return CakeProduct;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">791</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">792</strong></pre></div>
-<div class="line"><div class="doc"><p>The <code>comparator</code> getter returns a function that maps a record to the property it should be sorted <em>by</em>. So if we wanted to sort cakes by their names, we&#39;d write:</p>
+<div class="line"><div class="doc"><p>The <code>comparator</code> getter returns a function that maps a record
+to the property it should be sorted <em>by</em>. So if we wanted to sort
+cakes by their names, we&#39;d write:</p>
 </div><pre class="source javascript"><strong class="lineNumber">796</strong>    get comparator() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">797</strong>        return cake =&#62; cake.get('name');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">798</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">799</strong></pre></div>
-<div class="line"><div class="doc"><p>If you&#39;re looking for more advanced sorting behavior, you&#39;re welcome to override <code>Store#summarize()</code> in your subclass based on Torus&#39;s implementation.</p>
+<div class="line"><div class="doc"><p>If you&#39;re looking for more advanced sorting behavior, you&#39;re welcome
+to override <code>Store#summarize()</code> in your subclass based on Torus&#39;s implementation.</p>
 </div><pre class="source javascript"><strong class="lineNumber">802</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">803</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">804</strong></pre></div>
-<div class="line"><div class="doc"><p>Since our store now knows what it contains and how to sort it, it can do two more things.</p>
+<div class="line"><div class="doc"><p>Since our store now knows what it contains and how to sort it,
+it can do two more things.</p>
 </div><pre class="source javascript"><strong class="lineNumber">807</strong>const cakes = new CakeProductStore([cake1, cake2]);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>First, it can create new cakes from its properties</p>
@@ -700,7 +869,8 @@
 <div class="line"><div class="doc"><p>Second, it can also sort them by the comparator when providing a summary</p>
 </div><pre class="source javascript"><strong class="lineNumber">816</strong>cakes.summarize(); // [cake2, cake1, cake3], sorted by 'name'</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">817</strong></pre></div>
-<div class="line"><div class="doc"><p>Rather than overriding <code>get recordClass()</code> each time you subclass <code>Store</code>, Torus provides a <code>StoreOf()</code> shorthand, so you can write the above like this.</p>
+<div class="line"><div class="doc"><p>Rather than overriding <code>get recordClass()</code> each time you subclass <code>Store</code>,
+Torus provides a <code>StoreOf()</code> shorthand, so you can write the above like this.</p>
 </div><pre class="source javascript"><strong class="lineNumber">820</strong>class CakeProductStore extends StoreOf(CakeProduct) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">821</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">822</strong>    get comparator() {</pre></div>
@@ -712,17 +882,26 @@
 <div class="line"><div class="doc"><h2 id="list">List</h2>
 </div><pre class="source javascript"><strong class="lineNumber">829</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>80% of user interface development is about building lists, and the best UI platforms like iOS and (as of recently) Android come with great list view primitives like <code>UICollectionView</code> on iOS or <code>RecyclerView</code> on Android. The web doesn&#39;t, but Torus comes with a basic list view implementation that works well with Torus components for small lists, up to hundreds of items. (I might build a more performance-focused collection view later.)</p>
+<div class="line"><div class="doc"><p>80% of user interface development is about building lists, and the best
+UI platforms like iOS and (as of recently) Android come with great list view
+primitives like <code>UICollectionView</code> on iOS or <code>RecyclerView</code> on Android.
+The web doesn&#39;t, but Torus comes with a basic list view implementation that works
+well with Torus components for small lists, up to hundreds of items. (I might
+build a more performance-focused collection view later.)</p>
 </div><pre class="source javascript"><strong class="lineNumber">836</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>To define our own list component, we first create a component for each item in the list. Let&#39;s say we want to reimplement the <code>RankingsList</code> above as a Torus list component.</p>
+<div class="line"><div class="doc"><p>To define our own list component, we first create a component for each item
+in the list. Let&#39;s say we want to reimplement the <code>RankingsList</code> above
+as a Torus list component.</p>
 </div><pre class="source javascript"><strong class="lineNumber">840</strong>class WinnerListing extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">841</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">842</strong>    init(winner, removeCallback) {</pre></div>
 <div class="line"><div class="doc"><p>We can store the winner&#39;s properties here</p>
 </div><pre class="source javascript"><strong class="lineNumber">844</strong>        this.winner = winner;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>When we want to remove this item from the list (from a user event, for example), we can run this callback passed from <code>List</code>.</p>
+<div class="line"><div class="doc"><p>When we want to remove this item from the list
+(from a user event, for example), we can run this callback
+passed from <code>List</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">848</strong>        this.removeCallback = removeCallback;</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">849</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">850</strong></pre></div>
@@ -733,19 +912,24 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">855</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">856</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">857</strong>}</pre></div>
-<div class="line"><div class="doc"><p>We also need to define a Store for our winners, so we can have something the list can sync its contents with. Let&#39;s also give it a <code>fetch()</code> method.</p>
+<div class="line"><div class="doc"><p>We also need to define a Store for our winners, so we can have
+something the list can sync its contents with. Let&#39;s also give it a <code>fetch()</code> method.</p>
 </div><pre class="source javascript"><strong class="lineNumber">860</strong>class WinnerRecord extends Record {}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">861</strong>class WinnerStore extends StoreOf(WinnerRecord) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">862</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">863</strong>    async fetch() {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">864</strong>        const data = fetch('/api/v2/rankings').then(r =&#62; r.json());</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">865</strong>        const rankings = data.slice(0, this.limit);</pre></div>
-<div class="line"><div class="doc"><p>When new data comes back, reset the collection with the new list of winners.</p>
+<div class="line"><div class="doc"><p>When new data comes back, reset the collection with the new
+list of winners.</p>
 </div><pre class="source javascript"><strong class="lineNumber">868</strong>        this.reset(rankings.map(winner =&#62; new this.recordClass(winner)));</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">869</strong>    }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">870</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">871</strong>};</pre></div>
-<div class="line"><div class="doc"><p>Our list component extends <code>List</code>, which already implements creating and managing our <code>WinnerListing</code> views from a Store it&#39;s given on creation. Note that <code>List</code> is not styled by default. You can extend the styled version of the list component by extending from <code>Styled(List)</code>.</p>
+<div class="line"><div class="doc"><p>Our list component extends <code>List</code>, which already implements creating
+and managing our <code>WinnerListing</code> views from a Store it&#39;s given on creation.
+Note that <code>List</code> is not styled by default. You can extend the styled version
+of the list component by extending from <code>Styled(List)</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">876</strong>class WinnerList extends List {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">877</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">878</strong>    get itemClass() {</pre></div>
@@ -756,20 +940,29 @@
 <div class="line"><div class="doc"><p>Create a new store for winners</p>
 </div><pre class="source javascript"><strong class="lineNumber">884</strong>const winners = new WinnerStore();</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Create a new list view based on the store. This list will now stay in sync with the store&#39;s data until it&#39;s removed.</p>
+<div class="line"><div class="doc"><p>Create a new list view based on the store. This list will now stay in sync
+with the store&#39;s data until it&#39;s removed.</p>
 </div><pre class="source javascript"><strong class="lineNumber">887</strong>const winnerList = new WinnerList(winners);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">888</strong>winners.fetch(); // fetch new data, so the list updates</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">889</strong>                 // when we get it back from the server</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">890</strong></pre></div>
-<div class="line"><div class="doc"><p>Torus also has a composable, higher-order component called <code>ListOf</code> that allows us to write the above like this instead. This creates and returns a <code>List</code> component with the item component class set to the class we give it.</p>
+<div class="line"><div class="doc"><p>Torus also has a composable, higher-order component called
+<code>ListOf</code> that allows us to write the above like this instead.
+This creates and returns a <code>List</code> component with the item
+component class set to the class we give it.</p>
 </div><pre class="source javascript"><strong class="lineNumber">895</strong>const WinnerList = ListOf(WinnerListing); // same as class WinnerList extends ...</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">896</strong></pre></div>
-<div class="line"><div class="doc"><p>Like stores, we can iterate over <code>List</code> instances to get an <em>unfiltered,</em> <em>ordered</em> sequence of components inside the list. This means we can e.g. <code>for...of</code> loop over the list&#39;s components.</p>
+<div class="line"><div class="doc"><p>Like stores, we can iterate over <code>List</code> instances to get an <em>unfiltered,</em> <em>ordered</em>
+sequence of components inside the list. This means we can e.g. <code>for...of</code> loop over the list&#39;s components.</p>
 </div><pre class="source javascript"><strong class="lineNumber">899</strong>for (const winnerListing of winnerList) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">900</strong>    do_something_with_each_item_view(winnerListing);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">901</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">902</strong></pre></div>
-<div class="line"><div class="doc"><p>By default, <code>List</code> will render the children into a <code>&lt;ul&gt;&lt;/ul&gt;</code>. But we&#39;ll usually want to customize that. To do so, we can just override <code>List#compose()</code> with our custom behavior. The <code>List#nodes</code> property always evaluates to a sorted array of the children nodes, so we can use that in our compose method.</p>
+<div class="line"><div class="doc"><p>By default, <code>List</code> will render the children into a <code>&lt;ul&gt;&lt;/ul&gt;</code>.
+But we&#39;ll usually want to customize that. To do so, we can just override
+<code>List#compose()</code> with our custom behavior. The <code>List#nodes</code> property
+always evaluates to a sorted array of the children nodes, so we can
+use that in our compose method.</p>
 </div><pre class="source javascript"><strong class="lineNumber">908</strong>class WinnerList extends ListOf(WinnerListing) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">909</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">910</strong>    compose() {</pre></div>
@@ -782,14 +975,18 @@
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">917</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">918</strong>}</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">919</strong></pre></div>
-<div class="line"><div class="doc"><p>We can set and remove a filter function that Torus lists will run on each record before rendering that record&#39;s listing in the view. Each time we change the filter, the list will automatically re-render. This is useful for searching through or filtering lists rendered with <code>List</code>.</p>
+<div class="line"><div class="doc"><p>We can set and remove a filter function that Torus lists will run on each
+record before rendering that record&#39;s listing in the view. Each time we change
+the filter, the list will automatically re-render. This is useful for searching
+through or filtering lists rendered with <code>List</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">924</strong>class MovieView extends Component { /*...*/ }</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">925</strong>const movieList = new (ListOf(MovieView))(movies);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">926</strong></pre></div>
 <div class="line"><div class="doc"><p>Let&#39;s only show movies that start with &#39;A&#39; or &#39;a&#39;</p>
 </div><pre class="source javascript"><strong class="lineNumber">928</strong>movieList.filter(movie =&#62; movie.get('name').toLowerCase()[0] === 'a');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Let&#39;s switch the filter to movies that are rated above 80% this <em>unsets the last filter</em>, and sets a new filter.</p>
+<div class="line"><div class="doc"><p>Let&#39;s switch the filter to movies that are rated above 80%
+this <em>unsets the last filter</em>, and sets a new filter.</p>
 </div><pre class="source javascript"><strong class="lineNumber">931</strong>movieList.filter(movie =&#62; movie.get('rating') &#62; 80);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
 <div class="line"><div class="doc"><p>Show all the movies again</p>
@@ -798,10 +995,13 @@
 <div class="line"><div class="doc"><h2 id="router">Router</h2>
 </div><pre class="source javascript"><strong class="lineNumber">936</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>Torus comes with a Router that implements basic client-side routing and works well with Torus components. To use <code>Router</code> on your page, just create an instance of it with your routes</p>
+<div class="line"><div class="doc"><p>Torus comes with a Router that implements basic client-side routing
+and works well with Torus components. To use <code>Router</code> on your page, just
+create an instance of it with your routes</p>
 </div><pre class="source javascript"><strong class="lineNumber">940</strong>const router = new Router({</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>We pass in a JSON dictionary of routes when we create a new router. it&#39;ll automatically start listening to page navigations.</p>
+<div class="line"><div class="doc"><p>We pass in a JSON dictionary of routes when we create a new router.
+it&#39;ll automatically start listening to page navigations.</p>
 </div><pre class="source javascript"><strong class="lineNumber">943</strong>    tabPage: '/tab/:tabID/page/:pageNumber',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">944</strong>    tab: '/tab/:tabID',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">945</strong>    about: '/about',</pre></div>
@@ -810,14 +1010,19 @@
 </div><pre class="source javascript"><strong class="lineNumber">948</strong>    default: '/',</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">949</strong>});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">950</strong></pre></div>
-<div class="line"><div class="doc"><p>When we later create our top-level app view (or whatever view is in charge of routing) we can listen to events from the router and re-render accordingly.</p>
+<div class="line"><div class="doc"><p>When we later create our top-level app view (or whatever view is in charge of routing)
+we can listen to events from the router and re-render accordingly.</p>
 </div><pre class="source javascript"><strong class="lineNumber">953</strong>class App extends Component {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">954</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">955</strong>    init(router) {</pre></div>
-<div class="line"><div class="doc"><p>We bind to a router just like we&#39;d bind to a record or store. the event summary will contain two values in an array: the name of the route, as defined in the router, and the route parameters, like <code>:tabID</code>.</p>
+<div class="line"><div class="doc"><p>We bind to a router just like we&#39;d bind to a record or store.
+the event summary will contain two values in an array: the name of the
+route, as defined in the router, and the route parameters, like <code>:tabID</code>.</p>
 </div><pre class="source javascript"><strong class="lineNumber">959</strong>        this.bind(router, ([name, params]) =&#62; {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>You can write your routing logic however you like, but I personally found switch cases based on the name of the route to be a good pattern.</p>
+<div class="line"><div class="doc"><p>You can write your routing logic however you like, but
+I personally found switch cases based on the name of the route
+to be a good pattern.</p>
 </div><pre class="source javascript"><strong class="lineNumber">963</strong>            switch (name) {</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">964</strong>                case 'tabPage':</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">965</strong>                    this.activeTab = params.tabID;</pre></div>
@@ -840,10 +1045,14 @@
 <div class="line"><div class="doc"><p>When we create the app later, we can pass it our page router</p>
 </div><pre class="source javascript"><strong class="lineNumber">983</strong>const app = new App(router);</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">984</strong></pre></div>
-<div class="line"><div class="doc"><p>The router has a method, <code>#go()</code>, that we can call to navigate to a new route. For example, if we want some method to redirect the page to tab &#39;shop&#39;, page 3, we can just call...</p>
+<div class="line"><div class="doc"><p>The router has a method, <code>#go()</code>, that we can call to navigate to a new route.
+For example, if we want some method to redirect the page to tab &#39;shop&#39;, page 3,
+we can just call...</p>
 </div><pre class="source javascript"><strong class="lineNumber">988</strong>router.go('/tab/shop/page/3');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">989</strong></pre></div>
-<div class="line"><div class="doc"><p>If you want the new history entry to <em>replace</em> the old one (rather than get added to the history as a new entry), pass the <code>{replace: true}</code> option to the <code>router.go()</code> method.</p>
+<div class="line"><div class="doc"><p>If you want the new history entry to <em>replace</em> the old one (rather than
+get added to the history as a new entry), pass the <code>{replace: true}</code> option
+to the <code>router.go()</code> method.</p>
 </div><pre class="source javascript"><strong class="lineNumber">993</strong>router.go('/tab/shop/page/4', {replace: true});</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">994</strong></pre></div>
 <div class="line"><div class="doc"><p>We can also write a component that abstracts this away from us</p>
@@ -868,10 +1077,15 @@
 <div class="line"><div class="doc"><h2 id="conclusions">Conclusions</h2>
 </div><pre class="source javascript"><strong class="lineNumber">1015</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>That&#39;s it! That&#39;s all of Torus&#39;s API. It&#39;s pretty small. Torus tries to be simple, lightweight, and extensible, so rather than being opinionated about how to do common things, it provides a set of powerful extensible APIs on top of a simple component and data model system.</p>
+<div class="line"><div class="doc"><p>That&#39;s it! That&#39;s all of Torus&#39;s API. It&#39;s pretty small. Torus tries to be
+simple, lightweight, and extensible, so rather than being opinionated about
+how to do common things, it provides a set of powerful extensible APIs on top
+of a simple component and data model system.</p>
 </div><pre class="source javascript"><strong class="lineNumber">1020</strong></pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber"></strong></pre></div>
-<div class="line"><div class="doc"><p>I hope you found this page useful, and I hope Torus helps you build something awesome. If you have any questions or come across bugs, please find me on Github or Twitter at @thesephist :) Thanks for checking out Torus!</p>
+<div class="line"><div class="doc"><p>I hope you found this page useful, and I hope Torus helps you build something
+awesome. If you have any questions or come across bugs, please find me on
+Github or Twitter at @thesephist :) Thanks for checking out Torus!</p>
 </div><pre class="source javascript"><strong class="lineNumber">1024</strong>torus.build('🚀');</pre></div>
 <div class="line"><div class="doc"></div><pre class="source javascript"><strong class="lineNumber">1025</strong></pre></div>
     </main>

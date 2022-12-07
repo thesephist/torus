@@ -34,18 +34,18 @@
   ],
   "devDependencies": {
     "bundlesize2": "^0.0.31",
-    "chai": "^4.3.6",
-    "eslint": "^8.20.0",
-    "karma": "^6.4.0",
+    "chai": "^4.3.7",
+    "eslint": "^8.29.0",
+    "karma": "^6.4.1",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.1.1",
     "karma-coverage": "^2.2.0",
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
-    "marked": "^4.0.18",
-    "mocha": "^10.0.0",
+    "marked": "^4.2.4",
+    "mocha": "^10.1.0",
     "nyc": "^15.0.0",
-    "webpack": "^5.73.0"
+    "webpack": "^5.75.0"
   },
   "keywords": [
     "ui",
